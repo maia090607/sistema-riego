@@ -32,27 +32,27 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea7 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend7 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series7 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint37 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(1D, 45D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint38 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(2D, 52D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint39 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(3D, 60D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint40 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(4D, 55D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint41 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(5D, 70D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint42 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(6D, 100D);
-            System.Windows.Forms.DataVisualization.Charting.Title title7 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea15 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend15 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series15 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint85 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(10D, 45D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint86 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(20D, 52D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint87 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(30D, 60D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint88 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(40D, 55D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint89 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(50D, 70D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint90 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(60D, 100D);
+            System.Windows.Forms.DataVisualization.Charting.Title title15 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea16 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend16 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series16 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint91 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(10D, 45D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint92 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(20D, 52D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint93 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(30D, 60D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint94 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(40D, 55D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint95 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(50D, 70D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint96 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(60D, 100D);
+            System.Windows.Forms.DataVisualization.Charting.Title title16 = new System.Windows.Forms.DataVisualization.Charting.Title();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MENUPRINCIPAL));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea8 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend8 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series8 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint43 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(1D, 45D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint44 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(2D, 52D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint45 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(3D, 60D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint46 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(4D, 55D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint47 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(5D, 70D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint48 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(6D, 100D);
-            System.Windows.Forms.DataVisualization.Charting.Title title8 = new System.Windows.Forms.DataVisualization.Charting.Title();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.PanelPrincipal = new System.Windows.Forms.TabPage();
             this.panel3 = new System.Windows.Forms.Panel();
@@ -96,6 +96,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label15 = new System.Windows.Forms.Label();
             this.grilla = new System.Windows.Forms.DataGridView();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.chartTemperatura = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chartRiego = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.btnRiegoAuto = new System.Windows.Forms.Button();
             this.tabPage4 = new System.Windows.Forms.TabPage();
@@ -120,7 +121,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.tabPage5 = new System.Windows.Forms.TabPage();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.cbRol = new System.Windows.Forms.ComboBox();
-            this.btnGuardarCambios = new System.Windows.Forms.Button();
             this.btnHacerCambios = new System.Windows.Forms.Button();
             this.button10 = new System.Windows.Forms.Button();
             this.label24 = new System.Windows.Forms.Label();
@@ -151,9 +151,13 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.button4 = new System.Windows.Forms.Button();
             this.MenuTrancision = new System.Windows.Forms.Timer(this.components);
             this.timerTiempo = new System.Windows.Forms.Timer(this.components);
-            this.chartTemperatura = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.timerClima = new System.Windows.Forms.Timer(this.components);
             this.timerGraficas = new System.Windows.Forms.Timer(this.components);
+            this.cyberTextBox1 = new ReaLTaiizor.Controls.CyberTextBox();
+            this.dreamTextBox1 = new ReaLTaiizor.Controls.DreamTextBox();
+            this.aloneTextBox1 = new ReaLTaiizor.Controls.AloneTextBox();
+            this.button9 = new ReaLTaiizor.Controls.Button();
+            this.airButton1 = new ReaLTaiizor.Controls.AirButton();
             this.tabControl.SuspendLayout();
             this.PanelPrincipal.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -175,6 +179,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.grilla)).BeginInit();
             this.tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chartTemperatura)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartRiego)).BeginInit();
             this.tabPage4.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -190,7 +195,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel11.SuspendLayout();
             this.panel8.SuspendLayout();
             this.panel12.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.chartTemperatura)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl
@@ -689,41 +693,80 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.tabPage3.UseVisualStyleBackColor = true;
             this.tabPage3.Click += new System.EventHandler(this.tabPage3_Click_1);
             // 
+            // chartTemperatura
+            // 
+            chartArea15.AxisX.Interval = 10D;
+            chartArea15.AxisX.Title = "Tiempo (m)";
+            chartArea15.AxisY.Title = "Grados de Temperatura (C°)";
+            chartArea15.BackColor = System.Drawing.Color.White;
+            chartArea15.Name = "AreaPrincipal";
+            this.chartTemperatura.ChartAreas.Add(chartArea15);
+            legend15.Name = "Temperatura";
+            this.chartTemperatura.Legends.Add(legend15);
+            this.chartTemperatura.Location = new System.Drawing.Point(12, 222);
+            this.chartTemperatura.Name = "chartTemperatura";
+            series15.BorderWidth = 3;
+            series15.ChartArea = "AreaPrincipal";
+            series15.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
+            series15.Color = System.Drawing.Color.FromArgb(((int)(((byte)(134)))), ((int)(((byte)(33)))), ((int)(((byte)(52)))));
+            series15.IsVisibleInLegend = false;
+            series15.Legend = "Temperatura";
+            series15.MarkerColor = System.Drawing.Color.Black;
+            series15.MarkerSize = 8;
+            series15.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
+            series15.Name = "TEMPERATURA DEL AMBIENTE";
+            series15.Points.Add(dataPoint85);
+            series15.Points.Add(dataPoint86);
+            series15.Points.Add(dataPoint87);
+            series15.Points.Add(dataPoint88);
+            series15.Points.Add(dataPoint89);
+            series15.Points.Add(dataPoint90);
+            this.chartTemperatura.Series.Add(series15);
+            this.chartTemperatura.Size = new System.Drawing.Size(579, 207);
+            this.chartTemperatura.TabIndex = 3;
+            this.chartTemperatura.Text = "chart2";
+            title15.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            title15.Name = "Title1";
+            title15.Text = "GRAFICA DE LA HUMEDAD DEL SUELO";
+            this.chartTemperatura.Titles.Add(title15);
+            this.chartTemperatura.Click += new System.EventHandler(this.chart2_Click);
+            // 
             // chartRiego
             // 
-            chartArea7.AxisX.Title = "Tiempo (m)";
-            chartArea7.AxisY.Title = "Nivel de humedad (%)";
-            chartArea7.BackColor = System.Drawing.Color.White;
-            chartArea7.Name = "AreaPrincipal";
-            this.chartRiego.ChartAreas.Add(chartArea7);
-            legend7.Name = "Humedad";
-            this.chartRiego.Legends.Add(legend7);
+            chartArea16.AxisX.Interval = 10D;
+            chartArea16.AxisX.Title = "Tiempo (m)";
+            chartArea16.AxisY.Title = "Nivel de humedad (%)";
+            chartArea16.BackColor = System.Drawing.Color.White;
+            chartArea16.Name = "AreaPrincipal";
+            this.chartRiego.ChartAreas.Add(chartArea16);
+            legend16.Name = "Humedad";
+            this.chartRiego.Legends.Add(legend16);
             this.chartRiego.Location = new System.Drawing.Point(12, 9);
             this.chartRiego.Name = "chartRiego";
-            series7.BorderWidth = 3;
-            series7.ChartArea = "AreaPrincipal";
-            series7.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
-            series7.Color = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(134)))), ((int)(((byte)(75)))));
-            series7.IsVisibleInLegend = false;
-            series7.Legend = "Humedad";
-            series7.MarkerColor = System.Drawing.Color.Black;
-            series7.MarkerSize = 8;
-            series7.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
-            series7.Name = "HUMEDAD DEL SUELO";
-            series7.Points.Add(dataPoint37);
-            series7.Points.Add(dataPoint38);
-            series7.Points.Add(dataPoint39);
-            series7.Points.Add(dataPoint40);
-            series7.Points.Add(dataPoint41);
-            series7.Points.Add(dataPoint42);
-            this.chartRiego.Series.Add(series7);
+            series16.BorderWidth = 3;
+            series16.ChartArea = "AreaPrincipal";
+            series16.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
+            series16.Color = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(134)))), ((int)(((byte)(75)))));
+            series16.IsVisibleInLegend = false;
+            series16.Legend = "Humedad";
+            series16.MarkerColor = System.Drawing.Color.Black;
+            series16.MarkerSize = 8;
+            series16.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
+            series16.Name = "HUMEDAD DEL SUELO";
+            series16.Points.Add(dataPoint91);
+            series16.Points.Add(dataPoint92);
+            series16.Points.Add(dataPoint93);
+            series16.Points.Add(dataPoint94);
+            series16.Points.Add(dataPoint95);
+            series16.Points.Add(dataPoint96);
+            this.chartRiego.Series.Add(series16);
             this.chartRiego.Size = new System.Drawing.Size(579, 207);
             this.chartRiego.TabIndex = 2;
             this.chartRiego.Text = "chart2";
-            title7.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            title7.Name = "Title1";
-            title7.Text = "GRAFICA DE LA HUMEDAD DEL SUELO";
-            this.chartRiego.Titles.Add(title7);
+            title16.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            title16.Name = "Title1";
+            title16.Text = "GRAFICA DE LA HUMEDAD DEL SUELO";
+            this.chartRiego.Titles.Add(title16);
             this.chartRiego.Click += new System.EventHandler(this.chartRiego_Click);
             // 
             // btnRiegoAuto
@@ -803,7 +846,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             this.Mnombre.AutoSize = true;
             this.Mnombre.Font = new System.Drawing.Font("Segoe UI Semibold", 15.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))));
-            this.Mnombre.Location = new System.Drawing.Point(231, 131);
+            this.Mnombre.Location = new System.Drawing.Point(50, 224);
             this.Mnombre.Name = "Mnombre";
             this.Mnombre.Size = new System.Drawing.Size(91, 30);
             this.Mnombre.TabIndex = 26;
@@ -823,17 +866,18 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             this.Mtemperatura.AutoSize = true;
             this.Mtemperatura.Font = new System.Drawing.Font("Segoe UI Semibold", 15.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))));
-            this.Mtemperatura.Location = new System.Drawing.Point(51, 220);
+            this.Mtemperatura.Location = new System.Drawing.Point(211, 142);
             this.Mtemperatura.Name = "Mtemperatura";
             this.Mtemperatura.Size = new System.Drawing.Size(137, 30);
             this.Mtemperatura.TabIndex = 24;
             this.Mtemperatura.Text = "Temperatura";
+            this.Mtemperatura.Click += new System.EventHandler(this.Mtemperatura_Click);
             // 
             // Mhumedad
             // 
             this.Mhumedad.AutoSize = true;
             this.Mhumedad.Font = new System.Drawing.Font("Segoe UI Semibold", 15.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))));
-            this.Mhumedad.Location = new System.Drawing.Point(231, 220);
+            this.Mhumedad.Location = new System.Drawing.Point(243, 233);
             this.Mhumedad.Name = "Mhumedad";
             this.Mhumedad.Size = new System.Drawing.Size(106, 30);
             this.Mhumedad.TabIndex = 23;
@@ -867,11 +911,12 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label7.AutoSize = true;
             this.label7.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.label7.Font = new System.Drawing.Font("Segoe UI Black", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(38, 179);
+            this.label7.Location = new System.Drawing.Point(208, 101);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(149, 32);
             this.label7.TabIndex = 6;
             this.label7.Text = "Temperatura";
+            this.label7.Click += new System.EventHandler(this.label7_Click);
             // 
             // label1
             // 
@@ -891,7 +936,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label6.AutoSize = true;
             this.label6.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.label6.Font = new System.Drawing.Font("Segoe UI", 15.75F, System.Drawing.FontStyle.Bold);
-            this.label6.Location = new System.Drawing.Point(207, 99);
+            this.label6.Location = new System.Drawing.Point(51, 192);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(96, 32);
             this.label6.TabIndex = 5;
@@ -945,7 +990,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label2.AutoSize = true;
             this.label2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.label2.Font = new System.Drawing.Font("Segoe UI", 15.75F, System.Drawing.FontStyle.Bold);
-            this.label2.Location = new System.Drawing.Point(211, 180);
+            this.label2.Location = new System.Drawing.Point(223, 193);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(111, 32);
             this.label2.TabIndex = 1;
@@ -972,8 +1017,12 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.airButton1);
+            this.tabPage1.Controls.Add(this.button9);
+            this.tabPage1.Controls.Add(this.aloneTextBox1);
+            this.tabPage1.Controls.Add(this.dreamTextBox1);
+            this.tabPage1.Controls.Add(this.cyberTextBox1);
             this.tabPage1.Controls.Add(this.cbRol);
-            this.tabPage1.Controls.Add(this.btnGuardarCambios);
             this.tabPage1.Controls.Add(this.btnHacerCambios);
             this.tabPage1.Controls.Add(this.button10);
             this.tabPage1.Controls.Add(this.label24);
@@ -1008,22 +1057,10 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.cbRol.Size = new System.Drawing.Size(164, 25);
             this.cbRol.TabIndex = 16;
             // 
-            // btnGuardarCambios
-            // 
-            this.btnGuardarCambios.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
-            this.btnGuardarCambios.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.btnGuardarCambios.Location = new System.Drawing.Point(575, 41);
-            this.btnGuardarCambios.Name = "btnGuardarCambios";
-            this.btnGuardarCambios.Size = new System.Drawing.Size(107, 48);
-            this.btnGuardarCambios.TabIndex = 15;
-            this.btnGuardarCambios.Text = "GUARDAR CAMBIOS";
-            this.btnGuardarCambios.UseVisualStyleBackColor = false;
-            this.btnGuardarCambios.Click += new System.EventHandler(this.btnGuardarCambios_Click_1);
-            // 
             // btnHacerCambios
             // 
             this.btnHacerCambios.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.btnHacerCambios.Location = new System.Drawing.Point(575, 96);
+            this.btnHacerCambios.Location = new System.Drawing.Point(586, 88);
             this.btnHacerCambios.Name = "btnHacerCambios";
             this.btnHacerCambios.Size = new System.Drawing.Size(122, 27);
             this.btnHacerCambios.TabIndex = 14;
@@ -1062,7 +1099,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             // txtNombreUsuario
             // 
-            this.txtNombreUsuario.Location = new System.Drawing.Point(353, 182);
+            this.txtNombreUsuario.Location = new System.Drawing.Point(554, 327);
             this.txtNombreUsuario.Name = "txtNombreUsuario";
             this.txtNombreUsuario.Size = new System.Drawing.Size(164, 25);
             this.txtNombreUsuario.TabIndex = 9;
@@ -1094,7 +1131,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             // txtNombreUsuariodelUsuario
             // 
-            this.txtNombreUsuariodelUsuario.Location = new System.Drawing.Point(353, 114);
+            this.txtNombreUsuariodelUsuario.Location = new System.Drawing.Point(144, 327);
             this.txtNombreUsuariodelUsuario.Name = "txtNombreUsuariodelUsuario";
             this.txtNombreUsuariodelUsuario.Size = new System.Drawing.Size(164, 25);
             this.txtNombreUsuariodelUsuario.TabIndex = 3;
@@ -1110,7 +1147,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             // txtIdUsuario
             // 
-            this.txtIdUsuario.Location = new System.Drawing.Point(353, 54);
+            this.txtIdUsuario.Location = new System.Drawing.Point(353, 327);
             this.txtIdUsuario.Name = "txtIdUsuario";
             this.txtIdUsuario.Size = new System.Drawing.Size(164, 25);
             this.txtIdUsuario.TabIndex = 1;
@@ -1348,43 +1385,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             this.timerTiempo.Tick += new System.EventHandler(this.timer1_Tick_1);
             // 
-            // chartTemperatura
-            // 
-            chartArea8.AxisX.Title = "Tiempo (m)";
-            chartArea8.AxisY.Title = "Grados de Temperatura (C°)";
-            chartArea8.BackColor = System.Drawing.Color.White;
-            chartArea8.Name = "AreaPrincipal";
-            this.chartTemperatura.ChartAreas.Add(chartArea8);
-            legend8.Name = "Temperatura";
-            this.chartTemperatura.Legends.Add(legend8);
-            this.chartTemperatura.Location = new System.Drawing.Point(12, 222);
-            this.chartTemperatura.Name = "chartTemperatura";
-            series8.BorderWidth = 3;
-            series8.ChartArea = "AreaPrincipal";
-            series8.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
-            series8.Color = System.Drawing.Color.FromArgb(((int)(((byte)(134)))), ((int)(((byte)(33)))), ((int)(((byte)(52)))));
-            series8.IsVisibleInLegend = false;
-            series8.Legend = "Temperatura";
-            series8.MarkerColor = System.Drawing.Color.Black;
-            series8.MarkerSize = 8;
-            series8.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
-            series8.Name = "TEMPERATURA DEL AMBIENTE";
-            series8.Points.Add(dataPoint43);
-            series8.Points.Add(dataPoint44);
-            series8.Points.Add(dataPoint45);
-            series8.Points.Add(dataPoint46);
-            series8.Points.Add(dataPoint47);
-            series8.Points.Add(dataPoint48);
-            this.chartTemperatura.Series.Add(series8);
-            this.chartTemperatura.Size = new System.Drawing.Size(579, 207);
-            this.chartTemperatura.TabIndex = 3;
-            this.chartTemperatura.Text = "chart2";
-            title8.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            title8.Name = "Title1";
-            title8.Text = "GRAFICA DE LA HUMEDAD DEL SUELO";
-            this.chartTemperatura.Titles.Add(title8);
-            this.chartTemperatura.Click += new System.EventHandler(this.chart2_Click);
-            // 
             // timerClima
             // 
             this.timerClima.Interval = 600000;
@@ -1392,7 +1392,105 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             // timerGraficas
             // 
+            this.timerGraficas.Interval = 600000;
             this.timerGraficas.Tick += new System.EventHandler(this.timerGraficas_Tick);
+            // 
+            // cyberTextBox1
+            // 
+            this.cyberTextBox1.Alpha = 20;
+            this.cyberTextBox1.BackColor = System.Drawing.Color.Transparent;
+            this.cyberTextBox1.Background_WidthPen = 3F;
+            this.cyberTextBox1.BackgroundPen = true;
+            this.cyberTextBox1.ColorBackground = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(52)))), ((int)(((byte)(68)))));
+            this.cyberTextBox1.ColorBackground_Pen = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(200)))), ((int)(((byte)(238)))));
+            this.cyberTextBox1.ColorLighting = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(200)))), ((int)(((byte)(238)))));
+            this.cyberTextBox1.ColorPen_1 = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(200)))), ((int)(((byte)(238)))));
+            this.cyberTextBox1.ColorPen_2 = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(52)))), ((int)(((byte)(68)))));
+            this.cyberTextBox1.CyberTextBoxStyle = ReaLTaiizor.Enum.Cyber.StateStyle.Custom;
+            this.cyberTextBox1.Font = new System.Drawing.Font("Arial", 10F);
+            this.cyberTextBox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.cyberTextBox1.Lighting = false;
+            this.cyberTextBox1.LinearGradientPen = false;
+            this.cyberTextBox1.Location = new System.Drawing.Point(352, 117);
+            this.cyberTextBox1.Name = "cyberTextBox1";
+            this.cyberTextBox1.PenWidth = 15;
+            this.cyberTextBox1.RGB = false;
+            this.cyberTextBox1.Rounding = true;
+            this.cyberTextBox1.RoundingInt = 60;
+            this.cyberTextBox1.Size = new System.Drawing.Size(200, 40);
+            this.cyberTextBox1.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            this.cyberTextBox1.TabIndex = 17;
+            this.cyberTextBox1.Tag = "Cyber";
+            this.cyberTextBox1.TextButton = "Cyber Text";
+            this.cyberTextBox1.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+            this.cyberTextBox1.Timer_RGB = 300;
+            // 
+            // dreamTextBox1
+            // 
+            this.dreamTextBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(41)))), ((int)(((byte)(41)))));
+            this.dreamTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.dreamTextBox1.ColorA = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(31)))), ((int)(((byte)(31)))));
+            this.dreamTextBox1.ColorB = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(41)))), ((int)(((byte)(41)))));
+            this.dreamTextBox1.ColorC = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
+            this.dreamTextBox1.ColorD = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.dreamTextBox1.ColorE = System.Drawing.Color.FromArgb(((int)(((byte)(25)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.dreamTextBox1.ColorF = System.Drawing.Color.Black;
+            this.dreamTextBox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(218)))), ((int)(((byte)(255)))));
+            this.dreamTextBox1.Location = new System.Drawing.Point(359, 183);
+            this.dreamTextBox1.Name = "dreamTextBox1";
+            this.dreamTextBox1.Size = new System.Drawing.Size(193, 25);
+            this.dreamTextBox1.TabIndex = 18;
+            // 
+            // aloneTextBox1
+            // 
+            this.aloneTextBox1.BackColor = System.Drawing.Color.Transparent;
+            this.aloneTextBox1.EnabledCalc = true;
+            this.aloneTextBox1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.aloneTextBox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(124)))), ((int)(((byte)(133)))), ((int)(((byte)(142)))));
+            this.aloneTextBox1.Location = new System.Drawing.Point(352, 54);
+            this.aloneTextBox1.MaxLength = 32767;
+            this.aloneTextBox1.MultiLine = false;
+            this.aloneTextBox1.Name = "aloneTextBox1";
+            this.aloneTextBox1.ReadOnly = false;
+            this.aloneTextBox1.Size = new System.Drawing.Size(177, 29);
+            this.aloneTextBox1.TabIndex = 19;
+            this.aloneTextBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+            this.aloneTextBox1.UseSystemPasswordChar = false;
+            // 
+            // button9
+            // 
+            this.button9.BackColor = System.Drawing.Color.Transparent;
+            this.button9.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(34)))), ((int)(((byte)(37)))));
+            this.button9.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button9.EnteredBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(165)))), ((int)(((byte)(37)))), ((int)(((byte)(37)))));
+            this.button9.EnteredColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(34)))), ((int)(((byte)(37)))));
+            this.button9.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button9.Image = null;
+            this.button9.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.button9.InactiveColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(34)))), ((int)(((byte)(37)))));
+            this.button9.Location = new System.Drawing.Point(586, 39);
+            this.button9.Name = "button9";
+            this.button9.PressedBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(165)))), ((int)(((byte)(37)))), ((int)(((byte)(37)))));
+            this.button9.PressedColor = System.Drawing.Color.FromArgb(((int)(((byte)(165)))), ((int)(((byte)(37)))), ((int)(((byte)(37)))));
+            this.button9.Size = new System.Drawing.Size(120, 40);
+            this.button9.TabIndex = 20;
+            this.button9.Text = "GUARDAR CAMBIOS";
+            this.button9.TextAlignment = System.Drawing.StringAlignment.Center;
+            this.button9.Click += new System.EventHandler(this.button9_Click);
+            // 
+            // airButton1
+            // 
+            this.airButton1.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.airButton1.Customization = "7e3t//Ly8v/r6+v/5ubm/+vr6//f39//p6en/zw8PP8UFBT/gICA/w==";
+            this.airButton1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.airButton1.Image = null;
+            this.airButton1.Location = new System.Drawing.Point(256, 341);
+            this.airButton1.Name = "airButton1";
+            this.airButton1.NoRounding = false;
+            this.airButton1.Size = new System.Drawing.Size(8, 10);
+            this.airButton1.TabIndex = 21;
+            this.airButton1.Text = "airButton1";
+            this.airButton1.Transparent = false;
             // 
             // MENUPRINCIPAL
             // 
@@ -1430,6 +1528,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.tabPage2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.grilla)).EndInit();
             this.tabPage3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.chartTemperatura)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartRiego)).EndInit();
             this.tabPage4.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
@@ -1447,7 +1546,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel11.ResumeLayout(false);
             this.panel8.ResumeLayout(false);
             this.panel12.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.chartTemperatura)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1534,7 +1632,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         private TextBox txtEmailUsu;
         private Label label24;
         private Label label25;
-        private Button btnGuardarCambios;
         private Button btnHacerCambios;
         private Button button10;
         private Button button5;
@@ -1554,5 +1651,10 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         private System.Windows.Forms.DataVisualization.Charting.Chart chartTemperatura;
         private Timer timerClima;
         private Timer timerGraficas;
+        private ReaLTaiizor.Controls.AloneTextBox aloneTextBox1;
+        private ReaLTaiizor.Controls.DreamTextBox dreamTextBox1;
+        private ReaLTaiizor.Controls.CyberTextBox cyberTextBox1;
+        private ReaLTaiizor.Controls.Button button9;
+        private ReaLTaiizor.Controls.AirButton airButton1;
     }
 }

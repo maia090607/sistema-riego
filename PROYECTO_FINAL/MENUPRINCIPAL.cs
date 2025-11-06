@@ -11,7 +11,6 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
 
 namespace PROYECTO_RIEGO_AUTOMATICO
 {
@@ -144,6 +143,23 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             cbRol.Enabled = true;
 
         }
+        private void timerGraficaReal()
+        {
+            var listaDatos = servicioGraficas.MostrarTodos();
+
+            // 🔹 Limpia las series antes de agregar nuevos datos
+            chartTemperatura.Series["TEMPERATURA DEL AMBIENTE"].Points.Clear();
+            chartRiego.Series["HUMEDAD DEL SUELO"].Points.Clear();
+
+            int contador = 0;
+
+            foreach (var item in listaDatos)
+            {
+                contador=contador+10;
+                chartTemperatura.Series["TEMPERATURA DEL AMBIENTE"].Points.AddXY(contador, item.temp);
+                chartRiego.Series["HUMEDAD DEL SUELO"].Points.AddXY(contador, item.humidity);
+            }
+        }
         private void GuardarCambios()
         {
             DialogResult resultado = MessageBox.Show($"¿Seguro que quiere hacer estos cambios?",
@@ -244,7 +260,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
                     var lis = servicioHistorial.MostrarTodos();
                     Historial_Riego historial = new Historial_Riego();
-                    historial.Id = lis.Count() + 1;
+                    historial.Id = lis.Count + 1;
                     historial.Temperatura = temperatura_actual;
                     historial.Humedad = humedad_actual;
                     historial.Fecha = DateTime.Now;
@@ -464,13 +480,9 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             CargarHistorial();
             timerTiempo.Start();
             timerClima.Start();
+            timerGraficas.Start();
             CargarUsuario();
-        }
-
-        private void btnGuardarCambios_Click_1(object sender, EventArgs e)
-        {
-            GuardarCambios();
-
+            timerGraficaReal();
         }
 
         private void btnHacerCambios_Click(object sender, EventArgs e)
@@ -566,22 +578,24 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
         }
 
+        private void label7_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Mtemperatura_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            GuardarCambios();
+        }
+
         private void timerGraficas_Tick(object sender, EventArgs e)
         {
-            var listaDatos = servicioGraficas.MostrarTodos();
-
-            // 🔹 Limpia las series antes de agregar nuevos datos
-            chartTemperatura.Series["Temperatura"].Points.Clear();
-            chartRiego.Series["Humedad"].Points.Clear();
-
-            int contador = 0;
-
-            foreach (var item in listaDatos)
-            {
-                contador++;
-                chartTemperatura.Series["Temperatura"].Points.AddXY(contador, item.temp);
-                chartRiego.Series["Humedad"].Points.AddXY(contador, item.humidity);
-            }
+            timerGraficaReal();
         }
 
         private void chart2_Click(object sender, EventArgs e)

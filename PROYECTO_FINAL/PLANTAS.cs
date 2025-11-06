@@ -169,6 +169,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         {
                 MENUPRINCIPAL menu = new MENUPRINCIPAL();
                 menu.Show();
+                this.Hide();
         }
 
         private void btnActualizar_Click_1(object sender, EventArgs e)
