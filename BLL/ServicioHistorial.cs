@@ -3,67 +3,51 @@ using ENTITY;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL
 {
-    public class ServicioHistorial : ICrudEscritura<Historial_Riego>, ICrudLectura<Historial_Riego>
+    public class ServicioHistorial
     {
-        HistorialRepository historial;
+        private readonly HistorialRepository _historialRepository;
+
         public ServicioHistorial()
         {
-            historial = new HistorialRepository(Utils.ARC_HISTORIAL);
-        }
-        public bool Actualizar(Historial_Riego entidad)
-        {
-            throw new NotImplementedException();
+            _historialRepository = new HistorialRepository();
         }
 
+        // Método para mostrar todos los registros de historial
         public ReadOnlyCollection<Historial_Riego> MostrarTodos()
         {
-            var lista = historial.MostrarTodos();
-            if (lista == null)
-            {
-                return new ReadOnlyCollection<Historial_Riego>(new List<Historial_Riego>());
-            }
+            var respuesta = _historialRepository.MostrarTodos();
+            var lista = respuesta != null && respuesta.Entidad != null
+                ? respuesta.Entidad
+                : new List<Historial_Riego>();
+
             return new ReadOnlyCollection<Historial_Riego>(lista);
         }
 
-        public bool Eliminar(Historial_Riego entidad)
-        {
-            throw new NotImplementedException();
-        }
-
+        // Método para guardar un registro de historial
         public string Guardar(Historial_Riego entidad)
         {
-            try
-            {
-                if (entidad == null)
-                {
-                    throw new ArgumentNullException("El registro que se intento guardar es nulo");
-                }
-                
-                return historial.Guardar(entidad);
+            if (entidad == null)
+                throw new ArgumentNullException(nameof(entidad), "El registro que se intentó guardar es nulo");
 
-            }
-            catch (Exception)
-            {
+            var respuesta = _historialRepository.Insertar(entidad);
 
-                throw;
-            }
-
+            // Si la inserción fue exitosa, el ID ya fue asignado en el objeto entidad
+            return respuesta.Estado
+                ? $"Historial registrado correctamente. ID generado: {entidad.Id}"
+                : respuesta.Mensaje;
         }
 
+        // Método para obtener un historial por su ID
         public Historial_Riego ObtenerPorId(int id)
         {
             if (id <= 0)
-            {
-                throw new ArgumentOutOfRangeException("El id debe ser mayor a cero");
-            }
-            return historial.ObtenerPorId(id);
-        }
+                throw new ArgumentOutOfRangeException(nameof(id), "El id debe ser mayor a cero");
 
+            var respuesta = _historialRepository.BuscarPorId(id);
+            return respuesta?.Entidad;
+        }
     }
 }

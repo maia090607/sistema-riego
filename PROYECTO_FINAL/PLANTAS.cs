@@ -32,13 +32,14 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             nuevaPlanta.nivel_optimo_temperatura = float.Parse(txtNivelTemperatura.Text);
             nuevaPlanta.nivel_optimo_luz = float.Parse(txtNivelLuz.Text);
             nuevaPlanta.RutaImagen = rutaImagenSeleccionada;
-            if (serviciosPlanta.ObtenerPorId(nuevaPlanta.IdPlanta) != null)
+            var plantaExistente = serviciosPlanta.BuscarPorId(nuevaPlanta.IdPlanta);   
+            if (plantaExistente.Estado == true)
             {
                 MessageBox.Show("Ya hay una planta registrada con este id");
                 return false;
             }
-            var mensaje = serviciosPlanta.Guardar(nuevaPlanta);
-            MessageBox.Show(mensaje);
+            var mensaje = serviciosPlanta.Insertar(nuevaPlanta);
+            MessageBox.Show(mensaje.Mensaje);
             LimpiarCampos();
             return true;
         }
@@ -58,8 +59,8 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             plantaActualizada.nivel_optimo_temperatura = float.Parse(txtNivelTemperatura.Text.Trim());
             plantaActualizada.nivel_optimo_luz = float.Parse(txtNivelLuz.Text.Trim());
             plantaActualizada.RutaImagen = rutaImagenSeleccionada;
-            serviciosPlanta.Actualizar(plantaActualizada);
-
+            var mensaje = serviciosPlanta.Actualizar(plantaActualizada);
+            MessageBox.Show(mensaje.Mensaje);
         }
         private void EliminarPlanta()
         {
@@ -74,15 +75,15 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                 return;
             }
 
-            Cultivo plantaExistente = serviciosPlanta.ObtenerPorId(id);
-            string nombre = plantaExistente.NombrePlanta;
-            DialogResult resultado = MessageBox.Show($"¿Seguro que quiere eliminar la planta con ID {plantaExistente.IdPlanta}?",
+            var plantaExistente = serviciosPlanta.BuscarPorId(id);
+            string nombre = plantaExistente.Entidad.NombrePlanta;
+            DialogResult resultado = MessageBox.Show($"¿Seguro que quiere eliminar la planta con ID {plantaExistente.Entidad.IdPlanta}?",
                     "Confirmación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (resultado == DialogResult.Yes)
             {
-
-                if (serviciosPlanta.Eliminar(plantaExistente))
+                var PlantaEliminar = serviciosPlanta.Eliminar(plantaExistente.Entidad.IdPlanta);
+                if (PlantaEliminar.Estado)
                 {
                     MessageBox.Show($"La planta {nombre} fue eliminada correctamente");
 
@@ -106,18 +107,18 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                 return;
             }
 
-            var plantaExistente = serviciosPlanta.ObtenerPorId(int.Parse(txtId.Text.Trim()));
+            var plantaExistente = serviciosPlanta.BuscarPorId(int.Parse(txtId.Text.Trim()));
             if (plantaExistente == null)
             {
                 MessageBox.Show("No se encontró una planta con el ID proporcionado.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            txtId.Text = plantaExistente.IdPlanta.ToString();
-            txtNombre.Text = plantaExistente.NombrePlanta;
-            txtDescripcion.Text = plantaExistente.Descripcion;
-            txtNivelHumedad.Text = plantaExistente.nivel_optimo_humedad.ToString();
-            txtNivelTemperatura.Text = plantaExistente.nivel_optimo_temperatura.ToString();
-            txtNivelLuz.Text = plantaExistente.nivel_optimo_luz.ToString();
+            txtId.Text = plantaExistente.Entidad.IdPlanta.ToString();
+            txtNombre.Text = plantaExistente.Entidad.NombrePlanta;
+            txtDescripcion.Text = plantaExistente.Entidad.Descripcion;
+            txtNivelHumedad.Text = plantaExistente.Entidad.nivel_optimo_humedad.ToString();
+            txtNivelTemperatura.Text = plantaExistente.Entidad.nivel_optimo_temperatura.ToString();
+            txtNivelLuz.Text = plantaExistente.Entidad.nivel_optimo_luz.ToString();
 
         }
 
@@ -215,6 +216,11 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         private void button3_Click(object sender, EventArgs e)
         {
             BuscarPlanta();
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

@@ -1,47 +1,44 @@
-﻿using ENTITY;
+﻿using DAL;
+using ENTITY;
 using System;
 using System.Collections.Generic;
-using DAL;
-using ENTITY;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL
 {
     public class ServicioGraficas
     {
-        GraficasRepository graficasRepository;
+        private readonly GraficasRepository _GraficasRepository;
+
         public ServicioGraficas()
         {
-            graficasRepository = new GraficasRepository(Utils.ARC_GRAFICOS);
-        }
-        public ReadOnlyCollection<Main> MostrarTodos()
-        {
-            var lista = graficasRepository.MostrarTodos();
-            if (lista == null)
-            {
-                return new ReadOnlyCollection<Main>(new List<Main>());
-            }
-            return new ReadOnlyCollection<Main>(lista);
-        }
-        public void GuardarDatos(Main datos)
-        {
-            try
-            {
-                if (datos == null)
-                {
-                    throw new ArgumentNullException("Los datos que se intentó guardar es nulo");
-                }
-                graficasRepository.Guardar(datos);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("ERROR..."+e);
-                return;
-            }
+            _GraficasRepository = new GraficasRepository();
         }
 
+        public ReadOnlyCollection<Main> MostrarTodos()
+        {
+            var respuesta = _GraficasRepository.MostrarTodos();
+            var lista = respuesta.Entidad != null && respuesta.Entidad != null ? respuesta.Entidad : new List<Main>();
+            return new ReadOnlyCollection<Main>(lista);
+        }
+
+        public string Guardar(Main entidad)
+        {
+            if (entidad == null)
+                throw new ArgumentNullException("El registro que se intentó guardar es nulo");
+
+            var respuesta = _GraficasRepository.Guardar(entidad);
+            return respuesta.Estado ? "Historial registrado correctamente" : respuesta.Mensaje;
+        }
+
+        public Main ObtenerPorId(int id)
+        {
+            if (id <= 0)
+                throw new ArgumentOutOfRangeException("El id debe ser mayor a cero");
+
+            var respuesta = _GraficasRepository.ObtenerPorId(id);
+            return respuesta.Entidad;
+        }
     }
 }
+

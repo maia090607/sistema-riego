@@ -1,148 +1,238 @@
 ﻿using ENTITY;
+using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.Data;
 
 namespace DAL
 {
-    public class PlantaRepository : BaseRepository<Cultivo>
+    public class PlantaRepository : BaseRepository, IRepository<Cultivo>
     {
-        public PlantaRepository(string nombreArchivo) : base(nombreArchivo)
-        {
-        }
-        public override IList<Cultivo> MostrarTodos()
+        public Response<Cultivo> Insertar(Cultivo planta)
         {
             try
             {
-                var lista = new List<Cultivo>();
-
-                using (StreamReader lector = new StreamReader(ruta))
+                using (var conn = new OracleConnection(_connectionString))
                 {
-                    while (!lector.EndOfStream)
+                    conn.Open();
+
+                            string sentencia = @"INSERT INTO Cultivo
+                            (id_planta, nombre_planta, descripcion, ruta_imagen,
+                             nivel_optimo_humedad, nivel_optimo_temperatura, nivel_optimo_luz)
+                            VALUES (:id, :nombre, :descripcionParam, :ruta, :humedad, :temp, :luz)";
+
+                    using (var cmd = new OracleCommand(sentencia, conn))
                     {
-                        var linea = lector.ReadLine();
-                        if (!string.IsNullOrWhiteSpace(linea))
-                        {
-                            lista.Add(Mappear(linea));
-                        }
+                        cmd.Parameters.Add("id", OracleDbType.Int32).Value = planta.IdPlanta;
+                        cmd.Parameters.Add("nombre", OracleDbType.Varchar2).Value = planta.NombrePlanta ?? "";
+                        cmd.Parameters.Add("descripcionParam", OracleDbType.Varchar2).Value = planta.Descripcion ?? "";
+                        cmd.Parameters.Add("ruta", OracleDbType.Varchar2).Value = planta.RutaImagen ?? "";
+                        cmd.Parameters.Add("humedad", OracleDbType.Single).Value = planta.nivel_optimo_humedad;
+                        cmd.Parameters.Add("temp", OracleDbType.Single).Value = planta.nivel_optimo_temperatura;
+                        cmd.Parameters.Add("luz", OracleDbType.Single).Value = planta.nivel_optimo_luz;
+
+                        int filas = cmd.ExecuteNonQuery();
+
+                        return new Response<Cultivo>(
+                            filas > 0,
+                            filas > 0 ? "Planta insertada correctamente" : "No se pudo insertar la planta",
+                            planta,
+                            null
+                        );
                     }
                 }
-
-                return lista;
+            }
+            catch (OracleException ex)
+            {
+                return new Response<Cultivo>(false, $"Error de base de datos:\n{ex.Message}", null, null);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error al leer el archivo: " + ex.Message);
-                return new List<Cultivo>();
+                return new Response<Cultivo>(false, $"Error al insertar planta:\n{ex.Message}", null, null);
             }
         }
-        private Cultivo Mappear(string linea)
+
+
+        public Response<Cultivo> Actualizar(Cultivo planta)
         {
-            Cultivo planta = new Cultivo();
+            try
+            {
+                string sentencia = "UPDATE Cultivo SET " +
+                                   "nombre_planta = :nombre, " +
+                                   "descripcion = :descripcionParam, " +
+                                   "ruta_imagen = :ruta, " +
+                                   "nivel_optimo_humedad = :humedad, " +
+                                   "nivel_optimo_temperatura = :temp, " +
+                                   "nivel_optimo_luz = :luz " +
+                                   "WHERE id_planta = :id";
 
-            var aux = linea.Split(';');
-            planta.IdPlanta = int.Parse(aux[0]);
-            planta.NombrePlanta = aux[1];
-            planta.Descripcion = aux[2];
-            planta.RutaImagen = aux[3];
-            planta.nivel_optimo_humedad = float.Parse(aux[4]);
-            planta.nivel_optimo_temperatura = float.Parse(aux[5]);
-            planta.nivel_optimo_luz = float.Parse(aux[6]);
-            return planta;
+                using (var conn = new OracleConnection(_connectionString))
+                using (var cmd = new OracleCommand(sentencia, conn))
+                {
+                    // 🔹 Parámetros con validación nula o vacía
+                    if (string.IsNullOrWhiteSpace(planta.NombrePlanta))
+                        cmd.Parameters.Add(":nombre", OracleDbType.Varchar2).Value = DBNull.Value;
+                    else
+                        cmd.Parameters.Add(":nombre", OracleDbType.Varchar2).Value = planta.NombrePlanta;
+
+                    if (string.IsNullOrWhiteSpace(planta.Descripcion))
+                        cmd.Parameters.Add(":descripcionParam", OracleDbType.Varchar2).Value = DBNull.Value;
+                    else
+                        cmd.Parameters.Add(":descripcionParam", OracleDbType.Varchar2).Value = planta.Descripcion;
+
+                    if (string.IsNullOrWhiteSpace(planta.RutaImagen))
+                        cmd.Parameters.Add(":ruta", OracleDbType.Varchar2).Value = DBNull.Value;
+                    else
+                        cmd.Parameters.Add(":ruta", OracleDbType.Varchar2).Value = planta.RutaImagen;
+
+                    cmd.Parameters.Add(":humedad", OracleDbType.Single).Value = planta.nivel_optimo_humedad;
+                    cmd.Parameters.Add(":temp", OracleDbType.Single).Value = planta.nivel_optimo_temperatura;
+                    cmd.Parameters.Add(":luz", OracleDbType.Single).Value = planta.nivel_optimo_luz;
+
+                    cmd.Parameters.Add(":id", OracleDbType.Int32).Value = planta.IdPlanta;
+
+                    conn.Open();
+                    int filas = cmd.ExecuteNonQuery();
+
+                    return new Response<Cultivo>(
+                        filas > 0,
+                        filas > 0 ? "✅ Planta actualizada correctamente" : "⚠️ No se encontró la planta con ese ID",
+                        planta,
+                        null
+                    );
+                }
+            }
+            catch (OracleException ex)
+            {
+                return new Response<Cultivo>(false, $"Error de base de datos:\n{ex.Message}", null, null);
+            }
+            catch (Exception ex)
+            {
+                return new Response<Cultivo>(false, $"Error al actualizar planta:\n{ex.Message}", null, null);
+            }
         }
-        private void ReescribirArchivo(IList<Cultivo> lista)
+
+
+        public Response<Cultivo> Eliminar(int id)
         {
-            using (StreamWriter sw = new StreamWriter(ruta, false))
+            try
             {
-                foreach (var item in lista)
+                string sentencia = "DELETE FROM Cultivo WHERE id_planta = :id";
+
+                using (var conn = new OracleConnection(_connectionString))
+                using (var cmd = new OracleCommand(sentencia, conn))
                 {
-                    sw.WriteLine(item.ToString());
+                    // Siempre usar el nombre del parámetro con ":" también al agregarlo
+                    cmd.Parameters.Add(":id", OracleDbType.Int32).Value = id;
+
+                    conn.Open();
+                    int filas = cmd.ExecuteNonQuery();
+
+                    return new Response<Cultivo>(
+                        filas > 0,
+                        filas > 0 ? "✅ Planta eliminada correctamente" : "⚠️ No se encontró la planta con ese ID",
+                        null,
+                        null
+                    );
                 }
             }
+            catch (OracleException ex)
+            {
+                return new Response<Cultivo>(false, $"Error de base de datos:\n{ex.Message}", null, null);
+            }
+            catch (Exception ex)
+            {
+                return new Response<Cultivo>(false, $"Error al eliminar planta:\n{ex.Message}", null, null);
+            }
         }
-        public bool Eliminar(Cultivo obj)
+
+        public Response<Cultivo> ObtenerPorId(int id)
         {
-            var lista = MostrarTodos();
-            bool eliminado = false;
-            Cultivo PlantaEliminada = null;
-
-            foreach (var item in lista.ToList()) // Evita modificar la colección mientras se recorre
+            try
             {
-                if (item.IdPlanta == obj.IdPlanta)
+                string sentencia = "SELECT * FROM Cultivo WHERE id_planta = :id";
+
+                using (var conn = new OracleConnection(_connectionString))
+                using (var cmd = new OracleCommand(sentencia, conn))
                 {
-                    PlantaEliminada = item;
-                    lista.Remove(item);
-                    eliminado = true;
-                    break;
+                    // 🔹 Importante: usar el mismo formato del parámetro (:id)
+                    cmd.Parameters.Add(":id", OracleDbType.Int32).Value = id;
+
+                    conn.Open();
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            var planta = MapearPlanta(reader);
+                            return new Response<Cultivo>(true, "✅ Planta encontrada", planta, null);
+                        }
+                        else
+                        {
+                            return new Response<Cultivo>(false, "⚠️ No se encontró la planta con ese ID", null, null);
+                        }
+                    }
                 }
             }
-
-            if (eliminado)
+            catch (OracleException ex)
             {
-                try
-                {
-                    ReescribirArchivo(lista);
-                    return true;
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
+                return new Response<Cultivo>(false, $"Error de base de datos:\n{ex.Message}", null, null);
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("No se encontró la planta...");
-                return false;
+                return new Response<Cultivo>(false, $"Error al obtener planta:\n{ex.Message}", null, null);
             }
         }
-        public bool Actualizar(Cultivo obj)
+
+        public Response<Cultivo> ObtenerTodos()
         {
-            var lista = MostrarTodos();
-            bool actualizado = false;
-            Cultivo PlantaActualizado = null;
+            try
+            {
+                List<Cultivo> lista = new List<Cultivo>();
+                string sentencia = "SELECT * FROM Cultivo ORDER BY nombre_planta";
 
-            foreach (var item in lista)
-            {
-                if (item.IdPlanta == obj.IdPlanta)
+                using (var conn = new OracleConnection(_connectionString))
+                using (var cmd = new OracleCommand(sentencia, conn))
                 {
-                    PlantaActualizado = item;
-                    item.NombrePlanta = obj.NombrePlanta;
-                    item.Descripcion = obj.Descripcion;
-                    item.RutaImagen = obj.RutaImagen;
-                    item.nivel_optimo_humedad = obj.nivel_optimo_humedad;
-                    item.nivel_optimo_temperatura = obj.nivel_optimo_temperatura;
-                    item.nivel_optimo_luz = obj.nivel_optimo_luz;
-                    actualizado = true;
-                    break;
+                    conn.Open();
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lista.Add(MapearPlanta(reader));
+                        }
+                    }
+
+                    string mensaje = lista.Count > 0
+                        ? $"✅ Se encontraron {lista.Count} plantas registradas."
+                        : "⚠️ No hay plantas registradas.";
+
+                    return new Response<Cultivo>(true, mensaje, null, lista);
                 }
             }
-            if (actualizado)
+            catch (OracleException ex)
             {
-                try
-                {
-                    MostrarTodos();
-                    Console.WriteLine($"El Usuario {PlantaActualizado.NombrePlanta} fue actualizado correctamente");
-                    return true;
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine("Hubo un error...");
-                    return false;
-                }
+                return new Response<Cultivo>(false, $"Error de base de datos:\n{ex.Message}", null, null);
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("No se encontro el usuario...");
-                return false;
+                return new Response<Cultivo>(false, $"Error al obtener plantas:\n{ex.Message}", null, null);
             }
         }
 
-
-
-        public override Cultivo ObtenerPorId(int id)
+        private Cultivo MapearPlanta(OracleDataReader reader)
         {
-            return MostrarTodos().FirstOrDefault<Cultivo>(x => x.IdPlanta == id);
+            return new Cultivo
+            {
+                IdPlanta = reader["ID_PLANTA"] != DBNull.Value ? Convert.ToInt32(reader["ID_PLANTA"]) : 0,
+                NombrePlanta = reader["NOMBRE_PLANTA"]?.ToString(),
+                Descripcion = reader["DESCRIPCION"]?.ToString(),
+                RutaImagen = reader["RUTA_IMAGEN"]?.ToString(),
+                nivel_optimo_humedad = reader["NIVEL_OPTIMO_HUMEDAD"] != DBNull.Value ? Convert.ToSingle(reader["NIVEL_OPTIMO_HUMEDAD"]) : 0,
+                nivel_optimo_temperatura = reader["NIVEL_OPTIMO_TEMPERATURA"] != DBNull.Value ? Convert.ToSingle(reader["NIVEL_OPTIMO_TEMPERATURA"]) : 0,
+                nivel_optimo_luz = reader["NIVEL_OPTIMO_LUZ"] != DBNull.Value ? Convert.ToSingle(reader["NIVEL_OPTIMO_LUZ"]) : 0
+            };
         }
+
     }
 }

@@ -63,6 +63,16 @@ namespace PROYECTO_FINAL.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap admin_14471192 {
+            get {
+                object obj = ResourceManager.GetObject("admin_14471192", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap drenaje {
             get {
                 object obj = ResourceManager.GetObject("drenaje", resourceCulture);
@@ -196,6 +206,16 @@ namespace PROYECTO_FINAL.Properties {
         internal static System.Drawing.Bitmap regando_plantas {
             get {
                 object obj = ResourceManager.GetObject("regando-plantas", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap riego_por_goteo {
+            get {
+                object obj = ResourceManager.GetObject("riego-por-goteo", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

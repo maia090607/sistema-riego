@@ -1,36 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Oracle.ManagedDataAccess.Client; // Asegúrate de tener este paquete NuGet instalado
 
 namespace DAL
 {
-    public abstract class BaseRepository<T>
+    public abstract class BaseRepository : IDisposable
     {
-        protected string ruta;
+        protected readonly string _connectionString;
 
-        protected BaseRepository(string nombreArchivo)
+        public BaseRepository()
         {
-            this.ruta = nombreArchivo;
+            // Connection string para Oracle
+            _connectionString = "User Id=riego_user02;Password=riego123;Data Source=localhost:1521/xepdb1;";
         }
 
-        public string Guardar(T entidad)
+        // Método helper para crear conexiones Oracle
+        protected OracleConnection CrearConexion()
         {
-            try
-            {
-                using (StreamWriter sw = new StreamWriter(ruta, true))
-                {
-                    sw.WriteLine(entidad.ToString());
-                }
-                return $"Se guardaron los datos de la entidad {typeof(T).Name}.";
-            }
-            catch (Exception ex)
-            {
-                return $"Error al guardar la entidad {typeof(T).Name}: {ex.Message}";
-            }
+            return new OracleConnection(_connectionString);
         }
 
-        public abstract IList<T> MostrarTodos();
-        public abstract T ObtenerPorId(int id);
-
+        // Implementación de IDisposable
+        public void Dispose()
+        {
+            // Liberar recursos si es necesario
+        }
     }
 }

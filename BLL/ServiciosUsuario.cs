@@ -1,71 +1,23 @@
 ﻿using DAL;
 using ENTITY;
 using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
-
+using System.Text;
+using System.Threading.Tasks;
 
 namespace BLL
 {
-    public class ServiciosUsuario : ICrudEscritura<Usuario>, ICrudLectura<Usuario>
+    public class ServiciosUsuario
     {
-        UsuarioRepository usuarioRepository;
-        public ServiciosUsuario()
-        {
-            usuarioRepository = new UsuarioRepository(Utils.ARC_USUARIO);
-        }
+        private UsuarioRepository usuarioDAL = new UsuarioRepository();
 
-        public bool Actualizar(Usuario entidad)
-        {
-            return usuarioRepository.Actualizar(entidad);
-        }
-
-        public ReadOnlyCollection<Usuario> MostrarTodos()
-        {
-            var lista = usuarioRepository.MostrarTodos();
-            return new ReadOnlyCollection<Usuario>(lista);
-        }
-
-        public bool Eliminar(Usuario entidad)
-        {
-            return usuarioRepository.Eliminar(entidad);
-        }
-
-        public string Guardar(Usuario entidad)
-        {
-            return usuarioRepository.Guardar(entidad);
-        }
-
-        public Usuario ObtenerPorId(int id)
-        {
-            //validar
-            return usuarioRepository.ObtenerPorId(id);
-        }
-
-        public bool ExisteId(int id)
-        {
-            foreach (var usuario in MostrarTodos())
-            {
-                if (usuario.IdUsuario == id)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        public bool ExisteNombreUsuario(string nombreUsuario)
-        {
-            foreach (var usuario in MostrarTodos())
-            {
-                if (usuario.NombreUsuario==nombreUsuario)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
+        public Response<Usuario> Insertar(Usuario u) => usuarioDAL.Insertar(u);
+        public Response<Usuario> ObtenerTodos() => usuarioDAL.ObtenerTodos();
+        public Response<Usuario> BuscarPorId(int id) => usuarioDAL.ObtenerPorId(id);
+        public Response<Usuario> Actualizar(Usuario u) => usuarioDAL.Actualizar(u);
+        public Response<Usuario> Eliminar(int id) => usuarioDAL.Eliminar(id);
+        public Response<Usuario> ValidarNombreUsuario(string nombreUsuario) => usuarioDAL.BuscarPorUsuario(nombreUsuario); 
+        public Response<Usuario> ValidarCredenciales(string nombreUsuario, string password) => usuarioDAL.BuscarPorCredenciales(nombreUsuario, password);
     }
 }
-

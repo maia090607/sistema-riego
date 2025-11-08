@@ -11,7 +11,7 @@ namespace ENTITY
         public string Password { get; set; }
         public string Rol { get; set; }
         public string RutaImagen { get; set; }
-        public int Accedio { get; set; }
+        public bool Accedio { get; set; }
 
         public override string ToString()
         {

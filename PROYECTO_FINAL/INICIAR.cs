@@ -1,43 +1,24 @@
 ﻿using BLL;
 using ENTITY;
-using PROYECTO_FINAL;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Windows.Forms;
+
 namespace PROYECTO_RIEGO_AUTOMATICO
 {
     public partial class INICIAR : Form
     {
         private int intentos = 3;
-        ServiciosUsuario serviciosusuario;
-        List<Usuario> listaUsuario;
+        private readonly ServiciosUsuario serviciosUsuario;
+
         public INICIAR()
         {
             InitializeComponent();
-            serviciosusuario = new ServiciosUsuario();
-            listaUsuario = serviciosusuario.MostrarTodos().ToList();
+            serviciosUsuario = new ServiciosUsuario();
             this.StartPosition = FormStartPosition.CenterScreen;
         }
-        public bool ValidarInformacion(string nombreUsu, string contra)
+
+        private bool ValidarInformacion(string nombreUsu, string contra)
         {
-            if (listaUsuario == null || listaUsuario.Count == 0)
-            {
-                MessageBox.Show("No hay usuarios cargados.");
-                return false;
-            }
-
-            foreach (var lis in listaUsuario)
-            {
-                if (lis.Accedio == 1)
-                {
-                    lis.Accedio = 0;
-                    serviciosusuario.Actualizar(lis);
-                }
-
-            }
-
             if (intentos <= 0)
             {
                 MessageBox.Show("Ha excedido el número máximo de intentos fallidos. La aplicación se cerrará.");
@@ -45,42 +26,37 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                 return false;
             }
 
-            foreach (var usuario in listaUsuario)
+            var usuario = serviciosUsuario.ValidarCredenciales(nombreUsu, contra);
+
+            if (usuario.Entidad != null)
             {
-                if (usuario.NombreUsuario == nombreUsu)
+                MessageBox.Show("✅ ACCESO CONCEDIDO");
+                var todos = serviciosUsuario.ObtenerTodos();
+                foreach(var item in todos.Lista)
                 {
-                    if (usuario.Password == contra)
-                    {
-                        MessageBox.Show("ACCESO CONCEDIDO");
-                        usuario.Accedio = 1;
-                        serviciosusuario.Actualizar(usuario);
-                        MENUPRINCIPAL form = new MENUPRINCIPAL();
-                        form.Show();
-                        this.Hide();
-                        return true;
-                    }
-                    else
-                    {
-                        intentos--;
-                        MessageBox.Show($"La contraseña es incorrecta. Te quedan {intentos} intento(s).");
-                        return false;
-                    }
+                    item.Accedio = false;
+                    serviciosUsuario.Actualizar(item);
                 }
+                usuario.Entidad.Accedio = true;
+                serviciosUsuario.Actualizar(usuario.Entidad);
+                MENUPRINCIPAL form = new MENUPRINCIPAL();
+                form.Show();
+                this.Hide();
+                return true;
             }
-
-            intentos--;
-            MessageBox.Show("Usuario no encontrado. Verifique el nombre de usuario. " + intentos + " Intentos.");
-            return false;
-
+            else
+            {
+                intentos--;
+                MessageBox.Show($"❌ Usuario o contraseña incorrectos. Intentos restantes: {intentos}");
+                return false;
+            }
         }
-        private void INICIAR_Load(object sender, EventArgs e)
-        {
 
-        }
+        private void INICIAR_Load(object sender, EventArgs e) { }
 
         private void tbnIniciar_Click(object sender, EventArgs e)
         {
-            ValidarInformacion(txtUsuario.Text, txtContraseña.Text);
+            ValidarInformacion(txtUsuario.Text.Trim(), txtContraseña.Text.Trim());
         }
 
         private void btnCrearCuenta_Click_1(object sender, EventArgs e)

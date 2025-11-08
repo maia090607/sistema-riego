@@ -1,73 +1,145 @@
 ﻿using ENTITY;
+using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace DAL
 {
-    public class HistorialRepository : BaseRepository<Historial_Riego>
+    public class HistorialRepository : BaseRepository
     {
-        private static List<Historial_Riego> historialSimulado = new List<Historial_Riego>();
-
-        public HistorialRepository(string nombreArchivo) : base(nombreArchivo)
+        public Response<Historial_Riego> Insertar(Historial_Riego historial)
         {
+            Response<Historial_Riego> response = new Response<Historial_Riego>();
 
-        }
-
-        public Historial_Riego BuscarPorId(int id)
-        {
-            var entidad = historialSimulado.Find(x => x.Id == id);
-            if (entidad == null)
+            using (OracleConnection connection = new OracleConnection(_connectionString))
             {
-                throw new KeyNotFoundException("No se encontro el registro con el id especificado");
+                try
+                {
+                    connection.Open();
+
+                    // Obtener el siguiente valor de la secuencia
+                    using (var cmdSeq = new OracleCommand("SELECT SEQ_HISTORIAL_RIEGO.NEXTVAL FROM DUAL", connection))
+                    {
+                        historial.Id = Convert.ToInt32(cmdSeq.ExecuteScalar());
+                    }
+
+                    // Insertar el registro con el ID generado
+                    string query = @"
+                INSERT INTO HISTORIAL_RIEGO (ID_HISTORIAL_RIEGO, FECHA_HORA, HUMEDAD, TEMPERATURA)
+                VALUES (:IdHistorialRiego, :FechaHora, :Humedad, :Temperatura)";
+
+                    using (OracleCommand cmd = new OracleCommand(query, connection))
+                    {
+                        cmd.Parameters.Add(":IdHistorialRiego", OracleDbType.Int32).Value = historial.Id;
+                        cmd.Parameters.Add(":FechaHora", OracleDbType.Date).Value = historial.Fecha;
+                        cmd.Parameters.Add(":Humedad", OracleDbType.Single).Value = historial.Humedad;
+                        cmd.Parameters.Add(":Temperatura", OracleDbType.Single).Value = historial.Temperatura;
+
+                        int filas = cmd.ExecuteNonQuery();
+
+                        if (filas > 0)
+                        {
+                            response.Estado = true;
+                            response.Mensaje = "Historial guardado correctamente.";
+                            response.Entidad = historial;
+                        }
+                        else
+                        {
+                            response.Estado = false;
+                            response.Mensaje = "No se insertó ningún registro.";
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    response.Estado = false;
+                    response.Mensaje = "Error al guardar historial: " + ex.Message;
+                }
             }
-            return entidad;
+
+            return response;
         }
 
-        public void Eliminar(Historial_Riego obj)
-        {
 
-        }
-
-        public override IList<Historial_Riego> MostrarTodos()
+        public Response<Historial_Riego> BuscarPorId(int id)
         {
+            string query = "SELECT ID_HISTORIAL_RIEGO, FECHA_HORA, HUMEDAD, TEMPERATURA FROM HISTORIAL_RIEGO WHERE ID_HISTORIAL_RIEGO = :id";
+
             try
             {
-                StreamReader lector = new StreamReader(ruta);
-                List<Historial_Riego> lista = new List<Historial_Riego>();
-
-                while (!lector.EndOfStream)
+                using (var conexion = CrearConexion())
+                using (var comando = new OracleCommand(query, conexion))
                 {
+                    comando.Parameters.Add(new OracleParameter("id", id));
+                    conexion.Open();
 
-                    lista.Add(Mappear(lector.ReadLine()));
+                    using (var reader = comando.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            var historial = new Historial_Riego
+                            {
+                                Id = Convert.ToInt32(reader["ID_HISTORIAL_RIEGO"]),
+                                Fecha = Convert.ToDateTime(reader["FECHA_HORA"]),
+                                Humedad = Convert.ToSingle(reader["HUMEDAD"]),
+                                Temperatura = Convert.ToSingle(reader["TEMPERATURA"])
+                            };
+
+                            return new Response<Historial_Riego>(true, "Historial encontrado correctamente", historial, null);
+                        }
+                        else
+                        {
+                            return new Response<Historial_Riego>(false, "No se encontró el historial con el ID especificado", null, null);
+                        }
+                    }
                 }
-                lector.Close();
-                return lista;
             }
-            catch (Exception)
+            catch (OracleException ex)
             {
-
-                return null;
+                return new Response<Historial_Riego>(false, $"Error en la base de datos: {ex.Message}", null, null);
+            }
+            catch (Exception ex)
+            {
+                return new Response<Historial_Riego>(false, $"Error general: {ex.Message}", null, null);
             }
         }
-        private Historial_Riego Mappear(string linea)
+
+        public Response<List<Historial_Riego>> MostrarTodos()
         {
-            Historial_Riego historial = new Historial_Riego();
+            string query = "SELECT ID_HISTORIAL_RIEGO, FECHA_HORA, HUMEDAD, TEMPERATURA FROM HISTORIAL_RIEGO";
+            var lista = new List<Historial_Riego>();
 
-            var aux = linea.Split(';');
+            try
+            {
+                using (var conexion = CrearConexion())
+                using (var comando = new OracleCommand(query, conexion))
+                {
+                    conexion.Open();
+                    using (var reader = comando.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lista.Add(new Historial_Riego
+                            {
+                                Id = Convert.ToInt32(reader["ID_HISTORIAL_RIEGO"]),
+                                Fecha = Convert.ToDateTime(reader["FECHA_HORA"]),
+                                Humedad = Convert.ToSingle(reader["HUMEDAD"]),
+                                Temperatura = Convert.ToSingle(reader["TEMPERATURA"])
+                            });
+                        }
+                    }
+                }
 
-            //historial.Id = int.Parse(aux[0]);
-            historial.Fecha = DateTime.Parse(aux[1]);
-            historial.Humedad = float.Parse(aux[2]);
-            historial.Temperatura = float.Parse(aux[3]);
-
-            return historial;
-        }
-        public override Historial_Riego ObtenerPorId(int id)
-        {
-            return MostrarTodos().FirstOrDefault<Historial_Riego>(x => x.Id == id);
+                return new Response<List<Historial_Riego>>(true, "Lista obtenida correctamente", lista, null);
+            }
+            catch (OracleException ex)
+            {
+                return new Response<List<Historial_Riego>>(false, $"Error Oracle: {ex.Message}", null, null);
+            }
+            catch (Exception ex)
+            {
+                return new Response<List<Historial_Riego>>(false, $"Error general: {ex.Message}", null, null);
+            }
         }
     }
 }
-

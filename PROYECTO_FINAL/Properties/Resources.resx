@@ -127,14 +127,17 @@
   <data name="Imagen-iniciosession" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Imagen-iniciosession.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="admin_14471192" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\admin_14471192.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="home_6821152 (1)" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\home_6821152 (1).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="pronostico-del-tiempo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\pronostico-del-tiempo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="grafico (1)" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\grafico (1).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="lily_7148928" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\lily_7148928.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="user_11043331" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\user_11043331.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="norte" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\norte.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -142,8 +145,8 @@
   <data name="watering-can_179154" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\watering-can_179154.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="user_1104333" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\user_1104333.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="regando-plantas" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\regando-plantas.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="grafico" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\grafico.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -154,8 +157,11 @@
   <data name="humedad" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\humedad.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="home_6821152 (1)" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\home_6821152 (1).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="senal-satelital" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\senal-satelital.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="lily_7148928" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\lily_7148928.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="grafico (1)1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\grafico (1)1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -163,16 +169,16 @@
   <data name="Imagen-iniciosession1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Imagen-iniciosession.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="senal-satelital" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\senal-satelital.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="user_1104333" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\user_1104333.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="menu" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\menu.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="user_11043331" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\user_11043331.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="grafico (1)" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\grafico (1).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="regando-plantas" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\regando-plantas.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="riego-por-goteo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\riego-por-goteo.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

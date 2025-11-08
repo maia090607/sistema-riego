@@ -1,41 +1,16 @@
 ﻿using DAL;
 using ENTITY;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 
 namespace BLL
 {
-    public class ServiciosPlanta: ICrudEscritura<Cultivo>, ICrudLectura<Cultivo>
+    public class ServiciosPlanta
     {
-            PlantaRepository plantaRepository;
-            public ServiciosPlanta()
-            {
-                plantaRepository = new PlantaRepository(Utils.ARC_PLANTAS);
-            }
-
-            public bool Actualizar(Cultivo entidad)
-            {
-                return plantaRepository.Actualizar(entidad);
-            }
-
-            public ReadOnlyCollection<Cultivo> MostrarTodos()
-            {
-                var lista = plantaRepository.MostrarTodos();
-                return new ReadOnlyCollection<Cultivo>(lista);
-            }
-
-            public bool Eliminar(Cultivo entidad)
-            {
-                return plantaRepository.Eliminar(entidad);
-            }
-
-            public string Guardar(Cultivo entidad)
-            {
-                return plantaRepository.Guardar(entidad);
-            }
-
-            public Cultivo ObtenerPorId(int id)
-            {
-                return plantaRepository.ObtenerPorId(id);
-            }
-        }
+        private readonly PlantaRepository cultivoDAL = new PlantaRepository();
+        public Response<Cultivo> Insertar(Cultivo c) => cultivoDAL.Insertar(c);
+        public Response<Cultivo> ObtenerTodos() => cultivoDAL.ObtenerTodos();
+        public Response<Cultivo> BuscarPorId(int id) => cultivoDAL.ObtenerPorId(id);
+        public Response<Cultivo> Actualizar(Cultivo c) => cultivoDAL.Actualizar(c);
+        public Response<Cultivo> Eliminar(int id) => cultivoDAL.Eliminar(id);
     }
+}

@@ -2,6 +2,7 @@
 using ENTITY;
 using System;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 
 namespace PROYECTO_RIEGO_AUTOMATICO
@@ -32,20 +33,26 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             {
                 return false;
             }
-            if (serviciosUsuario.ObtenerPorId(nuevoUsuario.IdUsuario) != null)
+            var respuesta = serviciosUsuario.ValidarNombreUsuario(txtUusario.Text.Trim());
+
+            if (respuesta.Estado)
             {
-                MessageBox.Show("El ID de usuario ya existe. Por favor, elija otro.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(respuesta.Mensaje);
                 return false;
             }
-            serviciosUsuario.Guardar(nuevoUsuario);
+
+            var mensaje = serviciosUsuario.Insertar(nuevoUsuario);
+            MessageBox.Show(mensaje.Mensaje);
             return true;
 
         }
         private bool ValidarUsuario()
         {
-            if (!serviciosUsuario.ExisteNombreUsuario(txtUusario.Text.Trim()))
+            var respuesta = serviciosUsuario.ValidarNombreUsuario(txtUusario.Text.Trim());
+
+            if (respuesta.Estado)
             {
-                MessageBox.Show("El nombre de usuario ya existe. Por favor, elija otro.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(respuesta.Mensaje);
                 return false;
             }
             return true;
@@ -62,9 +69,9 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         }
         private bool validarCampos()
         {
-            if (string.IsNullOrEmpty(txtNombre.Text) || string.IsNullOrEmpty(txtEmail.Text) || string.IsNullOrEmpty(txtUusario.Text) || string.IsNullOrEmpty(txtContraseña.Text))
+            if (string.IsNullOrWhiteSpace(txtNombre.Text) || string.IsNullOrWhiteSpace(txtEmail.Text) || string.IsNullOrWhiteSpace(txtUusario.Text) || string.IsNullOrWhiteSpace(txtContraseña.Text))
             {
-                MessageBox.Show("Por favor, complete todos los campos.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Por favor, complete todos los campos y no pueden haber espacios." , "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             if (cbRol.SelectedIndex == -1)
@@ -75,6 +82,12 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             if (int.Parse(txtId.Text) <= 0)
             {
                 MessageBox.Show("El ID de usuario debe ser un número positivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            if (!txtEmail.Text.Contains("@"))
+            {
+                MessageBox.Show("El correo debe contener '@'.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtEmail.Focus();
                 return false;
             }
             return true;
@@ -94,7 +107,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             if (Obtenerdatos())
             {
                 LimpiarCampos();
-                MessageBox.Show("El Usuario ha sido agregado con exito...");
                 return;
             }
         }

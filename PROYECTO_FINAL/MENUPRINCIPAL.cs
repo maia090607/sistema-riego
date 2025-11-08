@@ -1,5 +1,6 @@
 ﻿using BLL;
 using ENTITY;
+using Microsoft.VisualBasic;
 using PROYECTO_FINAL;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace PROYECTO_RIEGO_AUTOMATICO
 {
@@ -20,6 +22,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         ServicioHistorial servicioHistorial;
         ServiciosUsuario serviciosUsuario;
         ServicioGraficas servicioGraficas;
+        ServiciosAlertas serviciosAlertas;
         private float humedad_actual, temperatura_actual;
         private bool puedeRegar = true, Expandir = false;
         private int IdDelUsuario, contadorTiempo;
@@ -32,6 +35,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             servicioHistorial = new ServicioHistorial();
             serviciosUsuario = new ServiciosUsuario();
             servicioGraficas = new ServicioGraficas();
+            serviciosAlertas = new ServiciosAlertas();
             InitializeComponent();
             ObtenerDatosClimaAsync();
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -41,6 +45,15 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                 originalControlBounds[c] = new Rectangle(c.Location, c.Size);
             }
             cargarPlantas();
+        }
+        private int NuevoId()
+        {
+            var todas = serviciosAlertas.MostrarTodos();
+
+            int nuevoId = 1;
+            if (todas.Lista != null && todas.Lista.Count > 0)
+                nuevoId = todas.Lista.Max(a => a.IdAlerta) + 1;
+            return nuevoId;
         }
         public async Task ObtenerDatosClimaAsync()
         {
@@ -62,30 +75,180 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
                     temperatura_actual = (float)weatherInfo.main.temp;
                     humedad_actual = (float)weatherInfo.main.humidity;
+                    ActualizarGraficoClima((float)weatherInfo.main.temp, (float)weatherInfo.main.humidity, (float)weatherInfo.wind.speed);
 
- 
-                        Main datos = new Main();
-                        datos.temp = weatherInfo.main.temp;
-                        datos.humidity = weatherInfo.main.humidity;
-                        servicioGraficas.GuardarDatos(datos);
+
+                    Main datos = new Main();
+                    datos.temp = weatherInfo.main.temp;
+                    datos.humidity = weatherInfo.main.humidity;
+                    servicioGraficas.Guardar(datos);
+                    if (weatherInfo.main.temp > 35)
+                    {
+                        Alertas alerta = new Alertas
+                        {
+                            IdAlerta = NuevoId(),
+                            FechaHora = DateTime.Now,
+                            TipoAlerta = "Alta Temperatura",
+                            Descripcion = $"La temperatura actual es de {weatherInfo.main.temp}°C, lo cual supera el umbral seguro.",
+                            NivelCritico = "Alto",
+                            Estado = false
+                        };
+                        var mensaje = serviciosAlertas.Agregar(alerta);
+                    }
+                    if (weatherInfo.main.humidity < 20)
+                    {
+                        Alertas alerta = new Alertas
+                        {
+                            IdAlerta = NuevoId(),
+                            FechaHora = DateTime.Now,
+                            TipoAlerta = "Baja Humedad",
+                            Descripcion = $"La humedad actual es de {weatherInfo.main.humidity}%, lo cual está por debajo del umbral seguro.",
+                            NivelCritico = "Medio",
+                            Estado = false
+                        };
+                        var mensaje = serviciosAlertas.Agregar(alerta);
+                    }
+                    if (weatherInfo.wind.speed > 10)
+                    {
+                        Alertas alerta = new Alertas
+                        {
+                            IdAlerta = NuevoId(),
+                            FechaHora = DateTime.Now,
+                            TipoAlerta = "Viento Fuerte",
+                            Descripcion = $"La velocidad del viento es de {weatherInfo.wind.speed} m/s, lo cual supera el umbral seguro.",
+                            NivelCritico = "Bajo",
+                            Estado = false
+                        };
+                        var mensaje = serviciosAlertas.Agregar(alerta);
+                    }
+                    if (weatherInfo.weather[0].description.ToLower().Contains("lluvia"))
+                    {
+                        Alertas alerta = new Alertas
+                        {
+                            IdAlerta = NuevoId(),
+                            FechaHora = DateTime.Now,
+                            TipoAlerta = "Lluvia",
+                            Descripcion = $"Se ha detectado lluvia en la zona, lo cual puede afectar el riego automático.",
+                            NivelCritico = "Bajo",
+                            Estado = false
+                        };
+                        var mensaje = serviciosAlertas.Agregar(alerta);
+                    }
+                    if (weatherInfo.weather[0].description.ToLower().Contains("tormenta"))
+                    {
+                        Alertas alerta = new Alertas
+                        {
+                            IdAlerta = NuevoId(),
+                            FechaHora = DateTime.Now,
+                            TipoAlerta = "Tormenta",
+                            Descripcion = $"Se ha detectado una tormenta en la zona, lo cual puede afectar el riego automático.",
+                            NivelCritico = "Alto",
+                            Estado = false
+                        };
+                        var mensaje = serviciosAlertas.Agregar(alerta);
+                    }
+                    var alertaClima = serviciosAlertas.MostrarTodos();
+                    foreach (var alerta in alertaClima.Lista)
+                    {
+                        if (alerta.Estado == false)
+                        {
+                            // Aquí podrías implementar una notificación más sofisticada si lo deseas
+                            MessageBox.Show($"Alerta: {alerta.TipoAlerta}\nDescripción: {alerta.Descripcion}\nNivel Crítico: {alerta.NivelCritico}", "Alerta Climática", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                    }
 
                 }
-                catch (HttpRequestException e)
+                catch (Exception e)
                 {
                     MessageBox.Show($"Error al obtener datos del clima: {e.Message}");
+                    Alertas alerta = new Alertas
+                    {
+                        IdAlerta = NuevoId(),
+                        FechaHora = DateTime.Now,
+                        TipoAlerta = "Error Clima",
+                        Descripcion = $"No se pudieron obtener los datos climáticos: {e.Message}",
+                        NivelCritico = "Medio",
+                        Estado = false
+                    };
+                    var mensaje = serviciosAlertas.Agregar(alerta);
+                    MessageBox.Show(mensaje.Mensaje);
                 }
+            }
+        } 
 
+        private void ActualizarGraficoClima(float temp, float hum, float vie)
+        {
+            try
+            {
+
+                chartClima.Series.Clear();
+                chartClima.Titles.Clear();
+
+                Series serie = new Series("DatosClimáticos");
+                serie.ChartType = SeriesChartType.Doughnut;
+                serie.IsValueShownAsLabel = true;
+
+                serie.Points.AddXY("Humedad (%)", Math.Round(hum, 0));
+                serie.Points.AddXY("Viento (m/s)", Math.Round(vie, 2));
+                serie.Points.AddXY("Temperatura (°C)", Math.Round(temp, 0));
+
+                chartClima.Series.Add(serie);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al generar gráfico: {ex.Message}");
+            }
+        }
+        private void ActualizarGraficoCultivo(float nivelHumedad, float nivelTemperatura, float nivelLuz)
+        {
+            try
+            {
+                // Limpiar gráfico anterior
+                chartCultivo.Series.Clear();
+                chartCultivo.Titles.Clear();
+
+                // Crear serie de datos
+                Series serie = new Series("NivelesÓptimos");
+                serie.ChartType = SeriesChartType.Doughnut; // Puedes usar Bar, Pie, etc.
+                serie.IsValueShownAsLabel = true;
+
+                // Agregar los puntos
+                serie.Points.AddXY("Humedad óptima (%)", Math.Round(nivelHumedad, 0));
+                serie.Points.AddXY("Temperatura óptima (°C)", Math.Round(nivelTemperatura, 0));
+                serie.Points.AddXY("Luz óptima (%)", Math.Round(nivelLuz, 0));
+
+                // Personalizar colores (opcional)
+                serie.Points[0].Color = Color.DeepSkyBlue;   // Humedad
+                serie.Points[1].Color = Color.OrangeRed;     // Temperatura
+                serie.Points[2].Color = Color.Gold;          // Luz
+
+                // Título del gráfico
+                chartCultivo.Titles.Add("Niveles Óptimos del Cultivo");
+
+                // Agregar serie al gráfico
+                chartCultivo.Series.Add(serie);
+
+                // Opcional: quitar fondo gris por defecto
+                chartCultivo.BackColor = Color.Transparent;
+                chartCultivo.ChartAreas[0].BackColor = Color.Transparent;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al generar gráfico de cultivo: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+
+
+
         public void cargarPlantas()
         {
-            var lista = serviciosPlanta.MostrarTodos();
+            var lista = serviciosPlanta.ObtenerTodos();
 
             cbPlantas.DataSource = null;
             cbPlantas.Items.Clear();
 
-            cbPlantas.DataSource = lista;
+            cbPlantas.DataSource = lista.Lista;
             cbPlantas.DisplayMember = "NombrePlanta"; // Lo que se muestra en el ComboBox
             cbPlantas.ValueMember = "IdPlanta";       // Valor interno (opcional)
         }
@@ -99,6 +262,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                 Mhumedad.Text = cultivo.nivel_optimo_humedad.ToString("0.00") + "%";
                 Mtemperatura.Text = cultivo.nivel_optimo_temperatura.ToString("0.00") + "C°";
                 Mluz.Text = cultivo.nivel_optimo_luz.ToString("0.00") + "%";
+                ActualizarGraficoCultivo(cultivo.nivel_optimo_humedad, cultivo.nivel_optimo_temperatura, cultivo.nivel_optimo_luz);
                 if (!string.IsNullOrEmpty(cultivo.RutaImagen) && File.Exists(cultivo.RutaImagen))
                 {
                     pbPlanta.Image = Image.FromFile(cultivo.RutaImagen);
@@ -136,6 +300,10 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         }
         private void HacerCambios()
         {
+            btnGuardarCambios.Enabled = true;
+            btnEliminarUsuario.Enabled = true;
+            btnSubirFoto.Enabled = true;
+            btnSubirFoto.Enabled = true;
             txtIdUsuario.Enabled = true;
             txtNombreUsuario.Enabled = true;
             txtNombreUsuariodelUsuario.Enabled = true;
@@ -155,7 +323,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
             foreach (var item in listaDatos)
             {
-                contador=contador+10;
+                contador = contador + 10;
                 chartTemperatura.Series["TEMPERATURA DEL AMBIENTE"].Points.AddXY(contador, item.temp);
                 chartRiego.Series["HUMEDAD DEL SUELO"].Points.AddXY(contador, item.humidity);
             }
@@ -167,15 +335,15 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
             if (resultado == DialogResult.Yes)
             {
-                var usu = serviciosUsuario.ObtenerPorId(IdDelUsuario);
-                if (!serviciosUsuario.ExisteNombreUsuario(txtNombreUsuariodelUsuario.Text) && usu.NombreUsuario != txtNombreUsuariodelUsuario.Text)
+                var usu = serviciosUsuario.BuscarPorId(IdDelUsuario);
+                if (serviciosUsuario.ValidarNombreUsuario(txtNombreUsuariodelUsuario.Text) ==null && usu.Entidad.NombreUsuario != txtNombreUsuariodelUsuario.Text)
                 {
                     MessageBox.Show("El ID ingresado ya pertenece a otro usuario. Cámbialo por favor.");
                     return;
                 }
 
                 // Validar que no exista otro usuario con el mismo nombre de usuario
-                if (!serviciosUsuario.ExisteId(int.Parse(txtIdUsuario.Text)) && usu.IdUsuario != int.Parse(txtIdUsuario.Text))
+                if (serviciosUsuario.BuscarPorId(int.Parse(txtIdUsuario.Text)) == null && serviciosUsuario.ValidarNombreUsuario(txtIdUsuario.Text) == null)
                 {
                     MessageBox.Show("El nombre de usuario ya está en uso. Cámbialo por favor.");
                     return;
@@ -183,16 +351,16 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
 
 
-                usu.IdUsuario = int.Parse(txtIdUsuario.Text);
-                usu.NombreUsuario = txtNombreUsuariodelUsuario.Text;
-                usu.Nombre = txtNombreUsuario.Text;
-                usu.Email = txtEmailUsu.Text;
-                usu.Rol = cbRol.GetItemText(cbRol.SelectedItem);
+                usu.Entidad.IdUsuario = int.Parse(txtIdUsuario.Text);
+                usu.Entidad.NombreUsuario = txtNombreUsuariodelUsuario.Text;
+                usu.Entidad.Nombre = txtNombreUsuario.Text;
+                usu.Entidad.Email = txtEmailUsu.Text;
+                usu.Entidad.Rol = cbRol.GetItemText(cbRol.SelectedItem);
 
-
-                if (serviciosUsuario.Actualizar(usu))
+                
+                if (serviciosUsuario.Actualizar(usu.Entidad)!=null)
                 {
-                    MessageBox.Show($"El/La Usuari@ {usu.NombreUsuario} fue actualizad@ correctamente");
+                    MessageBox.Show($"El/La Usuari@ {usu.Entidad.NombreUsuario} fue actualizad@ correctamente");
 
                 }
                 else
@@ -205,27 +373,25 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         }
         private void CargarUsuario()
         {
-            Usuario usuario = new Usuario();
-            var list = serviciosUsuario.MostrarTodos();
-            foreach (var item in list)
+            var list = serviciosUsuario.ObtenerTodos();
+            foreach (var item in list.Lista)
             {
-                if (item.Accedio == 1)
+                if (item.Accedio == true)
                 {
                     IdDelUsuario = item.IdUsuario;
-                    serviciosUsuario.Actualizar(item);
                     break;
                 }
             }
 
-            usuario = serviciosUsuario.ObtenerPorId(IdDelUsuario);
-            txtIdUsuario.Text = usuario.IdUsuario.ToString();
-            txtNombreUsuario.Text = usuario.Nombre;
-            txtNombreUsuariodelUsuario.Text = usuario.NombreUsuario;
-            cbRol.Text = usuario.Rol;
-            txtEmailUsu.Text = usuario.Email;
-            if (!string.IsNullOrEmpty(usuario.RutaImagen) && File.Exists(usuario.RutaImagen))
+            var usuario = serviciosUsuario.BuscarPorId(IdDelUsuario);
+            txtIdUsuario.Text = usuario.Entidad.IdUsuario.ToString();
+            txtNombreUsuario.Text = usuario.Entidad.Nombre;
+            txtNombreUsuariodelUsuario.Text = usuario.Entidad.NombreUsuario;
+            cbRol.Text = usuario.Entidad.Rol;
+            txtEmailUsu.Text = usuario.Entidad.Email;
+            if (!string.IsNullOrEmpty(usuario.Entidad.RutaImagen) && File.Exists(usuario.Entidad.RutaImagen))
             {
-                pbImagenUsuario.Image = Image.FromFile(usuario.RutaImagen);
+                pbImagenUsuario.Image = Image.FromFile(usuario.Entidad.RutaImagen);
             }
             txtIdUsuario.Enabled = false;
             txtNombreUsuario.Enabled = false;
@@ -235,6 +401,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
 
         }
+
         private void ActualizarEstadoConexion()
         {
             if (Application.OpenForms["MENUPRINCIPAL"] != null)
@@ -260,7 +427,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
                     var lis = servicioHistorial.MostrarTodos();
                     Historial_Riego historial = new Historial_Riego();
-                    historial.Id = lis.Count + 1;
                     historial.Temperatura = temperatura_actual;
                     historial.Humedad = humedad_actual;
                     historial.Fecha = DateTime.Now;
@@ -321,7 +487,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
         private void pictureBox2_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void label15_Click(object sender, EventArgs e)
@@ -403,7 +569,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
         private void lbUltimoRegado_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void panel2_Paint_1(object sender, PaintEventArgs e)
@@ -471,6 +637,8 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         private void timer1_Tick_1(object sender, EventArgs e)
         {
             lbFechaActual.Text = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+            lbFechaInicio.Text = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+
         }
 
         private void MENUPRINCIPAL_Load_1(object sender, EventArgs e)
@@ -483,6 +651,9 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             timerGraficas.Start();
             CargarUsuario();
             timerGraficaReal();
+            grilla2.CellValueChanged += grilla2_CellValueChanged;
+            grilla2.CurrentCellDirtyStateChanged += grilla2_CurrentCellDirtyStateChanged;
+
         }
 
         private void btnHacerCambios_Click(object sender, EventArgs e)
@@ -492,35 +663,8 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
         private void button10_Click_1(object sender, EventArgs e)
         {
-            OpenFileDialog dialogo = new OpenFileDialog();
-            var usu = serviciosUsuario.ObtenerPorId(IdDelUsuario);
-            dialogo.Filter = "Archivos de imagen|*.jpg;*.jpeg;*.png;*.bmp";
-
-            if (dialogo.ShowDialog() == DialogResult.OK)
-            {
-                usu.RutaImagen = dialogo.FileName;
-                serviciosUsuario.Actualizar(usu);
-                pbImagenUsuario.Image = Image.FromFile(usu.RutaImagen);
-            }
-            else
-            {
-                MessageBox.Show("No se seleccionó ninguna imagen.", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            
         }
-
-        private void button1_Click_3(object sender, EventArgs e)
-        {
-            PLANTAS from = new PLANTAS();
-            from.Show();
-            this.Hide();
-
-        }
-
-        private void button2_Click_1(object sender, EventArgs e)
-        {
-            BuscarPlanta();
-        }
-
         private void label13_Click(object sender, EventArgs e)
         {
 
@@ -593,6 +737,124 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             GuardarCambios();
         }
 
+        private void button11_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dialogo = new OpenFileDialog();
+            var usu = serviciosUsuario.BuscarPorId(IdDelUsuario);
+            dialogo.Filter = "Archivos de imagen|*.jpg;*.jpeg;*.png;*.bmp";
+
+            if (dialogo.ShowDialog() == DialogResult.OK)
+            {
+                usu.Entidad.RutaImagen = dialogo.FileName;
+                serviciosUsuario.Actualizar(usu.Entidad);
+                pbImagenUsuario.Image = Image.FromFile(usu.Entidad.RutaImagen);
+            }
+            else
+            {
+                MessageBox.Show("No se seleccionó ninguna imagen.", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            INICIAR form = new INICIAR();
+            form.Show();
+            this.Hide();
+        }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
+            DialogResult resultado = MessageBox.Show($"¿Seguro que quieres eliminar este Usuario?", "Confirmación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (resultado == DialogResult.Yes)
+            {
+                string contraseña = Interaction.InputBox($"Ingrese su la contraseña del Usuario {txtNombreUsuariodelUsuario.Text}:", "Registro obligatorio", "");
+                var usu = serviciosUsuario.BuscarPorId(IdDelUsuario);
+                if (contraseña == usu.Entidad.Password)
+                {
+                    var mensaje = serviciosUsuario.Eliminar(usu.Entidad.IdUsuario);
+                    if (mensaje.Estado)
+                    {
+                        MessageBox.Show("Usuario eliminado correctamente. Volviendo a la pantalla de inicio de sesión.");
+                        INICIAR form = new INICIAR();
+                        form.Show();
+                        this.Hide();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Hubo un error al eliminar el usuario.");
+                    }
+                }
+            }
+        }
+
+        private void PanelPrincipal_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MId_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            BuscarPlanta();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            PLANTAS from = new PLANTAS();
+            from.Show();
+            this.Hide();
+        }
+
+        private void grilla2_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            button3.Select();
+        }
+
+        private void button3_Click_2(object sender, EventArgs e)
+        {
+            grilla2.DataSource = null;
+            grilla2.DataSource = serviciosAlertas.MostrarTodos().Lista;
+        }
+
+        // Esto es para detectar cambios inmediatos en checkbox
+        private void grilla2_CurrentCellDirtyStateChanged(object sender, EventArgs e)
+        {
+            if (grilla2.IsCurrentCellDirty)
+            {
+                grilla2.CommitEdit(DataGridViewDataErrorContexts.Commit);
+            }
+        }
+
+        // Esto es para ejecutar la actualización cuando cambió el valor
+        private void grilla2_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return; // Ignorar cabecera
+
+            // Verifica si la columna es la de Estado (ej: columna 5)
+            if (grilla2.Columns[e.ColumnIndex].Name == "Estado")
+            {
+                var alerta = grilla2.Rows[e.RowIndex].DataBoundItem as Alertas;
+                if (alerta != null)
+                {
+                    try
+                    {
+                        serviciosAlertas.Actualizar(alerta); // Actualiza directamente en BD
+                        MessageBox.Show($"Alerta ID {alerta.IdAlerta} actualizada correctamente.");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error al actualizar alerta: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+
         private void timerGraficas_Tick(object sender, EventArgs e)
         {
             timerGraficaReal();
@@ -605,7 +867,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
         private void button4_Click_1(object sender, EventArgs e)
         {
-            tabControl.SelectedIndex = 5;
+            tabControl.SelectedIndex = 4;
 
         }
 
