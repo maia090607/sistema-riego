@@ -15,6 +15,8 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             InitializeComponent();
             serviciosUsuario = new ServiciosUsuario();
             this.StartPosition = FormStartPosition.CenterScreen;
+            this.MaximizeBox = false;
+
         }
 
         private bool ValidarInformacion(string nombreUsu, string contra)
@@ -52,17 +54,18 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             }
         }
 
-        private void INICIAR_Load(object sender, EventArgs e) { }
+        private void INICIAR_Load(object sender, EventArgs e) {
+        }
 
-        private void tbnIniciar_Click(object sender, EventArgs e)
+        private void btnGuardarCambios_Click(object sender, EventArgs e)
         {
             ValidarInformacion(txtUsuario.Text.Trim(), txtContraseña.Text.Trim());
         }
 
-        private void btnCrearCuenta_Click_1(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
-            NuevoUsuario form3 = new NuevoUsuario();
-            form3.Show();
+            NuevoUsuario nuevoUsuario = new NuevoUsuario();
+            nuevoUsuario.Show();
             this.Hide();
         }
     }

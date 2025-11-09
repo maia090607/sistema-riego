@@ -14,6 +14,8 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         {
             InitializeComponent();
             serviciosUsuario = new ServiciosUsuario();
+            this.StartPosition = FormStartPosition.CenterScreen;
+
 
         }
         public bool Obtenerdatos()
@@ -102,20 +104,20 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
         }
 
-        private void btnCrearUsuario_Click(object sender, EventArgs e)
+        private void button1_Click_2(object sender, EventArgs e)
+        {
+            INICIAR form = new INICIAR();
+            form.Show();
+            this.Hide();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
         {
             if (Obtenerdatos())
             {
                 LimpiarCampos();
                 return;
             }
-        }
-
-        private void button1_Click_2(object sender, EventArgs e)
-        {
-            INICIAR form = new INICIAR();
-            form.Show();
-            this.Hide();
         }
     }
 }

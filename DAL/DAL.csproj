@@ -80,6 +80,7 @@
   <ItemGroup>
     <Compile Include="AlertasRepository.cs" />
     <Compile Include="BaseRepository.cs" />
+    <Compile Include="ClimaRepository.cs" />
     <Compile Include="GraficasRepository.cs" />
     <Compile Include="HistorialRepository.cs" />
     <Compile Include="IRepository.cs" />

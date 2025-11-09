@@ -83,6 +83,7 @@
     <Compile Include="Historial_Riego.cs" />
     <Compile Include="Mantenimientos.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Registroclimatico.cs" />
     <Compile Include="Response.cs" />
     <Compile Include="Sensor.cs" />
     <Compile Include="Usuario.cs" />

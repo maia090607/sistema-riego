@@ -32,49 +32,43 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title1 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint1 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(10D, 45D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint2 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(20D, 52D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint3 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(30D, 60D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint4 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(40D, 55D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint5 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(50D, 70D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint6 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(60D, 100D);
+            System.Windows.Forms.DataVisualization.Charting.Title title2 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint7 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(10D, 45D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint8 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(20D, 52D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint9 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(30D, 60D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint10 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(40D, 55D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint11 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(50D, 70D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint12 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(60D, 100D);
+            System.Windows.Forms.DataVisualization.Charting.Title title3 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title4 = new System.Windows.Forms.DataVisualization.Charting.Title();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MENUPRINCIPAL));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea33 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend33 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series33 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title33 = new System.Windows.Forms.DataVisualization.Charting.Title();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea34 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend34 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series34 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint97 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(10D, 45D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint98 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(20D, 52D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint99 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(30D, 60D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint100 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(40D, 55D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint101 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(50D, 70D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint102 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(60D, 100D);
-            System.Windows.Forms.DataVisualization.Charting.Title title34 = new System.Windows.Forms.DataVisualization.Charting.Title();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea35 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend35 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series35 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint103 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(10D, 45D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint104 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(20D, 52D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint105 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(30D, 60D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint106 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(40D, 55D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint107 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(50D, 70D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint108 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(60D, 100D);
-            System.Windows.Forms.DataVisualization.Charting.Title title35 = new System.Windows.Forms.DataVisualization.Charting.Title();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea36 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend36 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series36 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title36 = new System.Windows.Forms.DataVisualization.Charting.Title();
             this.panel7 = new System.Windows.Forms.Panel();
             this.nightControlBox1 = new ReaLTaiizor.Controls.NightControlBox();
-            this.btnHam = new System.Windows.Forms.PictureBox();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.panel10 = new System.Windows.Forms.Panel();
-            this.button5 = new System.Windows.Forms.Button();
             this.panel9 = new System.Windows.Forms.Panel();
-            this.btnHistorial = new System.Windows.Forms.Button();
             this.panel13 = new System.Windows.Forms.Panel();
-            this.button7 = new System.Windows.Forms.Button();
             this.panel11 = new System.Windows.Forms.Panel();
-            this.button6 = new System.Windows.Forms.Button();
             this.panel8 = new System.Windows.Forms.Panel();
-            this.button4 = new System.Windows.Forms.Button();
             this.MenuTrancision = new System.Windows.Forms.Timer(this.components);
             this.timerTiempo = new System.Windows.Forms.Timer(this.components);
             this.timerClima = new System.Windows.Forms.Timer(this.components);
@@ -95,7 +89,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label23 = new System.Windows.Forms.Label();
             this.label21 = new System.Windows.Forms.Label();
             this.label20 = new System.Windows.Forms.Label();
-            this.pbImagenUsuario = new System.Windows.Forms.PictureBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.panel2 = new System.Windows.Forms.Panel();
             this.chartCultivo = new System.Windows.Forms.DataVisualization.Charting.Chart();
@@ -115,12 +108,16 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.pbPlanta = new System.Windows.Forms.PictureBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.button9 = new System.Windows.Forms.Button();
+            this.grillaClima = new System.Windows.Forms.DataGridView();
             this.chartTemperatura = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chartRiego = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.btnRiegoAuto = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.button3 = new System.Windows.Forms.Button();
+            this.label14 = new System.Windows.Forms.Label();
+            this.grilla2 = new System.Windows.Forms.DataGridView();
             this.lbFechaActual = new System.Windows.Forms.Label();
             this.label19 = new System.Windows.Forms.Label();
             this.button8 = new System.Windows.Forms.Button();
@@ -129,47 +126,61 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label15 = new System.Windows.Forms.Label();
             this.grilla = new System.Windows.Forms.DataGridView();
             this.PanelPrincipal = new System.Windows.Forms.TabPage();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.label26 = new System.Windows.Forms.Label();
+            this.lblHumedad = new System.Windows.Forms.Label();
             this.panel12 = new ReaLTaiizor.Controls.Panel();
             this.chartClima = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.lbFechaInicio = new System.Windows.Forms.Label();
-            this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.panel5 = new System.Windows.Forms.Panel();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.lbEstadodeBomba = new System.Windows.Forms.Label();
             this.label18 = new System.Windows.Forms.Label();
             this.panel3 = new System.Windows.Forms.Panel();
-            this.ImagenTemperatura = new System.Windows.Forms.PictureBox();
             this.label13 = new System.Windows.Forms.Label();
             this.lbTemperatura = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.lbConec = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.panel6 = new System.Windows.Forms.Panel();
-            this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.lbUltimoRegado = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.PanelHumedad = new System.Windows.Forms.Panel();
-            this.I = new System.Windows.Forms.PictureBox();
             this.label10 = new System.Windows.Forms.Label();
             this.lbHum = new System.Windows.Forms.Label();
             this.PanelPronostico = new System.Windows.Forms.Panel();
-            this.ImagenPronostico = new System.Windows.Forms.PictureBox();
             this.label11 = new System.Windows.Forms.Label();
             this.lbDes = new System.Windows.Forms.Label();
             this.PanelViento = new System.Windows.Forms.Panel();
-            this.ImagenViento = new System.Windows.Forms.PictureBox();
             this.label12 = new System.Windows.Forms.Label();
             this.lbVie = new System.Windows.Forms.Label();
             this.PanelTemperatura = new System.Windows.Forms.Panel();
             this.label9 = new System.Windows.Forms.Label();
             this.lbTemp = new System.Windows.Forms.Label();
             this.tabControl = new System.Windows.Forms.TabControl();
-            this.label14 = new System.Windows.Forms.Label();
-            this.grilla2 = new System.Windows.Forms.DataGridView();
-            this.button3 = new System.Windows.Forms.Button();
+            this.calendarioRiego = new System.Windows.Forms.DateTimePicker();
+            this.label17 = new System.Windows.Forms.Label();
+            this.button11 = new ReaLTaiizor.Controls.Button();
+            this.button10 = new System.Windows.Forms.Button();
+            this.calendarioAlertas = new System.Windows.Forms.DateTimePicker();
+            this.label22 = new System.Windows.Forms.Label();
+            this.button5 = new System.Windows.Forms.Button();
+            this.btnHistorial = new System.Windows.Forms.Button();
+            this.button7 = new System.Windows.Forms.Button();
+            this.button6 = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
+            this.btnHam = new System.Windows.Forms.PictureBox();
+            this.pictureBox5 = new System.Windows.Forms.PictureBox();
+            this.pictureBox4 = new System.Windows.Forms.PictureBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.ImagenTemperatura = new System.Windows.Forms.PictureBox();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.I = new System.Windows.Forms.PictureBox();
+            this.ImagenPronostico = new System.Windows.Forms.PictureBox();
+            this.ImagenViento = new System.Windows.Forms.PictureBox();
+            this.pbPlanta = new System.Windows.Forms.PictureBox();
+            this.pbImagenUsuario = new System.Windows.Forms.PictureBox();
             this.panel7.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.btnHam)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
             this.panel10.SuspendLayout();
             this.panel9.SuspendLayout();
@@ -177,37 +188,41 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel11.SuspendLayout();
             this.panel8.SuspendLayout();
             this.tabPage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pbImagenUsuario)).BeginInit();
             this.tabPage4.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartCultivo)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbPlanta)).BeginInit();
             this.tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.grillaClima)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartTemperatura)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartRiego)).BeginInit();
             this.tabPage2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.grilla2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.grilla)).BeginInit();
             this.PanelPrincipal.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.panel12.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartClima)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             this.panel5.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.ImagenTemperatura)).BeginInit();
             this.panel4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.panel6.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             this.PanelHumedad.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.I)).BeginInit();
             this.PanelPronostico.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.ImagenPronostico)).BeginInit();
             this.PanelViento.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.ImagenViento)).BeginInit();
             this.PanelTemperatura.SuspendLayout();
             this.tabControl.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.grilla2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.btnHam)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ImagenTemperatura)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.I)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ImagenPronostico)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ImagenViento)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbPlanta)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbImagenUsuario)).BeginInit();
             this.SuspendLayout();
             // 
             // panel7
@@ -245,18 +260,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.nightControlBox1.Size = new System.Drawing.Size(139, 31);
             this.nightControlBox1.TabIndex = 1;
             // 
-            // btnHam
-            // 
-            this.btnHam.Image = global::PROYECTO_FINAL.Properties.Resources.menu;
-            this.btnHam.InitialImage = ((System.Drawing.Image)(resources.GetObject("btnHam.InitialImage")));
-            this.btnHam.Location = new System.Drawing.Point(11, 7);
-            this.btnHam.Name = "btnHam";
-            this.btnHam.Size = new System.Drawing.Size(33, 29);
-            this.btnHam.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.btnHam.TabIndex = 0;
-            this.btnHam.TabStop = false;
-            this.btnHam.Click += new System.EventHandler(this.btnHam_Click);
-            // 
             // flowLayoutPanel1
             // 
             this.flowLayoutPanel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
@@ -280,23 +283,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel10.Size = new System.Drawing.Size(220, 47);
             this.panel10.TabIndex = 3;
             // 
-            // button5
-            // 
-            this.button5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
-            this.button5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button5.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.button5.Image = global::PROYECTO_FINAL.Properties.Resources.home_6821152__1_;
-            this.button5.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button5.Location = new System.Drawing.Point(-4, -5);
-            this.button5.Name = "button5";
-            this.button5.Padding = new System.Windows.Forms.Padding(21, 0, 0, 0);
-            this.button5.Size = new System.Drawing.Size(237, 56);
-            this.button5.TabIndex = 1;
-            this.button5.Text = "                INICIO";
-            this.button5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button5.UseVisualStyleBackColor = false;
-            this.button5.Click += new System.EventHandler(this.button5_Click_1);
-            // 
             // panel9
             // 
             this.panel9.Controls.Add(this.btnHistorial);
@@ -304,23 +290,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel9.Name = "panel9";
             this.panel9.Size = new System.Drawing.Size(220, 47);
             this.panel9.TabIndex = 3;
-            // 
-            // btnHistorial
-            // 
-            this.btnHistorial.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
-            this.btnHistorial.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnHistorial.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.btnHistorial.Image = global::PROYECTO_FINAL.Properties.Resources.grafico__1_1;
-            this.btnHistorial.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnHistorial.Location = new System.Drawing.Point(-4, -6);
-            this.btnHistorial.Name = "btnHistorial";
-            this.btnHistorial.Padding = new System.Windows.Forms.Padding(21, 0, 0, 0);
-            this.btnHistorial.Size = new System.Drawing.Size(237, 57);
-            this.btnHistorial.TabIndex = 0;
-            this.btnHistorial.Text = "                HISTORIAL";
-            this.btnHistorial.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnHistorial.UseVisualStyleBackColor = false;
-            this.btnHistorial.Click += new System.EventHandler(this.btnHistorial_Click_1);
             // 
             // panel13
             // 
@@ -330,23 +299,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel13.Size = new System.Drawing.Size(220, 47);
             this.panel13.TabIndex = 4;
             // 
-            // button7
-            // 
-            this.button7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
-            this.button7.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button7.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.button7.Image = global::PROYECTO_FINAL.Properties.Resources.watering_can_179154;
-            this.button7.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button7.Location = new System.Drawing.Point(-4, -8);
-            this.button7.Name = "button7";
-            this.button7.Padding = new System.Windows.Forms.Padding(21, 0, 0, 0);
-            this.button7.Size = new System.Drawing.Size(237, 62);
-            this.button7.TabIndex = 0;
-            this.button7.Text = "                RIEGO MANUAL";
-            this.button7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button7.UseVisualStyleBackColor = false;
-            this.button7.Click += new System.EventHandler(this.button7_Click_1);
-            // 
             // panel11
             // 
             this.panel11.Controls.Add(this.button6);
@@ -355,23 +307,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel11.Size = new System.Drawing.Size(220, 47);
             this.panel11.TabIndex = 3;
             // 
-            // button6
-            // 
-            this.button6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
-            this.button6.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button6.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.button6.Image = global::PROYECTO_FINAL.Properties.Resources.lily_7148928;
-            this.button6.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button6.Location = new System.Drawing.Point(-4, -4);
-            this.button6.Name = "button6";
-            this.button6.Padding = new System.Windows.Forms.Padding(21, 0, 0, 0);
-            this.button6.Size = new System.Drawing.Size(237, 58);
-            this.button6.TabIndex = 0;
-            this.button6.Text = "                MIS PLANTAS";
-            this.button6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button6.UseVisualStyleBackColor = false;
-            this.button6.Click += new System.EventHandler(this.button6_Click_1);
-            // 
             // panel8
             // 
             this.panel8.Controls.Add(this.button4);
@@ -379,23 +314,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel8.Name = "panel8";
             this.panel8.Size = new System.Drawing.Size(220, 47);
             this.panel8.TabIndex = 2;
-            // 
-            // button4
-            // 
-            this.button4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
-            this.button4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button4.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.button4.Image = global::PROYECTO_FINAL.Properties.Resources.user_11043331;
-            this.button4.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button4.Location = new System.Drawing.Point(-4, -4);
-            this.button4.Name = "button4";
-            this.button4.Padding = new System.Windows.Forms.Padding(21, 0, 0, 0);
-            this.button4.Size = new System.Drawing.Size(237, 55);
-            this.button4.TabIndex = 0;
-            this.button4.Text = "                USUARIO";
-            this.button4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button4.UseVisualStyleBackColor = false;
-            this.button4.Click += new System.EventHandler(this.button4_Click_1);
             // 
             // MenuTrancision
             // 
@@ -420,11 +338,11 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // tabPage1
             // 
             this.tabPage1.Controls.Add(this.btnEliminarUsuario);
-            this.tabPage1.Controls.Add(this.btnCerrarsession);
             this.tabPage1.Controls.Add(this.btnSubirFoto);
             this.tabPage1.Controls.Add(this.cbRol);
             this.tabPage1.Controls.Add(this.txtEmailUsu);
             this.tabPage1.Controls.Add(this.txtNombreUsuario);
+            this.tabPage1.Controls.Add(this.btnCerrarsession);
             this.tabPage1.Controls.Add(this.txtIdUsuario);
             this.tabPage1.Controls.Add(this.btnGuardarCambios);
             this.tabPage1.Controls.Add(this.txtNombreUsuariodelUsuario);
@@ -478,7 +396,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.btnCerrarsession.Image = null;
             this.btnCerrarsession.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnCerrarsession.InactiveColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(34)))), ((int)(((byte)(37)))));
-            this.btnCerrarsession.Location = new System.Drawing.Point(882, 26);
+            this.btnCerrarsession.Location = new System.Drawing.Point(882, 20);
             this.btnCerrarsession.Name = "btnCerrarsession";
             this.btnCerrarsession.PressedBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(165)))), ((int)(((byte)(37)))), ((int)(((byte)(37)))));
             this.btnCerrarsession.PressedColor = System.Drawing.Color.FromArgb(((int)(((byte)(165)))), ((int)(((byte)(37)))), ((int)(((byte)(37)))));
@@ -675,17 +593,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label20.TabIndex = 2;
             this.label20.Text = "Identificación ";
             // 
-            // pbImagenUsuario
-            // 
-            this.pbImagenUsuario.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pbImagenUsuario.Image = global::PROYECTO_FINAL.Properties.Resources.admin_14471192;
-            this.pbImagenUsuario.Location = new System.Drawing.Point(23, 14);
-            this.pbImagenUsuario.Name = "pbImagenUsuario";
-            this.pbImagenUsuario.Size = new System.Drawing.Size(315, 307);
-            this.pbImagenUsuario.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pbImagenUsuario.TabIndex = 0;
-            this.pbImagenUsuario.TabStop = false;
-            // 
             // tabPage4
             // 
             this.tabPage4.BackColor = System.Drawing.Color.Gainsboro;
@@ -731,34 +638,34 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chartCultivo.BackColor = System.Drawing.SystemColors.ControlLight;
-            chartArea33.Area3DStyle.Enable3D = true;
-            chartArea33.Area3DStyle.Inclination = 25;
-            chartArea33.Name = "MainArea";
-            this.chartCultivo.ChartAreas.Add(chartArea33);
-            legend33.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Bottom;
-            legend33.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            legend33.IsTextAutoFit = false;
-            legend33.Name = "Legend1";
-            this.chartCultivo.Legends.Add(legend33);
+            chartArea1.Area3DStyle.Enable3D = true;
+            chartArea1.Area3DStyle.Inclination = 25;
+            chartArea1.Name = "MainArea";
+            this.chartCultivo.ChartAreas.Add(chartArea1);
+            legend1.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Bottom;
+            legend1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            legend1.IsTextAutoFit = false;
+            legend1.Name = "Legend1";
+            this.chartCultivo.Legends.Add(legend1);
             this.chartCultivo.Location = new System.Drawing.Point(-3, 339);
             this.chartCultivo.Name = "chartCultivo";
             this.chartCultivo.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.EarthTones;
-            series33.ChartArea = "MainArea";
-            series33.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Doughnut;
-            series33.Color = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
-            series33.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            series33.IsValueShownAsLabel = true;
-            series33.Label = "#VALY";
-            series33.Legend = "Legend1";
-            series33.LegendText = "#VALX";
-            series33.Name = "DatosClimáticos";
-            series33.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.BrightPastel;
-            this.chartCultivo.Series.Add(series33);
+            series1.ChartArea = "MainArea";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Doughnut;
+            series1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            series1.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            series1.IsValueShownAsLabel = true;
+            series1.Label = "#VALY";
+            series1.Legend = "Legend1";
+            series1.LegendText = "#VALX";
+            series1.Name = "DatosClimáticos";
+            series1.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.BrightPastel;
+            this.chartCultivo.Series.Add(series1);
             this.chartCultivo.Size = new System.Drawing.Size(573, 263);
             this.chartCultivo.TabIndex = 31;
             this.chartCultivo.Text = "chart1";
-            title33.Name = "Title1";
-            this.chartCultivo.Titles.Add(title33);
+            title1.Name = "Title1";
+            this.chartCultivo.Titles.Add(title1);
             // 
             // button1
             // 
@@ -954,18 +861,13 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label2.TabIndex = 1;
             this.label2.Text = "Humedad";
             // 
-            // pbPlanta
-            // 
-            this.pbPlanta.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pbPlanta.Location = new System.Drawing.Point(581, 11);
-            this.pbPlanta.Name = "pbPlanta";
-            this.pbPlanta.Size = new System.Drawing.Size(429, 409);
-            this.pbPlanta.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pbPlanta.TabIndex = 0;
-            this.pbPlanta.TabStop = false;
-            // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.button11);
+            this.tabPage3.Controls.Add(this.calendarioRiego);
+            this.tabPage3.Controls.Add(this.label17);
+            this.tabPage3.Controls.Add(this.button9);
+            this.tabPage3.Controls.Add(this.grillaClima);
             this.tabPage3.Controls.Add(this.chartTemperatura);
             this.tabPage3.Controls.Add(this.chartRiego);
             this.tabPage3.Controls.Add(this.btnRiegoAuto);
@@ -978,89 +880,111 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.tabPage3.UseVisualStyleBackColor = true;
             this.tabPage3.Click += new System.EventHandler(this.tabPage3_Click_1);
             // 
+            // button9
+            // 
+            this.button9.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
+            this.button9.ForeColor = System.Drawing.SystemColors.ControlLight;
+            this.button9.Location = new System.Drawing.Point(744, 372);
+            this.button9.Name = "button9";
+            this.button9.Size = new System.Drawing.Size(141, 54);
+            this.button9.TabIndex = 5;
+            this.button9.Text = "RECARGAR HISTORIAL";
+            this.button9.UseVisualStyleBackColor = false;
+            this.button9.Click += new System.EventHandler(this.button9_Click_1);
+            // 
+            // grillaClima
+            // 
+            this.grillaClima.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.grillaClima.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.grillaClima.Location = new System.Drawing.Point(3, 360);
+            this.grillaClima.Name = "grillaClima";
+            this.grillaClima.Size = new System.Drawing.Size(715, 218);
+            this.grillaClima.TabIndex = 4;
+            this.grillaClima.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
+            // 
             // chartTemperatura
             // 
-            chartArea34.AxisX.Interval = 10D;
-            chartArea34.AxisX.Title = "Tiempo (m)";
-            chartArea34.AxisY.Title = "Grados de Temperatura (C°)";
-            chartArea34.BackColor = System.Drawing.Color.White;
-            chartArea34.Name = "AreaPrincipal";
-            this.chartTemperatura.ChartAreas.Add(chartArea34);
-            legend34.Name = "Temperatura";
-            this.chartTemperatura.Legends.Add(legend34);
-            this.chartTemperatura.Location = new System.Drawing.Point(12, 222);
+            chartArea2.AxisX.Interval = 10D;
+            chartArea2.AxisX.Title = "Tiempo (m)";
+            chartArea2.AxisY.Title = "Grados de Temperatura (C°)";
+            chartArea2.BackColor = System.Drawing.Color.White;
+            chartArea2.Name = "AreaPrincipal";
+            this.chartTemperatura.ChartAreas.Add(chartArea2);
+            legend2.Name = "Temperatura";
+            this.chartTemperatura.Legends.Add(legend2);
+            this.chartTemperatura.Location = new System.Drawing.Point(510, 3);
             this.chartTemperatura.Name = "chartTemperatura";
-            series34.BorderWidth = 3;
-            series34.ChartArea = "AreaPrincipal";
-            series34.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
-            series34.Color = System.Drawing.Color.FromArgb(((int)(((byte)(134)))), ((int)(((byte)(33)))), ((int)(((byte)(52)))));
-            series34.IsVisibleInLegend = false;
-            series34.Legend = "Temperatura";
-            series34.MarkerColor = System.Drawing.Color.Black;
-            series34.MarkerSize = 8;
-            series34.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
-            series34.Name = "TEMPERATURA DEL AMBIENTE";
-            series34.Points.Add(dataPoint97);
-            series34.Points.Add(dataPoint98);
-            series34.Points.Add(dataPoint99);
-            series34.Points.Add(dataPoint100);
-            series34.Points.Add(dataPoint101);
-            series34.Points.Add(dataPoint102);
-            this.chartTemperatura.Series.Add(series34);
-            this.chartTemperatura.Size = new System.Drawing.Size(579, 207);
+            series2.BorderWidth = 3;
+            series2.ChartArea = "AreaPrincipal";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
+            series2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(134)))), ((int)(((byte)(33)))), ((int)(((byte)(52)))));
+            series2.IsVisibleInLegend = false;
+            series2.Legend = "Temperatura";
+            series2.MarkerColor = System.Drawing.Color.Black;
+            series2.MarkerSize = 8;
+            series2.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
+            series2.Name = "TEMPERATURA DEL AMBIENTE";
+            series2.Points.Add(dataPoint1);
+            series2.Points.Add(dataPoint2);
+            series2.Points.Add(dataPoint3);
+            series2.Points.Add(dataPoint4);
+            series2.Points.Add(dataPoint5);
+            series2.Points.Add(dataPoint6);
+            this.chartTemperatura.Series.Add(series2);
+            this.chartTemperatura.Size = new System.Drawing.Size(506, 336);
             this.chartTemperatura.TabIndex = 3;
             this.chartTemperatura.Text = "chart2";
-            title34.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            title34.Name = "Title1";
-            title34.Text = "GRAFICA DE LA HUMEDAD DEL SUELO";
-            this.chartTemperatura.Titles.Add(title34);
+            title2.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            title2.Name = "Title1";
+            title2.Text = "GRAFICO DE LA TEMPERATURA DEL AMBIENTE";
+            this.chartTemperatura.Titles.Add(title2);
             this.chartTemperatura.Click += new System.EventHandler(this.chart2_Click);
             // 
             // chartRiego
             // 
-            chartArea35.AxisX.Interval = 10D;
-            chartArea35.AxisX.Title = "Tiempo (m)";
-            chartArea35.AxisY.Title = "Nivel de humedad (%)";
-            chartArea35.BackColor = System.Drawing.Color.White;
-            chartArea35.Name = "AreaPrincipal";
-            this.chartRiego.ChartAreas.Add(chartArea35);
-            legend35.Name = "Humedad";
-            this.chartRiego.Legends.Add(legend35);
-            this.chartRiego.Location = new System.Drawing.Point(12, 9);
+            chartArea3.AxisX.Interval = 10D;
+            chartArea3.AxisX.Title = "Tiempo (m)";
+            chartArea3.AxisY.Title = "Nivel de humedad (%)";
+            chartArea3.BackColor = System.Drawing.Color.White;
+            chartArea3.Name = "AreaPrincipal";
+            this.chartRiego.ChartAreas.Add(chartArea3);
+            legend3.Name = "Humedad";
+            this.chartRiego.Legends.Add(legend3);
+            this.chartRiego.Location = new System.Drawing.Point(3, 3);
             this.chartRiego.Name = "chartRiego";
-            series35.BorderWidth = 3;
-            series35.ChartArea = "AreaPrincipal";
-            series35.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
-            series35.Color = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(134)))), ((int)(((byte)(75)))));
-            series35.IsVisibleInLegend = false;
-            series35.Legend = "Humedad";
-            series35.MarkerColor = System.Drawing.Color.Black;
-            series35.MarkerSize = 8;
-            series35.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
-            series35.Name = "HUMEDAD DEL SUELO";
-            series35.Points.Add(dataPoint103);
-            series35.Points.Add(dataPoint104);
-            series35.Points.Add(dataPoint105);
-            series35.Points.Add(dataPoint106);
-            series35.Points.Add(dataPoint107);
-            series35.Points.Add(dataPoint108);
-            this.chartRiego.Series.Add(series35);
-            this.chartRiego.Size = new System.Drawing.Size(579, 207);
+            series3.BorderWidth = 3;
+            series3.ChartArea = "AreaPrincipal";
+            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
+            series3.Color = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(134)))), ((int)(((byte)(75)))));
+            series3.IsVisibleInLegend = false;
+            series3.Legend = "Humedad";
+            series3.MarkerColor = System.Drawing.Color.Black;
+            series3.MarkerSize = 8;
+            series3.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
+            series3.Name = "HUMEDAD DEL SUELO";
+            series3.Points.Add(dataPoint7);
+            series3.Points.Add(dataPoint8);
+            series3.Points.Add(dataPoint9);
+            series3.Points.Add(dataPoint10);
+            series3.Points.Add(dataPoint11);
+            series3.Points.Add(dataPoint12);
+            this.chartRiego.Series.Add(series3);
+            this.chartRiego.Size = new System.Drawing.Size(492, 339);
             this.chartRiego.TabIndex = 2;
             this.chartRiego.Text = "chart2";
-            title35.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            title35.Name = "Title1";
-            title35.Text = "GRAFICA DE LA HUMEDAD DEL SUELO";
-            this.chartRiego.Titles.Add(title35);
+            title3.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            title3.Name = "Title1";
+            title3.Text = "GRAFICA DE LA HUMEDAD DEL SUELO";
+            this.chartRiego.Titles.Add(title3);
             this.chartRiego.Click += new System.EventHandler(this.chartRiego_Click);
             // 
             // btnRiegoAuto
             // 
             this.btnRiegoAuto.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
             this.btnRiegoAuto.ForeColor = System.Drawing.SystemColors.ControlLight;
-            this.btnRiegoAuto.Location = new System.Drawing.Point(642, 77);
+            this.btnRiegoAuto.Location = new System.Drawing.Point(891, 371);
             this.btnRiegoAuto.Name = "btnRiegoAuto";
-            this.btnRiegoAuto.Size = new System.Drawing.Size(113, 54);
+            this.btnRiegoAuto.Size = new System.Drawing.Size(129, 55);
             this.btnRiegoAuto.TabIndex = 0;
             this.btnRiegoAuto.Text = "INICIAR RIEGO MANUAL";
             this.btnRiegoAuto.UseVisualStyleBackColor = false;
@@ -1068,6 +992,9 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.button10);
+            this.tabPage2.Controls.Add(this.calendarioAlertas);
+            this.tabPage2.Controls.Add(this.label22);
             this.tabPage2.Controls.Add(this.button3);
             this.tabPage2.Controls.Add(this.label14);
             this.tabPage2.Controls.Add(this.grilla2);
@@ -1086,13 +1013,46 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.tabPage2.Text = "HISTORIALES";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // button3
+            // 
+            this.button3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
+            this.button3.Font = new System.Drawing.Font("Segoe UI Black", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button3.ForeColor = System.Drawing.SystemColors.Control;
+            this.button3.Location = new System.Drawing.Point(801, 367);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(111, 46);
+            this.button3.TabIndex = 9;
+            this.button3.Text = "RECARGAR";
+            this.button3.UseVisualStyleBackColor = false;
+            this.button3.Click += new System.EventHandler(this.button3_Click_2);
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label14.Location = new System.Drawing.Point(178, 340);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(468, 27);
+            this.label14.TabIndex = 8;
+            this.label14.Text = "HISTORIAL DE ALERTAS DEL PROGRAMA";
+            // 
+            // grilla2
+            // 
+            this.grilla2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.grilla2.Location = new System.Drawing.Point(28, 381);
+            this.grilla2.Name = "grilla2";
+            this.grilla2.Size = new System.Drawing.Size(689, 185);
+            this.grilla2.TabIndex = 7;
+            this.grilla2.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.grilla2_CellContentClick);
+            // 
             // lbFechaActual
             // 
             this.lbFechaActual.AutoSize = true;
-            this.lbFechaActual.Font = new System.Drawing.Font("Segoe UI", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbFechaActual.Font = new System.Drawing.Font("Microsoft JhengHei", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbFechaActual.Location = new System.Drawing.Point(534, 139);
             this.lbFechaActual.Name = "lbFechaActual";
-            this.lbFechaActual.Size = new System.Drawing.Size(150, 25);
+            this.lbFechaActual.Size = new System.Drawing.Size(169, 26);
             this.lbFechaActual.TabIndex = 6;
             this.lbFechaActual.Text = "FECHA ACTUAL";
             // 
@@ -1100,10 +1060,10 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             this.label19.AutoSize = true;
             this.label19.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))));
-            this.label19.Location = new System.Drawing.Point(40, 26);
+            this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label19.Location = new System.Drawing.Point(27, 26);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(413, 26);
+            this.label19.Size = new System.Drawing.Size(461, 27);
             this.label19.TabIndex = 5;
             this.label19.Text = "HISTORIAL DE RIEGOS EN LAS PLANTAS";
             // 
@@ -1112,9 +1072,9 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.button8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(128)))), ((int)(((byte)(255)))));
             this.button8.Font = new System.Drawing.Font("Segoe UI Black", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button8.ForeColor = System.Drawing.SystemColors.Control;
-            this.button8.Location = new System.Drawing.Point(865, 147);
+            this.button8.Location = new System.Drawing.Point(865, 157);
             this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(106, 29);
+            this.button8.Size = new System.Drawing.Size(106, 39);
             this.button8.TabIndex = 4;
             this.button8.Text = "LIMPIAR";
             this.button8.UseVisualStyleBackColor = false;
@@ -1127,7 +1087,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.BuscarHistorial.ForeColor = System.Drawing.SystemColors.Control;
             this.BuscarHistorial.Location = new System.Drawing.Point(865, 113);
             this.BuscarHistorial.Name = "BuscarHistorial";
-            this.BuscarHistorial.Size = new System.Drawing.Size(106, 29);
+            this.BuscarHistorial.Size = new System.Drawing.Size(106, 38);
             this.BuscarHistorial.TabIndex = 3;
             this.BuscarHistorial.Text = "BUSCAR..";
             this.BuscarHistorial.UseVisualStyleBackColor = false;
@@ -1145,7 +1105,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             this.label15.AutoSize = true;
             this.label15.Font = new System.Drawing.Font("Segoe UI", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label15.Location = new System.Drawing.Point(497, 77);
+            this.label15.Location = new System.Drawing.Point(497, 81);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(187, 25);
             this.label15.TabIndex = 1;
@@ -1164,6 +1124,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             this.PanelPrincipal.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
             this.PanelPrincipal.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.PanelPrincipal.Controls.Add(this.panel1);
             this.PanelPrincipal.Controls.Add(this.panel12);
             this.PanelPrincipal.Controls.Add(this.lbFechaInicio);
             this.PanelPrincipal.Controls.Add(this.pictureBox4);
@@ -1183,15 +1144,49 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.PanelPrincipal.Text = "INICIO";
             this.PanelPrincipal.Click += new System.EventHandler(this.PanelPrincipal_Click);
             // 
+            // panel1
+            // 
+            this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
+            this.panel1.Controls.Add(this.label26);
+            this.panel1.Controls.Add(this.pictureBox5);
+            this.panel1.Controls.Add(this.lblHumedad);
+            this.panel1.Location = new System.Drawing.Point(400, 288);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(245, 135);
+            this.panel1.TabIndex = 26;
+            // 
+            // label26
+            // 
+            this.label26.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label26.ForeColor = System.Drawing.Color.PaleTurquoise;
+            this.label26.Location = new System.Drawing.Point(3, 74);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(234, 24);
+            this.label26.TabIndex = 26;
+            this.label26.Text = "HUMEDAD DEL SUELO";
+            this.label26.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblHumedad
+            // 
+            this.lblHumedad.Font = new System.Drawing.Font("Segoe UI Black", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblHumedad.ForeColor = System.Drawing.Color.MintCream;
+            this.lblHumedad.Location = new System.Drawing.Point(60, 96);
+            this.lblHumedad.Name = "lblHumedad";
+            this.lblHumedad.Size = new System.Drawing.Size(126, 37);
+            this.lblHumedad.TabIndex = 24;
+            this.lblHumedad.Text = "Humedad";
+            this.lblHumedad.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblHumedad.Click += new System.EventHandler(this.lblHumedad_Click);
+            // 
             // panel12
             // 
             this.panel12.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(51)))), ((int)(((byte)(63)))));
             this.panel12.Controls.Add(this.chartClima);
             this.panel12.EdgeColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(41)))), ((int)(((byte)(50)))));
-            this.panel12.Location = new System.Drawing.Point(0, 314);
+            this.panel12.Location = new System.Drawing.Point(0, 310);
             this.panel12.Name = "panel12";
             this.panel12.Padding = new System.Windows.Forms.Padding(5);
-            this.panel12.Size = new System.Drawing.Size(319, 295);
+            this.panel12.Size = new System.Drawing.Size(319, 299);
             this.panel12.SmoothingType = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             this.panel12.TabIndex = 31;
             this.panel12.Text = "panel12";
@@ -1202,55 +1197,44 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chartClima.BackColor = System.Drawing.SystemColors.ControlLight;
-            chartArea36.Area3DStyle.Enable3D = true;
-            chartArea36.Area3DStyle.Inclination = 25;
-            chartArea36.Name = "MainArea";
-            this.chartClima.ChartAreas.Add(chartArea36);
-            legend36.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Bottom;
-            legend36.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            legend36.IsTextAutoFit = false;
-            legend36.Name = "Legend1";
-            this.chartClima.Legends.Add(legend36);
+            chartArea4.Area3DStyle.Enable3D = true;
+            chartArea4.Area3DStyle.Inclination = 25;
+            chartArea4.Name = "MainArea";
+            this.chartClima.ChartAreas.Add(chartArea4);
+            legend4.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Bottom;
+            legend4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            legend4.IsTextAutoFit = false;
+            legend4.Name = "Legend1";
+            this.chartClima.Legends.Add(legend4);
             this.chartClima.Location = new System.Drawing.Point(0, -1);
             this.chartClima.Name = "chartClima";
-            series36.ChartArea = "MainArea";
-            series36.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Doughnut;
-            series36.Color = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
-            series36.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            series36.IsValueShownAsLabel = true;
-            series36.Label = "#VALY";
-            series36.Legend = "Legend1";
-            series36.LegendText = "#VALX";
-            series36.Name = "DatosClimáticos";
-            series36.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.BrightPastel;
-            this.chartClima.Series.Add(series36);
-            this.chartClima.Size = new System.Drawing.Size(328, 295);
+            series4.ChartArea = "MainArea";
+            series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Doughnut;
+            series4.Color = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            series4.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            series4.IsValueShownAsLabel = true;
+            series4.Label = "#VALY";
+            series4.Legend = "Legend1";
+            series4.LegendText = "#VALX";
+            series4.Name = "DatosClimáticos";
+            series4.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.BrightPastel;
+            this.chartClima.Series.Add(series4);
+            this.chartClima.Size = new System.Drawing.Size(328, 299);
             this.chartClima.TabIndex = 28;
             this.chartClima.Text = "chart1";
-            title36.Name = "Title1";
-            this.chartClima.Titles.Add(title36);
+            title4.Name = "Title1";
+            this.chartClima.Titles.Add(title4);
             // 
             // lbFechaInicio
             // 
             this.lbFechaInicio.AutoSize = true;
             this.lbFechaInicio.Font = new System.Drawing.Font("Microsoft JhengHei", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbFechaInicio.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.lbFechaInicio.Location = new System.Drawing.Point(369, 314);
+            this.lbFechaInicio.Location = new System.Drawing.Point(370, 470);
             this.lbFechaInicio.Name = "lbFechaInicio";
             this.lbFechaInicio.Size = new System.Drawing.Size(234, 37);
             this.lbFechaInicio.TabIndex = 30;
             this.lbFechaInicio.Text = "FECHA ACTUAL";
-            // 
-            // pictureBox4
-            // 
-            this.pictureBox4.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.pictureBox4.Image = global::PROYECTO_FINAL.Properties.Resources.riego_por_goteo;
-            this.pictureBox4.Location = new System.Drawing.Point(716, 310);
-            this.pictureBox4.Name = "pictureBox4";
-            this.pictureBox4.Size = new System.Drawing.Size(304, 295);
-            this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox4.TabIndex = 29;
-            this.pictureBox4.TabStop = false;
             // 
             // panel5
             // 
@@ -1262,16 +1246,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel5.Name = "panel5";
             this.panel5.Size = new System.Drawing.Size(209, 111);
             this.panel5.TabIndex = 1;
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Image = global::PROYECTO_FINAL.Properties.Resources.drenaje;
-            this.pictureBox1.Location = new System.Drawing.Point(73, 3);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(60, 61);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 31;
-            this.pictureBox1.TabStop = false;
             // 
             // lbEstadodeBomba
             // 
@@ -1308,16 +1282,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel3.TabIndex = 27;
             this.panel3.Paint += new System.Windows.Forms.PaintEventHandler(this.panel3_Paint);
             // 
-            // ImagenTemperatura
-            // 
-            this.ImagenTemperatura.Image = global::PROYECTO_FINAL.Properties.Resources.temperatura_alta;
-            this.ImagenTemperatura.Location = new System.Drawing.Point(98, 7);
-            this.ImagenTemperatura.Name = "ImagenTemperatura";
-            this.ImagenTemperatura.Size = new System.Drawing.Size(74, 76);
-            this.ImagenTemperatura.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.ImagenTemperatura.TabIndex = 23;
-            this.ImagenTemperatura.TabStop = false;
-            // 
             // label13
             // 
             this.label13.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1353,16 +1317,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel4.Size = new System.Drawing.Size(245, 111);
             this.panel4.TabIndex = 0;
             // 
-            // pictureBox2
-            // 
-            this.pictureBox2.Image = global::PROYECTO_FINAL.Properties.Resources.senal_satelital;
-            this.pictureBox2.Location = new System.Drawing.Point(78, 3);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(69, 71);
-            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox2.TabIndex = 25;
-            this.pictureBox2.TabStop = false;
-            // 
             // lbConec
             // 
             this.lbConec.Font = new System.Drawing.Font("Segoe UI Black", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1397,16 +1351,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel6.Name = "panel6";
             this.panel6.Size = new System.Drawing.Size(203, 113);
             this.panel6.TabIndex = 1;
-            // 
-            // pictureBox3
-            // 
-            this.pictureBox3.Image = global::PROYECTO_FINAL.Properties.Resources.regando_plantas;
-            this.pictureBox3.Location = new System.Drawing.Point(71, 0);
-            this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(57, 61);
-            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox3.TabIndex = 33;
-            this.pictureBox3.TabStop = false;
             // 
             // lbUltimoRegado
             // 
@@ -1444,16 +1388,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.PanelHumedad.Size = new System.Drawing.Size(274, 135);
             this.PanelHumedad.TabIndex = 24;
             // 
-            // I
-            // 
-            this.I.Image = global::PROYECTO_FINAL.Properties.Resources.humedad;
-            this.I.Location = new System.Drawing.Point(97, 10);
-            this.I.Name = "I";
-            this.I.Size = new System.Drawing.Size(58, 55);
-            this.I.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.I.TabIndex = 21;
-            this.I.TabStop = false;
-            // 
             // label10
             // 
             this.label10.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1489,16 +1423,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.PanelPronostico.Size = new System.Drawing.Size(275, 161);
             this.PanelPronostico.TabIndex = 24;
             // 
-            // ImagenPronostico
-            // 
-            this.ImagenPronostico.Image = global::PROYECTO_FINAL.Properties.Resources.pronostico_del_tiempo;
-            this.ImagenPronostico.Location = new System.Drawing.Point(104, 7);
-            this.ImagenPronostico.Name = "ImagenPronostico";
-            this.ImagenPronostico.Size = new System.Drawing.Size(67, 69);
-            this.ImagenPronostico.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.ImagenPronostico.TabIndex = 0;
-            this.ImagenPronostico.TabStop = false;
-            // 
             // label11
             // 
             this.label11.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1533,16 +1457,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.PanelViento.Padding = new System.Windows.Forms.Padding(4);
             this.PanelViento.Size = new System.Drawing.Size(274, 135);
             this.PanelViento.TabIndex = 25;
-            // 
-            // ImagenViento
-            // 
-            this.ImagenViento.Image = global::PROYECTO_FINAL.Properties.Resources.norte;
-            this.ImagenViento.Location = new System.Drawing.Point(113, 7);
-            this.ImagenViento.Name = "ImagenViento";
-            this.ImagenViento.Size = new System.Drawing.Size(67, 61);
-            this.ImagenViento.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.ImagenViento.TabIndex = 23;
-            this.ImagenViento.TabStop = false;
             // 
             // label12
             // 
@@ -1614,38 +1528,284 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.tabControl.Size = new System.Drawing.Size(1027, 633);
             this.tabControl.TabIndex = 14;
             // 
-            // label14
+            // calendarioRiego
             // 
-            this.label14.AutoSize = true;
-            this.label14.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))));
-            this.label14.Location = new System.Drawing.Point(173, 296);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(419, 26);
-            this.label14.TabIndex = 8;
-            this.label14.Text = "HISTORIAL DE ALERTAS DEL PROGRAMA";
+            this.calendarioRiego.Font = new System.Drawing.Font("Segoe UI Semibold", 11.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.calendarioRiego.Location = new System.Drawing.Point(725, 481);
+            this.calendarioRiego.Name = "calendarioRiego";
+            this.calendarioRiego.Size = new System.Drawing.Size(292, 28);
+            this.calendarioRiego.TabIndex = 7;
             // 
-            // grilla2
+            // label17
             // 
-            this.grilla2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.grilla2.Location = new System.Drawing.Point(23, 337);
-            this.grilla2.Name = "grilla2";
-            this.grilla2.Size = new System.Drawing.Size(712, 185);
-            this.grilla2.TabIndex = 7;
-            this.grilla2.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.grilla2_CellContentClick);
+            this.label17.AutoSize = true;
+            this.label17.Font = new System.Drawing.Font("Segoe UI", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label17.Location = new System.Drawing.Point(767, 453);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(193, 25);
+            this.label17.TabIndex = 6;
+            this.label17.Text = "BUSCAR POR FECHA";
             // 
-            // button3
+            // button11
             // 
-            this.button3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
-            this.button3.Font = new System.Drawing.Font("Segoe UI Black", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button3.ForeColor = System.Drawing.SystemColors.Control;
-            this.button3.Location = new System.Drawing.Point(271, 528);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(106, 29);
-            this.button3.TabIndex = 9;
-            this.button3.Text = "RECARGAR";
-            this.button3.UseVisualStyleBackColor = false;
-            this.button3.Click += new System.EventHandler(this.button3_Click_2);
+            this.button11.BackColor = System.Drawing.Color.Transparent;
+            this.button11.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(34)))), ((int)(((byte)(37)))));
+            this.button11.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button11.EnteredBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(165)))), ((int)(((byte)(37)))), ((int)(((byte)(37)))));
+            this.button11.EnteredColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(34)))), ((int)(((byte)(37)))));
+            this.button11.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button11.Image = null;
+            this.button11.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.button11.InactiveColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(34)))), ((int)(((byte)(37)))));
+            this.button11.Location = new System.Drawing.Point(809, 524);
+            this.button11.Name = "button11";
+            this.button11.PressedBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(165)))), ((int)(((byte)(37)))), ((int)(((byte)(37)))));
+            this.button11.PressedColor = System.Drawing.Color.FromArgb(((int)(((byte)(165)))), ((int)(((byte)(37)))), ((int)(((byte)(37)))));
+            this.button11.Size = new System.Drawing.Size(120, 40);
+            this.button11.TabIndex = 21;
+            this.button11.Text = "Buscar";
+            this.button11.TextAlignment = System.Drawing.StringAlignment.Center;
+            this.button11.Click += new System.EventHandler(this.button11_Click_1);
+            // 
+            // button10
+            // 
+            this.button10.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
+            this.button10.Font = new System.Drawing.Font("Segoe UI Black", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button10.ForeColor = System.Drawing.SystemColors.Control;
+            this.button10.Location = new System.Drawing.Point(809, 509);
+            this.button10.Name = "button10";
+            this.button10.Size = new System.Drawing.Size(103, 44);
+            this.button10.TabIndex = 12;
+            this.button10.Text = "BUSCAR..";
+            this.button10.UseVisualStyleBackColor = false;
+            this.button10.Click += new System.EventHandler(this.button10_Click_2);
+            // 
+            // calendarioAlertas
+            // 
+            this.calendarioAlertas.Font = new System.Drawing.Font("Segoe UI Semibold", 11.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.calendarioAlertas.Location = new System.Drawing.Point(723, 461);
+            this.calendarioAlertas.Name = "calendarioAlertas";
+            this.calendarioAlertas.Size = new System.Drawing.Size(292, 28);
+            this.calendarioAlertas.TabIndex = 11;
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Font = new System.Drawing.Font("Segoe UI", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label22.Location = new System.Drawing.Point(767, 433);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(169, 25);
+            this.label22.TabIndex = 10;
+            this.label22.Text = "BUSCAR ALERTAS";
+            // 
+            // button5
+            // 
+            this.button5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
+            this.button5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button5.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.button5.Image = global::PROYECTO_FINAL.Properties.Resources.home_6821152__1_;
+            this.button5.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.button5.Location = new System.Drawing.Point(-4, -5);
+            this.button5.Name = "button5";
+            this.button5.Padding = new System.Windows.Forms.Padding(21, 0, 0, 0);
+            this.button5.Size = new System.Drawing.Size(237, 56);
+            this.button5.TabIndex = 1;
+            this.button5.Text = "                INICIO";
+            this.button5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.button5.UseVisualStyleBackColor = false;
+            this.button5.Click += new System.EventHandler(this.button5_Click_1);
+            // 
+            // btnHistorial
+            // 
+            this.btnHistorial.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
+            this.btnHistorial.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnHistorial.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.btnHistorial.Image = global::PROYECTO_FINAL.Properties.Resources.grafico__1_1;
+            this.btnHistorial.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnHistorial.Location = new System.Drawing.Point(-4, -6);
+            this.btnHistorial.Name = "btnHistorial";
+            this.btnHistorial.Padding = new System.Windows.Forms.Padding(21, 0, 0, 0);
+            this.btnHistorial.Size = new System.Drawing.Size(237, 57);
+            this.btnHistorial.TabIndex = 0;
+            this.btnHistorial.Text = "                HISTORIAL";
+            this.btnHistorial.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnHistorial.UseVisualStyleBackColor = false;
+            this.btnHistorial.Click += new System.EventHandler(this.btnHistorial_Click_1);
+            // 
+            // button7
+            // 
+            this.button7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
+            this.button7.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button7.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.button7.Image = global::PROYECTO_FINAL.Properties.Resources.watering_can_179154;
+            this.button7.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.button7.Location = new System.Drawing.Point(-4, -8);
+            this.button7.Name = "button7";
+            this.button7.Padding = new System.Windows.Forms.Padding(21, 0, 0, 0);
+            this.button7.Size = new System.Drawing.Size(237, 62);
+            this.button7.TabIndex = 0;
+            this.button7.Text = "                RIEGO MANUAL";
+            this.button7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.button7.UseVisualStyleBackColor = false;
+            this.button7.Click += new System.EventHandler(this.button7_Click_1);
+            // 
+            // button6
+            // 
+            this.button6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
+            this.button6.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button6.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.button6.Image = global::PROYECTO_FINAL.Properties.Resources.lily_7148928;
+            this.button6.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.button6.Location = new System.Drawing.Point(-4, -4);
+            this.button6.Name = "button6";
+            this.button6.Padding = new System.Windows.Forms.Padding(21, 0, 0, 0);
+            this.button6.Size = new System.Drawing.Size(237, 58);
+            this.button6.TabIndex = 0;
+            this.button6.Text = "                MIS PLANTAS";
+            this.button6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.button6.UseVisualStyleBackColor = false;
+            this.button6.Click += new System.EventHandler(this.button6_Click_1);
+            // 
+            // button4
+            // 
+            this.button4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(50)))));
+            this.button4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button4.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.button4.Image = global::PROYECTO_FINAL.Properties.Resources.user_11043331;
+            this.button4.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.button4.Location = new System.Drawing.Point(-4, -4);
+            this.button4.Name = "button4";
+            this.button4.Padding = new System.Windows.Forms.Padding(21, 0, 0, 0);
+            this.button4.Size = new System.Drawing.Size(237, 55);
+            this.button4.TabIndex = 0;
+            this.button4.Text = "                USUARIO";
+            this.button4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.button4.UseVisualStyleBackColor = false;
+            this.button4.Click += new System.EventHandler(this.button4_Click_1);
+            // 
+            // btnHam
+            // 
+            this.btnHam.Image = global::PROYECTO_FINAL.Properties.Resources.menu;
+            this.btnHam.InitialImage = ((System.Drawing.Image)(resources.GetObject("btnHam.InitialImage")));
+            this.btnHam.Location = new System.Drawing.Point(11, 7);
+            this.btnHam.Name = "btnHam";
+            this.btnHam.Size = new System.Drawing.Size(33, 29);
+            this.btnHam.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.btnHam.TabIndex = 0;
+            this.btnHam.TabStop = false;
+            this.btnHam.Click += new System.EventHandler(this.btnHam_Click);
+            // 
+            // pictureBox5
+            // 
+            this.pictureBox5.Image = global::PROYECTO_FINAL.Properties.Resources.agriculture_15785894__1_;
+            this.pictureBox5.Location = new System.Drawing.Point(65, 0);
+            this.pictureBox5.Name = "pictureBox5";
+            this.pictureBox5.Size = new System.Drawing.Size(108, 98);
+            this.pictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox5.TabIndex = 25;
+            this.pictureBox5.TabStop = false;
+            // 
+            // pictureBox4
+            // 
+            this.pictureBox4.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.pictureBox4.Image = global::PROYECTO_FINAL.Properties.Resources.riego_por_goteo;
+            this.pictureBox4.Location = new System.Drawing.Point(716, 310);
+            this.pictureBox4.Name = "pictureBox4";
+            this.pictureBox4.Size = new System.Drawing.Size(304, 295);
+            this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox4.TabIndex = 29;
+            this.pictureBox4.TabStop = false;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = global::PROYECTO_FINAL.Properties.Resources.drenaje;
+            this.pictureBox1.Location = new System.Drawing.Point(73, 3);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(60, 61);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 31;
+            this.pictureBox1.TabStop = false;
+            // 
+            // ImagenTemperatura
+            // 
+            this.ImagenTemperatura.Image = global::PROYECTO_FINAL.Properties.Resources.temperatura_alta;
+            this.ImagenTemperatura.Location = new System.Drawing.Point(98, 7);
+            this.ImagenTemperatura.Name = "ImagenTemperatura";
+            this.ImagenTemperatura.Size = new System.Drawing.Size(74, 76);
+            this.ImagenTemperatura.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.ImagenTemperatura.TabIndex = 23;
+            this.ImagenTemperatura.TabStop = false;
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Image = global::PROYECTO_FINAL.Properties.Resources.senal_satelital;
+            this.pictureBox2.Location = new System.Drawing.Point(78, 3);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(69, 71);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox2.TabIndex = 25;
+            this.pictureBox2.TabStop = false;
+            // 
+            // pictureBox3
+            // 
+            this.pictureBox3.Image = global::PROYECTO_FINAL.Properties.Resources.regando_plantas;
+            this.pictureBox3.Location = new System.Drawing.Point(71, 0);
+            this.pictureBox3.Name = "pictureBox3";
+            this.pictureBox3.Size = new System.Drawing.Size(57, 61);
+            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox3.TabIndex = 33;
+            this.pictureBox3.TabStop = false;
+            // 
+            // I
+            // 
+            this.I.Image = global::PROYECTO_FINAL.Properties.Resources.humedad;
+            this.I.Location = new System.Drawing.Point(97, 10);
+            this.I.Name = "I";
+            this.I.Size = new System.Drawing.Size(58, 55);
+            this.I.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.I.TabIndex = 21;
+            this.I.TabStop = false;
+            // 
+            // ImagenPronostico
+            // 
+            this.ImagenPronostico.Image = global::PROYECTO_FINAL.Properties.Resources.pronostico_del_tiempo;
+            this.ImagenPronostico.Location = new System.Drawing.Point(104, 7);
+            this.ImagenPronostico.Name = "ImagenPronostico";
+            this.ImagenPronostico.Size = new System.Drawing.Size(67, 69);
+            this.ImagenPronostico.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.ImagenPronostico.TabIndex = 0;
+            this.ImagenPronostico.TabStop = false;
+            // 
+            // ImagenViento
+            // 
+            this.ImagenViento.Image = global::PROYECTO_FINAL.Properties.Resources.norte;
+            this.ImagenViento.Location = new System.Drawing.Point(113, 7);
+            this.ImagenViento.Name = "ImagenViento";
+            this.ImagenViento.Size = new System.Drawing.Size(67, 61);
+            this.ImagenViento.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.ImagenViento.TabIndex = 23;
+            this.ImagenViento.TabStop = false;
+            // 
+            // pbPlanta
+            // 
+            this.pbPlanta.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pbPlanta.Location = new System.Drawing.Point(581, 11);
+            this.pbPlanta.Name = "pbPlanta";
+            this.pbPlanta.Size = new System.Drawing.Size(429, 409);
+            this.pbPlanta.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pbPlanta.TabIndex = 0;
+            this.pbPlanta.TabStop = false;
+            // 
+            // pbImagenUsuario
+            // 
+            this.pbImagenUsuario.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.pbImagenUsuario.Image = global::PROYECTO_FINAL.Properties.Resources.admin_14471192;
+            this.pbImagenUsuario.Location = new System.Drawing.Point(23, 14);
+            this.pbImagenUsuario.Name = "pbImagenUsuario";
+            this.pbImagenUsuario.Size = new System.Drawing.Size(315, 307);
+            this.pbImagenUsuario.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pbImagenUsuario.TabIndex = 0;
+            this.pbImagenUsuario.TabStop = false;
             // 
             // MENUPRINCIPAL
             // 
@@ -1662,7 +1822,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.Load += new System.EventHandler(this.MENUPRINCIPAL_Load_1);
             this.Resize += new System.EventHandler(this.MENUPRINCIPAL_Resize);
             this.panel7.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.btnHam)).EndInit();
             this.flowLayoutPanel1.ResumeLayout(false);
             this.panel10.ResumeLayout(false);
             this.panel9.ResumeLayout(false);
@@ -1671,40 +1830,45 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel8.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pbImagenUsuario)).EndInit();
             this.tabPage4.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartCultivo)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbPlanta)).EndInit();
             this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.grillaClima)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartTemperatura)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartRiego)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.grilla2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.grilla)).EndInit();
             this.PanelPrincipal.ResumeLayout(false);
             this.PanelPrincipal.PerformLayout();
+            this.panel1.ResumeLayout(false);
             this.panel12.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.chartClima)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
             this.panel5.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.panel3.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.ImagenTemperatura)).EndInit();
             this.panel4.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.panel6.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             this.PanelHumedad.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.I)).EndInit();
             this.PanelPronostico.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.ImagenPronostico)).EndInit();
             this.PanelViento.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.ImagenViento)).EndInit();
             this.PanelTemperatura.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.grilla2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.btnHam)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ImagenTemperatura)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.I)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ImagenPronostico)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ImagenViento)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbPlanta)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbImagenUsuario)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1817,5 +1981,17 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         private Label label14;
         private DataGridView grilla2;
         private Button button3;
+        private Panel panel1;
+        private PictureBox pictureBox5;
+        private Label lblHumedad;
+        private Label label26;
+        private DataGridView grillaClima;
+        private Button button9;
+        private DateTimePicker calendarioRiego;
+        private Label label17;
+        private ReaLTaiizor.Controls.Button button11;
+        private Button button10;
+        private DateTimePicker calendarioAlertas;
+        private Label label22;
     }
 }

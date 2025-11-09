@@ -1,7 +1,7 @@
 ﻿using BLL;
+using Entity;
 using ENTITY;
 using Microsoft.VisualBasic;
-using PROYECTO_FINAL;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -23,11 +23,12 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         ServiciosUsuario serviciosUsuario;
         ServicioGraficas servicioGraficas;
         ServiciosAlertas serviciosAlertas;
-        private float humedad_actual, temperatura_actual;
+        ServicioClima servicioClima;
+        private ServicioPuerto puerto;
+        private float humedad_actual, temperatura_actual, viento_actual;
         private bool puedeRegar = true, Expandir = false;
         private int IdDelUsuario, contadorTiempo;
         private Size originalFormSize;
-        private Dictionary<Control, Rectangle> originalControlBounds = new Dictionary<Control, Rectangle>();
 
         public MENUPRINCIPAL()
         {
@@ -36,16 +37,37 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             serviciosUsuario = new ServiciosUsuario();
             servicioGraficas = new ServicioGraficas();
             serviciosAlertas = new ServiciosAlertas();
+            servicioClima = new ServicioClima();
             InitializeComponent();
             ObtenerDatosClimaAsync();
             this.StartPosition = FormStartPosition.CenterScreen;
             originalFormSize = this.Size;
-            foreach (Control c in this.Controls)
-            {
-                originalControlBounds[c] = new Rectangle(c.Location, c.Size);
-            }
+
             cargarPlantas();
+            puerto = new ServicioPuerto("COM3", 9600);
+            puerto.DatosRecibidos += Puerto_DatosRecibidos;
         }
+        private void Puerto_DatosRecibidos(string mensaje)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke((Action)(() =>
+                {
+                    if (mensaje.StartsWith("Humedad:"))
+                        lblHumedad.Text = mensaje + "%";
+                    else
+                        lbEstadodeBomba.Text = mensaje;
+                }));
+            }
+            else
+            {
+                if (mensaje.StartsWith("Humedad:"))
+                    lblHumedad.Text = mensaje + "%";
+                else
+                    lbEstadodeBomba.Text = mensaje;
+            }
+        }
+
         private int NuevoId()
         {
             var todas = serviciosAlertas.MostrarTodos();
@@ -75,13 +97,17 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
                     temperatura_actual = (float)weatherInfo.main.temp;
                     humedad_actual = (float)weatherInfo.main.humidity;
+                    viento_actual = (float)weatherInfo.wind.speed; 
                     ActualizarGraficoClima((float)weatherInfo.main.temp, (float)weatherInfo.main.humidity, (float)weatherInfo.wind.speed);
 
 
-                    Main datos = new Main();
-                    datos.temp = weatherInfo.main.temp;
-                    datos.humidity = weatherInfo.main.humidity;
-                    servicioGraficas.Guardar(datos);
+                    RegistroClimatico clima = new RegistroClimatico();
+                    clima.Humedad_Ambiente = (float)Math.Round(humedad_actual, 2);
+                    clima.Humedad_Suelo = (float)Math.Round(humedad_actual, 2);
+                    clima.Temperatura_Ambiente = (float)Math.Round(temperatura_actual, 2);
+                    clima.Viento = (float)Math.Round(viento_actual, 2);
+
+                    var mensaje1 = servicioClima.Guardar(clima);
                     if (weatherInfo.main.temp > 35)
                     {
                         Alertas alerta = new Alertas
@@ -203,32 +229,26 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         {
             try
             {
-                // Limpiar gráfico anterior
+
                 chartCultivo.Series.Clear();
                 chartCultivo.Titles.Clear();
 
-                // Crear serie de datos
                 Series serie = new Series("NivelesÓptimos");
-                serie.ChartType = SeriesChartType.Doughnut; // Puedes usar Bar, Pie, etc.
+                serie.ChartType = SeriesChartType.Doughnut;
                 serie.IsValueShownAsLabel = true;
 
-                // Agregar los puntos
                 serie.Points.AddXY("Humedad óptima (%)", Math.Round(nivelHumedad, 0));
                 serie.Points.AddXY("Temperatura óptima (°C)", Math.Round(nivelTemperatura, 0));
                 serie.Points.AddXY("Luz óptima (%)", Math.Round(nivelLuz, 0));
 
-                // Personalizar colores (opcional)
-                serie.Points[0].Color = Color.DeepSkyBlue;   // Humedad
-                serie.Points[1].Color = Color.OrangeRed;     // Temperatura
-                serie.Points[2].Color = Color.Gold;          // Luz
+                serie.Points[0].Color = Color.DeepSkyBlue;
+                serie.Points[1].Color = Color.OrangeRed;
+                serie.Points[2].Color = Color.Gold;
 
-                // Título del gráfico
                 chartCultivo.Titles.Add("Niveles Óptimos del Cultivo");
 
-                // Agregar serie al gráfico
                 chartCultivo.Series.Add(serie);
 
-                // Opcional: quitar fondo gris por defecto
                 chartCultivo.BackColor = Color.Transparent;
                 chartCultivo.ChartAreas[0].BackColor = Color.Transparent;
             }
@@ -313,21 +333,29 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         }
         private void timerGraficaReal()
         {
-            var listaDatos = servicioGraficas.MostrarTodos();
+            var listaDatos = servicioClima.MostrarTodos()?.Lista;
 
-            // 🔹 Limpia las series antes de agregar nuevos datos
+            if (listaDatos == null || listaDatos.Count == 0)
+                return;
+
+            // Tomar solo los últimos 10 registros
+            var ultimosDatos = listaDatos.Count > 10
+                ? listaDatos.Skip(listaDatos.Count - 10).ToList()
+                : listaDatos;
+
             chartTemperatura.Series["TEMPERATURA DEL AMBIENTE"].Points.Clear();
             chartRiego.Series["HUMEDAD DEL SUELO"].Points.Clear();
 
             int contador = 0;
 
-            foreach (var item in listaDatos)
+            foreach (var item in ultimosDatos)
             {
-                contador = contador + 10;
-                chartTemperatura.Series["TEMPERATURA DEL AMBIENTE"].Points.AddXY(contador, item.temp);
-                chartRiego.Series["HUMEDAD DEL SUELO"].Points.AddXY(contador, item.humidity);
+                contador += 10;
+                chartTemperatura.Series["TEMPERATURA DEL AMBIENTE"].Points.AddXY(contador, item.Temperatura_Ambiente);
+                chartRiego.Series["HUMEDAD DEL SUELO"].Points.AddXY(contador, item.Humedad_Suelo);
             }
         }
+
         private void GuardarCambios()
         {
             DialogResult resultado = MessageBox.Show($"¿Seguro que quiere hacer estos cambios?",
@@ -513,6 +541,42 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                 MessageBox.Show("No se encontraron registros para esa fecha.", "Sin resultados", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
+        private void BuscarHistorialGrillaAlertas()
+        {
+            DateTime fechaSeleccionada = calendarioAlertas.Value.Date;
+
+            var lista = serviciosAlertas.MostrarTodos().Lista;
+
+            var resultados = lista.Where(x => x.FechaHora.Date == fechaSeleccionada).ToList();
+
+            if (resultados.Any())
+            {
+                grilla2.DataSource = null; // limpiar primero
+                grilla2.DataSource = resultados;
+            }
+            else
+            {
+                MessageBox.Show("No se encontraron registros para esa fecha.", "Sin resultados", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+        private void BuscarPorFechaEnGrillaClima()
+        {
+            DateTime fechaSeleccionada = calendarioRiego.Value.Date;
+
+            var lista = servicioClima.MostrarTodos().Lista;
+
+            var resultados = lista.Where(x => x.Fecha.Date == fechaSeleccionada).ToList();
+
+            if (resultados.Any())
+            {
+                grillaClima.DataSource = null; // limpiar primero
+                grillaClima.DataSource = resultados;
+            }
+            else
+            {
+                MessageBox.Show("No se encontraron registros para esa fecha.", "Sin resultados", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
 
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -654,6 +718,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             grilla2.CellValueChanged += grilla2_CellValueChanged;
             grilla2.CurrentCellDirtyStateChanged += grilla2_CurrentCellDirtyStateChanged;
 
+
         }
 
         private void btnHacerCambios_Click(object sender, EventArgs e)
@@ -687,19 +752,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
         private void MENUPRINCIPAL_Resize(object sender, EventArgs e)
         {
-            float xRatio = (float)this.Width / originalFormSize.Width;
-            float yRatio = (float)this.Height / originalFormSize.Height;
-
-            foreach (Control c in this.Controls)
-            {
-                Rectangle r = originalControlBounds[c];
-                int newX = (int)(r.X * xRatio);
-                int newY = (int)(r.Y * yRatio);
-                int newWidth = (int)(r.Width * xRatio);
-                int newHeight = (int)(r.Height * yRatio);
-
-                c.SetBounds(newX, newY, newWidth, newHeight);
-            }
         }
 
         private void label5_Click(object sender, EventArgs e)
@@ -854,6 +906,46 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             }
         }
 
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            var hacer = servicioClima.MostrarTodos().Lista;
+            grillaClima.Columns["Humedad_Ambiente"].DefaultCellStyle.Format = "N2' %'";
+            grillaClima.Columns["Humedad_Suelo"].DefaultCellStyle.Format = "N2' %'";
+            grillaClima.Columns["Temperatura_Ambiente"].DefaultCellStyle.Format = "N2' C°'";
+
+        }
+
+        private void lblHumedad_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button11_Click_1(object sender, EventArgs e)
+        {
+            BuscarPorFechaEnGrillaClima();
+        }
+
+        private void button10_Click_2(object sender, EventArgs e)
+        {
+            BuscarHistorialGrillaAlertas();
+        }
+
+        private void button9_Click_1(object sender, EventArgs e)
+        {
+            grillaClima.DataSource = null;
+            var lista = servicioClima.MostrarTodos().Lista.Select(c => new
+            {
+                c.Fecha,
+                Humedad_Ambiente = $"{c.Humedad_Ambiente:F2}%",
+                Humedad_Suelo = $"{c.Humedad_Suelo:F2}%",
+                Temperatura_Ambiente = $"{c.Temperatura_Ambiente:F2} °C",
+                Viento = $"{c.Viento:F2} m/s"
+        }).ToList();
+            grillaClima.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+
+            grillaClima.DataSource = lista;
+
+        }
 
         private void timerGraficas_Tick(object sender, EventArgs e)
         {

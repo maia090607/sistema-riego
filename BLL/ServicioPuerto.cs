@@ -15,11 +15,11 @@ namespace BLL
                 _serialPort = new SerialPort(puerto, baudios);
                 _serialPort.DataReceived += SerialDataReceived;
                 _serialPort.Open();
-                Console.WriteLine($"✅ Puerto {puerto} abierto correctamente.");
+                Console.WriteLine($"Puerto {puerto} abierto correctamente.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error al abrir el puerto: {ex.Message}");
+                Console.WriteLine($"Error al abrir el puerto: {ex.Message}");
             }
         }
 
@@ -28,7 +28,17 @@ namespace BLL
             try
             {
                 string data = _serialPort.ReadLine().Trim();
-                DatosRecibidos?.Invoke(data);
+
+                if (data.StartsWith("Humedad del suelo:"))
+                {
+                    string valorStr = data.Split(':')[1].Trim();
+                    if (int.TryParse(valorStr, out int humedad))
+                        DatosRecibidos?.Invoke($"Humedad:{humedad}");
+                }
+                else if (data.Contains("Bomba"))
+                {
+                    DatosRecibidos?.Invoke(data);
+                }
             }
             catch (Exception ex)
             {
@@ -36,12 +46,18 @@ namespace BLL
             }
         }
 
+        public void EnviarComando(string comando)
+        {
+            if (_serialPort != null && _serialPort.IsOpen)
+                _serialPort.WriteLine(comando);
+        }
+
         public void CerrarPuerto()
         {
             if (_serialPort != null && _serialPort.IsOpen)
             {
                 _serialPort.Close();
-                Console.WriteLine("🔒 Puerto cerrado.");
+                Console.WriteLine("Puerto cerrado.");
             }
         }
     }
