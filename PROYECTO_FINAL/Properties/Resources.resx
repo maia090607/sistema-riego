@@ -118,20 +118,11 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="Monito" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Monito.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="senal-satelital" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\senal-satelital.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="drenaje" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\drenaje.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="temperatura-alta" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\temperatura-alta.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Imagen-iniciosession" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Imagen-iniciosession.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="admin_14471192" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\admin_14471192.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="user_1104333" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\user_1104333.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="home_6821152 (1)" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\home_6821152 (1).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -139,11 +130,62 @@
   <data name="pronostico-del-tiempo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\pronostico-del-tiempo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="user_1104333" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\user_1104333.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="grafico (1)1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\grafico (1)1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="grafico (1)" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\grafico (1).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="temperatura-alta" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\temperatura-alta.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="menu" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\menu.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Diseño sin título1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Diseño sin título.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="drenaje" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\drenaje.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="riego-por-goteo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\riego-por-goteo.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="grafico" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\grafico.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="norte" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\norte.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="agriculture_15785894 (1)" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\agriculture_15785894 (1).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Ojo_Cerrado" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Ojo_Cerrado.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="humedad" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\humedad.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Diseño sin título" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Diseño sin título.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Imagen-iniciosession" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Imagen-iniciosession.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="gear_14038827" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\gear_14038827.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="user_11043331" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\user_11043331.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Monito" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Monito.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="lily_7148928" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\lily_7148928.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="admin_14471192" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\admin_14471192.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="watering-can_179154" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\watering-can_179154.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -151,52 +193,13 @@
   <data name="regando-plantas" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\regando-plantas.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="user_11043331" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\user_11043331.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="gear_14038827" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\gear_14038827.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="grafico (1)1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\grafico (1)1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="agriculture_15785894 (1)" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\agriculture_15785894 (1).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Imagen-iniciosession1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Imagen-iniciosession.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="monkey_599687" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\monkey_599687.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="humedad" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\humedad.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="grafico" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\grafico.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="riego-por-goteo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\riego-por-goteo.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="lily_7148928" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\lily_7148928.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Diseño sin título1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Diseño sin título.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Diseño sin título" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Diseño sin título.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Imagen-iniciosession1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="Imagen-iniciosession2" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Imagen-iniciosession.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="senal-satelital" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\senal-satelital.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="menu" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\menu.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="grafico (1)" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\grafico (1).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Ojo_Cerrado" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Ojo_Cerrado.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

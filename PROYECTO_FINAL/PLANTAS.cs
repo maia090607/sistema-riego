@@ -135,26 +135,13 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         }
         private bool ValidarCampos()
         {
-            if (string.IsNullOrWhiteSpace(txtNombre.Text) ||
-                string.IsNullOrWhiteSpace(txtDescripcion.Text) ||
+            if (string.IsNullOrWhiteSpace(txtDescripcion.Text) ||
                 string.IsNullOrWhiteSpace(txtId.Text) ||
                 string.IsNullOrWhiteSpace(txtNivelHumedad.Text) ||
                 string.IsNullOrWhiteSpace(txtNivelTemperatura.Text) ||
                 string.IsNullOrWhiteSpace(txtNivelLuz.Text))
             {
                 MessageBox.Show("Por favor, complete todos los campos.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(txtId.Text) ||
-                !int.TryParse(txtId.Text, out int id) ||
-                id <= 0)
-            {
-                MessageBox.Show("El ID debe ser un número entero positivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            if (!int.TryParse(txtId.Text.Trim(), out _))
-            {
-                MessageBox.Show("El ID debe ser un número entero válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             if (int.TryParse(txtNombre.Text.Trim(), out _))
@@ -205,6 +192,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             if (dialogo.ShowDialog() == DialogResult.OK)
             {
                 rutaImagenSeleccionada = dialogo.FileName;
+                ImagenPlanta.ImageLocation = rutaImagenSeleccionada;
             }
             else
             {
@@ -230,6 +218,41 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        private void listPlantas_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnCerrarsession_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var listaPlantas = serviciosPlanta.ObtenerTodos().Lista;
+
+                listPlantas.Items.Clear();
+
+                if (listaPlantas == null || listaPlantas.Count == 0)
+                {
+                    listPlantas.Items.Add("No hay plantas registradas.");
+                    return;
+                }
+                foreach (var planta in listaPlantas)
+                {
+                    listPlantas.Items.Add($"ID: {planta.IdPlanta} - {planta.NombrePlanta}");
+
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al mostrar plantas: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnBuscar_Click(object sender, EventArgs e)
+        {
+            BuscarPlanta();
         }
     }
 }

@@ -193,6 +193,16 @@ namespace PROYECTO_FINAL.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Imagen_iniciosession2 {
+            get {
+                object obj = ResourceManager.GetObject("Imagen-iniciosession2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap lily_7148928 {
             get {
                 object obj = ResourceManager.GetObject("lily_7148928", resourceCulture);

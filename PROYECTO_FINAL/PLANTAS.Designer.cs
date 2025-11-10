@@ -42,7 +42,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.txtDescripcion = new System.Windows.Forms.TextBox();
             this.txtNombre = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.button3 = new System.Windows.Forms.Button();
             this.btnSubirImagen = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
@@ -50,15 +49,21 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.Identificación = new System.Windows.Forms.Label();
-            this.txtId = new System.Windows.Forms.TextBox();
             this.btnActualizar = new System.Windows.Forms.Button();
             this.btnEliminar = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.panel2 = new ReaLTaiizor.Controls.Panel();
             this.nightControlBox1 = new ReaLTaiizor.Controls.NightControlBox();
+            this.listPlantas = new System.Windows.Forms.ListBox();
+            this.btnPlantasMostrar = new ReaLTaiizor.Controls.Button();
+            this.txtId = new System.Windows.Forms.TextBox();
+            this.btnBuscar = new ReaLTaiizor.Controls.Button();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.ImagenPlanta = new System.Windows.Forms.PictureBox();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ImagenPlanta)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
@@ -66,7 +71,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.button1.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button1.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.button1.Location = new System.Drawing.Point(54, 309);
+            this.button1.Location = new System.Drawing.Point(26, 306);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(170, 34);
             this.button1.TabIndex = 27;
@@ -78,7 +83,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             this.txtNivelTemperatura.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtNivelTemperatura.ForeColor = System.Drawing.SystemColors.WindowFrame;
-            this.txtNivelTemperatura.Location = new System.Drawing.Point(250, 126);
+            this.txtNivelTemperatura.Location = new System.Drawing.Point(222, 180);
             this.txtNivelTemperatura.Name = "txtNivelTemperatura";
             this.txtNivelTemperatura.Size = new System.Drawing.Size(141, 22);
             this.txtNivelTemperatura.TabIndex = 25;
@@ -88,7 +93,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             this.txtNivelLuz.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtNivelLuz.ForeColor = System.Drawing.SystemColors.WindowFrame;
-            this.txtNivelLuz.Location = new System.Drawing.Point(73, 188);
+            this.txtNivelLuz.Location = new System.Drawing.Point(137, 242);
             this.txtNivelLuz.Name = "txtNivelLuz";
             this.txtNivelLuz.Size = new System.Drawing.Size(141, 22);
             this.txtNivelLuz.TabIndex = 24;
@@ -98,7 +103,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             this.txtNivelHumedad.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtNivelHumedad.ForeColor = System.Drawing.SystemColors.WindowFrame;
-            this.txtNivelHumedad.Location = new System.Drawing.Point(250, 188);
+            this.txtNivelHumedad.Location = new System.Drawing.Point(45, 179);
             this.txtNivelHumedad.Name = "txtNivelHumedad";
             this.txtNivelHumedad.Size = new System.Drawing.Size(141, 22);
             this.txtNivelHumedad.TabIndex = 23;
@@ -108,7 +113,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             this.txtDescripcion.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtDescripcion.ForeColor = System.Drawing.SystemColors.WindowFrame;
-            this.txtDescripcion.Location = new System.Drawing.Point(73, 126);
+            this.txtDescripcion.Location = new System.Drawing.Point(225, 108);
             this.txtDescripcion.Name = "txtDescripcion";
             this.txtDescripcion.Size = new System.Drawing.Size(141, 22);
             this.txtDescripcion.TabIndex = 22;
@@ -118,7 +123,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             this.txtNombre.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtNombre.ForeColor = System.Drawing.SystemColors.WindowFrame;
-            this.txtNombre.Location = new System.Drawing.Point(250, 59);
+            this.txtNombre.Location = new System.Drawing.Point(44, 107);
             this.txtNombre.Name = "txtNombre";
             this.txtNombre.Size = new System.Drawing.Size(141, 22);
             this.txtNombre.TabIndex = 21;
@@ -127,15 +132,15 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
-            this.panel1.Controls.Add(this.button3);
-            this.panel1.Controls.Add(this.btnSubirImagen);
+            this.panel1.Controls.Add(this.btnBuscar);
+            this.panel1.Controls.Add(this.btnPlantasMostrar);
+            this.panel1.Controls.Add(this.listPlantas);
             this.panel1.Controls.Add(this.label2);
             this.panel1.Controls.Add(this.label6);
             this.panel1.Controls.Add(this.label5);
             this.panel1.Controls.Add(this.label4);
             this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.label1);
-            this.panel1.Controls.Add(this.Identificación);
             this.panel1.Controls.Add(this.txtId);
             this.panel1.Controls.Add(this.btnActualizar);
             this.panel1.Controls.Add(this.btnEliminar);
@@ -147,29 +152,16 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel1.Controls.Add(this.txtNivelLuz);
             this.panel1.Location = new System.Drawing.Point(29, 79);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(474, 427);
+            this.panel1.Size = new System.Drawing.Size(689, 427);
             this.panel1.TabIndex = 28;
             this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
-            // 
-            // button3
-            // 
-            this.button3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.button3.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button3.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.button3.Location = new System.Drawing.Point(353, 216);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(101, 34);
-            this.button3.TabIndex = 40;
-            this.button3.Text = "BUSCAR";
-            this.button3.UseVisualStyleBackColor = false;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // btnSubirImagen
             // 
             this.btnSubirImagen.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.btnSubirImagen.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSubirImagen.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.btnSubirImagen.Location = new System.Drawing.Point(157, 225);
+            this.btnSubirImagen.Location = new System.Drawing.Point(778, 297);
             this.btnSubirImagen.Name = "btnSubirImagen";
             this.btnSubirImagen.Size = new System.Drawing.Size(143, 38);
             this.btnSubirImagen.TabIndex = 39;
@@ -182,7 +174,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label2.Location = new System.Drawing.Point(69, 5);
+            this.label2.Location = new System.Drawing.Point(56, 35);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(307, 23);
             this.label2.TabIndex = 38;
@@ -193,7 +185,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             this.label6.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label6.Location = new System.Drawing.Point(246, 167);
+            this.label6.Location = new System.Drawing.Point(41, 158);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(146, 21);
             this.label6.TabIndex = 37;
@@ -205,7 +197,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             this.label5.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label5.Location = new System.Drawing.Point(69, 167);
+            this.label5.Location = new System.Drawing.Point(161, 218);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(97, 21);
             this.label5.TabIndex = 36;
@@ -216,7 +208,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             this.label4.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label4.Location = new System.Drawing.Point(71, 104);
+            this.label4.Location = new System.Drawing.Point(223, 86);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(100, 21);
             this.label4.TabIndex = 35;
@@ -227,7 +219,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             this.label3.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label3.Location = new System.Drawing.Point(246, 104);
+            this.label3.Location = new System.Drawing.Point(218, 158);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(208, 21);
             this.label3.TabIndex = 34;
@@ -238,39 +230,18 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             this.label1.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label1.Location = new System.Drawing.Point(249, 38);
+            this.label1.Location = new System.Drawing.Point(43, 86);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(73, 21);
             this.label1.TabIndex = 32;
             this.label1.Text = "Nombre";
-            // 
-            // Identificación
-            // 
-            this.Identificación.AutoSize = true;
-            this.Identificación.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Identificación.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.Identificación.Location = new System.Drawing.Point(69, 38);
-            this.Identificación.Name = "Identificación";
-            this.Identificación.Size = new System.Drawing.Size(116, 21);
-            this.Identificación.TabIndex = 31;
-            this.Identificación.Text = "Identificación";
-            // 
-            // txtId
-            // 
-            this.txtId.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtId.ForeColor = System.Drawing.SystemColors.WindowFrame;
-            this.txtId.Location = new System.Drawing.Point(73, 59);
-            this.txtId.Name = "txtId";
-            this.txtId.Size = new System.Drawing.Size(141, 22);
-            this.txtId.TabIndex = 30;
-            this.txtId.Text = "Id";
             // 
             // btnActualizar
             // 
             this.btnActualizar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnActualizar.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnActualizar.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.btnActualizar.Location = new System.Drawing.Point(125, 349);
+            this.btnActualizar.Location = new System.Drawing.Point(97, 346);
             this.btnActualizar.Name = "btnActualizar";
             this.btnActualizar.Size = new System.Drawing.Size(226, 48);
             this.btnActualizar.TabIndex = 29;
@@ -283,7 +254,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.btnEliminar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.btnEliminar.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnEliminar.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.btnEliminar.Location = new System.Drawing.Point(239, 309);
+            this.btnEliminar.Location = new System.Drawing.Point(211, 306);
             this.btnEliminar.Name = "btnEliminar";
             this.btnEliminar.Size = new System.Drawing.Size(168, 34);
             this.btnEliminar.TabIndex = 28;
@@ -313,7 +284,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel2.Location = new System.Drawing.Point(0, 0);
             this.panel2.Name = "panel2";
             this.panel2.Padding = new System.Windows.Forms.Padding(5);
-            this.panel2.Size = new System.Drawing.Size(526, 41);
+            this.panel2.Size = new System.Drawing.Size(974, 41);
             this.panel2.SmoothingType = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             this.panel2.TabIndex = 32;
             this.panel2.Text = "panel2";
@@ -333,7 +304,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.nightControlBox1.EnableMaximizeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             this.nightControlBox1.EnableMinimizeButton = true;
             this.nightControlBox1.EnableMinimizeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
-            this.nightControlBox1.Location = new System.Drawing.Point(387, 2);
+            this.nightControlBox1.Location = new System.Drawing.Point(835, 0);
             this.nightControlBox1.MaximizeHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.nightControlBox1.MaximizeHoverForeColor = System.Drawing.Color.White;
             this.nightControlBox1.MinimizeHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
@@ -342,11 +313,99 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.nightControlBox1.Size = new System.Drawing.Size(139, 31);
             this.nightControlBox1.TabIndex = 0;
             // 
+            // listPlantas
+            // 
+            this.listPlantas.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.listPlantas.FormattingEnabled = true;
+            this.listPlantas.ItemHeight = 16;
+            this.listPlantas.Location = new System.Drawing.Point(455, 105);
+            this.listPlantas.Name = "listPlantas";
+            this.listPlantas.Size = new System.Drawing.Size(226, 212);
+            this.listPlantas.TabIndex = 41;
+            this.listPlantas.SelectedIndexChanged += new System.EventHandler(this.listPlantas_SelectedIndexChanged);
+            // 
+            // btnPlantasMostrar
+            // 
+            this.btnPlantasMostrar.BackColor = System.Drawing.Color.Transparent;
+            this.btnPlantasMostrar.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(34)))), ((int)(((byte)(37)))));
+            this.btnPlantasMostrar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnPlantasMostrar.EnteredBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(165)))), ((int)(((byte)(37)))), ((int)(((byte)(37)))));
+            this.btnPlantasMostrar.EnteredColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(34)))), ((int)(((byte)(37)))));
+            this.btnPlantasMostrar.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnPlantasMostrar.Image = null;
+            this.btnPlantasMostrar.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnPlantasMostrar.InactiveColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(34)))), ((int)(((byte)(37)))));
+            this.btnPlantasMostrar.Location = new System.Drawing.Point(512, 331);
+            this.btnPlantasMostrar.Name = "btnPlantasMostrar";
+            this.btnPlantasMostrar.PressedBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(165)))), ((int)(((byte)(37)))), ((int)(((byte)(37)))));
+            this.btnPlantasMostrar.PressedColor = System.Drawing.Color.FromArgb(((int)(((byte)(165)))), ((int)(((byte)(37)))), ((int)(((byte)(37)))));
+            this.btnPlantasMostrar.Size = new System.Drawing.Size(120, 40);
+            this.btnPlantasMostrar.TabIndex = 42;
+            this.btnPlantasMostrar.Text = "Mostrar Plantas";
+            this.btnPlantasMostrar.TextAlignment = System.Drawing.StringAlignment.Center;
+            this.btnPlantasMostrar.Click += new System.EventHandler(this.btnCerrarsession_Click);
+            // 
+            // txtId
+            // 
+            this.txtId.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtId.ForeColor = System.Drawing.SystemColors.WindowFrame;
+            this.txtId.Location = new System.Drawing.Point(431, 48);
+            this.txtId.Name = "txtId";
+            this.txtId.Size = new System.Drawing.Size(141, 22);
+            this.txtId.TabIndex = 30;
+            this.txtId.Text = "Id";
+            // 
+            // btnBuscar
+            // 
+            this.btnBuscar.BackColor = System.Drawing.Color.Transparent;
+            this.btnBuscar.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(34)))), ((int)(((byte)(37)))));
+            this.btnBuscar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnBuscar.EnteredBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(165)))), ((int)(((byte)(37)))), ((int)(((byte)(37)))));
+            this.btnBuscar.EnteredColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(34)))), ((int)(((byte)(37)))));
+            this.btnBuscar.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnBuscar.Image = null;
+            this.btnBuscar.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnBuscar.InactiveColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(34)))), ((int)(((byte)(37)))));
+            this.btnBuscar.Location = new System.Drawing.Point(591, 35);
+            this.btnBuscar.Name = "btnBuscar";
+            this.btnBuscar.PressedBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(165)))), ((int)(((byte)(37)))), ((int)(((byte)(37)))));
+            this.btnBuscar.PressedColor = System.Drawing.Color.FromArgb(((int)(((byte)(165)))), ((int)(((byte)(37)))), ((int)(((byte)(37)))));
+            this.btnBuscar.Size = new System.Drawing.Size(90, 35);
+            this.btnBuscar.TabIndex = 43;
+            this.btnBuscar.Text = "Buscar";
+            this.btnBuscar.TextAlignment = System.Drawing.StringAlignment.Center;
+            this.btnBuscar.Click += new System.EventHandler(this.btnBuscar_Click);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = global::PROYECTO_FINAL.Properties.Resources.Imagen_iniciosession2;
+            this.pictureBox1.Location = new System.Drawing.Point(734, 358);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(228, 148);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 40;
+            this.pictureBox1.TabStop = false;
+            // 
+            // ImagenPlanta
+            // 
+            this.ImagenPlanta.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.ImagenPlanta.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.ImagenPlanta.Location = new System.Drawing.Point(724, 79);
+            this.ImagenPlanta.Name = "ImagenPlanta";
+            this.ImagenPlanta.Size = new System.Drawing.Size(238, 212);
+            this.ImagenPlanta.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.ImagenPlanta.TabIndex = 33;
+            this.ImagenPlanta.TabStop = false;
+            // 
             // PLANTAS
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(526, 537);
+            this.BackColor = System.Drawing.Color.Beige;
+            this.ClientSize = new System.Drawing.Size(974, 537);
+            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.ImagenPlanta);
+            this.Controls.Add(this.btnSubirImagen);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.panel1);
@@ -358,6 +417,8 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ImagenPlanta)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -378,7 +439,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         }
 
         #endregion
-        private TextBox txtId;
         private Button button1;
         private TextBox txtNivelTemperatura;
         private TextBox txtNivelLuz;
@@ -393,12 +453,16 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         private Label label4;
         private Label label3;
         private Label label1;
-        private Label Identificación;
         private Label label2;
         private Button btnSubirImagen;
         private Button btnEliminar;
-        private Button button3;
         private ReaLTaiizor.Controls.Panel panel2;
         private ReaLTaiizor.Controls.NightControlBox nightControlBox1;
+        private PictureBox ImagenPlanta;
+        private ListBox listPlantas;
+        private ReaLTaiizor.Controls.Button btnPlantasMostrar;
+        private ReaLTaiizor.Controls.Button btnBuscar;
+        private TextBox txtId;
+        private PictureBox pictureBox1;
     }
 }

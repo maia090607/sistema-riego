@@ -82,6 +82,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             string apiKey = "91c59362a4519b067f3be52b6fe361f3";
             string ciudad = "Valledupar";
             string url = $"https://api.openweathermap.org/data/2.5/weather?q={ciudad}&appid={apiKey}&units=metric&lang=es";
+
             using (HttpClient client = new HttpClient())
             {
                 try
@@ -90,99 +91,94 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                     response.EnsureSuccessStatusCode();
                     string responseBody = await response.Content.ReadAsStringAsync();
                     var weatherInfo = JsonSerializer.Deserialize<ENTITY.WeatherInfo>(responseBody);
+
+                    // Mostrar en labels
                     lbTemperatura.Text = $"{weatherInfo.main.temp}°C";
                     lbHum.Text = $"{weatherInfo.main.humidity} %";
                     lbVie.Text = $"{weatherInfo.wind.speed} M/S";
                     lbDes.Text = $"{weatherInfo.weather[0].description.ToUpper()}";
 
+                    // Variables
                     temperatura_actual = (float)weatherInfo.main.temp;
                     humedad_actual = (float)weatherInfo.main.humidity;
-                    viento_actual = (float)weatherInfo.wind.speed; 
-                    ActualizarGraficoClima((float)weatherInfo.main.temp, (float)weatherInfo.main.humidity, (float)weatherInfo.wind.speed);
+                    viento_actual = (float)weatherInfo.wind.speed;
 
+                    ActualizarGraficoClima(temperatura_actual, humedad_actual, viento_actual);
 
-                    RegistroClimatico clima = new RegistroClimatico();
-                    clima.Humedad_Ambiente = (float)Math.Round(humedad_actual, 2);
-                    clima.Humedad_Suelo = (float)Math.Round(humedad_actual, 2);
-                    clima.Temperatura_Ambiente = (float)Math.Round(temperatura_actual, 2);
-                    clima.Viento = (float)Math.Round(viento_actual, 2);
+                    // 🔹 Verificar si ya existe un registro reciente similar (últimos 5 min)
+                    var registrosExistentes = servicioClima.MostrarTodos().Lista;
+                    var registroReciente = registrosExistentes
+                        .Where(r => (DateTime.Now - r.Fecha).TotalMinutes < 5)
+                        .OrderByDescending(r => r.Fecha)
+                        .FirstOrDefault();
 
-                    var mensaje1 = servicioClima.Guardar(clima);
-                    if (weatherInfo.main.temp > 35)
+                    if (registroReciente == null ||
+                        Math.Abs(registroReciente.Temperatura_Ambiente - temperatura_actual) > 0.5 ||
+                        Math.Abs(registroReciente.Humedad_Ambiente - humedad_actual) > 0.5 ||
+                        Math.Abs(registroReciente.Viento - viento_actual) > 0.2)
                     {
-                        Alertas alerta = new Alertas
+                        RegistroClimatico clima = new RegistroClimatico
                         {
-                            IdAlerta = NuevoId(),
-                            FechaHora = DateTime.Now,
-                            TipoAlerta = "Alta Temperatura",
-                            Descripcion = $"La temperatura actual es de {weatherInfo.main.temp}°C, lo cual supera el umbral seguro.",
-                            NivelCritico = "Alto",
-                            Estado = false
+                            Humedad_Ambiente = (float)Math.Round(humedad_actual, 2),
+                            Humedad_Suelo = (float)Math.Round(humedad_actual, 2),
+                            Temperatura_Ambiente = (float)Math.Round(temperatura_actual, 2),
+                            Viento = (float)Math.Round(viento_actual, 2),
+                            Fecha = DateTime.Now
                         };
-                        var mensaje = serviciosAlertas.Agregar(alerta);
+                        servicioClima.Guardar(clima);
                     }
-                    if (weatherInfo.main.humidity < 20)
+
+                    // 🔹 Obtener todas las alertas actuales
+                    var alertasExistentes = serviciosAlertas.MostrarTodos().Lista;
+
+                    // === VERIFICAR Y CREAR ALERTAS ===
+                    void CrearAlertaSiNoExiste(string tipo, string descripcion, string nivel)
                     {
-                        Alertas alerta = new Alertas
+                        bool existeActiva = alertasExistentes.Any(a =>
+                            a.TipoAlerta.Equals(tipo, StringComparison.OrdinalIgnoreCase) &&
+                            a.Estado == false); // solo si hay una alerta igual activa
+
+                        if (!existeActiva)
                         {
-                            IdAlerta = NuevoId(),
-                            FechaHora = DateTime.Now,
-                            TipoAlerta = "Baja Humedad",
-                            Descripcion = $"La humedad actual es de {weatherInfo.main.humidity}%, lo cual está por debajo del umbral seguro.",
-                            NivelCritico = "Medio",
-                            Estado = false
-                        };
-                        var mensaje = serviciosAlertas.Agregar(alerta);
-                    }
-                    if (weatherInfo.wind.speed > 10)
-                    {
-                        Alertas alerta = new Alertas
-                        {
-                            IdAlerta = NuevoId(),
-                            FechaHora = DateTime.Now,
-                            TipoAlerta = "Viento Fuerte",
-                            Descripcion = $"La velocidad del viento es de {weatherInfo.wind.speed} m/s, lo cual supera el umbral seguro.",
-                            NivelCritico = "Bajo",
-                            Estado = false
-                        };
-                        var mensaje = serviciosAlertas.Agregar(alerta);
-                    }
-                    if (weatherInfo.weather[0].description.ToLower().Contains("lluvia"))
-                    {
-                        Alertas alerta = new Alertas
-                        {
-                            IdAlerta = NuevoId(),
-                            FechaHora = DateTime.Now,
-                            TipoAlerta = "Lluvia",
-                            Descripcion = $"Se ha detectado lluvia en la zona, lo cual puede afectar el riego automático.",
-                            NivelCritico = "Bajo",
-                            Estado = false
-                        };
-                        var mensaje = serviciosAlertas.Agregar(alerta);
-                    }
-                    if (weatherInfo.weather[0].description.ToLower().Contains("tormenta"))
-                    {
-                        Alertas alerta = new Alertas
-                        {
-                            IdAlerta = NuevoId(),
-                            FechaHora = DateTime.Now,
-                            TipoAlerta = "Tormenta",
-                            Descripcion = $"Se ha detectado una tormenta en la zona, lo cual puede afectar el riego automático.",
-                            NivelCritico = "Alto",
-                            Estado = false
-                        };
-                        var mensaje = serviciosAlertas.Agregar(alerta);
-                    }
-                    var alertaClima = serviciosAlertas.MostrarTodos();
-                    foreach (var alerta in alertaClima.Lista)
-                    {
-                        if (alerta.Estado == false)
-                        {
-                            // Aquí podrías implementar una notificación más sofisticada si lo deseas
-                            MessageBox.Show($"Alerta: {alerta.TipoAlerta}\nDescripción: {alerta.Descripcion}\nNivel Crítico: {alerta.NivelCritico}", "Alerta Climática", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            Alertas alerta = new Alertas
+                            {
+                                IdAlerta = NuevoId(),
+                                FechaHora = DateTime.Now,
+                                TipoAlerta = tipo,
+                                Descripcion = descripcion,
+                                NivelCritico = nivel,
+                                Estado = false
+                            };
+                            serviciosAlertas.Agregar(alerta);
+                            MessageBox.Show($"Alerta: {tipo}\nDescripción: {descripcion}\nNivel Crítico: {nivel}",
+                                            "Alerta Climática", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }
                     }
 
+                    if (weatherInfo.main.temp > 35)
+                        CrearAlertaSiNoExiste("Alta Temperatura",
+                            $"La temperatura actual es de {weatherInfo.main.temp}°C, lo cual supera el umbral seguro.",
+                            "Alto");
+
+                    if (weatherInfo.main.humidity < 20)
+                        CrearAlertaSiNoExiste("Baja Humedad",
+                            $"La humedad actual es de {weatherInfo.main.humidity}%, lo cual está por debajo del umbral seguro.",
+                            "Medio");
+
+                    if (weatherInfo.wind.speed > 10)
+                        CrearAlertaSiNoExiste("Viento Fuerte",
+                            $"La velocidad del viento es de {weatherInfo.wind.speed} m/s, lo cual supera el umbral seguro.",
+                            "Bajo");
+
+                    if (weatherInfo.weather[0].description.Contains("lluvia"))
+                        CrearAlertaSiNoExiste("Lluvia",
+                            "Se ha detectado lluvia en la zona, lo cual puede afectar el riego automático.",
+                            "Bajo");
+
+                    if (weatherInfo.weather[0].description.Contains("tormenta"))
+                        CrearAlertaSiNoExiste("Tormenta",
+                            "Se ha detectado una tormenta en la zona, lo cual puede afectar el riego automático.",
+                            "Alto");
                 }
                 catch (Exception e)
                 {
@@ -196,11 +192,11 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                         NivelCritico = "Medio",
                         Estado = false
                     };
-                    var mensaje = serviciosAlertas.Agregar(alerta);
-                    MessageBox.Show(mensaje.Mensaje);
+                    serviciosAlertas.Agregar(alerta);
                 }
             }
-        } 
+        }
+
 
         private void ActualizarGraficoClima(float temp, float hum, float vie)
         {
@@ -324,13 +320,13 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             btnEliminarUsuario.Enabled = true;
             btnSubirFoto.Enabled = true;
             btnSubirFoto.Enabled = true;
-            txtIdUsuario.Enabled = true;
             txtNombreUsuario.Enabled = true;
             txtNombreUsuariodelUsuario.Enabled = true;
             txtEmailUsu.Enabled = true;
             cbRol.Enabled = true;
 
         }
+
         private void timerGraficaReal()
         {
             var listaDatos = servicioClima.MostrarTodos().Lista;
@@ -338,9 +334,18 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             if (listaDatos == null || listaDatos.Count == 0)
                 return;
 
-            var ultimosDatos = listaDatos.Count > 10
-                ? listaDatos.Skip(listaDatos.Count - 10).ToList()
-                : listaDatos;
+            // 🔹 Ordenar los datos por fecha
+            var datosOrdenados = listaDatos.OrderBy(d => d.Fecha).ToList();
+
+            // 🔹 Tomar los datos de la última hora
+            DateTime horaLimite = DateTime.Now.AddHours(-1);
+            var ultimosDatos = datosOrdenados
+                .Where(d => d.Fecha >= horaLimite)
+                .ToList();
+
+            // 🔹 Si no hay suficientes, usar los últimos 6 (1 hora / cada 10 min = 6 puntos)
+            if (ultimosDatos.Count < 6)
+                ultimosDatos = datosOrdenados.Skip(Math.Max(0, datosOrdenados.Count - 6)).ToList();
 
             var serieTemp = chartTemperatura.Series["TEMPERATURA DEL AMBIENTE"];
             var serieHum = chartRiego.Series["HUMEDAD DEL SUELO"];
@@ -348,17 +353,45 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             serieTemp.Points.Clear();
             serieHum.Points.Clear();
 
-            int contador = 1;
+            // 🔹 Crear los puntos cada 10 minutos dentro de la última hora
+            DateTime inicio = DateTime.Now.AddHours(-1);
+            DateTime actual = inicio;
 
-            foreach (var item in ultimosDatos)
+            for (int i = 0; i <= 6; i++)
             {
-                serieTemp.Points.AddXY(contador, item.Temperatura_Ambiente);
-                serieHum.Points.AddXY(contador, item.Humedad_Suelo);
-                contador++;
-            }
-        }
-    
+                // Buscar el dato más cercano a este instante (dentro de ±5 minutos)
+                var dato = ultimosDatos
+                    .OrderBy(d => Math.Abs((d.Fecha - actual).TotalMinutes))
+                    .FirstOrDefault();
 
+                if (dato != null)
+                {
+                    double x = (actual - inicio).TotalMinutes; // eje X en minutos desde el inicio
+                    serieTemp.Points.AddXY(x, dato.Temperatura_Ambiente);
+                    serieHum.Points.AddXY(x, dato.Humedad_Suelo);
+                }
+
+                actual = actual.AddMinutes(10);
+            }
+
+            // 🔹 Configurar los ejes
+            var areaTemp = chartTemperatura.ChartAreas[0];
+            areaTemp.AxisX.Minimum = 0;
+            areaTemp.AxisX.Maximum = 60;
+            areaTemp.AxisX.Interval = 10;
+            areaTemp.AxisX.Title = "Tiempo (min)";
+            areaTemp.AxisY.Title = "Temperatura (°C)";
+
+            var areaHum = chartRiego.ChartAreas[0];
+            areaHum.AxisX.Minimum = 0;
+            areaHum.AxisX.Maximum = 60;
+            areaHum.AxisX.Interval = 10;
+            areaHum.AxisX.Title = "Tiempo (min)";
+            areaHum.AxisY.Title = "Humedad del suelo (%)";
+
+            chartTemperatura.Update();
+            chartRiego.Update();
+        }
 
         private void GuardarCambios()
         {
@@ -368,11 +401,11 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             if (resultado == DialogResult.Yes)
             {
                 var usu = serviciosUsuario.BuscarPorId(IdDelUsuario);
-                if (serviciosUsuario.ValidarNombreUsuario(txtNombreUsuariodelUsuario.Text) ==null && usu.Entidad.NombreUsuario != txtNombreUsuariodelUsuario.Text)
-                {
-                    MessageBox.Show("El ID ingresado ya pertenece a otro usuario. Cámbialo por favor.");
-                    return;
-                }
+                //if (serviciosUsuario.ValidarNombreUsuario(txtNombreUsuariodelUsuario.Text) == null && usu.Entidad.NombreUsuario != txtNombreUsuariodelUsuario.Text)
+                //{
+                //    MessageBox.Show("El ID ingresado ya pertenece a otro usuario. Cámbialo por favor.");
+                //    return;
+                //}
 
                 // Validar que no exista otro usuario con el mismo nombre de usuario
                 if (serviciosUsuario.BuscarPorId(int.Parse(txtIdUsuario.Text)) == null && serviciosUsuario.ValidarNombreUsuario(txtIdUsuario.Text) == null)
@@ -383,14 +416,13 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
 
 
-                usu.Entidad.IdUsuario = int.Parse(txtIdUsuario.Text);
                 usu.Entidad.NombreUsuario = txtNombreUsuariodelUsuario.Text;
                 usu.Entidad.Nombre = txtNombreUsuario.Text;
                 usu.Entidad.Email = txtEmailUsu.Text;
                 usu.Entidad.Rol = cbRol.GetItemText(cbRol.SelectedItem);
 
-                
-                if (serviciosUsuario.Actualizar(usu.Entidad)!=null)
+                var mensaje = serviciosUsuario.Actualizar(usu.Entidad);
+                if (mensaje.Entidad!=null)
                 {
                     MessageBox.Show($"El/La Usuari@ {usu.Entidad.NombreUsuario} fue actualizad@ correctamente");
 
@@ -425,12 +457,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             {
                 pbImagenUsuario.Image = Image.FromFile(usuario.Entidad.RutaImagen);
             }
-            txtIdUsuario.Enabled = false;
-            txtNombreUsuario.Enabled = false;
-            txtNombreUsuariodelUsuario.Enabled = false;
-            txtEmailUsu.Enabled = false;
-            cbRol.Enabled = false;
-
 
         }
 
