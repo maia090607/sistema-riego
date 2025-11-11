@@ -17,7 +17,7 @@ namespace DAL
                 {
                     conn.Open();
 
-                    using (OracleCommand cmd = new OracleCommand("pkg_riego.insertar_usuario", conn))
+                    using (OracleCommand cmd = new OracleCommand("pkg_usuario.insertar_usuario", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
@@ -57,27 +57,27 @@ namespace DAL
                     return new Response<Usuario>(false, "Datos inválidos para actualizar", null, null);
 
                 string sentencia = @"UPDATE USUARIO SET
-                                NOMBRE = :nombre,
-                                EMAIL = :email,
-                                NOMBRE_USUARIO = :usuario,
-                                CONTRASEÑA = :pass,
-                                ROL = :rol,
-                                RUTA_IMAGEN = :ruta,
-                                ACCEDIO = :accedio
-                             WHERE ID_USUARIO = :id";
+                                NOMBRE = :p_nombre,
+                                EMAIL = :p_email,
+                                NOMBRE_USUARIO = :p_usuario,
+                                CONTRASEÑA = :p_pass,
+                                ROL = :p_rol,
+                                RUTA_IMAGEN = :p_ruta,
+                                ACCEDIO = :p_accedio
+                             WHERE ID_USUARIO = :p_id";
 
                 using (var conexion = new OracleConnection(_connectionString))
                 using (var comando = new OracleCommand(sentencia, conexion))
                 {
                     // Parámetros
-                    comando.Parameters.Add(new OracleParameter("nombre", entidad.Nombre));
-                    comando.Parameters.Add(new OracleParameter("email", entidad.Email));
-                    comando.Parameters.Add(new OracleParameter("usuario", entidad.NombreUsuario));
-                    comando.Parameters.Add(new OracleParameter("pass", entidad.Password));
-                    comando.Parameters.Add(new OracleParameter("rol", entidad.Rol));
-                    comando.Parameters.Add(new OracleParameter("ruta", entidad.RutaImagen ?? (object)DBNull.Value));
-                    comando.Parameters.Add(new OracleParameter("accedio", entidad.Accedio ? 1 : 0));
-                    comando.Parameters.Add(new OracleParameter("id", entidad.IdUsuario));
+                    comando.Parameters.Add(new OracleParameter("p_nombre", entidad.Nombre));
+                    comando.Parameters.Add(new OracleParameter("p_email", entidad.Email));
+                    comando.Parameters.Add(new OracleParameter("p_usuario", entidad.NombreUsuario));
+                    comando.Parameters.Add(new OracleParameter("p_pass", entidad.Password));
+                    comando.Parameters.Add(new OracleParameter("p_rol", entidad.Rol));
+                    comando.Parameters.Add(new OracleParameter("p_ruta", entidad.RutaImagen ?? (object)DBNull.Value));
+                    comando.Parameters.Add(new OracleParameter("p_accedio", entidad.Accedio ? 1 : 0));
+                    comando.Parameters.Add(new OracleParameter("p_id", entidad.IdUsuario));
 
                     conexion.Open();
                     int filasAfectadas = comando.ExecuteNonQuery();
@@ -97,6 +97,7 @@ namespace DAL
                 return new Response<Usuario>(false, $"Error al actualizar el usuario: {ex.Message}", null, null);
             }
         }
+
 
 
 

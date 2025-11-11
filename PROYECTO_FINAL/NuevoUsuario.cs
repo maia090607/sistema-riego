@@ -32,6 +32,8 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             nuevoUsuario.NombreUsuario = txtUusario.Text.Trim();
             nuevoUsuario.Password = txtContraseña.Text.Trim();
             nuevoUsuario.Rol = cbRol.GetItemText(cbRol.SelectedItem);
+
+
             if (!ValidarUsuario())
             {
                 return false;

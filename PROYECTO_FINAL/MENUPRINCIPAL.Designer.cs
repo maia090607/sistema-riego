@@ -818,10 +818,10 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // MDescripcion
             // 
             this.MDescripcion.AutoSize = true;
-            this.MDescripcion.Font = new System.Drawing.Font("Segoe UI Semibold", 15.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))));
-            this.MDescripcion.Location = new System.Drawing.Point(576, 470);
+            this.MDescripcion.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.MDescripcion.Location = new System.Drawing.Point(587, 468);
             this.MDescripcion.Name = "MDescripcion";
-            this.MDescripcion.Size = new System.Drawing.Size(122, 30);
+            this.MDescripcion.Size = new System.Drawing.Size(98, 18);
             this.MDescripcion.TabIndex = 27;
             this.MDescripcion.Text = "Descripción";
             // 
@@ -950,7 +950,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label3.AutoSize = true;
             this.label3.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.label3.Font = new System.Drawing.Font("Segoe UI", 15.75F, System.Drawing.FontStyle.Bold);
-            this.label3.Location = new System.Drawing.Point(624, 423);
+            this.label3.Location = new System.Drawing.Point(724, 423);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(129, 32);
             this.label3.TabIndex = 2;
