@@ -6,7 +6,11 @@ namespace BLL
     public class ServicioPuerto
     {
         private SerialPort _serialPort;
+
+        // Evento para notificar cuando llegan datos
         public event Action<string> DatosRecibidos;
+
+        public bool PuertoAbierto => _serialPort?.IsOpen ?? false;
 
         public ServicioPuerto(string puerto = "COM3", int baudios = 9600)
         {
@@ -29,13 +33,13 @@ namespace BLL
             {
                 string data = _serialPort.ReadLine().Trim();
 
-                if (data.StartsWith("Humedad del suelo:"))
+                // 🔹 Si el dato viene como "57,1" (humedad,bomba)
+                if (data.Contains(","))
                 {
-                    string valorStr = data.Split(':')[1].Trim();
-                    if (int.TryParse(valorStr, out int humedad))
-                        DatosRecibidos?.Invoke($"Humedad:{humedad}");
+                    DatosRecibidos?.Invoke(data); // Ejemplo: "57,1"
                 }
-                else if (data.Contains("Bomba"))
+
+                else
                 {
                     DatosRecibidos?.Invoke(data);
                 }
@@ -48,16 +52,30 @@ namespace BLL
 
         public void EnviarComando(string comando)
         {
-            if (_serialPort != null && _serialPort.IsOpen)
-                _serialPort.WriteLine(comando);
+            try
+            {
+                if (_serialPort != null && _serialPort.IsOpen)
+                    _serialPort.WriteLine(comando);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error enviando comando: {ex.Message}");
+            }
         }
 
         public void CerrarPuerto()
         {
-            if (_serialPort != null && _serialPort.IsOpen)
+            try
             {
-                _serialPort.Close();
-                Console.WriteLine("Puerto cerrado.");
+                if (_serialPort != null && _serialPort.IsOpen)
+                {
+                    _serialPort.Close();
+                    Console.WriteLine("Puerto cerrado.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error cerrando el puerto: {ex.Message}");
             }
         }
     }

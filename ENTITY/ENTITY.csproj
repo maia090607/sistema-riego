@@ -81,6 +81,7 @@
     <Compile Include="Alertas.cs" />
     <Compile Include="Cultivo.cs" />
     <Compile Include="Historial_Riego.cs" />
+    <Compile Include="humedad.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registroclimatico.cs" />
     <Compile Include="Response.cs" />

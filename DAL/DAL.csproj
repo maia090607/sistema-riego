@@ -83,6 +83,7 @@
     <Compile Include="ClimaRepository.cs" />
     <Compile Include="GraficasRepository.cs" />
     <Compile Include="HistorialRepository.cs" />
+    <Compile Include="HumedadRepository.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="PlantaRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -84,6 +84,7 @@
     <Compile Include="ServicioPuerto.cs" />
     <Compile Include="ServiciosAlertas.cs" />
     <Compile Include="ServiciosHistorialClima.cs" />
+    <Compile Include="ServiciosHumedad.cs" />
     <Compile Include="ServiciosPlanta.cs" />
     <Compile Include="ServiciosUsuario.cs" />
   </ItemGroup>

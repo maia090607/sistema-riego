@@ -3,9 +3,9 @@ using Entity;
 using ENTITY;
 using Microsoft.VisualBasic;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -24,10 +24,11 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         ServicioGraficas servicioGraficas;
         ServiciosAlertas serviciosAlertas;
         ServicioClima servicioClima;
-        private ServicioPuerto puerto;
-        private float humedad_actual, temperatura_actual, viento_actual;
-        private bool puedeRegar = true, Expandir = false;
-        private int IdDelUsuario, contadorTiempo;
+        ServiciosHumedad serviciosHumedad;
+        private ServicioPuerto _servicioPuerto;
+        private float humedad_actual, temperatura_actual, viento_actual, humedad_suelo, humedad_real;
+        private bool puedeRegar = true, Expandir = false, bombaAnteriorEncendida = false;
+        private int IdDelUsuario;
         private Size originalFormSize;
 
         public MENUPRINCIPAL()
@@ -38,34 +39,77 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             servicioGraficas = new ServicioGraficas();
             serviciosAlertas = new ServiciosAlertas();
             servicioClima = new ServicioClima();
+            serviciosHumedad = new ServiciosHumedad();
             InitializeComponent();
-            ObtenerDatosClimaAsync();
             this.StartPosition = FormStartPosition.CenterScreen;
             originalFormSize = this.Size;
             timerGraficas.Start();
             cargarPlantas();
-            puerto = new ServicioPuerto("COM3", 9600);
-            puerto.DatosRecibidos += Puerto_DatosRecibidos;
+            _servicioPuerto = new ServicioPuerto("COM3", 9600);
+            _servicioPuerto.DatosRecibidos += MostrarDatos;
+            ObtenerDatosClimaAsync();
+
         }
-        private void Puerto_DatosRecibidos(string mensaje)
+        private async void MostrarDatos(string mensaje)
         {
-            if (this.InvokeRequired)
+            // Espera asincrónica sin bloquear la UI
+
+            // 🔹 Si el mensaje viene como "57,1" (humedad, estado bomba)
+            if (mensaje.Contains(","))
             {
-                this.Invoke((Action)(() =>
+                string[] partes = mensaje.Split(',');
+                if (partes.Length == 2 &&
+                    float.TryParse(partes[0], NumberStyles.Float, CultureInfo.InvariantCulture, out float humedad) &&
+                    int.TryParse(partes[1], out int estadoBomba))
                 {
-                    if (mensaje.StartsWith("Humedad:"))
-                        lblHumedad.Text = mensaje + "%";
-                    else
-                        lbEstadodeBomba.Text = mensaje;
-                }));
-            }
-            else
-            {
-                if (mensaje.StartsWith("Humedad:"))
-                    lblHumedad.Text = mensaje + "%";
+                    humedad_real = humedad;
+                    bool bombaEncendida = estadoBomba == 1;
+
+                    // Mostrar en interfaz
+                    Invoke(new Action(() =>
+                    {
+                        lblHumedad.Text = humedad.ToString("F2");
+                        lbEstadodeBomba.Text = bombaEncendida ? "ENCENDIDA" : "APAGADA";
+                        lbEstadodeBomba.BackColor = bombaEncendida ? ColorTranslator.FromHtml("#21864B") : ColorTranslator.FromHtml("#8B0000");
+
+                        // Solo guardar historial si la bomba acaba de encenderse
+                        if (bombaEncendida && !bombaAnteriorEncendida)
+                        {
+                            Historial_Riego historial = new Historial_Riego
+                            {
+                                Temperatura = temperatura_actual,
+                                Humedad = humedad,
+                                Fecha = DateTime.Now
+                            };
+                            servicioHistorial.Guardar(historial);
+                            ultimoRegado();
+                        }
+
+                        // Actualizar estado anterior
+                        bombaAnteriorEncendida = bombaEncendida;
+                    }));
+
+                    // Guardar humedad en base de datos
+                    var hum = new humedad
+                    {
+                        ValorHumedad = humedad,
+                        FechaRegistro = DateTime.Now
+                    };
+                    serviciosHumedad.insertar(hum);
+                }
                 else
-                    lbEstadodeBomba.Text = mensaje;
+                {
+                    MessageBox.Show("⚠️ Formato inválido: " + mensaje);
+                }
             }
+            await Task.Delay(TimeSpan.FromSeconds(3));
+        }
+        private void EnviarComandoSeguro(string comando)
+        {
+            if (_servicioPuerto != null && _servicioPuerto.PuertoAbierto)
+                _servicioPuerto.EnviarComando(comando);
+            else
+                MessageBox.Show("El puerto serial no está disponible.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private int NuevoId()
@@ -79,10 +123,10 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         }
         public async Task ObtenerDatosClimaAsync()
         {
+            await Task.Delay(TimeSpan.FromSeconds(4));
             string apiKey = "91c59362a4519b067f3be52b6fe361f3";
             string ciudad = "Valledupar";
             string url = $"https://api.openweathermap.org/data/2.5/weather?q={ciudad}&appid={apiKey}&units=metric&lang=es";
-
             using (HttpClient client = new HttpClient())
             {
                 try
@@ -102,27 +146,43 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                     temperatura_actual = (float)weatherInfo.main.temp;
                     humedad_actual = (float)weatherInfo.main.humidity;
                     viento_actual = (float)weatherInfo.wind.speed;
+                    humedad_suelo = float.Parse(lblHumedad.Text);
+           
 
                     ActualizarGraficoClima(temperatura_actual, humedad_actual, viento_actual);
 
                     // 🔹 Verificar si ya existe un registro reciente similar (últimos 5 min)
                     var registrosExistentes = servicioClima.MostrarTodos().Lista;
-                    var registroReciente = registrosExistentes
-                        .Where(r => (DateTime.Now - r.Fecha).TotalMinutes < 5)
-                        .OrderByDescending(r => r.Fecha)
-                        .FirstOrDefault();
+                    var haceCincoMin = DateTime.Now.AddMinutes(-5);
 
-                    if (registroReciente == null ||
-                        Math.Abs(registroReciente.Temperatura_Ambiente - temperatura_actual) > 0.5 ||
-                        Math.Abs(registroReciente.Humedad_Ambiente - humedad_actual) > 0.5 ||
-                        Math.Abs(registroReciente.Viento - viento_actual) > 0.2)
+                    // 🔹 Filtrar registros recientes
+                    var registrosRecientes = registrosExistentes
+                        .Where(r => r.Fecha >= haceCincoMin)
+                        .OrderByDescending(r => r.Fecha)
+                        .ToList();
+
+                    // 🔹 Redondear valores actuales
+                    float tempActual = (float)Math.Round(temperatura_actual, 2);
+                    float humSueloActual = (float)Math.Round(humedad_suelo, 2);
+                    float humAmbienteActual = (float)Math.Round(humedad_actual, 2);
+                    float vientoActual = (float)Math.Round(viento_actual, 2);
+
+                    // 🔍 Buscar si ya existe un registro igual
+                    bool existeIgual = registrosRecientes.Any(r =>
+                        Math.Round(r.Temperatura_Ambiente, 2) == tempActual &&
+                        Math.Round(r.Humedad_Suelo, 2) == humSueloActual &&
+                        Math.Round(r.Humedad_Ambiente, 2) == humAmbienteActual &&
+                        Math.Round(r.Viento, 2) == vientoActual
+                    );
+
+                    if (!existeIgual)
                     {
                         RegistroClimatico clima = new RegistroClimatico
                         {
-                            Humedad_Ambiente = (float)Math.Round(humedad_actual, 2),
-                            Humedad_Suelo = (float)Math.Round(humedad_actual, 2),
-                            Temperatura_Ambiente = (float)Math.Round(temperatura_actual, 2),
-                            Viento = (float)Math.Round(viento_actual, 2),
+                            Humedad_Ambiente = humAmbienteActual,
+                            Humedad_Suelo = humSueloActual,
+                            Temperatura_Ambiente = tempActual,
+                            Viento = vientoActual,
                             Fecha = DateTime.Now
                         };
                         servicioClima.Guardar(clima);
@@ -163,10 +223,10 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                             $"La temperatura actual es de {weatherInfo.main.temp}°C, y esta sobrepasa lo optimo para la planta {c.NombrePlanta} con id {c.IdPlanta}.",
                             "Medio");
                         }
-                        if(c.nivel_optimo_humedad < weatherInfo.main.temp)
+                        if(c.nivel_optimo_humedad < humedad_real)
                         {
                             CrearAlertaSiNoExiste("Humedad no Optima",
-                            $"La humedad actual es de {weatherInfo.main.temp}°C, y esta sobrepasa lo optimo para la planta {c.NombrePlanta} con id {c.IdPlanta}.",
+                            $"La humedad actual es de {float.Parse(lblHumedad.Text)}°C, y esta sobrepasa lo optimo para la planta {c.NombrePlanta} con id {c.IdPlanta}.",
                             "Medio");
                         }
                     }
@@ -268,10 +328,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                 MessageBox.Show($"Error al generar gráfico de cultivo: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-
-
-
         public void cargarPlantas()
         {
             var lista = serviciosPlanta.ObtenerTodos();
@@ -341,68 +397,124 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             cbRol.Enabled = true;
 
         }
-
         private void timerGraficaReal()
         {
-            var listaDatos = servicioClima.MostrarTodos().Lista;
+            GraficarTemperatura();
+        }
 
-            if (listaDatos == null || listaDatos.Count == 0)
+        private void GraficarTemperatura()
+        {
+            var listaTemperatura = servicioClima.MostrarTodos().Lista;
+            if (listaTemperatura == null || listaTemperatura.Count == 0)
                 return;
 
-            // 🔹 Ordenar por fecha
-            var datosOrdenados = listaDatos.OrderBy(d => d.Fecha).ToList();
+            // 🔹 Ordenar por fecha y tomar los últimos 10 registros
+            var ultimosDatos = listaTemperatura
+                .OrderBy(d => d.Fecha)
+                .Skip(Math.Max(0, listaTemperatura.Count - 10))
+                .ToList();
 
-            // 🔹 Tomar los 10 últimos registros
-            var ultimosDatos = datosOrdenados.Skip(Math.Max(0, datosOrdenados.Count - 10)).ToList();
-
+            // 🔹 Configurar la serie
             var serieTemp = chartTemperatura.Series["TEMPERATURA DEL AMBIENTE"];
-            var serieHum = chartRiego.Series["HUMEDAD DEL SUELO"];
-
             serieTemp.Points.Clear();
-            serieHum.Points.Clear();
+            serieTemp.ChartType = SeriesChartType.Spline; // Curva suave
+            serieTemp.BorderWidth = 2;
+            serieTemp.Color = Color.OrangeRed;
 
-            // 🔹 Agregar puntos según la hora real (Eje X = hora, Eje Y = valor)
+            // 🔹 Agregar puntos con etiquetas de hora
             foreach (var item in ultimosDatos)
             {
-                // Eje X: hora del registro
                 double xValue = item.Fecha.ToOADate();
+                int pointIndex = serieTemp.Points.AddXY(xValue, item.Temperatura_Ambiente);
 
-                serieTemp.Points.AddXY(xValue, item.Temperatura_Ambiente);
-                serieHum.Points.AddXY(xValue, item.Humedad_Suelo);
+                // Etiqueta sobre el punto
+                serieTemp.Points[pointIndex].Label = item.Fecha.ToString("HH:mm");
+                serieTemp.Points[pointIndex].LabelForeColor = Color.DarkSlateGray;
+                serieTemp.Points[pointIndex].Font = new Font("Segoe UI", 8);
             }
 
-            // 🔹 Configurar el área de Temperatura
+            // 🔹 Configurar el área del gráfico
             var areaTemp = chartTemperatura.ChartAreas[0];
-            areaTemp.AxisX.LabelStyle.Format = "HH:mm"; // mostrar horas
-            areaTemp.AxisX.IntervalType = DateTimeIntervalType.Minutes;
-            areaTemp.AxisX.Interval = 6; // cada 6 min aprox
+            areaTemp.AxisX.LabelStyle.Enabled = false; // Ocultar etiquetas automáticas
             areaTemp.AxisX.Title = "Hora";
             areaTemp.AxisY.Title = "Temperatura (°C)";
             areaTemp.AxisX.MajorGrid.LineColor = Color.LightGray;
             areaTemp.AxisY.MajorGrid.LineColor = Color.LightGray;
-            areaTemp.AxisX.LabelStyle.Angle = -45; // girar etiquetas para mejor lectura
+            areaTemp.BackColor = Color.White;
+            chartTemperatura.BackColor = Color.WhiteSmoke;
+
+            // 🔹 Ajustar el rango del eje X
             areaTemp.AxisX.Minimum = ultimosDatos.First().Fecha.ToOADate();
             areaTemp.AxisX.Maximum = ultimosDatos.Last().Fecha.ToOADate();
 
-            // 🔹 Configurar el área de Humedad
+            chartTemperatura.Update();
+        }
+        private void GraficarHumedad()
+        {
+            var listaHumedad = serviciosHumedad.MostrarTodos().Lista;
+            if (listaHumedad == null || listaHumedad.Count == 0)
+                return;
+
+            var datosOrdenados = listaHumedad.OrderBy(d => d.FechaRegistro).ToList();
+            var ultimosDatos = datosOrdenados.Skip(Math.Max(0, datosOrdenados.Count - 10)).ToList();
+
+            var serieHum = chartRiego.Series["HUMEDAD DEL SUELO"];
+            serieHum.Points.Clear();
+            serieHum.ChartType = SeriesChartType.Spline; // 🔄 Línea suave
+            serieHum.BorderWidth = 2;
+            serieHum.Color = Color.MediumBlue;
+
+            foreach (var item in ultimosDatos)
+            {
+                double xValue = item.FechaRegistro.ToOADate();
+                int yValue = (int)item.ValorHumedad;
+
+                int pointIndex = serieHum.Points.AddXY(xValue, yValue);
+
+                // 🔹 Colorear según el valor
+                if (yValue <= 30)
+                    serieHum.Points[pointIndex].Color = Color.Red;
+                else if (yValue <= 60)
+                    serieHum.Points[pointIndex].Color = Color.Orange;
+                else
+                    serieHum.Points[pointIndex].Color = Color.Green;
+            }
+
             var areaHum = chartRiego.ChartAreas[0];
-            areaHum.AxisX.LabelStyle.Format = "HH:mm";
+            areaHum.AxisX.LabelStyle.Format = "HH:mm"; // 🕒 Mostrar hora real
             areaHum.AxisX.IntervalType = DateTimeIntervalType.Minutes;
-            areaHum.AxisX.Interval = 6;
+            areaHum.AxisX.Interval = 2; // Más juntos
             areaHum.AxisX.Title = "Hora";
             areaHum.AxisY.Title = "Humedad del Suelo (%)";
+            areaHum.AxisX.LabelStyle.Angle = -45;
+            areaHum.AxisX.LabelStyle.Font = new Font("Segoe UI", 9);
             areaHum.AxisX.MajorGrid.LineColor = Color.LightGray;
             areaHum.AxisY.MajorGrid.LineColor = Color.LightGray;
-            areaHum.AxisX.LabelStyle.Angle = -45;
-            areaHum.AxisX.Minimum = ultimosDatos.First().Fecha.ToOADate();
-            areaHum.AxisX.Maximum = ultimosDatos.Last().Fecha.ToOADate();
+            areaHum.BackColor = Color.White;
+            chartRiego.BackColor = Color.WhiteSmoke;
 
-            // 🔹 Actualizar gráficos
-            chartTemperatura.Update();
+            // 🔹 Línea de referencia para humedad crítica
+            areaHum.AxisY.StripLines.Clear(); // Limpiar anteriores
+            var lineaCritica = new StripLine
+            {
+                IntervalOffset = 30,
+                BorderColor = Color.Red,
+                BorderWidth = 2,
+                BorderDashStyle = ChartDashStyle.Dash,
+                Text = "Umbral Crítico",
+                TextAlignment = StringAlignment.Far,
+                TextLineAlignment = StringAlignment.Center,
+                Font = new Font("Segoe UI", 8),
+                ForeColor = Color.Red
+            };
+            areaHum.AxisY.StripLines.Add(lineaCritica);
+
+            // 🔹 Ajuste de rango en eje X
+            areaHum.AxisX.Minimum = ultimosDatos.First().FechaRegistro.ToOADate();
+            areaHum.AxisX.Maximum = ultimosDatos.Last().FechaRegistro.ToOADate();
+
             chartRiego.Update();
         }
-
-
         private void GuardarCambios()
         {
             DialogResult resultado = MessageBox.Show($"¿Seguro que quiere hacer estos cambios?",
@@ -483,7 +595,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                 lbConec.BackColor = ColorTranslator.FromHtml("#8B0000"); // Rojo oscuro
             }
         }
-        private void ActivarRiego()
+        private async Task CicloRiegoAsync()
         {
             try
             {
@@ -492,13 +604,31 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
                 if (resultado == DialogResult.Yes)
                 {
+                    if (puedeRegar)
+                    {
+                        puedeRegar = false;
+                        btnRiegoAuto.Enabled = false;
 
-                    var lis = servicioHistorial.MostrarTodos();
-                    Historial_Riego historial = new Historial_Riego();
-                    historial.Temperatura = temperatura_actual;
-                    historial.Humedad = humedad_actual;
-                    historial.Fecha = DateTime.Now;
-                    servicioHistorial.Guardar(historial);
+                        EnviarComandoSeguro("BOMBA_ON");
+                        // Ejecuta el riego
+                        lbEstadodeBomba.Text = "ACTIVO";
+                        lbEstadodeBomba.BackColor = ColorTranslator.FromHtml("#21864B");
+
+                        await Task.Delay(TimeSpan.FromSeconds(3));
+                        EnviarComandoSeguro("BOMBA_OFF");
+                        EnviarComandoSeguro("AUTO");
+                        lbEstadodeBomba.Text = "DESCONECTADO";
+                        lbEstadodeBomba.BackColor = ColorTranslator.FromHtml("#8B0000");
+                        await Task.Delay(TimeSpan.FromMinutes(1));
+
+                        puedeRegar = true;
+                        btnRiegoAuto.Enabled = true;
+                        MessageBox.Show("Ya puedes volver a regar.");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Debes esperar antes de volver a regar.");
+                    }
                 }
                 else
                 {
@@ -511,27 +641,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                 MessageBox.Show("Ocurrio un error..." + ex);
             }
 
-
-        }
-        private async Task CicloRiegoAsync()
-        {
-            if (puedeRegar)
-            {
-                puedeRegar = false;
-                btnRiegoAuto.Enabled = false;
-
-                ActivarRiego(); // Ejecuta el riego
-
-                await Task.Delay(TimeSpan.FromSeconds(10));
-
-                puedeRegar = true;
-                btnRiegoAuto.Enabled = true;
-                MessageBox.Show("Ya puedes volver a regar.");
-            }
-            else
-            {
-                MessageBox.Show("Debes esperar antes de volver a regar.");
-            }
         }
         private void button3_Click(object sender, EventArgs e)
         {
@@ -617,18 +726,14 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                 MessageBox.Show("No se encontraron registros para esa fecha.", "Sin resultados", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
-
-
         private void timer1_Tick(object sender, EventArgs e)
         {
             lbFechaActual.Text = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
         }
-
         private void tabPage3_Click(object sender, EventArgs e)
         {
 
         }
-
         private void btnHam_Click(object sender, EventArgs e)
         {
             MenuTrancision.Start();
@@ -655,27 +760,22 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                 }
             }
         }
-
         private void flowLayoutPanel1_Paint(object sender, PaintEventArgs e)
         {
 
         }
-
         private void button5_Click_1(object sender, EventArgs e)
         {
             tabControl.SelectedIndex = 0;
         }
-
         private void tabPage3_Click_1(object sender, EventArgs e)
         {
 
         }
-
         private void lbUltimoRegado_Click(object sender, EventArgs e)
         {
 
         }
-
         private void panel2_Paint_1(object sender, PaintEventArgs e)
         {
 
@@ -688,28 +788,23 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         {
             tabControl.SelectedIndex = 1;
         }
-
         private void button7_Click_1(object sender, EventArgs e)
         {
             tabControl.SelectedIndex = 2;
 
         }
-
         private void button6_Click_1(object sender, EventArgs e)
         {
             tabControl.SelectedIndex = 3;
         }
-
         private void button3_Click_3(object sender, EventArgs e)
         {
             tabControl.SelectedIndex = 4;
         }
-
         private void label8_Click(object sender, EventArgs e)
         {
 
         }
-
         private void btnRiegoAuto_Click(object sender, EventArgs e)
         {
             CicloRiegoAsync();
@@ -759,6 +854,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             grilla2.CurrentCellDirtyStateChanged += grilla2_CurrentCellDirtyStateChanged;
             button9.PerformClick();
             button3.PerformClick();
+            timerHumedad.Start();
 
 
 
@@ -887,7 +983,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         {
 
         }
-
         private void MId_Click(object sender, EventArgs e)
         {
 
@@ -972,6 +1067,32 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         {
             BuscarHistorialGrillaAlertas();
         }
+        private void MENUPRINCIPAL_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            try
+            {
+                if (_servicioPuerto != null && _servicioPuerto.PuertoAbierto)
+                {
+                    _servicioPuerto.CerrarPuerto();
+                    Console.WriteLine("Puerto cerrado correctamente al salir.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cerrar el puerto: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+        }
+
+        private void listHum_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lbEstadodeBomba_Click(object sender, EventArgs e)
+        {
+
+        }
 
         private void button9_Click_1(object sender, EventArgs e)
         {
@@ -990,6 +1111,11 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
         }
 
+        private void timerHumedad_Tick(object sender, EventArgs e)
+        {
+            GraficarHumedad();
+        }
+
         private void timerGraficas_Tick(object sender, EventArgs e)
         {
             timerGraficaReal();
@@ -1005,6 +1131,5 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             tabControl.SelectedIndex = 4;
 
         }
-
     }
 }

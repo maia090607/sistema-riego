@@ -10,7 +10,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new INICIAR());
+            Application.Run(new MENUPRINCIPAL());
         }
     }
 }

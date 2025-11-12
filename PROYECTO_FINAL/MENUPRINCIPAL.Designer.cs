@@ -179,6 +179,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.label9 = new System.Windows.Forms.Label();
             this.lbTemp = new System.Windows.Forms.Label();
             this.tabControl = new System.Windows.Forms.TabControl();
+            this.timerHumedad = new System.Windows.Forms.Timer(this.components);
             this.panel7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnHam)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
@@ -1336,7 +1337,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.panel1.Controls.Add(this.label26);
             this.panel1.Controls.Add(this.pictureBox5);
             this.panel1.Controls.Add(this.lblHumedad);
-            this.panel1.Location = new System.Drawing.Point(758, 372);
+            this.panel1.Location = new System.Drawing.Point(748, 370);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(245, 135);
             this.panel1.TabIndex = 26;
@@ -1357,7 +1358,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.pictureBox5.Image = global::PROYECTO_FINAL.Properties.Resources.agriculture_15785894__1_;
             this.pictureBox5.Location = new System.Drawing.Point(65, 0);
             this.pictureBox5.Name = "pictureBox5";
-            this.pictureBox5.Size = new System.Drawing.Size(108, 98);
+            this.pictureBox5.Size = new System.Drawing.Size(108, 93);
             this.pictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox5.TabIndex = 25;
             this.pictureBox5.TabStop = false;
@@ -1366,9 +1367,9 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             this.lblHumedad.Font = new System.Drawing.Font("Segoe UI Black", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblHumedad.ForeColor = System.Drawing.Color.MintCream;
-            this.lblHumedad.Location = new System.Drawing.Point(60, 96);
+            this.lblHumedad.Location = new System.Drawing.Point(60, 93);
             this.lblHumedad.Name = "lblHumedad";
-            this.lblHumedad.Size = new System.Drawing.Size(126, 37);
+            this.lblHumedad.Size = new System.Drawing.Size(126, 46);
             this.lblHumedad.TabIndex = 24;
             this.lblHumedad.Text = "Humedad";
             this.lblHumedad.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1415,7 +1416,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             series4.Name = "DatosClimáticos";
             series4.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.BrightPastel;
             this.chartClima.Series.Add(series4);
-            this.chartClima.Size = new System.Drawing.Size(328, 392);
+            this.chartClima.Size = new System.Drawing.Size(319, 392);
             this.chartClima.TabIndex = 28;
             this.chartClima.Text = "chart1";
             title4.Name = "Title1";
@@ -1426,7 +1427,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.lbFechaInicio.AutoSize = true;
             this.lbFechaInicio.Font = new System.Drawing.Font("Microsoft JhengHei", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbFechaInicio.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.lbFechaInicio.Location = new System.Drawing.Point(383, 173);
+            this.lbFechaInicio.Location = new System.Drawing.Point(375, 173);
             this.lbFechaInicio.Name = "lbFechaInicio";
             this.lbFechaInicio.Size = new System.Drawing.Size(234, 37);
             this.lbFechaInicio.TabIndex = 30;
@@ -1457,12 +1458,13 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             // 
             this.lbEstadodeBomba.Font = new System.Drawing.Font("Segoe UI Black", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbEstadodeBomba.ForeColor = System.Drawing.Color.MintCream;
-            this.lbEstadodeBomba.Location = new System.Drawing.Point(56, 82);
+            this.lbEstadodeBomba.Location = new System.Drawing.Point(22, 82);
             this.lbEstadodeBomba.Name = "lbEstadodeBomba";
-            this.lbEstadodeBomba.Size = new System.Drawing.Size(98, 24);
+            this.lbEstadodeBomba.Size = new System.Drawing.Size(168, 24);
             this.lbEstadodeBomba.TabIndex = 30;
             this.lbEstadodeBomba.Text = "ESTADO";
             this.lbEstadodeBomba.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbEstadodeBomba.Click += new System.EventHandler(this.lbEstadodeBomba_Click);
             // 
             // label18
             // 
@@ -1794,6 +1796,11 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.tabControl.Size = new System.Drawing.Size(1027, 633);
             this.tabControl.TabIndex = 14;
             // 
+            // timerHumedad
+            // 
+            this.timerHumedad.Interval = 1000;
+            this.timerHumedad.Tick += new System.EventHandler(this.timerHumedad_Tick);
+            // 
             // MENUPRINCIPAL
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1806,6 +1813,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "MENUPRINCIPAL";
             this.Text = "MENUPRINCIPAL";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MENUPRINCIPAL_FormClosing);
             this.Load += new System.EventHandler(this.MENUPRINCIPAL_Load_1);
             this.Resize += new System.EventHandler(this.MENUPRINCIPAL_Resize);
             this.panel7.ResumeLayout(false);
@@ -1978,5 +1986,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         private Button button10;
         private DateTimePicker calendarioAlertas;
         private Label label22;
+        private Timer timerHumedad;
     }
 }
