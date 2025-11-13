@@ -38,12 +38,24 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                     item.Accedio = false;
                     serviciosUsuario.Actualizar(item);
                 }
-                usuario.Entidad.Accedio = true;
-                serviciosUsuario.Actualizar(usuario.Entidad);
-                MENUPRINCIPAL form = new MENUPRINCIPAL();
-                form.Show();
-                this.Hide();
-                return true;
+                if (usuario.Entidad.Rol == "Cuidador")
+                {
+                    usuario.Entidad.Accedio = true;
+                    MenuCuidador form1 = new MenuCuidador();
+                    form1.Show();
+                    this.Hide();
+                    return true;
+                }
+                else
+                {
+                    usuario.Entidad.Accedio = true;
+                    serviciosUsuario.Actualizar(usuario.Entidad);
+                    MENUPRINCIPAL form = new MENUPRINCIPAL();
+                    form.Show();
+                    this.Hide();
+                    return true;
+                }
+                    
             }
             else
             {

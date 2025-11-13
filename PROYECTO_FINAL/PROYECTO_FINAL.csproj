@@ -97,6 +97,12 @@
     <Compile Include="INICIAR.Designer.cs">
       <DependentUpon>INICIAR.cs</DependentUpon>
     </Compile>
+    <Compile Include="MenuCuidador.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MenuCuidador.Designer.cs">
+      <DependentUpon>MenuCuidador.cs</DependentUpon>
+    </Compile>
     <Compile Include="MENUPRINCIPAL.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -119,6 +125,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="INICIAR.resx">
       <DependentUpon>INICIAR.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MenuCuidador.resx">
+      <DependentUpon>MenuCuidador.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MENUPRINCIPAL.resx">
       <DependentUpon>MENUPRINCIPAL.cs</DependentUpon>
@@ -179,6 +188,7 @@
     <None Include="Resources\admin_14471192.png" />
     <None Include="Resources\agriculture_15785894 %281%29.png" />
     <None Include="Resources\Diseño sin título.png" />
+    <None Include="Resources\admin_144711921.png" />
     <Content Include="Resources\grafico %281%29.png" />
     <None Include="Resources\lily_7148928.png" />
     <None Include="Resources\watering-can_179154.png" />

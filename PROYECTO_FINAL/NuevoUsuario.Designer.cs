@@ -136,12 +136,12 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.cbRol.FormattingEnabled = true;
             this.cbRol.Items.AddRange(new object[] {
             "Cuidador",
-            "Espectador",
             "Dueño"});
             this.cbRol.Location = new System.Drawing.Point(535, 127);
             this.cbRol.Name = "cbRol";
             this.cbRol.Size = new System.Drawing.Size(104, 21);
             this.cbRol.TabIndex = 11;
+            this.cbRol.SelectedIndexChanged += new System.EventHandler(this.cbRol_SelectedIndexChanged);
             // 
             // label7
             // 
@@ -212,7 +212,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             this.nightControlBox1.EnableMaximizeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             this.nightControlBox1.EnableMinimizeButton = true;
             this.nightControlBox1.EnableMinimizeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
-            this.nightControlBox1.Location = new System.Drawing.Point(547, 3);
+            this.nightControlBox1.Location = new System.Drawing.Point(547, 0);
             this.nightControlBox1.MaximizeHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.nightControlBox1.MaximizeHoverForeColor = System.Drawing.Color.White;
             this.nightControlBox1.MinimizeHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));

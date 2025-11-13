@@ -73,6 +73,16 @@ namespace PROYECTO_FINAL.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap admin_144711921 {
+            get {
+                object obj = ResourceManager.GetObject("admin_144711921", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap agriculture_15785894__1_ {
             get {
                 object obj = ResourceManager.GetObject("agriculture_15785894 (1)", resourceCulture);

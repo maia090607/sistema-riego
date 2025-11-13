@@ -1,5 +1,6 @@
 ﻿using BLL;
 using ENTITY;
+using Microsoft.VisualBasic;
 using System;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -11,6 +12,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
     public partial class NuevoUsuario : Form
     {
         ServiciosUsuario serviciosUsuario;
+        int contadorIntentos = 3;
         public NuevoUsuario()
         {
             InitializeComponent();
@@ -84,6 +86,29 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                 MessageBox.Show("Por favor, seleccione un rol.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
+            else
+            {
+                if(cbRol.SelectedItem.ToString() == "Dueño")
+                {
+                    string mensaje = Interaction.InputBox($"Ingrese la contraseña para ser Dueño:", "Registro obligatorio", "");
+                    string contra = "2025";
+                    if (mensaje == contra)
+                    {
+                        return true;
+                    }
+                    MessageBox.Show($"Contraseña incorrecta para el rol de Dueño. tienes {contadorIntentos} intentos..", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    contadorIntentos--;
+                    if(contadorIntentos == 0)
+                    {
+                        MessageBox.Show("Ha excedido el número máximo de intentos.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        this.Close();
+                    }   
+                    cbRol.SelectedIndex = 1;
+                    return false;
+
+                }
+            }
+
             if (string.IsNullOrWhiteSpace(txtId.Text) ||
                 !int.TryParse(txtId.Text, out int id) ||
                 id <= 0)
@@ -168,6 +193,11 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                 txtContraseña.UseSystemPasswordChar = true;
                 picVerContraseña.Image = PROYECTO_FINAL.Properties.Resources.monkey_599687;
             }
+        }
+
+        private void cbRol_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
