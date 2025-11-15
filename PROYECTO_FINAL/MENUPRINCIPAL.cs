@@ -48,28 +48,48 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             timerGraficas.Start();
             cargarPlantas();
             _servicioPuerto = new ServicioPuerto("COM3", 9600);
-            _servicioPuerto.DatosRecibidos += MostrarDatos;
+
+            // Suscripción defensiva: usa un lambda async que llama a MostrarDatosAsync
+            // así evitamos problemas si el delegado del evento tiene otra firma.
+            _servicioPuerto.DatosRecibidos += async (mensaje) =>
+            {
+                try
+                {
+                    await MostrarDatosAsync(mensaje);
+
+                }
+                catch (Exception ex)
+                {
+                    // logging opcional: Console.WriteLine(ex);
+                    Invoke(new Action(() =>
+                        MessageBox.Show("Error procesando datos recibidos: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    ));
+                }
+            };
+
             _ = ObtenerDatosClimaAsync();
 
         }
-        private async void MostrarDatos(string mensaje)
+        private async void MostrarDatosAsync(string mensaje)
         {
-            // Espera asincrónica sin bloquear la UI
-            // 🔹 Si el mensaje viene como "57,1" (humedad, estado bomba)
+            if (string.IsNullOrWhiteSpace(mensaje))
+                return;
+
+            // Si el mensaje viene como "57,1" (humedad, estado bomba)
             if (mensaje.Contains(","))
             {
                 string[] partes = mensaje.Split(',');
                 if (partes.Length == 2 &&
-                    float.TryParse(partes[0], NumberStyles.Float, CultureInfo.InvariantCulture, out float humedad) &&
-                    int.TryParse(partes[1], out int estadoBomba))
+                    float.TryParse(partes[0].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out float humedad) &&
+                    int.TryParse(partes[1].Trim(), out int estadoBomba))
                 {
                     humedad_real = humedad;
                     bool bombaEncendida = estadoBomba == 1;
 
-                    // Mostrar en interfaz
+                    // Mostrar en interfaz de forma segura
                     Invoke(new Action(() =>
                     {
-                        lblHumedad.Text = humedad.ToString("F2");
+                        lblHumedad.Text = humedad.ToString("F2", CultureInfo.InvariantCulture);
                         lbEstadodeBomba.Text = bombaEncendida ? "ENCENDIDA" : "APAGADA";
                         lbEstadodeBomba.BackColor = bombaEncendida ? ColorTranslator.FromHtml("#21864B") : ColorTranslator.FromHtml("#8B0000");
 
@@ -82,27 +102,42 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                                 Humedad = humedad,
                                 Fecha = DateTime.Now
                             };
-                            servicioHistorial.Guardar(historial);
-                            lbUltimoRegado.Text = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+                            try
+                            {
+                                servicioHistorial.Guardar(historial);
+                                lbUltimoRegado.Text = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+                            }
+                            catch
+                            {
+                                // Manejo silencioso o log si la BD falla
+                            }
                         }
 
-                        // Actualizar estado anterior
                         bombaAnteriorEncendida = bombaEncendida;
                     }));
 
-                    // Guardar humedad en base de datos
-                    var hum = new humedad
+                    // Guardar humedad en base de datos (defensivo)
+                    try
                     {
-                        ValorHumedad = humedad,
-                        FechaRegistro = DateTime.Now
-                    };
-                    serviciosHumedad.insertar(hum);
+                        var hum = new humedad
+                        {
+                            ValorHumedad = humedad,
+                            FechaRegistro = DateTime.Now
+                        };
+                        serviciosHumedad.insertar(hum);
+                    }
+                    catch
+                    {
+                        // opcional logging
+                    }
                 }
                 else
                 {
-                    MessageBox.Show("⚠️ Formato inválido: " + mensaje);
+                    Invoke(new Action(() => MessageBox.Show("⚠️ Formato inválido recibido por puerto: " + mensaje)));
                 }
             }
+
+            // retraso breve para no saturar el hilo si vienen muchos mensajes
             await Task.Delay(TimeSpan.FromSeconds(1));
         }
         private void EnviarComandoSeguro(string comando)
@@ -147,8 +182,14 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                     temperatura_actual = (float)weatherInfo.main.temp;
                     humedad_actual = (float)weatherInfo.main.humidity;
                     viento_actual = (float)weatherInfo.wind.speed;
-                    humedad_suelo = float.Parse(lblHumedad.Text);
-           
+                    // Intentamos obtener humedad de la etiqueta; si falla, usamos la lectura real del sensor (humedad_real)
+                    float parsedHumSuelo;
+                    if (!float.TryParse(Regex.Replace(lblHumedad.Text ?? "0", @"[^\d\.\-]", ""), NumberStyles.Float, CultureInfo.InvariantCulture, out parsedHumSuelo))
+                    {
+                        parsedHumSuelo = humedad_real; // valor alternativo
+                    }
+                    humedad_suelo = parsedHumSuelo;
+
 
                     ActualizarGraficoClima(temperatura_actual, humedad_actual, viento_actual);
 
@@ -524,6 +565,20 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             if (resultado == DialogResult.Yes)
             {
                 var usu = serviciosUsuario.BuscarPorId(IdDelUsuario);
+                if (usu == null)
+                {
+                    MessageBox.Show("No se encontró el usuario actual.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // Verificar que el nombre de usuario esté disponible o pertenece al mismo usuario
+                var existentePorNombre = serviciosUsuario.ValidarNombreUsuario(txtNombreUsuariodelUsuario.Text);
+                if (existentePorNombre != null && existentePorNombre.IdUsuario != usu.Entidad.IdUsuario)
+                {
+                    MessageBox.Show("El nombre de usuario ya está en uso. Cámbialo por favor.");
+                    return;
+                }
+
                 if (serviciosUsuario.BuscarPorId(int.Parse(txtIdUsuario.Text)) == null && serviciosUsuario.ValidarNombreUsuario(txtIdUsuario.Text) == null)
                 {
                     MessageBox.Show("El nombre de usuario ya está en uso. Cámbialo por favor.");
