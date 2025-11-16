@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BLL;
+using RiegoAPI.DTO.Request;
 
 namespace API.Controllers
 {
@@ -37,9 +38,11 @@ namespace API.Controllers
             if (_ultimoRiego.HasValue)
             {
                 var tiempoTranscurrido = DateTime.Now - _ultimoRiego.Value;
+
                 if (tiempoTranscurrido < TIEMPO_ESPERA)
                 {
                     var tiempoRestante = TIEMPO_ESPERA - tiempoTranscurrido;
+
                     return BadRequest(new
                     {
                         mensaje = "Debes esperar antes de volver a regar",
@@ -73,7 +76,7 @@ namespace API.Controllers
 
         // POST: api/riego/comando
         [HttpPost("comando")]
-        public ActionResult<object> EnviarComando([FromBody] ComandoRequest request)
+        public ActionResult<object> EnviarComando([FromBody] ComandoDTO request)
         {
             if (!_servicioPuerto.PuertoAbierto)
                 return BadRequest("El puerto serial no está disponible");
@@ -84,6 +87,7 @@ namespace API.Controllers
             try
             {
                 _servicioPuerto.EnviarComando(request.Comando);
+
                 return Ok(new
                 {
                     mensaje = $"Comando '{request.Comando}' enviado correctamente"
@@ -161,11 +165,5 @@ namespace API.Controllers
                 mensaje = "Para datos en tiempo real, implementar SignalR o WebSockets"
             });
         }
-    }
-
-    // DTO para comandos
-    public class ComandoRequest
-    {
-        public string Comando { get; set; }
     }
 }

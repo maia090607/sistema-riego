@@ -8,10 +8,10 @@ namespace RiegoAPI.DTO.Mappers
 {
     public class AlertaMapper
     {
-        /// Convierte de AlertaRequestDTO a Alertas (Entity)
         public static Alertas ToEntity(AlertaRequestDTO dto)
         {
-            if (dto == null) return null;
+            if (dto == null)
+                return new Alertas(); // Nunca retorna null
 
             return new Alertas
             {
@@ -23,10 +23,11 @@ namespace RiegoAPI.DTO.Mappers
                 Estado = dto.Estado
             };
         }
-        /// Convierte de Alertas (Entity) a AlertaResponseDTO
+
         public static AlertaResponseDTO ToResponseDTO(Alertas entity)
         {
-            if (entity == null) return null;
+            if (entity == null)
+                return new AlertaResponseDTO(); // Evita null
 
             return new AlertaResponseDTO
             {
@@ -39,17 +40,21 @@ namespace RiegoAPI.DTO.Mappers
             };
         }
 
-        /// Convierte lista de Alertas a lista de DTOs
         public static List<AlertaResponseDTO> ToResponseDTOList(IList<Alertas> entities)
         {
-            if (entities == null) return new List<AlertaResponseDTO>();
-            return entities.Select(a => ToResponseDTO(a)).ToList();
+            if (entities == null || entities.Count == 0)
+                return new List<AlertaResponseDTO>();
+
+            return entities
+                .Select(a => ToResponseDTO(a))
+                .ToList();
         }
 
         /// Actualiza una Alerta existente con datos del DTO
         public static void UpdateEntity(Alertas entity, AlertaRequestDTO dto)
         {
-            if (entity == null || dto == null) return;
+            if (entity == null || dto == null)
+                return;
 
             entity.FechaHora = dto.FechaHora;
             entity.TipoAlerta = dto.TipoAlerta;
@@ -57,6 +62,5 @@ namespace RiegoAPI.DTO.Mappers
             entity.NivelCritico = dto.NivelCritico;
             entity.Estado = dto.Estado;
         }
-
     }
 }

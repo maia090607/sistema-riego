@@ -33,6 +33,7 @@ namespace RiegoAPI.Controllers
             ));
         }
 
+
         [HttpGet("{id}")]
         public IActionResult ObtenerPorId(int id)
         {

@@ -5,7 +5,6 @@ namespace RiegoAPI.DTO.Mappers
 {
     public class ResponseMapper
     {
-        /// Convierte un Response de DAL a ApiResponseDTO
         public static ApiResponseDTO<T> ToApiResponse<T>(Response<T>? dalResponse, T data = default!)
         {
             if (dalResponse == null)
@@ -26,9 +25,8 @@ namespace RiegoAPI.DTO.Mappers
             };
         }
 
-        /// Convierte un Response de DAL con lista a ApiResponseDTO con lista de DTOs
         public static ApiResponseDTO<List<TDto>> ToApiResponseList<TEntity, TDto>(
-            Response<TEntity>? dalResponse,
+            Response<List<TEntity>>? dalResponse,
             List<TDto> dtoList)
         {
             if (dalResponse == null)
