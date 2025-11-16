@@ -11,7 +11,6 @@
     </div>
 
     <div class="dashboard-grid-nuevo">
-        <!-- Temperatura -->
         <div class="card-sensor temperatura">
             <div class="icon-sensor">🌡️</div>
             <h3>TEMPERATURA</h3>
@@ -21,7 +20,6 @@
             </div>
         </div>
 
-        <!-- Humedad del Aire -->
         <div class="card-sensor humedad-aire">
             <div class="icon-sensor">💧</div>
             <h3>HUMEDAD DEL AIRE</h3>
@@ -31,7 +29,6 @@
             </div>
         </div>
 
-        <!-- Bomba de Agua -->
         <div class="card-sensor bomba">
             <div class="icon-sensor">💧</div>
             <h3>BOMBA DE AGUA</h3>
@@ -41,7 +38,6 @@
             </div>
         </div>
 
-        <!-- Último Riego -->
         <div class="card-sensor ultimo-riego">
             <div class="icon-sensor">📅</div>
             <h3>ÚLTIMO RIEGO</h3>
@@ -51,14 +47,12 @@
             </div>
         </div>
 
-        <!-- Pronóstico -->
         <div class="card-sensor pronostico">
             <div class="icon-sensor">@ObtenerIconoClima()</div>
             <h3>PRONÓSTICO</h3>
             <div class="valor-sensor estado">@datosActuales.Pronostico</div>
         </div>
 
-        <!-- Viento -->
         <div class="card-sensor viento">
             <div class="icon-sensor">🧭</div>
             <h3>VIENTO</h3>
@@ -66,7 +60,6 @@
             <div class="estado-mini">@datosActuales.VelocidadViento km/h</div>
         </div>
 
-        <!-- Estado del Programa -->
         <div class="card-sensor programa">
             <div class="icon-sensor">💻</div>
             <h3>ESTADO DEL PROGRAMA</h3>
@@ -76,13 +69,21 @@
             </div>
         </div>
 
-        <!-- Humedad del Suelo -->
         <div class="card-sensor humedad-suelo">
             <div class="icon-sensor">🌱</div>
             <h3>HUMEDAD DEL SUELO</h3>
             <div class="valor-sensor">@datosActuales.HumedadSuelo%</div>
             <div class="estado-badge @ObtenerClaseHumedadSuelo()">
                 @ObtenerEstadoHumedadSuelo()
+            </div>
+        </div>
+
+        <div class="card-sensor graficas" @onclick="IrAHistorial" style="cursor: pointer;">
+            <div class="icon-sensor">📊</div>
+            <h3>VER GRÁFICAS</h3>
+            <h4>HISTÓRICO</h4>
+            <div class="estado-badge ver-graficas">
+                📈 Ver Datos
             </div>
         </div>
     </div>
@@ -107,7 +108,6 @@
     {
         await CargarDatosSensores();
 
-        // Actualizar cada 10 minutos (600 segundos) para respetar límites de la API
         timer = new System.Threading.Timer(async _ =>
         {
             await CargarDatosSensores();
@@ -119,7 +119,6 @@
     {
         try
         {
-            // LLAMAR AL SERVICIO REAL que obtiene datos del clima de Valledupar
             datosActuales = await RiegoService.ObtenerDatosActualesAsync();
             ultimaActualizacion = DateTime.Now;
         }
@@ -127,7 +126,6 @@
         {
             Console.WriteLine($"Error al cargar datos: {ex.Message}");
 
-            // Valores por defecto en caso de error
             datosActuales = new DatosSensorModel
             {
                 Temperatura = 0,
@@ -220,6 +218,11 @@
         return datosActuales.ProgramaOnline ? "Online" : "Offline";
     }
 
+    private async Task IrAHistorial()
+    {
+        await OnIrAHistorial.InvokeAsync();
+    }
+
     private async Task CerrarSesion()
     {
         await OnCerrarSesion.InvokeAsync();
@@ -230,3 +233,9 @@
         timer?.Dispose();
     }
 }
+
+
+
+
+
+

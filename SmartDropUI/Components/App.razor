@@ -8,9 +8,132 @@
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet />
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Script para las gráficas -->
+    <script>
+        window.chartInstances = {};
+
+        window.crearGraficaHumedad = function(labels, valores) {
+            const ctx = document.getElementById('chartHumedadSuelo');
+            if (!ctx) return;
+
+            // Destruir gráfica anterior si existe
+            if (window.chartInstances.humedad) {
+                window.chartInstances.humedad.destroy();
+            }
+
+            window.chartInstances.humedad = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Humedad del Suelo (%)',
+                        data: valores,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Tiempo (m)'
+                            }
+                        }
+                    }
+                }
+            });
+        };
+
+        window.crearGraficaTemperatura = function(labels, valores) {
+            const ctx = document.getElementById('chartTemperatura');
+            if (!ctx) return;
+
+            // Destruir gráfica anterior si existe
+            if (window.chartInstances.temperatura) {
+                window.chartInstances.temperatura.destroy();
+            }
+
+            window.chartInstances.temperatura = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Temperatura (°C)',
+                        data: valores,
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#ef4444',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 40,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '°C';
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Tiempo (m)'
+                            }
+                        }
+                    }
+                }
+            });
+        };
+    </script>
 </head>
 <body>
     <Routes />
     <script src="_framework/blazor.web.js"></script>
 </body>
 </html>
+

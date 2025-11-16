@@ -8,7 +8,7 @@ namespace SmartDropUI.Services
     {
         private readonly HttpClient _httpClient;
         private readonly HttpClient _weatherClient;
-        private const bool MODO_PRUEBA = false; // Cambiar a false cuando uses API real
+        private const bool MODO_PRUEBA = true; // Cambiar a false cuando conectes Arduino
 
         public RiegoService(HttpClient httpClient, IHttpClientFactory httpClientFactory)
         {
@@ -34,7 +34,7 @@ namespace SmartDropUI.Services
                     DireccionViento = datosClima.DireccionViento,
                     VelocidadViento = datosClima.VelocidadViento,
 
-                    // DATOS DEL SISTEMA LOCAL (Simulados)
+                    // DATOS DEL SISTEMA LOCAL (Simulados hasta conectar Arduino)
                     HumedadSuelo = Random.Shared.Next(20, 100),
                     BombaActiva = Random.Shared.Next(0, 2) == 1,
                     ProgramaOnline = true,
@@ -62,6 +62,8 @@ namespace SmartDropUI.Services
         {
             try
             {
+                Console.WriteLine("Intentando obtener clima de Valledupar...");
+
                 // Coordenadas de Valledupar: 10.4631°N, -73.2532°W
                 var url = "https://api.open-meteo.com/v1/forecast?latitude=10.4631&longitude=-73.2532&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m&timezone=America/Bogota";
 
@@ -69,6 +71,8 @@ namespace SmartDropUI.Services
 
                 if (response?.Current != null)
                 {
+                    Console.WriteLine($"Clima obtenido: Temp={response.Current.Temperature2m}°C, Humedad={response.Current.RelativeHumidity2m}%");
+
                     return new ClimaValleduparModel
                     {
                         Temperatura = (int)Math.Round(response.Current.Temperature2m),
@@ -78,18 +82,22 @@ namespace SmartDropUI.Services
                         VelocidadViento = (int)Math.Round(response.Current.WindSpeed10m)
                     };
                 }
+
+                Console.WriteLine("Response.Current es null");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al obtener clima: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
             }
 
             // Valores por defecto si falla la API
+            Console.WriteLine("Usando valores por defecto del clima");
             return new ClimaValleduparModel
             {
                 Temperatura = 32,
                 HumedadAire = 60,
-                Pronostico = "Parcialmente Nublado",
+                Pronostico = "Despejado",
                 DireccionViento = "Norte",
                 VelocidadViento = 10
             };
@@ -203,29 +211,5 @@ namespace SmartDropUI.Services
 
         [JsonPropertyName("wind_direction_10m")]
         public double WindDirection10m { get; set; }
-    }
-
-    // Modelo para datos del clima de Valledupar
-    public class ClimaValleduparModel
-    {
-        public int Temperatura { get; set; }
-        public int HumedadAire { get; set; }
-        public string Pronostico { get; set; } = "";
-        public string DireccionViento { get; set; } = "";
-        public int VelocidadViento { get; set; }
-    }
-
-    // Modelos existentes
-    public class DatosSensorModel
-    {
-        public int Temperatura { get; set; }
-        public int HumedadAire { get; set; }
-        public int HumedadSuelo { get; set; }
-        public bool BombaActiva { get; set; }
-        public bool ProgramaOnline { get; set; }
-        public DateTime UltimoRiego { get; set; } = DateTime.Now;
-        public string Pronostico { get; set; } = "Despejado";
-        public string DireccionViento { get; set; } = "Norte";
-        public int VelocidadViento { get; set; }
-    }
+    }    
 }

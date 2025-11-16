@@ -1,50 +1,238 @@
 ﻿@using SmartDropUI.Models
 @using SmartDropUI.Services
+@using Microsoft.JSInterop
 @inject RiegoService RiegoService
+@inject IJSRuntime JSRuntime
+@implements IDisposable
 
 <div class="historial-container">
+    <div class="historial-header">
+        <div class="header-left">
+            <span class="icon">📊</span>
+            <h1>Historial del Sistema</h1>
+        </div>
+        <div class="header-right">
+            <button class="nav-btn" @onclick="VolverAlDashboard">
+                ← Atrás
+            </button>
+            <button class="nav-btn logout" @onclick="CerrarSesion">Salir</button>
+        </div>
+    </div>
 
-    <button class="nav-btn" @onclick="IrDashboard">
-        Dashboard
-    </button>
+    <div class="dashboard-grid">
+        <!-- Gráfica de Humedad del Suelo -->
+        <div class="chart-card">
+            <h2>GRÁFICA DE LA HUMEDAD DEL SUELO</h2>
+            <p class="chart-subtitle">Humedad – Vacío</p>
+            <canvas id="chartHumedadSuelo" width="400" height="200"></canvas>
+        </div>
 
-    <button class="nav-btn logout" @onclick="CerrarSesion">
-        Salir
-    </button>
+        <!-- Gráfica de Temperatura -->
+        <div class="chart-card">
+            <h2>GRÁFICO DE LA TEMPERATURA DEL AMBIENTE</h2>
+            <p class="chart-subtitle">Temperatura – Vacío</p>
+            <canvas id="chartTemperatura" width="400" height="200"></canvas>
+        </div>
 
-    <!-- tabla historial ... -->
+        <!-- Controles -->
+        <div class="controls-card">
+            <h2>CONTROLES DEL SISTEMA</h2>
+            <div class="controls-content">
+                <button class="control-btn success" @onclick="RecargarHistorial">
+                    🔄 RECARGAR HISTORIAL
+                </button>
+                <button class="control-btn primary" @onclick="IniciarRiegoManual">
+                    💧 INICIAR RIEGO MANUAL
+                </button>
+                <div class="date-search">
+                    <h3>BUSCAR POR FECHA</h3>
+                    <input type="date" @bind="fechaBusqueda" />
+                    <button class="control-btn info" @onclick="BuscarPorFecha">
+                        🔍 BUSCAR
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Área de Historial de Datos -->
+    <div class="historial-area">
+        @if (cargandoDatos)
+        {
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Cargando historial...</p>
+            </div>
+        }
+        else if (datosHistorial.Any())
+        {
+            <div class="historial-content">
+                <h2>📋 Historial de Registros</h2>
+                <div class="table-container">
+                    <table class="historial-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha</th>
+                                <th>Humedad Suelo</th>
+                                <th>Temperatura</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var dato in datosHistorial)
+                            {
+                                <tr>
+                                    <td>@dato.Id</td>
+                                    <td>@dato.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td><span class="badge status">@dato.Humedad%</span></td>
+                                    <td><span class="badge temp">@dato.Temperatura°C</span></td>
+                                    <td>
+                                        <span class="badge @(dato.Estado == "Regado" ? "success" : "warning")">
+                                            @dato.Estado
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="historial-content">
+                <div class="historial-icon">📊</div>
+                <h2>Área de Historial de Datos</h2>
+                <p>Los registros históricos del sistema aparecerán aquí</p>
+            </div>
+        }
+    </div>
 </div>
 
 @code {
-    [Parameter] public EventCallback OnIrADashboard { get; set; }
+    [Parameter] public EventCallback OnVolverAlDashboard { get; set; }
     [Parameter] public EventCallback OnCerrarSesion { get; set; }
 
-    private List<DatosRiegoModel> registros = new();
-    private bool cargando = false;
+    private List<DatosRiegoModel> datosHistorial = new();
+    private List<DatosSensorModel> datosParaGraficas = new();
+    private DateTime fechaBusqueda = DateTime.Now;
+    private bool cargandoDatos = false;
+    private System.Threading.Timer? timer;
 
     protected override async Task OnInitializedAsync()
     {
-        await CargarHistorial();
+        await CargarDatos();
+
+        // Actualizar cada 30 segundos
+        timer = new System.Threading.Timer(async _ =>
+        {
+            await CargarDatos();
+            await InvokeAsync(StateHasChanged);
+        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
     }
 
-    private async Task IrDashboard() =>
-        await OnIrADashboard.InvokeAsync();
-
-    private async Task CerrarSesion() =>
-        await OnCerrarSesion.InvokeAsync();
-
-    private async Task CargarHistorial()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        cargando = true;
-        await Task.Delay(1000);
-
-        registros = new()
+        if (firstRender)
         {
-            new() { Fecha = DateTime.Now.AddHours(-1), Humedad = 45, Temperatura = 22, Estado = "Riego Automático" },
-            new() { Fecha = DateTime.Now.AddHours(-3), Humedad = 68, Temperatura = 24, Estado = "Riego Completado" },
-        };
+            await DibujarGraficas();
+        }
+    }
 
-        cargando = false;
+    private async Task CargarDatos()
+    {
+        try
+        {
+            cargandoDatos = true;
+
+            // Cargar historial
+            datosHistorial = await RiegoService.ObtenerHistorialAsync();
+
+            // Generar datos para las gráficas (últimas 30 lecturas)
+            datosParaGraficas.Clear();
+            for (int i = 0; i < 30; i++)
+            {
+                var datos = await RiegoService.ObtenerDatosActualesAsync();
+                datosParaGraficas.Add(datos);
+                await Task.Delay(100); // Pequeña pausa entre lecturas
+            }
+
+            cargandoDatos = false;
+            await DibujarGraficas();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar datos: {ex.Message}");
+            cargandoDatos = false;
+        }
+    }
+
+    private async Task DibujarGraficas()
+    {
+        try
+        {
+            // Preparar datos para Chart.js
+            var labelsHumedad = datosParaGraficas.Select((d, i) => i.ToString()).ToArray();
+            var valoresHumedad = datosParaGraficas.Select(d => d.HumedadSuelo).ToArray();
+
+            var labelsTemp = datosParaGraficas.Select((d, i) => i.ToString()).ToArray();
+            var valoresTemp = datosParaGraficas.Select(d => d.Temperatura).ToArray();
+
+            // Aquí iría el código JavaScript para dibujar con Chart.js
+            // Por ahora usamos datos simulados
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al dibujar gráficas: {ex.Message}");
+        }
+    }
+
+    private async Task RecargarHistorial()
+    {
+        await CargarDatos();
+    }
+
+    private async Task IniciarRiegoManual()
+    {
+        try
+        {
+            var resultado = await RiegoService.ActivarRiegoManualAsync();
+            if (resultado)
+            {
+                Console.WriteLine("Riego manual iniciado correctamente");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al iniciar riego: {ex.Message}");
+        }
+    }
+
+    private async Task BuscarPorFecha()
+    {
+        // Filtrar datos por fecha
+        var datosFiltrados = datosHistorial
+            .Where(d => d.Fecha.Date == fechaBusqueda.Date)
+            .ToList();
+
+        datosHistorial = datosFiltrados;
+        StateHasChanged();
+    }
+
+    private async Task VolverAlDashboard()
+    {
+        await OnVolverAlDashboard.InvokeAsync();
+    }
+
+    private async Task CerrarSesion()
+    {
+        await OnCerrarSesion.InvokeAsync();
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
     }
 }
