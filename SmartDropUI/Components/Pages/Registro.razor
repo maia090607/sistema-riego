@@ -1,149 +1,51 @@
-﻿@page "/registro"
-@using SmartDropUI.Models
+﻿@using SmartDropUI.Models
 @using SmartDropUI.Services
 @inject AuthService AuthService
-@inject NavigationManager Navigation
-
-<PageTitle>Registro - SmartDrop</PageTitle>
 
 <div class="registro-container">
-    <div class="registro-card">
-        <div class="registro-header">
-            <h1>REGISTRAR NUEVO USUARIO</h1>
-            <p>Sistema de Riego Automático SmartDrop</p>
-        </div>
-
-        <div class="icon-group">
-            <span class="icon">🌿</span>
-            <span class="icon">💧</span>
-            <span class="icon">🔧</span>
-            <span class="icon">⚙️</span>
-        </div>
-
-        <div class="registro-form">
-            <div class="form-group">
-                <label>
-                    <span class="label-icon purple">🆔</span>
-                    Identificación
-                </label>
-                <input type="text" @bind="usuario.Identificacion"
-                       placeholder="Ingrese su identificación" />
-            </div>
-
-            <div class="form-group">
-                <label>
-                    <span class="label-icon blue">👤</span>
-                    Nombre Completo
-                </label>
-                <input type="text" @bind="usuario.NombreCompleto"
-                       placeholder="Ingrese su nombre completo" />
-            </div>
-
-            <div class="form-group">
-                <label>
-                    <span class="label-icon green">📧</span>
-                    Correo Electrónico
-                </label>
-                <input type="email" @bind="usuario.Correo"
-                       placeholder="usuario@ejemplo.com" />
-            </div>
-
-            <div class="form-group">
-                <label>
-                    <span class="label-icon orange">👤</span>
-                    Nombre de Usuario
-                </label>
-                <input type="text" @bind="usuario.NombreUsuario"
-                       placeholder="Ingrese nombre de usuario" />
-            </div>
-
-            <div class="form-group">
-                <label>
-                    <span class="label-icon teal">👥</span>
-                    Rol del Usuario
-                </label>
-                <select @bind="usuario.Rol">
-                    <option value="">Seleccionar rol</option>
-                    <option value="Administrador">Administrador</option>
-                    <option value="Usuario">Usuario</option>
-                    <option value="Operador">Operador</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>
-                    <span class="label-icon yellow">🔒</span>
-                    Contraseña
-                </label>
-                <div class="input-wrapper">
-                    <input type="@(mostrarPassword ? "text" : "password")"
-                           @bind="usuario.Contrasena"
-                           placeholder="Ingrese una contraseña segura" />
-                    <button type="button"
-                            class="toggle-password"
-                            @onclick="() => mostrarPassword = !mostrarPassword">
-                        @(mostrarPassword ? "👁️" : "👁️‍🗨️")
-                    </button>
-                </div>
-            </div>
-
-            @if (!string.IsNullOrEmpty(mensaje))
-            {
-                <div class="@(mensajeExito ? "alert-success" : "alert-error")">
-                    @mensaje
-                </div>
-            }
-
-            <div class="button-group">
-                <button class="btn-create" @onclick="HandleRegistro" disabled="@cargando">
-                    <span>➕</span>
-                    @(cargando ? "Creando..." : "CREAR USUARIO")
-                </button>
-                <button class="btn-back" @onclick='() => Navigation.NavigateTo("/")'>
-                    <span>⬅️</span>
-                    ATRÁS
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- Tu código HTML actual de registro -->
 </div>
 
 @code {
-    private UsuarioModel usuario = new();
-    private bool mostrarPassword = false;
+    [Parameter] public EventCallback OnRegistroExitoso { get; set; }
+    [Parameter] public EventCallback OnVolverALogin { get; set; }
+
+    private UsuarioModel formRegistro = new();
+    private bool mostrarPasswordRegistro = false;
     private bool cargando = false;
-    private string mensaje = string.Empty;
-    private bool mensajeExito = false;
+    private string mensajeError = "";
+    private string mensajeExito = "";
+
+    private void ToggleMostrarPasswordRegistro() => mostrarPasswordRegistro = !mostrarPasswordRegistro;
 
     private async Task HandleRegistro()
     {
-        cargando = true;
-        mensaje = string.Empty;
+        mensajeError = "";
+        mensajeExito = "";
 
-        if (string.IsNullOrWhiteSpace(usuario.NombreUsuario) ||
-            string.IsNullOrWhiteSpace(usuario.Contrasena))
+        if (string.IsNullOrWhiteSpace(formRegistro.NombreUsuario) ||
+            string.IsNullOrWhiteSpace(formRegistro.Contrasena))
         {
-            mensaje = "Complete todos los campos obligatorios";
-            mensajeExito = false;
-            cargando = false;
+            mensajeError = "Complete los campos requeridos";
             return;
         }
 
-        var success = await AuthService.RegistrarAsync(usuario);
+        cargando = true;
+        bool registroExitoso = await AuthService.RegistrarAsync(formRegistro);
 
-        if (success)
+        if (registroExitoso)
         {
-            mensaje = "Usuario creado exitosamente";
-            mensajeExito = true;
+            mensajeExito = "Usuario creado exitosamente";
             await Task.Delay(1500);
-            Navigation.NavigateTo("/");
+            formRegistro = new UsuarioModel();
+            await OnRegistroExitoso.InvokeAsync();
         }
         else
         {
-            mensaje = "Error al crear usuario";
-            mensajeExito = false;
+            mensajeError = "Error al crear el usuario. Intente nuevamente.";
         }
-
         cargando = false;
     }
+
+    private async Task IrALogin() => await OnVolverALogin.InvokeAsync();
 }

@@ -10,10 +10,13 @@ var builder = WebApplication.CreateBuilder(args);
 // CONFIGURACIÓN DE SERVICIOS
 // ===========================
 
+
+// LA CONFIGURACION DE SWAGGER ESTABA REPETIDA, TENIA DOS Y CADA UNA SU INICIALIZACION, QUITE LA PRIMERA QUE SE VEIA MAS BASICA
 // Agregar controladores
 builder.Services.AddControllers();
 
 // Configurar Swagger/OpenAPI para documentación
+// NO SE
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -21,7 +24,13 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "SmartDrop - Sistema de Riego Automático",
         Version = "v1",
-        Description = "API RESTful para el sistema de riego automático con Arduino.",
+
+        Description = @"
+![SmartDrop Logo](https://tusitio.com/img/smartdrop-logo.png)
+
+API RESTful para el sistema de riego automático con Arduino.
+
+**Contacto:** Equipo de Desarrollo",
         Contact = new OpenApiContact
         {
             Name = "Equipo de Desarrollo",
@@ -103,7 +112,12 @@ if (app.Environment.IsDevelopment())
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartDrop API v1");
         c.DocumentTitle = "SmartDrop - API de Riego Automático";
+
+        c.InjectStylesheet("/swagger-ui/custom.css"); // Opcional
+        c.RoutePrefix = "swagger"; // Acceder en /swagger
+
         c.RoutePrefix = "swagger"; // /swagger
+
     });
 }
 
@@ -131,8 +145,18 @@ app.Map("/error", (HttpContext context) =>
 });
 
 // ===================================
-// INICIO DE LA APLICACIÓN
+
+// MANEJO DEL SWAGGER UI PERSONALIZADO  
 // ===================================
+
+
+
+
+// ===================================
+// ACTIVAR EL SWAGGER UI PERSONALIZADO  
+// ===================================
+
+
 
 Console.WriteLine("╔════════════════════════════════════════════════════════════╗");
 Console.WriteLine("║     🌱 API SISTEMA DE RIEGO AUTOMÁTICO - SMARTDROP        ║");

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+
 namespace RiegoAPI.Controllers
 {
     [ApiController]
@@ -21,6 +22,7 @@ namespace RiegoAPI.Controllers
             _servicioHistorial = servicioHistorial;
         }
 
+
         // GET: api/historial
         [HttpGet]
         public IActionResult ObtenerTodos()
@@ -31,6 +33,7 @@ namespace RiegoAPI.Controllers
             return Ok(ApiResponseDTO<List<HistorialRiegoResponseDTO>>.Success(
                 dto, $"Se encontraron {dto.Count} registros"));
         }
+
 
         // GET: api/historial/{id}
         [HttpGet("{id}")]
@@ -48,6 +51,7 @@ namespace RiegoAPI.Controllers
 
             return Ok(ApiResponseDTO<HistorialRiegoResponseDTO>.Success(dto, "Historial encontrado"));
         }
+
 
         // GET: api/historial/por-fecha
         [HttpGet("por-fecha")]
@@ -150,4 +154,20 @@ namespace RiegoAPI.Controllers
                 dto, $"Estadísticas de los últimos {dias} días"));
         }
     }
+
+
+    // DTO de Estadísticas como Response
+    //ESTE DTO DEBERIA IR EN LA CARPETA DTO/RESPONSE
+    public class EstadisticasHistorialResponseDTO
+    {
+        public int TotalRegistros { get; set; }
+        public float HumedadPromedio { get; set; }
+        public float HumedadMinima { get; set; }
+        public float HumedadMaxima { get; set; }
+        public float TemperaturaPromedio { get; set; }
+        public float TemperaturaMinima { get; set; }
+        public float TemperaturaMaxima { get; set; }
+        public int PeriodoAnalizado { get; set; }
+    }
+
 }

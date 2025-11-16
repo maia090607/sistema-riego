@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/login"
 @using SmartDropUI.Models
 @using SmartDropUI.Services
 @inject AuthService AuthService
@@ -30,8 +30,8 @@
                 <label>Usuario</label>
                 <div class="input-wrapper">
                     <span class="input-icon">👤</span>
-                    <input type="text" 
-                           @bind="loginModel.Usuario" 
+                    <input type="text"
+                           @bind="loginModel.Usuario"
                            placeholder="Usuario"
                            class="form-input" />
                 </div>
@@ -41,11 +41,11 @@
                 <label>Contraseña</label>
                 <div class="input-wrapper">
                     <span class="input-icon">🔒</span>
-                    <input type="@(mostrarPassword ? "text" : "password")" 
-                           @bind="loginModel.Password" 
+                    <input type="@(mostrarPassword ? "text" : "password")"
+                           @bind="loginModel.Password"
                            placeholder="Contraseña"
                            class="form-input" />
-                    <button type="button" 
+                    <button type="button"
                             class="toggle-password"
                             @onclick="() => mostrarPassword = !mostrarPassword">
                         @(mostrarPassword ? "👁️" : "👁️‍🗨️")
@@ -82,7 +82,7 @@
         cargando = true;
         mensajeError = string.Empty;
 
-        if (string.IsNullOrWhiteSpace(loginModel.Usuario) || 
+        if (string.IsNullOrWhiteSpace(loginModel.Usuario) ||
             string.IsNullOrWhiteSpace(loginModel.Password))
         {
             mensajeError = "Por favor complete todos los campos";
@@ -103,4 +103,4 @@
 
         cargando = false;
     }
-} 
+}
