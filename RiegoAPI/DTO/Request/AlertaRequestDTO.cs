@@ -3,6 +3,7 @@ using System;
 
 namespace RiegoAPI.DTO.Request
 {
+
     public class AlertaRequestDTO
     {
         public int IdAlerta { get; set; }

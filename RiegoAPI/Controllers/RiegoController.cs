@@ -164,6 +164,8 @@ namespace API.Controllers
     }
 
     // DTO para comandos
+    // ESTE DTO DEBERIA IR EN LA CARPETA DTO/REQUEST O DTO/CREATE Y ADEMAS DE TENER EL SUFIJO DTO, REQUEST ES MUY AMBIGUO Y NO SIGUE
+    // EL CAMINO DE LOS DEMAS DTO
     public class ComandoRequest
     {
         public string Comando { get; set; }

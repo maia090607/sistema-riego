@@ -219,156 +219,157 @@ namespace RiegoAPI.Controllers
             ));
         }
     }
-
-
-    // ===== ARCHIVO: HistorialController.cs (REFACTORIZADO) =====
-    [ApiController]
-    [Route("api/[controller]")]
-    public class HistorialController : ControllerBase
-    {
-        private readonly ServicioHistorial _servicioHistorial;
-
-        public HistorialController(ServicioHistorial servicioHistorial)
-        {
-            _servicioHistorial = servicioHistorial;
-        }
-
-        // GET: api/historial
-        [HttpGet]
-        public IActionResult ObtenerTodos()
-        {
-            var historiales = _servicioHistorial.MostrarTodos();
-            var historialesDto = HistorialRiegoMapper.ToResponseDTOList(historiales.ToList());
-
-            return Ok(ApiResponseDTO<System.Collections.Generic.List<HistorialRiegoResponseDTO>>.Success(
-                historialesDto,
-                $"Se encontraron {historialesDto.Count} registros"
-            ));
-        }
-
-        // GET: api/historial/{id}
-        [HttpGet("{id}")]
-        public IActionResult ObtenerPorId(int id)
-        {
-            if (id <= 0)
-                return BadRequest(ApiResponseDTO<object>.Error("El ID debe ser mayor a cero"));
-
-            var historial = _servicioHistorial.ObtenerPorId(id);
-
-            if (historial != null)
-            {
-                var historialDto = HistorialRiegoMapper.ToResponseDTO(historial);
-                return Ok(ApiResponseDTO<HistorialRiegoResponseDTO>.Success(
-                    historialDto,
-                    "Historial encontrado"
-                ));
-            }
-
-            return NotFound(ApiResponseDTO<object>.Error($"No se encontró historial con ID {id}"));
-        }
-
-        // GET: api/historial/por-fecha
-        [HttpGet("por-fecha")]
-        public IActionResult ObtenerPorFecha([FromQuery] DateTime fecha)
-        {
-            var todos = _servicioHistorial.MostrarTodos();
-            var filtrados = todos.Where(h => h.Fecha.Date == fecha.Date).ToList();
-            var filtradosDto = HistorialRiegoMapper.ToResponseDTOList(filtrados);
-
-            return Ok(ApiResponseDTO<System.Collections.Generic.List<HistorialRiegoResponseDTO>>.Success(
-                filtradosDto,
-                $"Se encontraron {filtradosDto.Count} registros para la fecha {fecha:dd/MM/yyyy}"
-            ));
-        }
-
-        // GET: api/historial/rango-fechas
-        [HttpGet("rango-fechas")]
-        public IActionResult ObtenerPorRangoFechas(
-            [FromQuery] DateTime fechaInicio,
-            [FromQuery] DateTime fechaFin)
-        {
-            var todos = _servicioHistorial.MostrarTodos();
-            var filtrados = todos.Where(h =>
-                h.Fecha.Date >= fechaInicio.Date &&
-                h.Fecha.Date <= fechaFin.Date
-            ).ToList();
-            var filtradosDto = HistorialRiegoMapper.ToResponseDTOList(filtrados);
-
-            return Ok(ApiResponseDTO<System.Collections.Generic.List<HistorialRiegoResponseDTO>>.Success(
-                filtradosDto,
-                $"Se encontraron {filtradosDto.Count} registros entre {fechaInicio:dd/MM/yyyy} y {fechaFin:dd/MM/yyyy}"
-            ));
-        }
-
-        // POST: api/historial
-        [HttpPost]
-        public IActionResult Guardar([FromBody] HistorialRiegoRequestDTO historialDto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ApiResponseDTO<object>.Error("Datos inválidos"));
-
-            try
-            {
-                var historial = HistorialRiegoMapper.ToEntity(historialDto);
-                var resultado = _servicioHistorial.Guardar(historial);
-
-                var historialResponse = HistorialRiegoMapper.ToResponseDTO(historial);
-                return CreatedAtAction(
-                    nameof(ObtenerPorId),
-                    new { id = historial.Id },
-                    ApiResponseDTO<HistorialRiegoResponseDTO>.Success(historialResponse, resultado)
-                );
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponseDTO<object>.Error($"Error al guardar: {ex.Message}"));
-            }
-        }
-
-        // GET: api/historial/ultimo
-        [HttpGet("ultimo")]
-        public IActionResult ObtenerUltimo()
-        {
-            var todos = _servicioHistorial.MostrarTodos();
-            var ultimo = todos.OrderByDescending(h => h.Fecha).FirstOrDefault();
-
-            if (ultimo == null)
-                return NotFound(ApiResponseDTO<object>.Error("No hay registros de historial"));
-
-            var ultimoDto = HistorialRiegoMapper.ToResponseDTO(ultimo);
-            return Ok(ApiResponseDTO<HistorialRiegoResponseDTO>.Success(
-                ultimoDto,
-                "Último registro de riego"
-            ));
-        }
-
-        // GET: api/historial/estadisticas
-        [HttpGet("estadisticas")]
-        public IActionResult ObtenerEstadisticas([FromQuery] int dias = 7)
-        {
-            var fechaLimite = DateTime.Now.AddDays(-dias);
-            var todos = _servicioHistorial.MostrarTodos();
-            var recientes = todos.Where(h => h.Fecha >= fechaLimite).ToList();
-
-            if (!recientes.Any())
-                return Ok(ApiResponseDTO<object>.Success(new { }, "No hay datos para el período"));
-
-            var estadisticas = new
-            {
-                TotalRegistros = recientes.Count,
-                HumedadPromedio = recientes.Average(h => h.Humedad),
-                HumedadMinima = recientes.Min(h => h.Humedad),
-                HumedadMaxima = recientes.Max(h => h.Humedad),
-                TemperaturaPromedio = recientes.Average(h => h.Temperatura),
-                TemperaturaMinima = recientes.Min(h => h.Temperatura),
-                TemperaturaMaxima = recientes.Max(h => h.Temperatura),
-                PeriodoAnalizado = dias
-            };
-
-            return Ok(ApiResponseDTO<object>.Success(
-                estadisticas,
-                $"Estadísticas de los últimos {dias} días"
-            ));
-        }
-    }
 }
+
+/// ESTE ESTO ESTA REPETIDO, ESTO DEBERIA IR EN CONTROLADOR DE HISTORIAl
+//    // ===== ARCHIVO: HistorialController.cs (REFACTORIZADO) =====
+//    [ApiController]
+//    [Route("api/[controller]")]
+//    public class HistorialController : ControllerBase
+//    {
+//        private readonly ServicioHistorial _servicioHistorial;
+
+//        public HistorialController(ServicioHistorial servicioHistorial)
+//        {
+//            _servicioHistorial = servicioHistorial;
+//        }
+
+//        // GET: api/historial
+//        [HttpGet]
+//        public IActionResult ObtenerTodos()
+//        {
+//            var historiales = _servicioHistorial.MostrarTodos();
+//            var historialesDto = HistorialRiegoMapper.ToResponseDTOList(historiales.ToList());
+
+//            return Ok(ApiResponseDTO<System.Collections.Generic.List<HistorialRiegoResponseDTO>>.Success(
+//                historialesDto,
+//                $"Se encontraron {historialesDto.Count} registros"
+//            ));
+//        }
+
+//        // GET: api/historial/{id}
+//        [HttpGet("{id}")]
+//        public IActionResult ObtenerPorId(int id)
+//        {
+//            if (id <= 0)
+//                return BadRequest(ApiResponseDTO<object>.Error("El ID debe ser mayor a cero"));
+
+//            var historial = _servicioHistorial.ObtenerPorId(id);
+
+//            if (historial != null)
+//            {
+//                var historialDto = HistorialRiegoMapper.ToResponseDTO(historial);
+//                return Ok(ApiResponseDTO<HistorialRiegoResponseDTO>.Success(
+//                    historialDto,
+//                    "Historial encontrado"
+//                ));
+//            }
+
+//            return NotFound(ApiResponseDTO<object>.Error($"No se encontró historial con ID {id}"));
+//        }
+
+//        // GET: api/historial/por-fecha
+//        [HttpGet("por-fecha")]
+//        public IActionResult ObtenerPorFecha([FromQuery] DateTime fecha)
+//        {
+//            var todos = _servicioHistorial.MostrarTodos();
+//            var filtrados = todos.Where(h => h.Fecha.Date == fecha.Date).ToList();
+//            var filtradosDto = HistorialRiegoMapper.ToResponseDTOList(filtrados);
+
+//            return Ok(ApiResponseDTO<System.Collections.Generic.List<HistorialRiegoResponseDTO>>.Success(
+//                filtradosDto,
+//                $"Se encontraron {filtradosDto.Count} registros para la fecha {fecha:dd/MM/yyyy}"
+//            ));
+//        }
+
+//        // GET: api/historial/rango-fechas
+//        [HttpGet("rango-fechas")]
+//        public IActionResult ObtenerPorRangoFechas(
+//            [FromQuery] DateTime fechaInicio,
+//            [FromQuery] DateTime fechaFin)
+//        {
+//            var todos = _servicioHistorial.MostrarTodos();
+//            var filtrados = todos.Where(h =>
+//                h.Fecha.Date >= fechaInicio.Date &&
+//                h.Fecha.Date <= fechaFin.Date
+//            ).ToList();
+//            var filtradosDto = HistorialRiegoMapper.ToResponseDTOList(filtrados);
+
+//            return Ok(ApiResponseDTO<System.Collections.Generic.List<HistorialRiegoResponseDTO>>.Success(
+//                filtradosDto,
+//                $"Se encontraron {filtradosDto.Count} registros entre {fechaInicio:dd/MM/yyyy} y {fechaFin:dd/MM/yyyy}"
+//            ));
+//        }
+
+//        // POST: api/historial
+//        [HttpPost]
+//        public IActionResult Guardar([FromBody] HistorialRiegoRequestDTO historialDto)
+//        {
+//            if (!ModelState.IsValid)
+//                return BadRequest(ApiResponseDTO<object>.Error("Datos inválidos"));
+
+//            try
+//            {
+//                var historial = HistorialRiegoMapper.ToEntity(historialDto);
+//                var resultado = _servicioHistorial.Guardar(historial);
+
+//                var historialResponse = HistorialRiegoMapper.ToResponseDTO(historial);
+//                return CreatedAtAction(
+//                    nameof(ObtenerPorId),
+//                    new { id = historial.Id },
+//                    ApiResponseDTO<HistorialRiegoResponseDTO>.Success(historialResponse, resultado)
+//                );
+//            }
+//            catch (Exception ex)
+//            {
+//                return BadRequest(ApiResponseDTO<object>.Error($"Error al guardar: {ex.Message}"));
+//            }
+//        }
+
+//        // GET: api/historial/ultimo
+//        [HttpGet("ultimo")]
+//        public IActionResult ObtenerUltimo()
+//        {
+//            var todos = _servicioHistorial.MostrarTodos();
+//            var ultimo = todos.OrderByDescending(h => h.Fecha).FirstOrDefault();
+
+//            if (ultimo == null)
+//                return NotFound(ApiResponseDTO<object>.Error("No hay registros de historial"));
+
+//            var ultimoDto = HistorialRiegoMapper.ToResponseDTO(ultimo);
+//            return Ok(ApiResponseDTO<HistorialRiegoResponseDTO>.Success(
+//                ultimoDto,
+//                "Último registro de riego"
+//            ));
+//        }
+
+//        // GET: api/historial/estadisticas
+//        [HttpGet("estadisticas")]
+//        public IActionResult ObtenerEstadisticas([FromQuery] int dias = 7)
+//        {
+//            var fechaLimite = DateTime.Now.AddDays(-dias);
+//            var todos = _servicioHistorial.MostrarTodos();
+//            var recientes = todos.Where(h => h.Fecha >= fechaLimite).ToList();
+
+//            if (!recientes.Any())
+//                return Ok(ApiResponseDTO<object>.Success(new { }, "No hay datos para el período"));
+
+//            var estadisticas = new
+//            {
+//                TotalRegistros = recientes.Count,
+//                HumedadPromedio = recientes.Average(h => h.Humedad),
+//                HumedadMinima = recientes.Min(h => h.Humedad),
+//                HumedadMaxima = recientes.Max(h => h.Humedad),
+//                TemperaturaPromedio = recientes.Average(h => h.Temperatura),
+//                TemperaturaMinima = recientes.Min(h => h.Temperatura),
+//                TemperaturaMaxima = recientes.Max(h => h.Temperatura),
+//                PeriodoAnalizado = dias
+//            };
+
+//            return Ok(ApiResponseDTO<object>.Success(
+//                estadisticas,
+//                $"Estadísticas de los últimos {dias} días"
+//            ));
+//        }
+//    }
+//}

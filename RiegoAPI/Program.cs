@@ -10,22 +10,32 @@ var builder = WebApplication.CreateBuilder(args);
 // CONFIGURACIÓN DE SERVICIOS
 // ===========================
 
+
+// LA CONFIGURACION DE SWAGGER ESTABA REPETIDA, TENIA DOS Y CADA UNA SU INICIALIZACION, QUITE LA PRIMERA QUE SE VEIA MAS BASICA
 // Agregar controladores
 builder.Services.AddControllers();
 
 // Configurar Swagger/OpenAPI para documentación
+// NO SE
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+builder.Services.AddSwaggerGen(c =>
 {
-    options.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo
+    c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "API Sistema de Riego Automático",
+        Title = "SmartDrop - Sistema de Riego Automático",
         Version = "v1",
-        Description = "API RESTful para el sistema de riego automático con Arduino",
-        Contact = new Microsoft.OpenApi.OpenApiContact
+        Description = @"
+![SmartDrop Logo](https://tusitio.com/img/smartdrop-logo.png)
+
+API RESTful para el sistema de riego automático con Arduino.
+
+**Contacto:** Equipo de Desarrollo
+",
+        Contact = new OpenApiContact
         {
             Name = "Equipo de Desarrollo",
-            Email = "soporte@riego.com"
+            Email = "contacto@smartdrop.com",
+            Url = new Uri("https://smartdrop.com")
         }
     });
 });
@@ -80,10 +90,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(options =>
+    app.UseSwaggerUI(c =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "API Riego v1");
-        options.RoutePrefix = "swagger"; // Acceder en /swagger
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartDrop API v1");
+        c.DocumentTitle = "SmartDrop - API de Riego Automático";
+        c.InjectStylesheet("/swagger-ui/custom.css"); // Opcional
+        c.RoutePrefix = "swagger"; // Acceder en /swagger
     });
 }
 
@@ -124,40 +136,12 @@ app.Map("/error", (HttpContext context) =>
 // MANEJO DEL SWAGGER UI PERSONALIZADO  
 // ===================================
 
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "SmartDrop - Sistema de Riego Automático",
-        Version = "v1",
-        Description = @"
-![SmartDrop Logo](https://tusitio.com/img/smartdrop-logo.png)
 
-API RESTful para el sistema de riego automático con Arduino.
-
-**Contacto:** Equipo de Desarrollo
-",
-        Contact = new OpenApiContact
-        {
-            Name = "Equipo de Desarrollo",
-            Email = "contacto@smartdrop.com",
-            Url = new Uri("https://smartdrop.com")
-        }
-    });
-});
 
 
 // ===================================
 // ACTIVAR EL SWAGGER UI PERSONALIZADO  
 // ===================================
-
-app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartDrop API v1");
-    c.DocumentTitle = "SmartDrop - API de Riego Automático";
-    c.InjectStylesheet("/swagger-ui/custom.css"); // Opcional para estilos
-});
 
 
 

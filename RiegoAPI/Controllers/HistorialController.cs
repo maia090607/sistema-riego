@@ -7,6 +7,9 @@ using RiegoAPI.DTOs.Response;
 using System.Collections.Generic;
 using System.Linq;
 
+// CUANDO EJECUTABA SWAGGER NO ME ABRIA POR EL HECHO DE TENER ESTE CONTRLADOR COPIADO TAMBIEN EN 
+// CLIMA CONTROLLER, SOLO LO COMENTE, SI AQUELLA VERSION ES MAS RECIENT O MEJOR, PEGAR AQUELLA ACA
+// SI NO DARA ERROES DE RUTAS DUPLICADAS
 namespace API.Controllers
 {
     [ApiController]
@@ -20,6 +23,7 @@ namespace API.Controllers
             _servicioHistorial = servicioHistorial;
         }
 
+
         // GET: api/historial
         [HttpGet]
         public ActionResult<List<HistorialRiegoResponseDTO>> ObtenerTodos()
@@ -28,6 +32,7 @@ namespace API.Controllers
             var dto = HistorialRiegoMapper.ToResponseDTOList(entidades);
             return Ok(dto);
         }
+
 
         // GET: api/historial/{id}
         [HttpGet("{id}")]
@@ -43,6 +48,7 @@ namespace API.Controllers
 
             return Ok(HistorialRiegoMapper.ToResponseDTO(entidad));
         }
+
 
         // GET: api/historial/por-fecha
         [HttpGet("por-fecha")]
@@ -135,6 +141,7 @@ namespace API.Controllers
     }
 
     // DTO de Estadísticas como Response
+    //ESTE DTO DEBERIA IR EN LA CARPETA DTO/RESPONSE
     public class EstadisticasHistorialResponseDTO
     {
         public int TotalRegistros { get; set; }

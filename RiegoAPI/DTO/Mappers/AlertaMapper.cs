@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace RiegoAPI.DTO.Mappers
-{
+{// BIEN
     public class AlertaMapper
     {
         /// Convierte de AlertaRequestDTO a Alertas (Entity)
