@@ -25,6 +25,12 @@ else if (vista == "historial")
     <Historial OnVolverAlDashboard="IrADashboard" OnCerrarSesion="IrALogin" />
 }
 
+else if (vista == "plantas")
+{
+    <Plantas OnVolverAlDashboard="IrADashboard" OnCerrarSesion="IrALogin" />
+}
+
+
 @code {
     private string vista = "login";
 
@@ -33,6 +39,8 @@ else if (vista == "historial")
     private void IrARegistro() => vista = "registro";
     private void IrADashboard() => vista = "dashboard";
     private void IrAHistorial() => vista = "historial";
+    private void IrAPlantas() => vista = "plantas";
+
 }
 
 

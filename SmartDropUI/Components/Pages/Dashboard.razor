@@ -8,6 +8,8 @@
         <h1>SISTEMA DE RIEGO AUTOMÁTICO SMARTDROP</h1>
         <p>Panel de Control y Monitoreo en Tiempo Real</p>
         <button class="btn-salir" @onclick="CerrarSesion">Salir</button>
+        @inject NavigationManager Navigation
+        <button class="nav-btn" @onclick="IrAPlantas">🌱 Plantas</button>
     </div>
 
     <div class="dashboard-grid-nuevo">
@@ -139,6 +141,11 @@
                 VelocidadViento = 0
             };
         }
+    }
+
+    private void IrAPlantas()
+    {
+        Navigation.NavigateTo("/plantas");
     }
 
     private string ObtenerClaseTemperatura()

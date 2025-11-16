@@ -4,6 +4,7 @@ using SmartDropUI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -27,6 +28,7 @@ builder.Services.AddHttpClient("WeatherAPI", client =>
 // Registrar servicios
 builder.Services.AddScoped<RiegoService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<PlantaService>();
 
 // LocalStorage
 builder.Services.AddBlazoredLocalStorage();

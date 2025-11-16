@@ -3,7 +3,134 @@
 @inject AuthService AuthService
 
 <div class="registro-container">
-    <!-- formulario de registro ... -->
+    <div class="registro-card">
+        <div class="registro-header">
+            <div class="icon-group">
+                <span>🌿</span>
+                <span>💧</span>
+                <span>🔧</span>
+                <span>⚙️</span>
+            </div>
+            <h1>REGISTRAR NUEVO USUARIO</h1>
+            <p>Sistema de Riego Automático SmartDrop</p>
+        </div>
+
+        <div class="registro-form">
+            <!-- Identificación -->
+            <div class="form-group">
+                <label>
+                    <span class="label-icon purple">🆔</span>
+                    Identificación
+                </label>
+                <input type="text"
+                       placeholder="Ingrese su identificación"
+                       @bind="formRegistro.Identificacion" />
+            </div>
+
+            <!-- Nombre Completo -->
+            <div class="form-group">
+                <label>
+                    <span class="label-icon blue">👤</span>
+                    Nombre Completo
+                </label>
+                <input type="text"
+                       placeholder="Ingrese su nombre completo"
+                       @bind="formRegistro.NombreCompleto" />
+            </div>
+
+            <!-- Correo Electrónico -->
+            <div class="form-group">
+                <label>
+                    <span class="label-icon green">📧</span>
+                    Correo Electrónico
+                </label>
+                <input type="email"
+                       placeholder="usuario@ejemplo.com"
+                       @bind="formRegistro.Correo" />
+            </div>
+
+            <!-- Nombre de Usuario -->
+            <div class="form-group">
+                <label>
+                    <span class="label-icon orange">📝</span>
+                    Nombre de Usuario
+                </label>
+                <input type="text"
+                       placeholder="Ingrese nombre de usuario"
+                       @bind="formRegistro.NombreUsuario" />
+            </div>
+
+            <!-- Rol del Usuario -->
+            <div class="form-group">
+                <label>
+                    <span class="label-icon teal">👥</span>
+                    Rol del Usuario
+                </label>
+                <select @bind="formRegistro.Rol">
+                    <option value="">Seleccionar rol</option>
+                    <option value="admin">Administrador</option>
+                    <option value="operario">Operario</option>
+                    <option value="usuario">Usuario</option>
+                </select>
+            </div>
+
+            <!-- Contraseña -->
+            <div class="form-group">
+                <label>
+                    <span class="label-icon yellow">🔒</span>
+                    Contraseña
+                </label>
+                <div class="input-wrapper">
+                    <input type="@(mostrarPasswordRegistro ? "text" : "password")"
+                           placeholder="Ingrese una contraseña segura"
+                           @bind="formRegistro.Contrasena"
+                           style="padding-right: 3rem;" />
+                    <button type="button"
+                            class="toggle-password"
+                            @onclick="ToggleMostrarPassword"
+                            style="position: absolute; right: 1rem; background: none; border: none; cursor: pointer; font-size: 1.3rem;">
+                        @(mostrarPasswordRegistro ? "🙈" : "👁️")
+                    </button>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+                    <input type="checkbox" id="mostrarPass" @bind="mostrarPasswordRegistro" />
+                    <label for="mostrarPass" style="margin: 0; font-size: 0.9rem; color: #6b7280;">Mostrar</label>
+                </div>
+            </div>
+
+            <!-- Mensajes -->
+            @if (!string.IsNullOrEmpty(mensajeError))
+            {
+                <div class="alert-error">
+                    ❌ @mensajeError
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(mensajeExito))
+            {
+                <div class="alert-success">
+                    ✅ @mensajeExito
+                </div>
+            }
+
+            <!-- Botones -->
+            <div class="button-group">
+                <button type="button"
+                        class="btn-create"
+                        @onclick="HandleRegistro"
+                        disabled="@cargando">
+                    <span>✨</span>
+                    @(cargando ? "Creando..." : "CREAR USUARIO")
+                </button>
+                <button type="button"
+                        class="btn-back"
+                        @onclick="IrALogin">
+                    <span>←</span>
+                    ATRÁS
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @code {
@@ -16,15 +143,62 @@
     private string mensajeError = "";
     private string mensajeExito = "";
 
+    private void ToggleMostrarPassword()
+    {
+        mostrarPasswordRegistro = !mostrarPasswordRegistro;
+    }
+
     private async Task HandleRegistro()
     {
         mensajeError = "";
         mensajeExito = "";
 
-        if (string.IsNullOrWhiteSpace(formRegistro.NombreUsuario) ||
-            string.IsNullOrWhiteSpace(formRegistro.Contrasena))
+        // Validaciones
+        if (string.IsNullOrWhiteSpace(formRegistro.Identificacion))
         {
-            mensajeError = "Complete todos los campos";
+            mensajeError = "La identificación es requerida";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(formRegistro.NombreCompleto))
+        {
+            mensajeError = "El nombre completo es requerido";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(formRegistro.Correo))
+        {
+            mensajeError = "El correo electrónico es requerido";
+            return;
+        }
+
+        if (!formRegistro.Correo.Contains("@") || !formRegistro.Correo.Contains("."))
+        {
+            mensajeError = "Ingrese un correo electrónico válido";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(formRegistro.NombreUsuario))
+        {
+            mensajeError = "El nombre de usuario es requerido";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(formRegistro.Rol))
+        {
+            mensajeError = "Debe seleccionar un rol";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(formRegistro.Contrasena))
+        {
+            mensajeError = "La contraseña es requerida";
+            return;
+        }
+
+        if (formRegistro.Contrasena.Length < 6)
+        {
+            mensajeError = "La contraseña debe tener al menos 6 caracteres";
             return;
         }
 
@@ -33,13 +207,13 @@
 
         if (ok)
         {
-            mensajeExito = "Usuario creado exitosamente";
-            await Task.Delay(1200);
+            mensajeExito = "¡Usuario creado exitosamente! Redirigiendo...";
+            await Task.Delay(1500);
             await OnRegistroExitoso.InvokeAsync();
         }
         else
         {
-            mensajeError = "Error al crear usuario";
+            mensajeError = "Error al crear usuario. El nombre de usuario puede estar en uso.";
         }
 
         cargando = false;

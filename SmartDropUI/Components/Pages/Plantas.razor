@@ -1,0 +1,163 @@
+﻿@using SmartDropUI.Models
+@using SmartDropUI.Services
+@inject PlantaService PlantaService
+
+@if (vistaActual == "lista")
+{
+    <div class="plantas-container">
+
+        <div class="plantas-header">
+            <div class="header-left">
+                <span class="icon">🌱</span>
+                <h1>Gestión de Plantas</h1>
+            </div>
+
+            <div class="header-right">
+                <button class="nav-btn success" @onclick="IrAAgregarPlanta">
+                    ➕ Nueva Planta
+                </button>
+
+                <button class="nav-btn" @onclick="VolverAlDashboard">
+                    ← Atrás
+                </button>
+
+                <button class="nav-btn logout" @onclick="CerrarSesion">
+                    Salir
+                </button>
+            </div>
+        </div>
+
+        @if (cargando)
+        {
+            <div class="loading-container">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando plantas...</p>
+                </div>
+            </div>
+        }
+        else if (!plantas.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon">🌱</div>
+                <h2>No hay plantas registradas</h2>
+                <p>Comienza agregando tu primera planta al sistema</p>
+
+                <button class="btn-add-first" @onclick="IrAAgregarPlanta">
+                    ➕ Agregar Primera Planta
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="plantas-grid">
+                @foreach (var planta in plantas)
+                {
+                    <div class="planta-card">
+                        <div class="planta-icon">@planta.ImagenUrl</div>
+
+                        <h3>@planta.Nombre</h3>
+
+                        <p class="planta-id">ID: @planta.IdPlanta</p>
+
+                        <p class="planta-descripcion">@planta.Descripcion</p>
+
+                        <div class="planta-specs">
+                            <div class="spec">
+                                <span class="spec-icon">💧</span>
+                                <span>@planta.HumedadOptima %</span>
+                            </div>
+
+                            <div class="spec">
+                                <span class="spec-icon">🌡️</span>
+                                <span>@planta.TemperaturaOptima °C</span>
+                            </div>
+
+                            <div class="spec">
+                                <span class="spec-icon">☀️</span>
+                                <span>@planta.LuzOptima</span>
+                            </div>
+                        </div>
+
+                        <div class="planta-actions">
+                            <button class="btn-edit" @onclick="@(() => EditarPlanta(planta.Id))">
+                                ✏️ Editar
+                            </button>
+
+                            <button class="btn-delete" @onclick="@(() => ConfirmarEliminar(planta.Id))">
+                                🗑️ Eliminar
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+    </div>
+}
+else if (vistaActual == "agregar" || vistaActual == "editar")
+{
+    <AgregarPlanta
+        PlantaId="@plantaSeleccionadaId"
+        OnGuardarExitoso="VolverALista"
+        OnCancelar="VolverALista" />
+}
+
+@code {
+    [Parameter] public EventCallback OnVolverAlDashboard { get; set; }
+    [Parameter] public EventCallback OnCerrarSesion { get; set; }
+
+    private List<PlantaModel> plantas = new();
+    private bool cargando = false;
+    private string vistaActual = "lista";
+    private int? plantaSeleccionadaId = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarPlantas();
+    }
+
+    private async Task CargarPlantas()
+    {
+        cargando = true;
+        plantas = await PlantaService.ObtenerPlantasAsync();
+        cargando = false;
+        StateHasChanged();
+    }
+
+    private void IrAAgregarPlanta()
+    {
+        plantaSeleccionadaId = null;
+        vistaActual = "agregar";
+    }
+
+    private void EditarPlanta(int id)
+    {
+        plantaSeleccionadaId = id;
+        vistaActual = "editar";
+    }
+
+    private async Task ConfirmarEliminar(int id)
+    {
+        if (await PlantaService.EliminarPlantaAsync(id))
+        {
+            await CargarPlantas();
+        }
+    }
+
+    private async Task VolverALista()
+    {
+        vistaActual = "lista";
+        await CargarPlantas();
+    }
+
+    private async Task VolverAlDashboard()
+    {
+        await OnVolverAlDashboard.InvokeAsync();
+    }
+
+    private async Task CerrarSesion()
+    {
+        await OnCerrarSesion.InvokeAsync();
+    }
+}
