@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,12 +17,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo
     {
         Title = "API Sistema de Riego Automático",
         Version = "v1",
         Description = "API RESTful para el sistema de riego automático con Arduino",
-        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        Contact = new Microsoft.OpenApi.OpenApiContact
         {
             Name = "Equipo de Desarrollo",
             Email = "soporte@riego.com"

@@ -27,11 +27,12 @@ namespace API.Controllers
             if (!resultado.Estado)
                 return BadRequest(resultado.Mensaje);
 
-            // ✅ CORREGIDO: usar resultado.Entidades (la lista)
-            var listaDTO = UsuarioMapper.ToResponseDTOList(resultado.Entidad);
+            // La propiedad correcta debe ser resultado.Entidades
+            var listaDTO = UsuarioMapper.ToResponseDTOList(resultado.Lista);
 
             return Ok(listaDTO);
         }
+
 
         // GET: api/usuarios/{id}
         [HttpGet("{id}")]

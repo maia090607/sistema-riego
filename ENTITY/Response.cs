@@ -13,14 +13,14 @@ namespace DAL
             Lista = null;
         }
 
-        public Response(bool estado, string mensaje, T entidad, IList<T> lista)
+
+        public Response(bool estado, string mensaje, T entidad, List<T> lista)
         {
             Estado = estado;
             Mensaje = mensaje;
             Entidad = entidad;
             Lista = lista;
         }
-
         public bool Estado { get; set; }
 
         public string Mensaje { get; set; }

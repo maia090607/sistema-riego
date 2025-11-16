@@ -1,22 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-//namespace RiegoAPI.DTOs.Response
-//{
-//    public class ApiResponseDTO<T>
-//    {
-//        public bool Estado { get; set; }
-//        public string Mensaje { get; set; }
-//        public T Datos { get; set; }
-
-//        internal static object? Success(UsuarioResponseDTO usuarioDto, string v)
-//        {
-//            throw new NotImplementedException();
-//        }
-//    }
-//}
-
-
+﻿using System.Collections.Generic;
 using System;
 
 namespace RiegoAPI.DTOs.Response
