@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using BLL;
-using ENTITY;
-using DAL;
+﻿using BLL;
+using Microsoft.AspNetCore.Mvc;
+using RiegoAPI.DTO.Mappers;
+using RiegoAPI.DTO.Request;
+using RiegoAPI.DTOs.Mappers;
+using RiegoAPI.DTOs.Request;
+using RiegoAPI.DTOs.Response;
 
-namespace API.Controllers
+namespace RiegoAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -18,86 +21,120 @@ namespace API.Controllers
 
         // GET: api/plantas
         [HttpGet]
-        public ActionResult<Response<Cultivo>> ObtenerTodos()
+        public IActionResult ObtenerTodos()
         {
             var resultado = _serviciosPlanta.ObtenerTodos();
-            return Ok(resultado);
+            var plantasDto = PlantaMapper.ToResponseDTOList(resultado.Lista);
+
+            return Ok(ApiResponseDTO<System.Collections.Generic.List<PlantaResponseDTO>>.Success(
+                plantasDto,
+                $"Se encontraron {plantasDto.Count} plantas"
+            ));
         }
 
         // GET: api/plantas/{id}
         [HttpGet("{id}")]
-        public ActionResult<Response<Cultivo>> ObtenerPorId(int id)
+        public IActionResult ObtenerPorId(int id)
         {
             if (id <= 0)
-                return BadRequest("El ID debe ser mayor a cero");
+                return BadRequest(ApiResponseDTO<object>.Error("El ID debe ser mayor a cero"));
 
             var resultado = _serviciosPlanta.BuscarPorId(id);
 
-            if (resultado.Entidad == null)
-                return NotFound($"No se encontró planta con ID {id}");
+            if (resultado.Estado && resultado.Entidad != null)
+            {
+                var plantaDto = PlantaMapper.ToResponseDTO(resultado.Entidad);
+                return Ok(ApiResponseDTO<PlantaResponseDTO>.Success(
+                    plantaDto,
+                    "Planta encontrada"
+                ));
+            }
 
-            return Ok(resultado);
+            return NotFound(ApiResponseDTO<object>.Error($"No se encontró planta con ID {id}"));
         }
 
         // POST: api/plantas
         [HttpPost]
-        public ActionResult<Response<Cultivo>> Insertar([FromBody] Cultivo cultivo)
+        public IActionResult Insertar([FromBody] PlantaRequestDTO plantaDto)
         {
-            if (cultivo == null)
-                return BadRequest("La planta no puede ser nula");
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponseDTO<object>.Error("Datos inválidos"));
 
-            var existente = _serviciosPlanta.BuscarPorId(cultivo.IdPlanta);
-            if (existente.Estado)
-                return Conflict($"Ya existe una planta con ID {cultivo.IdPlanta}");
+            var existente = _serviciosPlanta.BuscarPorId(plantaDto.IdPlanta);
+            if (existente.Estado && existente.Entidad != null)
+                return Conflict(ApiResponseDTO<object>.Error($"Ya existe una planta con ID {plantaDto.IdPlanta}"));
 
-            var resultado = _serviciosPlanta.Insertar(cultivo);
+            var planta = PlantaMapper.ToEntity(plantaDto);
+            var resultado = _serviciosPlanta.Insertar(planta);
 
             if (resultado.Estado)
-                return CreatedAtAction(nameof(ObtenerPorId), new { id = cultivo.IdPlanta }, resultado);
+            {
+                var plantaResponse = PlantaMapper.ToResponseDTO(resultado.Entidad);
+                return CreatedAtAction(
+                    nameof(ObtenerPorId),
+                    new { id = planta.IdPlanta },
+                    ApiResponseDTO<PlantaResponseDTO>.Success(plantaResponse, resultado.Mensaje)
+                );
+            }
 
-            return BadRequest(resultado.Mensaje);
+            return BadRequest(ApiResponseDTO<object>.Error(resultado.Mensaje));
         }
 
         // PUT: api/plantas/{id}
         [HttpPut("{id}")]
-        public ActionResult<Response<Cultivo>> Actualizar(int id, [FromBody] Cultivo cultivo)
+        public IActionResult Actualizar(int id, [FromBody] PlantaRequestDTO plantaDto)
         {
-            if (id != cultivo.IdPlanta)
-                return BadRequest("El ID no coincide");
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponseDTO<object>.Error("Datos inválidos"));
 
-            var resultado = _serviciosPlanta.Actualizar(cultivo);
+            if (id != plantaDto.IdPlanta)
+                return BadRequest(ApiResponseDTO<object>.Error("El ID no coincide"));
+
+            var plantaExistente = _serviciosPlanta.BuscarPorId(id);
+
+            if (!plantaExistente.Estado || plantaExistente.Entidad == null)
+                return NotFound(ApiResponseDTO<object>.Error("Planta no encontrada"));
+
+            PlantaMapper.UpdateEntity(plantaExistente.Entidad, plantaDto);
+            var resultado = _serviciosPlanta.Actualizar(plantaExistente.Entidad);
 
             if (resultado.Estado)
-                return Ok(resultado);
+            {
+                var plantaResponse = PlantaMapper.ToResponseDTO(resultado.Entidad);
+                return Ok(ApiResponseDTO<PlantaResponseDTO>.Success(
+                    plantaResponse,
+                    resultado.Mensaje
+                ));
+            }
 
-            return NotFound(resultado.Mensaje);
+            return NotFound(ApiResponseDTO<object>.Error(resultado.Mensaje));
         }
 
         // DELETE: api/plantas/{id}
         [HttpDelete("{id}")]
-        public ActionResult<Response<Cultivo>> Eliminar(int id)
+        public IActionResult Eliminar(int id)
         {
             if (id <= 0)
-                return BadRequest("El ID debe ser mayor a cero");
+                return BadRequest(ApiResponseDTO<object>.Error("El ID debe ser mayor a cero"));
 
             var resultado = _serviciosPlanta.Eliminar(id);
 
             if (resultado.Estado)
-                return Ok(resultado);
+                return Ok(ApiResponseDTO<object>.Success(null, resultado.Mensaje));
 
-            return NotFound(resultado.Mensaje);
+            return NotFound(ApiResponseDTO<object>.Error(resultado.Mensaje));
         }
 
         // POST: api/plantas/subir-imagen/{id}
         [HttpPost("subir-imagen/{id}")]
-        public async Task<ActionResult> SubirImagen(int id, IFormFile imagen)
+        public async Task<IActionResult> SubirImagen(int id, IFormFile imagen)
         {
             if (imagen == null || imagen.Length == 0)
-                return BadRequest("No se proporcionó imagen");
+                return BadRequest(ApiResponseDTO<object>.Error("No se proporcionó imagen"));
 
             var planta = _serviciosPlanta.BuscarPorId(id);
-            if (planta.Entidad == null)
-                return NotFound($"No se encontró planta con ID {id}");
+            if (!planta.Estado || planta.Entidad == null)
+                return NotFound(ApiResponseDTO<object>.Error($"No se encontró planta con ID {id}"));
 
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagenes", "plantas");
             Directory.CreateDirectory(uploadsFolder);
@@ -113,7 +150,10 @@ namespace API.Controllers
             planta.Entidad.RutaImagen = $"/imagenes/plantas/{fileName}";
             _serviciosPlanta.Actualizar(planta.Entidad);
 
-            return Ok(new { rutaImagen = planta.Entidad.RutaImagen });
+            return Ok(ApiResponseDTO<object>.Success(
+                new { rutaImagen = planta.Entidad.RutaImagen },
+                "Imagen subida correctamente"
+            ));
         }
     }
 }

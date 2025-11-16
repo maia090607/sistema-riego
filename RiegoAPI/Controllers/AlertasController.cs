@@ -1,9 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using BLL;
-using ENTITY;
-using DAL;
+﻿using BLL;
+using Microsoft.AspNetCore.Mvc;
+using RiegoAPI.DTO.Mappers;
+using RiegoAPI.DTO.Request;
+using RiegoAPI.DTOs.Response;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace API.Controllers
+namespace RiegoAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -16,161 +21,217 @@ namespace API.Controllers
             _serviciosAlertas = serviciosAlertas;
         }
 
-        // GET: api/alertas
         [HttpGet]
-        public ActionResult<Response<Alertas>> ObtenerTodas()
+        public IActionResult ObtenerTodas()
         {
             var resultado = _serviciosAlertas.MostrarTodos();
-            return Ok(resultado);
+            var alertasDto = AlertaMapper.ToResponseDTOList(resultado.Lista);
+
+            return Ok(ApiResponseDTO<List<AlertaResponseDTO>>.Success(
+                alertasDto,
+                $"Se encontraron {alertasDto.Count} alertas"
+            ));
         }
 
-        // GET: api/alertas/{id}
         [HttpGet("{id}")]
-        public ActionResult<Response<Alertas>> ObtenerPorId(int id)
+        public IActionResult ObtenerPorId(int id)
         {
             if (id <= 0)
-                return BadRequest("El ID debe ser mayor a cero");
+                return BadRequest(ApiResponseDTO<object>.Error("El ID debe ser mayor a cero"));
 
             var resultado = _serviciosAlertas.ObtenerPorId(id);
 
-            if (resultado.Entidad == null)
-                return NotFound($"No se encontró alerta con ID {id}");
+            if (resultado.Estado && resultado.Entidad != null)
+            {
+                var alertaDto = AlertaMapper.ToResponseDTO(resultado.Entidad);
+                return Ok(ApiResponseDTO<AlertaResponseDTO>.Success(
+                    alertaDto,
+                    "Alerta encontrada"
+                ));
+            }
 
-            return Ok(resultado);
+            return NotFound(ApiResponseDTO<object>.Error($"No se encontró alerta con ID {id}"));
         }
 
-        // GET: api/alertas/activas
         [HttpGet("activas")]
-        public ActionResult<List<Alertas>> ObtenerActivas()
+        public IActionResult ObtenerActivas()
         {
             var todas = _serviciosAlertas.MostrarTodos();
-            var activas = todas.Lista?.Where(a => !a.Estado).ToList() ?? new List<Alertas>();
+            var activas = todas.Lista?.Where(a => !a.Estado).ToList() ?? new List<ENTITY.Alertas>();
+            var activasDto = AlertaMapper.ToResponseDTOList(activas);
 
-            return Ok(new Response<Alertas>(true,
-                $"Se encontraron {activas.Count} alertas activas",
-                null,
-                activas));
+            return Ok(ApiResponseDTO<List<AlertaResponseDTO>>.Success(
+                activasDto,
+                $"Se encontraron {activasDto.Count} alertas activas"
+            ));
         }
 
-        // GET: api/alertas/por-nivel/{nivel}
         [HttpGet("por-nivel/{nivel}")]
-        public ActionResult<List<Alertas>> ObtenerPorNivel(string nivel)
+        public IActionResult ObtenerPorNivel(string nivel)
         {
             var todas = _serviciosAlertas.MostrarTodos();
             var filtradas = todas.Lista?
                 .Where(a => a.NivelCritico.Equals(nivel, StringComparison.OrdinalIgnoreCase))
-                .ToList() ?? new List<Alertas>();
+                .ToList() ?? new List<ENTITY.Alertas>();
 
-            return Ok(new Response<Alertas>(true,
-                $"Se encontraron {filtradas.Count} alertas de nivel {nivel}",
-                null,
-                filtradas));
+            var filtradasDto = AlertaMapper.ToResponseDTOList(filtradas);
+
+            return Ok(ApiResponseDTO<List<AlertaResponseDTO>>.Success(
+                filtradasDto,
+                $"Se encontraron {filtradasDto.Count} alertas de nivel {nivel}"
+            ));
         }
 
-        // GET: api/alertas/por-tipo/{tipo}
         [HttpGet("por-tipo/{tipo}")]
-        public ActionResult<List<Alertas>> ObtenerPorTipo(string tipo)
+        public IActionResult ObtenerPorTipo(string tipo)
         {
             var todas = _serviciosAlertas.MostrarTodos();
             var filtradas = todas.Lista?
                 .Where(a => a.TipoAlerta.Contains(tipo, StringComparison.OrdinalIgnoreCase))
-                .ToList() ?? new List<Alertas>();
+                .ToList() ?? new List<ENTITY.Alertas>();
 
-            return Ok(new Response<Alertas>(true,
-                $"Se encontraron {filtradas.Count} alertas del tipo {tipo}",
-                null,
-                filtradas));
+            var filtradasDto = AlertaMapper.ToResponseDTOList(filtradas);
+
+            return Ok(ApiResponseDTO<List<AlertaResponseDTO>>.Success(
+                filtradasDto,
+                $"Se encontraron {filtradasDto.Count} alertas del tipo {tipo}"
+            ));
         }
 
-        // GET: api/alertas/por-fecha
         [HttpGet("por-fecha")]
-        public ActionResult<List<Alertas>> ObtenerPorFecha([FromQuery] DateTime fecha)
+        public IActionResult ObtenerPorFecha([FromQuery] DateTime fecha)
         {
             var todas = _serviciosAlertas.MostrarTodos();
             var filtradas = todas.Lista?
                 .Where(a => a.FechaHora.Date == fecha.Date)
-                .ToList() ?? new List<Alertas>();
+                .ToList() ?? new List<ENTITY.Alertas>();
 
-            return Ok(new Response<Alertas>(true,
-                $"Se encontraron {filtradas.Count} alertas para la fecha {fecha:dd/MM/yyyy}",
-                null,
-                filtradas));
+            var filtradasDto = AlertaMapper.ToResponseDTOList(filtradas);
+
+            return Ok(ApiResponseDTO<List<AlertaResponseDTO>>.Success(
+                filtradasDto,
+                $"Se encontraron {filtradasDto.Count} alertas para la fecha {fecha:dd/MM/yyyy}"
+            ));
         }
 
-        // POST: api/alertas
         [HttpPost]
-        public ActionResult<Response<Alertas>> Agregar([FromBody] Alertas alerta)
+        public IActionResult Agregar([FromBody] AlertaRequestDTO alertaDto)
         {
-            if (alerta == null)
-                return BadRequest("La alerta no puede ser nula");
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponseDTO<object>.Error("Datos inválidos"));
 
             var todas = _serviciosAlertas.MostrarTodos();
-            int nuevoId = 1;
-            if (todas.Lista != null && todas.Lista.Count > 0)
-                nuevoId = todas.Lista.Max(a => a.IdAlerta) + 1;
+            int nuevoId = (todas.Lista?.Any() ?? false) ? todas.Lista.Max(a => a.IdAlerta) + 1 : 1;
 
-            alerta.IdAlerta = nuevoId;
-            alerta.FechaHora = DateTime.Now;
+            alertaDto.IdAlerta = nuevoId;
+            alertaDto.FechaHora = DateTime.Now;
 
+            var alerta = AlertaMapper.ToEntity(alertaDto);
             var resultado = _serviciosAlertas.Agregar(alerta);
 
             if (resultado.Estado)
-                return CreatedAtAction(nameof(ObtenerPorId), new { id = alerta.IdAlerta }, resultado);
+            {
+                var alertaResponse = AlertaMapper.ToResponseDTO(resultado.Entidad);
+                return CreatedAtAction(nameof(ObtenerPorId), new { id = alerta.IdAlerta },
+                    ApiResponseDTO<AlertaResponseDTO>.Success(alertaResponse, resultado.Mensaje));
+            }
 
-            return BadRequest(resultado.Mensaje);
+            return BadRequest(ApiResponseDTO<object>.Error(resultado.Mensaje));
         }
 
-        // PUT: api/alertas/{id}
         [HttpPut("{id}")]
-        public ActionResult<Response<Alertas>> Actualizar(int id, [FromBody] Alertas alerta)
+        public IActionResult Actualizar(int id, [FromBody] AlertaRequestDTO alertaDto)
         {
-            if (id != alerta.IdAlerta)
-                return BadRequest("El ID no coincide");
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponseDTO<object>.Error("Datos inválidos"));
 
-            var resultado = _serviciosAlertas.Actualizar(alerta);
+            if (id != alertaDto.IdAlerta)
+                return BadRequest(ApiResponseDTO<object>.Error("El ID no coincide"));
+
+            var alertaExistente = _serviciosAlertas.ObtenerPorId(id);
+
+            if (!alertaExistente.Estado || alertaExistente.Entidad == null)
+                return NotFound(ApiResponseDTO<object>.Error("Alerta no encontrada"));
+
+            AlertaMapper.UpdateEntity(alertaExistente.Entidad, alertaDto);
+            var resultado = _serviciosAlertas.Actualizar(alertaExistente.Entidad);
 
             if (resultado.Estado)
-                return Ok(resultado);
+            {
+                var alertaResponse = AlertaMapper.ToResponseDTO(resultado.Entidad);
+                return Ok(ApiResponseDTO<AlertaResponseDTO>.Success(
+                    alertaResponse, resultado.Mensaje
+                ));
+            }
 
-            return NotFound(resultado.Mensaje);
+            return NotFound(ApiResponseDTO<object>.Error(resultado.Mensaje));
         }
 
-        // PATCH: api/alertas/{id}/marcar-leida
+        [HttpPatch("{id}/estado")]
+        public IActionResult CambiarEstado(int id, [FromBody] AlertaEstadoRequestDTO estadoDto)
+        {
+            var alertaExistente = _serviciosAlertas.ObtenerPorId(id);
+
+            if (!alertaExistente.Estado || alertaExistente.Entidad == null)
+                return NotFound(ApiResponseDTO<object>.Error("Alerta no encontrada"));
+
+            alertaExistente.Entidad.Estado = estadoDto.Estado;
+            var resultado = _serviciosAlertas.Actualizar(alertaExistente.Entidad);
+
+            if (resultado.Estado)
+            {
+                var alertaResponse = AlertaMapper.ToResponseDTO(resultado.Entidad);
+                return Ok(ApiResponseDTO<AlertaResponseDTO>.Success(
+                    alertaResponse,
+                    $"Alerta {(estadoDto.Estado ? "resuelta" : "activada")} correctamente"
+                ));
+            }
+
+            return BadRequest(ApiResponseDTO<object>.Error(resultado.Mensaje));
+        }
+
         [HttpPatch("{id}/marcar-leida")]
-        public ActionResult<Response<Alertas>> MarcarComoLeida(int id)
+        public IActionResult MarcarComoLeida(int id)
         {
             var alerta = _serviciosAlertas.ObtenerPorId(id);
-            if (alerta.Entidad == null)
-                return NotFound($"No se encontró alerta con ID {id}");
+
+            if (!alerta.Estado || alerta.Entidad == null)
+                return NotFound(ApiResponseDTO<object>.Error($"No se encontró alerta con ID {id}"));
 
             alerta.Entidad.Estado = true;
             var resultado = _serviciosAlertas.Actualizar(alerta.Entidad);
 
-            return Ok(resultado);
+            if (resultado.Estado)
+            {
+                var alertaDto = AlertaMapper.ToResponseDTO(resultado.Entidad);
+                return Ok(ApiResponseDTO<AlertaResponseDTO>.Success(
+                    alertaDto, "Alerta marcada como leída"
+                ));
+            }
+
+            return BadRequest(ApiResponseDTO<object>.Error(resultado.Mensaje));
         }
 
-        // DELETE: api/alertas/{id}
         [HttpDelete("{id}")]
-        public ActionResult<Response<Alertas>> Eliminar(int id)
+        public IActionResult Eliminar(int id)
         {
             if (id <= 0)
-                return BadRequest("El ID debe ser mayor a cero");
+                return BadRequest(ApiResponseDTO<object>.Error("El ID debe ser mayor a cero"));
 
             var resultado = _serviciosAlertas.Eliminar(id);
 
             if (resultado.Estado)
-                return Ok(resultado);
+                return Ok(ApiResponseDTO<object>.Success(null, resultado.Mensaje));
 
-            return NotFound(resultado.Mensaje);
+            return NotFound(ApiResponseDTO<object>.Error(resultado.Mensaje));
         }
 
-        // GET: api/alertas/resumen
         [HttpGet("resumen")]
-        public ActionResult<ResumenAlertas> ObtenerResumen()
+        public IActionResult ObtenerResumen()
         {
-            var todas = _serviciosAlertas.MostrarTodos().Lista ?? new List<Alertas>();
+            var todas = _serviciosAlertas.MostrarTodos().Lista ?? new List<ENTITY.Alertas>();
 
-            var resumen = new ResumenAlertas
+            var resumen = new
             {
                 TotalAlertas = todas.Count,
                 AlertasActivas = todas.Count(a => !a.Estado),
@@ -181,17 +242,7 @@ namespace API.Controllers
                 UltimaAlerta = todas.OrderByDescending(a => a.FechaHora).FirstOrDefault()
             };
 
-            return Ok(resumen);
+            return Ok(ApiResponseDTO<object>.Success(resumen, "Resumen de alertas"));
         }
-    }
-
-    public class ResumenAlertas
-    {
-        public int TotalAlertas { get; set; }
-        public int AlertasActivas { get; set; }
-        public int AlertasLeidas { get; set; }
-        public int AlertasCriticasActivas { get; set; }
-        public Dictionary<string, int> AlertasPorNivel { get; set; }
-        public Alertas UltimaAlerta { get; set; }
     }
 }

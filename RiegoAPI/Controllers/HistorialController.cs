@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BLL;
 using ENTITY;
-using System.Collections.ObjectModel;
+using RiegoAPI.DTO.Mappers;
+using RiegoAPI.DTO.Request;
+using RiegoAPI.DTOs.Response;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace API.Controllers
 {
@@ -18,63 +22,71 @@ namespace API.Controllers
 
         // GET: api/historial
         [HttpGet]
-        public ActionResult<ReadOnlyCollection<Historial_Riego>> ObtenerTodos()
+        public ActionResult<List<HistorialRiegoResponseDTO>> ObtenerTodos()
         {
-            var resultado = _servicioHistorial.MostrarTodos();
-            return Ok(resultado);
+            var entidades = _servicioHistorial.MostrarTodos();
+            var dto = HistorialRiegoMapper.ToResponseDTOList(entidades);
+            return Ok(dto);
         }
 
         // GET: api/historial/{id}
         [HttpGet("{id}")]
-        public ActionResult<Historial_Riego> ObtenerPorId(int id)
+        public ActionResult<HistorialRiegoResponseDTO> ObtenerPorId(int id)
         {
             if (id <= 0)
                 return BadRequest("El ID debe ser mayor a cero");
 
-            var resultado = _servicioHistorial.ObtenerPorId(id);
+            var entidad = _servicioHistorial.ObtenerPorId(id);
 
-            if (resultado == null)
+            if (entidad == null)
                 return NotFound($"No se encontró historial con ID {id}");
 
-            return Ok(resultado);
+            return Ok(HistorialRiegoMapper.ToResponseDTO(entidad));
         }
 
         // GET: api/historial/por-fecha
         [HttpGet("por-fecha")]
-        public ActionResult<List<Historial_Riego>> ObtenerPorFecha([FromQuery] DateTime fecha)
+        public ActionResult<List<HistorialRiegoResponseDTO>> ObtenerPorFecha([FromQuery] DateTime fecha)
         {
-            var todos = _servicioHistorial.MostrarTodos();
-            var filtrados = todos.Where(h => h.Fecha.Date == fecha.Date).ToList();
+            var entidades = _servicioHistorial.MostrarTodos();
+            var filtrados = entidades
+                .Where(h => h.Fecha.Date == fecha.Date)
+                .ToList();
 
-            return Ok(filtrados);
+            return Ok(HistorialRiegoMapper.ToResponseDTOList(filtrados));
         }
 
         // GET: api/historial/rango-fechas
         [HttpGet("rango-fechas")]
-        public ActionResult<List<Historial_Riego>> ObtenerPorRangoFechas(
+        public ActionResult<List<HistorialRiegoResponseDTO>> ObtenerPorRangoFechas(
             [FromQuery] DateTime fechaInicio,
             [FromQuery] DateTime fechaFin)
         {
-            var todos = _servicioHistorial.MostrarTodos();
-            var filtrados = todos.Where(h =>
-                h.Fecha.Date >= fechaInicio.Date &&
-                h.Fecha.Date <= fechaFin.Date
-            ).ToList();
+            var entidades = _servicioHistorial.MostrarTodos();
+            var filtrados = entidades
+                .Where(h => h.Fecha.Date >= fechaInicio.Date &&
+                            h.Fecha.Date <= fechaFin.Date)
+                .ToList();
 
-            return Ok(filtrados);
+            return Ok(HistorialRiegoMapper.ToResponseDTOList(filtrados));
         }
 
         // POST: api/historial
         [HttpPost]
-        public ActionResult<string> Guardar([FromBody] Historial_Riego historial)
+        public ActionResult<HistorialRiegoResponseDTO> Guardar([FromBody] HistorialRiegoRequestDTO dto)
         {
-            if (historial == null)
+            if (dto == null)
                 return BadRequest("El historial no puede ser nulo");
 
             try
             {
-                var resultado = _servicioHistorial.Guardar(historial);
-                return CreatedAtAction(nameof(ObtenerPorId), new { id = historial.Id }, resultado);
+                var entidad = HistorialRiegoMapper.ToEntity(dto);
+                var mensaje = _servicioHistorial.Guardar(entidad);
+
+                // entidad.Id debe ya estar asignado después de guardar
+                var respuesta = HistorialRiegoMapper.ToResponseDTO(entidad);
+
+                return CreatedAtAction(nameof(ObtenerPorId), new { id = respuesta.Id }, respuesta);
             }
             catch (Exception ex)
             {
@@ -84,29 +96,29 @@ namespace API.Controllers
 
         // GET: api/historial/ultimo
         [HttpGet("ultimo")]
-        public ActionResult<Historial_Riego> ObtenerUltimo()
+        public ActionResult<HistorialRiegoResponseDTO> ObtenerUltimo()
         {
-            var todos = _servicioHistorial.MostrarTodos();
-            var ultimo = todos.OrderByDescending(h => h.Fecha).FirstOrDefault();
+            var entidades = _servicioHistorial.MostrarTodos();
+            var ultimo = entidades.OrderByDescending(h => h.Fecha).FirstOrDefault();
 
             if (ultimo == null)
                 return NotFound("No hay registros de historial");
 
-            return Ok(ultimo);
+            return Ok(HistorialRiegoMapper.ToResponseDTO(ultimo));
         }
 
         // GET: api/historial/estadisticas
         [HttpGet("estadisticas")]
-        public ActionResult<EstadisticasHistorial> ObtenerEstadisticas([FromQuery] int dias = 7)
+        public ActionResult<EstadisticasHistorialResponseDTO> ObtenerEstadisticas([FromQuery] int dias = 7)
         {
             var fechaLimite = DateTime.Now.AddDays(-dias);
-            var todos = _servicioHistorial.MostrarTodos();
-            var recientes = todos.Where(h => h.Fecha >= fechaLimite).ToList();
+            var entidades = _servicioHistorial.MostrarTodos();
+            var recientes = entidades.Where(h => h.Fecha >= fechaLimite).ToList();
 
             if (!recientes.Any())
-                return Ok(new EstadisticasHistorial());
+                return Ok(new EstadisticasHistorialResponseDTO());
 
-            var estadisticas = new EstadisticasHistorial
+            var dto = new EstadisticasHistorialResponseDTO
             {
                 TotalRegistros = recientes.Count,
                 HumedadPromedio = recientes.Average(h => h.Humedad),
@@ -118,11 +130,12 @@ namespace API.Controllers
                 PeriodoAnalizado = dias
             };
 
-            return Ok(estadisticas);
+            return Ok(dto);
         }
     }
 
-    public class EstadisticasHistorial
+    // DTO de Estadísticas como Response
+    public class EstadisticasHistorialResponseDTO
     {
         public int TotalRegistros { get; set; }
         public float HumedadPromedio { get; set; }

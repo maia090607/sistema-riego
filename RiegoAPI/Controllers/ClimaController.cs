@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using BLL;
-using Entity;
-using DAL;
-using System.Text.Json;
-using ENTITY;
+﻿using BLL;
+using Microsoft.AspNetCore.Mvc;
+using RiegoAPI.DTO.Mappers;
+using RiegoAPI.DTO.Request;
+using RiegoAPI.DTOs.Response;
+using RiegoAPI.DTO.Response;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace API.Controllers
+namespace RiegoAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -23,15 +26,20 @@ namespace API.Controllers
 
         // GET: api/clima
         [HttpGet]
-        public ActionResult<Response<RegistroClimatico>> ObtenerTodos()
+        public IActionResult ObtenerTodos()
         {
             var resultado = _servicioClima.MostrarTodos();
-            return Ok(resultado);
+            var climasDto = ClimaMapper.ToResponseDTOList(resultado.Lista);
+
+            return Ok(ApiResponseDTO<System.Collections.Generic.List<RegistroClimaticoResponseDTO>>.Success(
+                climasDto,
+                $"Se encontraron {climasDto.Count} registros climáticos"
+            ));
         }
 
         // GET: api/clima/actual/{ciudad}
         [HttpGet("actual/{ciudad}")]
-        public async Task<ActionResult<WeatherInfo>> ObtenerClimaActual(string ciudad = "Valledupar")
+        public async Task<IActionResult> ObtenerClimaActual(string ciudad = "Valledupar")
         {
             string url = $"https://api.openweathermap.org/data/2.5/weather?q={ciudad}&appid={API_KEY}&units=metric&lang=es";
 
@@ -43,34 +51,52 @@ namespace API.Controllers
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-                var weatherInfo = JsonSerializer.Deserialize<WeatherInfo>(content);
+                var weatherInfo = System.Text.Json.JsonSerializer.Deserialize<ENTITY.WeatherInfo>(content);
 
-                return Ok(weatherInfo);
+                var climaDto = new ClimaExternoResponseDTO
+                {
+                    Temperatura = (float)weatherInfo.main.temp,
+                    Humedad = (float)weatherInfo.main.humidity,
+                    Viento = (float)weatherInfo.wind.speed,
+                    Descripcion = weatherInfo.weather[0].description
+                };
+
+                return Ok(ApiResponseDTO<ClimaExternoResponseDTO>.Success(
+                    climaDto,
+                    "Datos climáticos obtenidos correctamente"
+                ));
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error al obtener datos del clima: {ex.Message}");
+                return BadRequest(ApiResponseDTO<object>.Error($"Error al obtener datos del clima: {ex.Message}"));
             }
         }
 
         // POST: api/clima
         [HttpPost]
-        public ActionResult<Response<RegistroClimatico>> Guardar([FromBody] RegistroClimatico registro)
+        public IActionResult Guardar([FromBody] RegistroClimaticoRequestDTO climaDto)
         {
-            if (registro == null)
-                return BadRequest("El registro no puede ser nulo");
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponseDTO<object>.Error("Datos inválidos"));
 
-            var resultado = _servicioClima.Guardar(registro);
+            var clima = ClimaMapper.ToEntity(climaDto);
+            var resultado = _servicioClima.Guardar(clima);
 
             if (resultado.Estado)
-                return Ok(resultado);
+            {
+                var climaResponse = ClimaMapper.ToResponseDTO(resultado.Entidad);
+                return Ok(ApiResponseDTO<RegistroClimaticoResponseDTO>.Success(
+                    climaResponse,
+                    resultado.Mensaje
+                ));
+            }
 
-            return BadRequest(resultado.Mensaje);
+            return BadRequest(ApiResponseDTO<object>.Error(resultado.Mensaje));
         }
 
         // POST: api/clima/capturar-y-guardar/{ciudad}
         [HttpPost("capturar-y-guardar/{ciudad}")]
-        public async Task<ActionResult<Response<RegistroClimatico>>> CapturarYGuardar(
+        public async Task<IActionResult> CapturarYGuardar(
             string ciudad = "Valledupar",
             [FromQuery] float humedadSuelo = 0)
         {
@@ -82,8 +108,9 @@ namespace API.Controllers
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-                var weatherInfo = JsonSerializer.Deserialize<WeatherInfo>(content);
+                var weatherInfo = System.Text.Json.JsonSerializer.Deserialize<ENTITY.WeatherInfo>(content);
 
+                // Validar duplicados recientes
                 var registrosExistentes = _servicioClima.MostrarTodos().Lista;
                 var haceCincoMin = DateTime.Now.AddMinutes(-5);
                 var registrosRecientes = registrosExistentes
@@ -104,72 +131,244 @@ namespace API.Controllers
                 );
 
                 if (existeIgual)
-                    return Ok(new Response<RegistroClimatico>(false, "Ya existe un registro reciente con estos valores", null, null));
+                    return Ok(ApiResponseDTO<object>.Error("Ya existe un registro reciente con estos valores"));
 
-                var registro = new RegistroClimatico
+                var climaDto = new RegistroClimaticoRequestDTO
                 {
-                    Humedad_Ambiente = humAmbienteActual,
-                    Humedad_Suelo = humSueloActual,
-                    Temperatura_Ambiente = tempActual,
-                    Viento = vientoActual,
-                    Fecha = DateTime.Now
+                    HumedadAmbiente = humAmbienteActual,
+                    HumedadSuelo = humSueloActual,
+                    TemperaturaAmbiente = tempActual,
+                    Viento = vientoActual
                 };
 
-                var resultado = _servicioClima.Guardar(registro);
-                return Ok(resultado);
+                var clima = ClimaMapper.ToEntity(climaDto);
+                var resultado = _servicioClima.Guardar(clima);
+
+                if (resultado.Estado)
+                {
+                    var climaResponse = ClimaMapper.ToResponseDTO(resultado.Entidad);
+                    return Ok(ApiResponseDTO<RegistroClimaticoResponseDTO>.Success(
+                        climaResponse,
+                        "Datos climáticos capturados y guardados correctamente"
+                    ));
+                }
+
+                return BadRequest(ApiResponseDTO<object>.Error(resultado.Mensaje));
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error: {ex.Message}");
+                return BadRequest(ApiResponseDTO<object>.Error($"Error: {ex.Message}"));
             }
         }
 
         // GET: api/clima/por-fecha
         [HttpGet("por-fecha")]
-        public ActionResult<List<RegistroClimatico>> ObtenerPorFecha([FromQuery] DateTime fecha)
+        public IActionResult ObtenerPorFecha([FromQuery] DateTime fecha)
         {
             var todos = _servicioClima.MostrarTodos().Lista;
             var filtrados = todos.Where(r => r.Fecha.Date == fecha.Date).ToList();
+            var filtradosDto = ClimaMapper.ToResponseDTOList(filtrados);
 
-            return Ok(filtrados);
+            return Ok(ApiResponseDTO<System.Collections.Generic.List<RegistroClimaticoResponseDTO>>.Success(
+                filtradosDto,
+                $"Se encontraron {filtradosDto.Count} registros para la fecha {fecha:dd/MM/yyyy}"
+            ));
+        }
+
+        // GET: api/clima/ultimos/{cantidad}
+        [HttpGet("ultimos/{cantidad}")]
+        public IActionResult ObtenerUltimos(int cantidad = 10)
+        {
+            var respuesta = _servicioClima.MostrarTodos();
+            var ultimosRegistros = respuesta.Lista
+                .OrderByDescending(c => c.Fecha)
+                .Take(cantidad)
+                .ToList();
+
+            var climasDto = ClimaMapper.ToResponseDTOList(ultimosRegistros);
+
+            return Ok(ApiResponseDTO<System.Collections.Generic.List<RegistroClimaticoResponseDTO>>.Success(
+                climasDto,
+                $"Últimos {climasDto.Count} registros climáticos"
+            ));
         }
 
         // GET: api/clima/estadisticas
         [HttpGet("estadisticas")]
-        public ActionResult<EstadisticasClima> ObtenerEstadisticas([FromQuery] int dias = 7)
+        public IActionResult ObtenerEstadisticas([FromQuery] int dias = 7)
         {
             var fechaLimite = DateTime.Now.AddDays(-dias);
             var todos = _servicioClima.MostrarTodos().Lista;
             var recientes = todos.Where(r => r.Fecha >= fechaLimite).ToList();
 
             if (!recientes.Any())
-                return Ok(new EstadisticasClima());
+                return Ok(ApiResponseDTO<object>.Success(new { }, "No hay datos para el período"));
 
-            var estadisticas = new EstadisticasClima
+            var estadisticas = new EstadisticasResponseDTO
             {
-                TotalRegistros = recientes.Count,
+                TotalRiegos = recientes.Count,
+                HumedadPromedio = recientes.Average(r => r.Humedad_Suelo),
                 TemperaturaPromedio = recientes.Average(r => r.Temperatura_Ambiente),
-                TemperaturaMinima = recientes.Min(r => r.Temperatura_Ambiente),
-                TemperaturaMaxima = recientes.Max(r => r.Temperatura_Ambiente),
-                HumedadAmbientePromedio = recientes.Average(r => r.Humedad_Ambiente),
-                HumedadSueloPromedio = recientes.Average(r => r.Humedad_Suelo),
-                VientoPromedio = recientes.Average(r => r.Viento),
-                PeriodoAnalizado = dias
+                PeriodoInicio = recientes.Min(r => r.Fecha),
+                PeriodoFin = recientes.Max(r => r.Fecha)
             };
 
-            return Ok(estadisticas);
+            return Ok(ApiResponseDTO<EstadisticasResponseDTO>.Success(
+                estadisticas,
+                $"Estadísticas de los últimos {dias} días"
+            ));
         }
     }
 
-    public class EstadisticasClima
+
+    // ===== ARCHIVO: HistorialController.cs (REFACTORIZADO) =====
+    [ApiController]
+    [Route("api/[controller]")]
+    public class HistorialController : ControllerBase
     {
-        public int TotalRegistros { get; set; }
-        public float TemperaturaPromedio { get; set; }
-        public float TemperaturaMinima { get; set; }
-        public float TemperaturaMaxima { get; set; }
-        public float HumedadAmbientePromedio { get; set; }
-        public float HumedadSueloPromedio { get; set; }
-        public float VientoPromedio { get; set; }
-        public int PeriodoAnalizado { get; set; }
+        private readonly ServicioHistorial _servicioHistorial;
+
+        public HistorialController(ServicioHistorial servicioHistorial)
+        {
+            _servicioHistorial = servicioHistorial;
+        }
+
+        // GET: api/historial
+        [HttpGet]
+        public IActionResult ObtenerTodos()
+        {
+            var historiales = _servicioHistorial.MostrarTodos();
+            var historialesDto = HistorialRiegoMapper.ToResponseDTOList(historiales.ToList());
+
+            return Ok(ApiResponseDTO<System.Collections.Generic.List<HistorialRiegoResponseDTO>>.Success(
+                historialesDto,
+                $"Se encontraron {historialesDto.Count} registros"
+            ));
+        }
+
+        // GET: api/historial/{id}
+        [HttpGet("{id}")]
+        public IActionResult ObtenerPorId(int id)
+        {
+            if (id <= 0)
+                return BadRequest(ApiResponseDTO<object>.Error("El ID debe ser mayor a cero"));
+
+            var historial = _servicioHistorial.ObtenerPorId(id);
+
+            if (historial != null)
+            {
+                var historialDto = HistorialRiegoMapper.ToResponseDTO(historial);
+                return Ok(ApiResponseDTO<HistorialRiegoResponseDTO>.Success(
+                    historialDto,
+                    "Historial encontrado"
+                ));
+            }
+
+            return NotFound(ApiResponseDTO<object>.Error($"No se encontró historial con ID {id}"));
+        }
+
+        // GET: api/historial/por-fecha
+        [HttpGet("por-fecha")]
+        public IActionResult ObtenerPorFecha([FromQuery] DateTime fecha)
+        {
+            var todos = _servicioHistorial.MostrarTodos();
+            var filtrados = todos.Where(h => h.Fecha.Date == fecha.Date).ToList();
+            var filtradosDto = HistorialRiegoMapper.ToResponseDTOList(filtrados);
+
+            return Ok(ApiResponseDTO<System.Collections.Generic.List<HistorialRiegoResponseDTO>>.Success(
+                filtradosDto,
+                $"Se encontraron {filtradosDto.Count} registros para la fecha {fecha:dd/MM/yyyy}"
+            ));
+        }
+
+        // GET: api/historial/rango-fechas
+        [HttpGet("rango-fechas")]
+        public IActionResult ObtenerPorRangoFechas(
+            [FromQuery] DateTime fechaInicio,
+            [FromQuery] DateTime fechaFin)
+        {
+            var todos = _servicioHistorial.MostrarTodos();
+            var filtrados = todos.Where(h =>
+                h.Fecha.Date >= fechaInicio.Date &&
+                h.Fecha.Date <= fechaFin.Date
+            ).ToList();
+            var filtradosDto = HistorialRiegoMapper.ToResponseDTOList(filtrados);
+
+            return Ok(ApiResponseDTO<System.Collections.Generic.List<HistorialRiegoResponseDTO>>.Success(
+                filtradosDto,
+                $"Se encontraron {filtradosDto.Count} registros entre {fechaInicio:dd/MM/yyyy} y {fechaFin:dd/MM/yyyy}"
+            ));
+        }
+
+        // POST: api/historial
+        [HttpPost]
+        public IActionResult Guardar([FromBody] HistorialRiegoRequestDTO historialDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponseDTO<object>.Error("Datos inválidos"));
+
+            try
+            {
+                var historial = HistorialRiegoMapper.ToEntity(historialDto);
+                var resultado = _servicioHistorial.Guardar(historial);
+
+                var historialResponse = HistorialRiegoMapper.ToResponseDTO(historial);
+                return CreatedAtAction(
+                    nameof(ObtenerPorId),
+                    new { id = historial.Id },
+                    ApiResponseDTO<HistorialRiegoResponseDTO>.Success(historialResponse, resultado)
+                );
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponseDTO<object>.Error($"Error al guardar: {ex.Message}"));
+            }
+        }
+
+        // GET: api/historial/ultimo
+        [HttpGet("ultimo")]
+        public IActionResult ObtenerUltimo()
+        {
+            var todos = _servicioHistorial.MostrarTodos();
+            var ultimo = todos.OrderByDescending(h => h.Fecha).FirstOrDefault();
+
+            if (ultimo == null)
+                return NotFound(ApiResponseDTO<object>.Error("No hay registros de historial"));
+
+            var ultimoDto = HistorialRiegoMapper.ToResponseDTO(ultimo);
+            return Ok(ApiResponseDTO<HistorialRiegoResponseDTO>.Success(
+                ultimoDto,
+                "Último registro de riego"
+            ));
+        }
+
+        // GET: api/historial/estadisticas
+        [HttpGet("estadisticas")]
+        public IActionResult ObtenerEstadisticas([FromQuery] int dias = 7)
+        {
+            var fechaLimite = DateTime.Now.AddDays(-dias);
+            var todos = _servicioHistorial.MostrarTodos();
+            var recientes = todos.Where(h => h.Fecha >= fechaLimite).ToList();
+
+            if (!recientes.Any())
+                return Ok(ApiResponseDTO<object>.Success(new { }, "No hay datos para el período"));
+
+            var estadisticas = new
+            {
+                TotalRegistros = recientes.Count,
+                HumedadPromedio = recientes.Average(h => h.Humedad),
+                HumedadMinima = recientes.Min(h => h.Humedad),
+                HumedadMaxima = recientes.Max(h => h.Humedad),
+                TemperaturaPromedio = recientes.Average(h => h.Temperatura),
+                TemperaturaMinima = recientes.Min(h => h.Temperatura),
+                TemperaturaMaxima = recientes.Max(h => h.Temperatura),
+                PeriodoAnalizado = dias
+            };
+
+            return Ok(ApiResponseDTO<object>.Success(
+                estadisticas,
+                $"Estadísticas de los últimos {dias} días"
+            ));
+        }
     }
 }

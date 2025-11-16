@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BLL;
 using ENTITY;
-using DAL;
+using RiegoAPI.DTOs.Request;
+using RiegoAPI.DTOs.Response;
+using RiegoAPI.DTOs.Mappers;
 
 namespace API.Controllers
 {
@@ -18,112 +20,131 @@ namespace API.Controllers
 
         // GET: api/usuarios
         [HttpGet]
-        public ActionResult<Response<Usuario>> ObtenerTodos()
+        public ActionResult<IEnumerable<UsuarioResponseDTO>> ObtenerTodos()
         {
             var resultado = _serviciosUsuario.ObtenerTodos();
-            return Ok(resultado);
+
+            if (!resultado.Estado)
+                return BadRequest(resultado.Mensaje);
+
+            // ✅ CORREGIDO: usar resultado.Entidades (la lista)
+            var listaDTO = UsuarioMapper.ToResponseDTOList(resultado.Entidad);
+
+            return Ok(listaDTO);
         }
 
         // GET: api/usuarios/{id}
         [HttpGet("{id}")]
-        public ActionResult<Response<Usuario>> ObtenerPorId(int id)
+        public ActionResult<UsuarioResponseDTO> ObtenerPorId(int id)
         {
             if (id <= 0)
                 return BadRequest("El ID debe ser mayor a cero");
 
             var resultado = _serviciosUsuario.BuscarPorId(id);
 
+            // ✅ resultado.Entidad contiene el usuario
             if (resultado.Entidad == null)
                 return NotFound($"No se encontró usuario con ID {id}");
 
-            return Ok(resultado);
+            return Ok(UsuarioMapper.ToResponseDTO(resultado.Entidad));
         }
 
         // POST: api/usuarios
         [HttpPost]
-        public ActionResult<Response<Usuario>> Insertar([FromBody] Usuario usuario)
+        public ActionResult<UsuarioResponseDTO> Insertar([FromBody] UsuarioRequestDTO usuarioDTO)
         {
-            if (usuario == null)
+            if (usuarioDTO == null)
                 return BadRequest("El usuario no puede ser nulo");
 
-            var existente = _serviciosUsuario.ValidarNombreUsuario(usuario.NombreUsuario);
+            // Validación de nombre de usuario único
+            var existente = _serviciosUsuario.ValidarNombreUsuario(usuarioDTO.NombreUsuario);
             if (existente.Estado)
-                return Conflict("El nombre de usuario ya existe");
+                return Conflict("El nombre de usuario ya está en uso");
 
-            var resultado = _serviciosUsuario.Insertar(usuario);
+            var entidad = UsuarioMapper.ToEntity(usuarioDTO);
 
-            if (resultado.Estado)
-                return CreatedAtAction(nameof(ObtenerPorId), new { id = usuario.IdUsuario }, resultado);
+            var resultado = _serviciosUsuario.Insertar(entidad);
 
-            return BadRequest(resultado.Mensaje);
+            if (!resultado.Estado)
+                return BadRequest(resultado.Mensaje);
+
+            var responseDTO = UsuarioMapper.ToResponseDTO(entidad);
+
+            return CreatedAtAction(nameof(ObtenerPorId), new { id = entidad.IdUsuario }, responseDTO);
         }
 
         // PUT: api/usuarios/{id}
         [HttpPut("{id}")]
-        public ActionResult<Response<Usuario>> Actualizar(int id, [FromBody] Usuario usuario)
+        public ActionResult<UsuarioResponseDTO> Actualizar(int id, [FromBody] UsuarioRequestDTO usuarioDTO)
         {
-            if (id != usuario.IdUsuario)
+            if (id != usuarioDTO.IdUsuario)
                 return BadRequest("El ID no coincide");
 
-            var resultado = _serviciosUsuario.Actualizar(usuario);
+            var entidad = UsuarioMapper.ToEntity(usuarioDTO);
 
-            if (resultado.Estado)
-                return Ok(resultado);
+            var resultado = _serviciosUsuario.Actualizar(entidad);
 
-            return NotFound(resultado.Mensaje);
+            if (!resultado.Estado)
+                return NotFound(resultado.Mensaje);
+
+            return Ok(UsuarioMapper.ToResponseDTO(entidad));
         }
 
         // DELETE: api/usuarios/{id}
         [HttpDelete("{id}")]
-        public ActionResult<Response<Usuario>> Eliminar(int id)
+        public ActionResult Eliminar(int id)
         {
             if (id <= 0)
                 return BadRequest("El ID debe ser mayor a cero");
 
             var resultado = _serviciosUsuario.Eliminar(id);
 
-            if (resultado.Estado)
-                return Ok(resultado);
+            if (!resultado.Estado)
+                return NotFound(resultado.Mensaje);
 
-            return NotFound(resultado.Mensaje);
+            return Ok(new { mensaje = "Usuario eliminado correctamente" });
         }
 
         // POST: api/usuarios/login
         [HttpPost("login")]
-        public ActionResult<Response<Usuario>> Login([FromBody] LoginRequest request)
+        public ActionResult<UsuarioResponseDTO> Login([FromBody] LoginRequestDTO request)
         {
             if (string.IsNullOrWhiteSpace(request.NombreUsuario) ||
                 string.IsNullOrWhiteSpace(request.Password))
+            {
                 return BadRequest("Usuario y contraseña son requeridos");
+            }
 
             var resultado = _serviciosUsuario.ValidarCredenciales(request.NombreUsuario, request.Password);
 
-            if (resultado.Entidad != null)
-            {
-                resultado.Entidad.Accedio = true;
-                _serviciosUsuario.Actualizar(resultado.Entidad);
-                return Ok(resultado);
-            }
+            if (resultado.Entidad == null)
+                return Unauthorized("Usuario o contraseña incorrectos");
 
-            return Unauthorized("Usuario o contraseña incorrectos");
+            resultado.Entidad.Accedio = true;
+            _serviciosUsuario.Actualizar(resultado.Entidad);
+
+            var responseDTO = UsuarioMapper.ToResponseDTO(resultado.Entidad);
+
+            return Ok(responseDTO);
         }
 
-        // POST: api/usuarios/logout
+        // POST: api/usuarios/logout/{id}
         [HttpPost("logout/{id}")]
-        public ActionResult<Response<Usuario>> Logout(int id)
+        public ActionResult Logout(int id)
         {
-            var usuario = _serviciosUsuario.BuscarPorId(id);
-            if (usuario.Entidad != null)
-            {
-                usuario.Entidad.Accedio = false;
-                _serviciosUsuario.Actualizar(usuario.Entidad);
-                return Ok(new { mensaje = "Sesión cerrada correctamente" });
-            }
-            return NotFound("Usuario no encontrado");
+            var resultado = _serviciosUsuario.BuscarPorId(id);
+
+            if (resultado.Entidad == null)
+                return NotFound("Usuario no encontrado");
+
+            resultado.Entidad.Accedio = false;
+            _serviciosUsuario.Actualizar(resultado.Entidad);
+
+            return Ok(new { mensaje = "Sesión cerrada correctamente" });
         }
     }
 
-    public class LoginRequest
+    public class LoginRequestDTO
     {
         public string NombreUsuario { get; set; }
         public string Password { get; set; }
