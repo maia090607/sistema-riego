@@ -1,91 +1,25 @@
-﻿@page "/historial"
-@using SmartDropUI.Models
+﻿@using SmartDropUI.Models
 @using SmartDropUI.Services
 @inject RiegoService RiegoService
-@inject NavigationManager Navigation
-
-<PageTitle>Historial - SmartDrop</PageTitle>
 
 <div class="historial-container">
-    <div class="historial-header">
-        <div class="header-left">
-            <span class="icon">🕐</span>
-            <h1>Historial de Registros</h1>
-        </div>
-        <div class="header-right">
-            <button class="nav-btn" @onclick='() => Navigation.NavigateTo("/dashboard")'>Dashboard</button>
-            <button class="nav-btn logout" @onclick='() => Navigation.NavigateTo("/")'>Salir</button>
-        </div>
-    </div>
 
-    <div class="historial-card">
-        <div class="card-header">
-            <h2>Registros Históricos del Sistema</h2>
-            <button class="btn-actualizar" @onclick="CargarHistorial">
-                <span>🔄</span>
-                Actualizar
-            </button>
-        </div>
+    <button class="nav-btn" @onclick="IrDashboard">
+        Dashboard
+    </button>
 
-        <div class="table-container">
-            <table class="historial-table">
-                <thead>
-                    <tr>
-                        <th>Fecha y Hora</th>
-                        <th>Humedad (%)</th>
-                        <th>Temperatura (°C)</th>
-                        <th>Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (cargando)
-                    {
-                        <tr>
-                            <td colspan="4" class="loading-cell">
-                                <div class="spinner"></div>
-                                Cargando datos...
-                            </td>
-                        </tr>
-                    }
-                    else if (registros.Any())
-                    {
-                        @foreach (var registro in registros)
-                        {
-                            <tr>
-                                <td>@registro.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>
-                                    <span class="badge @GetHumedadClass(registro.Humedad)">
-                                        @registro.Humedad.ToString("F0")%
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge temp">
-                                        @registro.Temperatura.ToString("F1")°C
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge status">
-                                        @registro.Estado
-                                    </span>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="4" class="empty-cell">
-                                No hay registros disponibles
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <button class="nav-btn logout" @onclick="CerrarSesion">
+        Salir
+    </button>
+
+    <!-- tabla historial ... -->
+
 </div>
 
 @code {
+    [Parameter] public EventCallback OnIrADashboard { get; set; }
+    [Parameter] public EventCallback OnCerrarSesion { get; set; }
+
     private List<DatosRiegoModel> registros = new();
     private bool cargando = false;
 
@@ -94,27 +28,23 @@
         await CargarHistorial();
     }
 
+    private async Task IrDashboard() =>
+        await OnIrADashboard.InvokeAsync();
+
+    private async Task CerrarSesion() =>
+        await OnCerrarSesion.InvokeAsync();
+
     private async Task CargarHistorial()
     {
         cargando = true;
-
-        // Simular datos si no hay API disponible
         await Task.Delay(1000);
-        registros = new List<DatosRiegoModel>
+
+        registros = new()
         {
             new() { Fecha = DateTime.Now.AddHours(-1), Humedad = 45, Temperatura = 22, Estado = "Riego Automático" },
             new() { Fecha = DateTime.Now.AddHours(-3), Humedad = 68, Temperatura = 24, Estado = "Riego Completado" },
-            new() { Fecha = DateTime.Now.AddHours(-5), Humedad = 52, Temperatura = 27, Estado = "Riego Manual" },
-            new() { Fecha = DateTime.Now.AddHours(-7), Humedad = 48, Temperatura = 25, Estado = "Monitoreo" }
         };
 
         cargando = false;
-    }
-
-    private string GetHumedadClass(double humedad)
-    {
-        if (humedad < 40) return "danger";
-        if (humedad < 60) return "warning";
-        return "success";
     }
 }

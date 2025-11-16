@@ -10,13 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 // CONFIGURACIÓN DE SERVICIOS
 // ===========================
 
-
-// LA CONFIGURACION DE SWAGGER ESTABA REPETIDA, TENIA DOS Y CADA UNA SU INICIALIZACION, QUITE LA PRIMERA QUE SE VEIA MAS BASICA
-// Agregar controladores
+// Controladores
 builder.Services.AddControllers();
 
-// Configurar Swagger/OpenAPI para documentación
-// NO SE
+// Swagger / OpenAPI (solo una configuración, como pediste)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -24,10 +21,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "SmartDrop - Sistema de Riego Automático",
         Version = "v1",
-
         Description = @"
-![SmartDrop Logo](https://tusitio.com/img/smartdrop-logo.png)
-
 API RESTful para el sistema de riego automático con Arduino.
 
 **Contacto:** Equipo de Desarrollo",
@@ -40,52 +34,11 @@ API RESTful para el sistema de riego automático con Arduino.
     });
 });
 
-// Configurar CORS para permitir llamadas desde cualquier origen
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
+// ===========================
+// CORS
+// ===========================
 
-// Configuración de HttpClient global
-builder.Services.AddHttpClient();
-
-// HttpClient específico para OpenWeather
-builder.Services.AddHttpClient("OpenWeather", client =>
-{
-    client.BaseAddress = new Uri("https://api.openweathermap.org/data/2.5/");
-    client.Timeout = TimeSpan.FromSeconds(10);
-});
-
-// ===================================
-// REGISTRAR SERVICIOS DE LA CAPA BLL
-// ===================================
-
-builder.Services.AddScoped<ServiciosPlanta>();
-builder.Services.AddScoped<ServicioHistorial>();
-builder.Services.AddScoped<ServiciosUsuario>();
-builder.Services.AddScoped<ServiciosAlertas>();
-builder.Services.AddScoped<ServicioClima>();
-builder.Services.AddScoped<ServiciosHumedad>();
-builder.Services.AddScoped<ServicioGraficas>();
-
-// Servicio Singleton para puerto serial
-builder.Services.AddSingleton<ServicioPuerto>(provider =>
-{
-    var config = provider.GetRequiredService<IConfiguration>();
-    string puerto = config.GetValue<string>("SerialPort:Puerto") ?? "COM3";
-    int baudRate = config.GetValue<int>("SerialPort:BaudRate", 9600);
-    return new ServicioPuerto(puerto, baudRate);
-});
-
-// Habilitar archivos estáticos
-builder.Services.AddDirectoryBrowser();
-
-// Configurar CORS
+// Solo una configuración de CORS (limpia y funcional)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowBlazor", policy =>
@@ -94,16 +47,55 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
+
+    // Política general si la necesitas
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
 });
+
+// HTTP Clients
+builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("OpenWeather", client =>
+{
+    client.BaseAddress = new Uri("https://api.openweathermap.org/data/2.5/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
+
+// ===========================
+// SERVICIOS BLL
+// ===========================
+builder.Services.AddScoped<ServiciosPlanta>();
+builder.Services.AddScoped<ServicioHistorial>();
+builder.Services.AddScoped<ServiciosUsuario>();
+builder.Services.AddScoped<ServiciosAlertas>();
+builder.Services.AddScoped<ServicioClima>();
+builder.Services.AddScoped<ServiciosHumedad>();
+builder.Services.AddScoped<ServicioGraficas>();
+
+// Puerto serial - Singleton
+builder.Services.AddSingleton<ServicioPuerto>(provider =>
+{
+    var config = provider.GetRequiredService<IConfiguration>();
+    string puerto = config.GetValue<string>("SerialPort:Puerto") ?? "COM3";
+    int baudRate = config.GetValue<int>("SerialPort:BaudRate", 9600);
+    return new ServicioPuerto(puerto, baudRate);
+});
+
+// Archivos estáticos
+builder.Services.AddDirectoryBrowser();
 
 var app = builder.Build();
 
-// Usar CORS
-app.UseCors("AllowBlazor");
+// ===============================
+// MIDDLEWARE
+// ===============================
 
-// ===================================
-// CONFIGURACIÓN DEL PIPELINE HTTP
-// ===================================
+// Aplicar CORS específico para Blazor
+app.UseCors("AllowBlazor");
 
 if (app.Environment.IsDevelopment())
 {
@@ -113,27 +105,25 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartDrop API v1");
         c.DocumentTitle = "SmartDrop - API de Riego Automático";
 
-        c.InjectStylesheet("/swagger-ui/custom.css"); // Opcional
-        c.RoutePrefix = "swagger"; // Acceder en /swagger
-
-        c.RoutePrefix = "swagger"; // /swagger
-
+        // Ruta del Swagger
+        c.RoutePrefix = "swagger";
     });
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Controladores
 app.MapControllers();
 
-// Ruta base hacia Swagger
+// Redirección base a Swagger
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
-// ===================================
+// ===============================
 // MANEJO GLOBAL DE ERRORES
-// ===================================
+// ===============================
 app.UseExceptionHandler("/error");
 
 app.Map("/error", (HttpContext context) =>
@@ -144,20 +134,9 @@ app.Map("/error", (HttpContext context) =>
     );
 });
 
-// ===================================
-
-// MANEJO DEL SWAGGER UI PERSONALIZADO  
-// ===================================
-
-
-
-
-// ===================================
-// ACTIVAR EL SWAGGER UI PERSONALIZADO  
-// ===================================
-
-
-
+// ===============================
+// CONSOLA DEL SERVIDOR
+// ===============================
 Console.WriteLine("╔════════════════════════════════════════════════════════════╗");
 Console.WriteLine("║     🌱 API SISTEMA DE RIEGO AUTOMÁTICO - SMARTDROP        ║");
 Console.WriteLine("╚════════════════════════════════════════════════════════════╝");

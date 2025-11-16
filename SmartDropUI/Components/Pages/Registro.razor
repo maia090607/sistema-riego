@@ -3,7 +3,7 @@
 @inject AuthService AuthService
 
 <div class="registro-container">
-    <!-- Tu código HTML actual de registro -->
+    <!-- formulario de registro ... -->
 </div>
 
 @code {
@@ -16,8 +16,6 @@
     private string mensajeError = "";
     private string mensajeExito = "";
 
-    private void ToggleMostrarPasswordRegistro() => mostrarPasswordRegistro = !mostrarPasswordRegistro;
-
     private async Task HandleRegistro()
     {
         mensajeError = "";
@@ -26,26 +24,27 @@
         if (string.IsNullOrWhiteSpace(formRegistro.NombreUsuario) ||
             string.IsNullOrWhiteSpace(formRegistro.Contrasena))
         {
-            mensajeError = "Complete los campos requeridos";
+            mensajeError = "Complete todos los campos";
             return;
         }
 
         cargando = true;
-        bool registroExitoso = await AuthService.RegistrarAsync(formRegistro);
+        bool ok = await AuthService.RegistrarAsync(formRegistro);
 
-        if (registroExitoso)
+        if (ok)
         {
             mensajeExito = "Usuario creado exitosamente";
-            await Task.Delay(1500);
-            formRegistro = new UsuarioModel();
+            await Task.Delay(1200);
             await OnRegistroExitoso.InvokeAsync();
         }
         else
         {
-            mensajeError = "Error al crear el usuario. Intente nuevamente.";
+            mensajeError = "Error al crear usuario";
         }
+
         cargando = false;
     }
 
-    private async Task IrALogin() => await OnVolverALogin.InvokeAsync();
+    private async Task IrALogin() =>
+        await OnVolverALogin.InvokeAsync();
 }
