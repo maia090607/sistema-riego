@@ -24,13 +24,13 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "SmartDrop - Sistema de Riego Automático",
         Version = "v1",
+
         Description = @"
 ![SmartDrop Logo](https://tusitio.com/img/smartdrop-logo.png)
 
 API RESTful para el sistema de riego automático con Arduino.
 
-**Contacto:** Equipo de Desarrollo
-",
+**Contacto:** Equipo de Desarrollo",
         Contact = new OpenApiContact
         {
             Name = "Equipo de Desarrollo",
@@ -51,14 +51,20 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Configurar HttpClient para llamadas a APIs externas (OpenWeatherMap)
+// Configuración de HttpClient global
 builder.Services.AddHttpClient();
+
+// HttpClient específico para OpenWeather
+builder.Services.AddHttpClient("OpenWeather", client =>
+{
+    client.BaseAddress = new Uri("https://api.openweathermap.org/data/2.5/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
 
 // ===================================
 // REGISTRAR SERVICIOS DE LA CAPA BLL
 // ===================================
 
-// Servicios Scoped (se crean por cada request)
 builder.Services.AddScoped<ServiciosPlanta>();
 builder.Services.AddScoped<ServicioHistorial>();
 builder.Services.AddScoped<ServiciosUsuario>();
@@ -67,26 +73,38 @@ builder.Services.AddScoped<ServicioClima>();
 builder.Services.AddScoped<ServiciosHumedad>();
 builder.Services.AddScoped<ServicioGraficas>();
 
-// Servicio Singleton (única instancia compartida) para el puerto serial
+// Servicio Singleton para puerto serial
 builder.Services.AddSingleton<ServicioPuerto>(provider =>
 {
-    var configuration = provider.GetRequiredService<IConfiguration>();
-    string puerto = configuration.GetValue<string>("SerialPort:Puerto") ?? "COM3";
-    int baudRate = configuration.GetValue<int>("SerialPort:BaudRate", 9600);
-
+    var config = provider.GetRequiredService<IConfiguration>();
+    string puerto = config.GetValue<string>("SerialPort:Puerto") ?? "COM3";
+    int baudRate = config.GetValue<int>("SerialPort:BaudRate", 9600);
     return new ServicioPuerto(puerto, baudRate);
 });
 
-// Configurar archivos estáticos (para servir imágenes)
+// Habilitar archivos estáticos
 builder.Services.AddDirectoryBrowser();
 
+// Configurar CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowBlazor", policy =>
+    {
+        policy.WithOrigins("https://localhost:5001", "http://localhost:5000")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+
+// Usar CORS
+app.UseCors("AllowBlazor");
 
 // ===================================
 // CONFIGURACIÓN DEL PIPELINE HTTP
 // ===================================
 
-// Habilitar Swagger en desarrollo
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -94,34 +112,30 @@ if (app.Environment.IsDevelopment())
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartDrop API v1");
         c.DocumentTitle = "SmartDrop - API de Riego Automático";
+
         c.InjectStylesheet("/swagger-ui/custom.css"); // Opcional
         c.RoutePrefix = "swagger"; // Acceder en /swagger
+
+        c.RoutePrefix = "swagger"; // /swagger
+
     });
 }
 
-// Redirigir HTTP a HTTPS
 app.UseHttpsRedirection();
-
-// Habilitar archivos estáticos (wwwroot)
 app.UseStaticFiles();
-
-// Habilitar CORS
 app.UseCors("AllowAll");
-
-// Autenticación y autorización (si se implementa en el futuro)
 app.UseAuthentication();
 app.UseAuthorization();
-
-// Mapear controladores
 app.MapControllers();
 
-// Página de inicio personalizada (opcional)
+// Ruta base hacia Swagger
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
 // ===================================
-// MANEJO DE ERRORES GLOBAL
+// MANEJO GLOBAL DE ERRORES
 // ===================================
 app.UseExceptionHandler("/error");
+
 app.Map("/error", (HttpContext context) =>
 {
     return Results.Problem(
@@ -130,9 +144,8 @@ app.Map("/error", (HttpContext context) =>
     );
 });
 
-
-
 // ===================================
+
 // MANEJO DEL SWAGGER UI PERSONALIZADO  
 // ===================================
 
@@ -145,19 +158,15 @@ app.Map("/error", (HttpContext context) =>
 
 
 
-// ===================================
-// EJECUTAR LA APLICACIÓN
-// ===================================
-
 Console.WriteLine("╔════════════════════════════════════════════════════════════╗");
-Console.WriteLine("║     🌱 API SISTEMA DE RIEGO AUTOMÁTICO 🌱                ║");
+Console.WriteLine("║     🌱 API SISTEMA DE RIEGO AUTOMÁTICO - SMARTDROP        ║");
 Console.WriteLine("╚════════════════════════════════════════════════════════════╝");
 Console.WriteLine();
-Console.WriteLine($"🌐 API corriendo en: https://localhost:5001");
-Console.WriteLine($"📚 Documentación Swagger: https://localhost:5001/swagger");
+Console.WriteLine($"🌐 API: https://localhost:5001");
+Console.WriteLine($"📚 Swagger: https://localhost:5001/swagger");
 Console.WriteLine($"🔌 Puerto Serial: {app.Configuration.GetValue<string>("SerialPort:Puerto")}");
 Console.WriteLine();
 Console.WriteLine("Presiona Ctrl+C para detener el servidor...");
 Console.WriteLine();
 
-app.Run(); 
+app.Run();

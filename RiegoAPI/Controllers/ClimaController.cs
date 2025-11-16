@@ -221,6 +221,7 @@ namespace RiegoAPI.Controllers
     }
 }
 
+
 /// ESTE ESTO ESTA REPETIDO, ESTO DEBERIA IR EN CONTROLADOR DE HISTORIAl
 //    // ===== ARCHIVO: HistorialController.cs (REFACTORIZADO) =====
 //    [ApiController]
@@ -373,3 +374,4 @@ namespace RiegoAPI.Controllers
 //        }
 //    }
 //}
+

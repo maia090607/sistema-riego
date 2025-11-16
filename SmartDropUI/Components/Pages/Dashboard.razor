@@ -1,0 +1,174 @@
+﻿@page "/dashboard"
+@using SmartDropUI.Models
+@using SmartDropUI.Services
+@inject RiegoService RiegoService
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<PageTitle>Dashboard - SmartDrop</PageTitle>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="header-left">
+            <span class="icon">🌿</span>
+            <span class="icon">💧</span>
+            <h1>SmartDrop Dashboard</h1>
+        </div>
+        <div class="header-right">
+            <button class="nav-btn active">Dashboard</button>
+            <button class="nav-btn" @onclick='() => Navigation.NavigateTo("/historial")'>Historial</button>
+            <button class="nav-btn logout" @onclick='() => Navigation.NavigateTo("/")'>Salir</button>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Gráfica de Humedad -->
+        <div class="chart-card">
+            <h2>GRÁFICA DE LA HUMEDAD DEL SUELO</h2>
+            <p class="chart-subtitle">Humedad – Tiempo Real</p>
+            <div class="chart-placeholder">
+                @foreach (var dato in datosHumedad.TakeLast(6))
+                {
+                    <div class="chart-bar" style="height: @(dato.Valor)%">
+                        <span>@dato.Valor.ToString("F0")%</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Gráfica de Temperatura -->
+        <div class="chart-card">
+            <h2>GRÁFICO DE LA TEMPERATURA DEL AMBIENTE</h2>
+            <p class="chart-subtitle">Temperatura – Tiempo Real</p>
+            <div class="chart-placeholder">
+                @foreach (var dato in datosTemperatura.TakeLast(6))
+                {
+                    <div class="chart-bar temp" style="height: @(dato.Valor * 2)%">
+                        <span>@dato.Valor.ToString("F1")°C</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Panel de Controles -->
+        <div class="controls-card">
+            <h2>CONTROLES DEL SISTEMA</h2>
+            <div class="controls-content">
+                <button class="control-btn primary" @onclick="RecargarHistorial" disabled="@cargando">
+                    <span>🔄</span>
+                    RECARGAR HISTORIAL
+                </button>
+
+                <button class="control-btn success" @onclick="IniciarRiego">
+                    <span>▶️</span>
+                    INICIAR RIEGO MANUAL
+                </button>
+
+                <div class="date-search">
+                    <h3>BUSCAR POR FECHA</h3>
+                    <input type="date" @bind="fechaBusqueda" />
+                    <button class="control-btn info" @onclick="BuscarPorFecha">
+                        <span>🔍</span>
+                        BUSCAR
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Área de Historial -->
+    <div class="historial-area">
+        <div class="historial-content">
+            @if (cargando)
+            {
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando registros históricos...</p>
+                </div>
+            }
+            else
+            {
+                <div class="historial-icon">📊</div>
+                <h2>Área de Historial de Datos</h2>
+                <p>Los registros históricos del sistema aparecerán aquí</p>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<DatoGrafica> datosHumedad = new();
+    private List<DatoGrafica> datosTemperatura = new();
+    private DateTime fechaBusqueda = DateTime.Today;
+    private bool cargando = false;
+    private Timer? timer;
+
+    protected override void OnInitialized()
+    {
+        // Inicializar datos
+        for (int i = 0; i < 6; i++)
+        {
+            datosHumedad.Add(new DatoGrafica 
+            { 
+                Tiempo = i * 5, 
+                Valor = Random.Shared.Next(40, 70) 
+            });
+            datosTemperatura.Add(new DatoGrafica 
+            { 
+                Tiempo = i * 5, 
+                Valor = Random.Shared.Next(20, 28) 
+            });
+        }
+
+        // Actualizar datos cada 3 segundos
+        timer = new Timer(ActualizarDatos, null, 3000, 3000);
+    }
+
+    private void ActualizarDatos(object? state)
+    {
+        InvokeAsync(() =>
+        {
+            // Humedad
+            datosHumedad.RemoveAt(0);
+            datosHumedad.Add(new DatoGrafica
+            {
+                Tiempo = datosHumedad[^1].Tiempo + 5,
+                Valor = Math.Clamp(datosHumedad[^1].Valor + Random.Shared.Next(-5, 6), 20, 100)
+            });
+
+            // Temperatura
+            datosTemperatura.RemoveAt(0);
+            datosTemperatura.Add(new DatoGrafica
+            {
+                Tiempo = datosTemperatura[^1].Tiempo + 5,
+                Valor = Math.Clamp(datosTemperatura[^1].Valor + Random.Shared.Next(-2, 3), 18, 35)
+            });
+
+            StateHasChanged();
+        });
+    }
+
+    private async Task RecargarHistorial()
+    {
+        cargando = true;
+        await Task.Delay(1500);
+        cargando = false;
+    }
+
+    private async Task IniciarRiego()
+    {
+        await RiegoService.IniciarRiegoManualAsync();
+    }
+
+    private async Task BuscarPorFecha()
+    {
+        cargando = true;
+        await Task.Delay(1000);
+        cargando = false;
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+}

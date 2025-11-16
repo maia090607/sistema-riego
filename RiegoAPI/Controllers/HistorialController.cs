@@ -1,16 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using BLL;
+﻿using BLL;
 using ENTITY;
+using Microsoft.AspNetCore.Mvc;
 using RiegoAPI.DTO.Mappers;
 using RiegoAPI.DTO.Request;
 using RiegoAPI.DTOs.Response;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-// CUANDO EJECUTABA SWAGGER NO ME ABRIA POR EL HECHO DE TENER ESTE CONTRLADOR COPIADO TAMBIEN EN 
-// CLIMA CONTROLLER, SOLO LO COMENTE, SI AQUELLA VERSION ES MAS RECIENT O MEJOR, PEGAR AQUELLA ACA
-// SI NO DARA ERROES DE RUTAS DUPLICADAS
-namespace API.Controllers
+
+namespace RiegoAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -26,103 +25,118 @@ namespace API.Controllers
 
         // GET: api/historial
         [HttpGet]
-        public ActionResult<List<HistorialRiegoResponseDTO>> ObtenerTodos()
+        public IActionResult ObtenerTodos()
         {
             var entidades = _servicioHistorial.MostrarTodos();
-            var dto = HistorialRiegoMapper.ToResponseDTOList(entidades);
-            return Ok(dto);
+            var dto = HistorialRiegoMapper.ToResponseDTOList(entidades.ToList());
+
+            return Ok(ApiResponseDTO<List<HistorialRiegoResponseDTO>>.Success(
+                dto, $"Se encontraron {dto.Count} registros"));
         }
 
 
         // GET: api/historial/{id}
         [HttpGet("{id}")]
-        public ActionResult<HistorialRiegoResponseDTO> ObtenerPorId(int id)
+        public IActionResult ObtenerPorId(int id)
         {
             if (id <= 0)
-                return BadRequest("El ID debe ser mayor a cero");
+                return BadRequest(ApiResponseDTO<object>.Error("El ID debe ser mayor a cero"));
 
             var entidad = _servicioHistorial.ObtenerPorId(id);
 
             if (entidad == null)
-                return NotFound($"No se encontró historial con ID {id}");
+                return NotFound(ApiResponseDTO<object>.Error($"No se encontró historial con ID {id}"));
 
-            return Ok(HistorialRiegoMapper.ToResponseDTO(entidad));
+            var dto = HistorialRiegoMapper.ToResponseDTO(entidad);
+
+            return Ok(ApiResponseDTO<HistorialRiegoResponseDTO>.Success(dto, "Historial encontrado"));
         }
 
 
         // GET: api/historial/por-fecha
         [HttpGet("por-fecha")]
-        public ActionResult<List<HistorialRiegoResponseDTO>> ObtenerPorFecha([FromQuery] DateTime fecha)
+        public IActionResult ObtenerPorFecha([FromQuery] DateTime fecha)
         {
             var entidades = _servicioHistorial.MostrarTodos();
-            var filtrados = entidades
-                .Where(h => h.Fecha.Date == fecha.Date)
-                .ToList();
+            var filtrados = entidades.Where(h => h.Fecha.Date == fecha.Date).ToList();
 
-            return Ok(HistorialRiegoMapper.ToResponseDTOList(filtrados));
+            var dto = HistorialRiegoMapper.ToResponseDTOList(filtrados);
+
+            return Ok(ApiResponseDTO<List<HistorialRiegoResponseDTO>>.Success(
+                dto, $"Se encontraron {dto.Count} registros para la fecha {fecha:dd/MM/yyyy}"));
         }
 
         // GET: api/historial/rango-fechas
         [HttpGet("rango-fechas")]
-        public ActionResult<List<HistorialRiegoResponseDTO>> ObtenerPorRangoFechas(
+        public IActionResult ObtenerPorRangoFechas(
             [FromQuery] DateTime fechaInicio,
             [FromQuery] DateTime fechaFin)
         {
             var entidades = _servicioHistorial.MostrarTodos();
+
             var filtrados = entidades
                 .Where(h => h.Fecha.Date >= fechaInicio.Date &&
                             h.Fecha.Date <= fechaFin.Date)
                 .ToList();
 
-            return Ok(HistorialRiegoMapper.ToResponseDTOList(filtrados));
+            var dto = HistorialRiegoMapper.ToResponseDTOList(filtrados);
+
+            return Ok(ApiResponseDTO<List<HistorialRiegoResponseDTO>>.Success(
+                dto, $"Se encontraron {dto.Count} registros entre {fechaInicio:dd/MM/yyyy} y {fechaFin:dd/MM/yyyy}"));
         }
 
         // POST: api/historial
         [HttpPost]
-        public ActionResult<HistorialRiegoResponseDTO> Guardar([FromBody] HistorialRiegoRequestDTO dto)
+        public IActionResult Guardar([FromBody] HistorialRiegoRequestDTO dto)
         {
-            if (dto == null)
-                return BadRequest("El historial no puede ser nulo");
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponseDTO<object>.Error("Datos inválidos"));
 
             try
             {
                 var entidad = HistorialRiegoMapper.ToEntity(dto);
-                var mensaje = _servicioHistorial.Guardar(entidad);
+                var resultado = _servicioHistorial.Guardar(entidad);
 
-                // entidad.Id debe ya estar asignado después de guardar
                 var respuesta = HistorialRiegoMapper.ToResponseDTO(entidad);
 
-                return CreatedAtAction(nameof(ObtenerPorId), new { id = respuesta.Id }, respuesta);
+                return CreatedAtAction(nameof(ObtenerPorId),
+                    new { id = respuesta.Id },
+                    ApiResponseDTO<HistorialRiegoResponseDTO>.Success(
+                        respuesta, resultado));
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error al guardar: {ex.Message}");
+                return BadRequest(ApiResponseDTO<object>.Error($"Error al guardar: {ex.Message}"));
             }
         }
 
         // GET: api/historial/ultimo
         [HttpGet("ultimo")]
-        public ActionResult<HistorialRiegoResponseDTO> ObtenerUltimo()
+        public IActionResult ObtenerUltimo()
         {
             var entidades = _servicioHistorial.MostrarTodos();
             var ultimo = entidades.OrderByDescending(h => h.Fecha).FirstOrDefault();
 
             if (ultimo == null)
-                return NotFound("No hay registros de historial");
+                return NotFound(ApiResponseDTO<object>.Error("No hay registros de historial"));
 
-            return Ok(HistorialRiegoMapper.ToResponseDTO(ultimo));
+            var dto = HistorialRiegoMapper.ToResponseDTO(ultimo);
+
+            return Ok(ApiResponseDTO<HistorialRiegoResponseDTO>.Success(
+                dto, "Último registro de riego"));
         }
 
         // GET: api/historial/estadisticas
         [HttpGet("estadisticas")]
-        public ActionResult<EstadisticasHistorialResponseDTO> ObtenerEstadisticas([FromQuery] int dias = 7)
+        public IActionResult ObtenerEstadisticas([FromQuery] int dias = 7)
         {
             var fechaLimite = DateTime.Now.AddDays(-dias);
             var entidades = _servicioHistorial.MostrarTodos();
             var recientes = entidades.Where(h => h.Fecha >= fechaLimite).ToList();
 
             if (!recientes.Any())
-                return Ok(new EstadisticasHistorialResponseDTO());
+                return Ok(ApiResponseDTO<object>.Success(
+                    new { }, "No hay datos para el período"));
 
             var dto = new EstadisticasHistorialResponseDTO
             {
@@ -136,9 +150,11 @@ namespace API.Controllers
                 PeriodoAnalizado = dias
             };
 
-            return Ok(dto);
+            return Ok(ApiResponseDTO<EstadisticasHistorialResponseDTO>.Success(
+                dto, $"Estadísticas de los últimos {dias} días"));
         }
     }
+
 
     // DTO de Estadísticas como Response
     //ESTE DTO DEBERIA IR EN LA CARPETA DTO/RESPONSE
@@ -153,4 +169,5 @@ namespace API.Controllers
         public float TemperaturaMaxima { get; set; }
         public int PeriodoAnalizado { get; set; }
     }
+
 }
