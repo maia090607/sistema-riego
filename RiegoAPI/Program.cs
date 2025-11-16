@@ -176,4 +176,4 @@ Console.WriteLine();
 Console.WriteLine("Presiona Ctrl+C para detener el servidor...");
 Console.WriteLine();
 
-app.Run(); HAY UN ERROR EN EL Model
+app.Run(); 
