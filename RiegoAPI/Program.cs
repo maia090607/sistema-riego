@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using BLL;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using BLL;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -117,6 +118,49 @@ app.Map("/error", (HttpContext context) =>
     );
 });
 
+
+
+// ===================================
+// MANEJO DEL SWAGGER UI PERSONALIZADO  
+// ===================================
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "SmartDrop - Sistema de Riego Automático",
+        Version = "v1",
+        Description = @"
+![SmartDrop Logo](https://tusitio.com/img/smartdrop-logo.png)
+
+API RESTful para el sistema de riego automático con Arduino.
+
+**Contacto:** Equipo de Desarrollo
+",
+        Contact = new OpenApiContact
+        {
+            Name = "Equipo de Desarrollo",
+            Email = "contacto@smartdrop.com",
+            Url = new Uri("https://smartdrop.com")
+        }
+    });
+});
+
+
+// ===================================
+// ACTIVAR EL SWAGGER UI PERSONALIZADO  
+// ===================================
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartDrop API v1");
+    c.DocumentTitle = "SmartDrop - API de Riego Automático";
+    c.InjectStylesheet("/swagger-ui/custom.css"); // Opcional para estilos
+});
+
+
+
 // ===================================
 // EJECUTAR LA APLICACIÓN
 // ===================================
@@ -132,4 +176,4 @@ Console.WriteLine();
 Console.WriteLine("Presiona Ctrl+C para detener el servidor...");
 Console.WriteLine();
 
-app.Run();
+app.Run(); HAY UN ERROR EN EL Model

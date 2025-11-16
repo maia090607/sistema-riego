@@ -70,7 +70,8 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             _ = ObtenerDatosClimaAsync();
 
         }
-        private async void MostrarDatosAsync(string mensaje)
+        private async         Task
+MostrarDatosAsync(string mensaje)
         {
             if (string.IsNullOrWhiteSpace(mensaje))
                 return;
@@ -573,7 +574,7 @@ namespace PROYECTO_RIEGO_AUTOMATICO
 
                 // Verificar que el nombre de usuario esté disponible o pertenece al mismo usuario
                 var existentePorNombre = serviciosUsuario.ValidarNombreUsuario(txtNombreUsuariodelUsuario.Text);
-                if (existentePorNombre != null && existentePorNombre.IdUsuario != usu.Entidad.IdUsuario)
+                if (existentePorNombre != null && existentePorNombre.Entidad.IdUsuario != usu.Entidad.IdUsuario)
                 {
                     MessageBox.Show("El nombre de usuario ya está en uso. Cámbialo por favor.");
                     return;
@@ -644,6 +645,12 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         private void CargarUsuario()
         {
             var list = serviciosUsuario.ObtenerTodos();
+            if (list == null || list.Lista == null)
+            {
+                MessageBox.Show("No se pudo obtener la lista de usuarios.");
+                return;
+            }
+
             foreach (var item in list.Lista)
             {
                 if (item.Accedio == true)
