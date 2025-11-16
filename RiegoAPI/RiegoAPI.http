@@ -1,6 +1,46 @@
-@RiegoAPI_HostAddress = http://localhost:5248
+@RiegoAPI_HostAddress = https://localhost:7001
 
-GET {{RiegoAPI_HostAddress}}/weatherforecast/
+### Obtener todos los registros de riego
+GET {{RiegoAPI_HostAddress}}/api/Riego
 Accept: application/json
+
+###
+
+### Obtener un registro por ID
+GET {{RiegoAPI_HostAddress}}/api/Riego/1
+Accept: application/json
+
+###
+
+### Crear nuevo registro de riego
+POST {{RiegoAPI_HostAddress}}/api/Riego
+Content-Type: application/json
+
+{
+  "zonaId": 1,
+  "humedad": 45.5,
+  "temperatura": 24.3,
+  "estado": "Activo",
+  "fechaRegistro": "2025-11-16T10:30:00"
+}
+
+###
+
+### Actualizar registro
+PUT {{RiegoAPI_HostAddress}}/api/Riego/1
+Content-Type: application/json
+
+{
+  "id": 1,
+  "zonaId": 1,
+  "humedad": 65.0,
+  "temperatura": 23.5,
+  "estado": "Completado"
+}
+
+###
+
+### Eliminar registro
+DELETE {{RiegoAPI_HostAddress}}/api/Riego/1
 
 ###

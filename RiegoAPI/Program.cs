@@ -76,7 +76,21 @@ builder.Services.AddSingleton<ServicioPuerto>(provider =>
 // Habilitar archivos estáticos
 builder.Services.AddDirectoryBrowser();
 
+// Configurar CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowBlazor", policy =>
+    {
+        policy.WithOrigins("https://localhost:5001", "http://localhost:5000")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+
+// Usar CORS
+app.UseCors("AllowBlazor");
 
 // ===================================
 // CONFIGURACIÓN DEL PIPELINE HTTP

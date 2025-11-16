@@ -1,0 +1,438 @@
+﻿@page "/"
+@using SmartDropUI.Models
+@using SmartDropUI.Services
+@inject RiegoService RiegoService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>SmartDrop - Sistema de Riego</PageTitle>
+
+@if (vista == "login")
+{
+    <div class="login-container">
+        <div class="login-decorations">
+            <div class="droplet droplet-1">💧</div>
+            <div class="droplet droplet-2">💧</div>
+            <div class="droplet droplet-3">💧</div>
+            <div class="leaf leaf-1">🌿</div>
+            <div class="leaf leaf-2">🍃</div>
+        </div>
+
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo">
+                    <span>🌿</span>
+                    <span>💧</span>
+                </div>
+                <h1 class="title">SmartDrop</h1>
+                <p class="subtitle">Sistema de Riego Automático</p>
+            </div>
+
+            <div class="login-form">
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input type="text" class="form-input" placeholder="Usuario" @bind="usuario" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="@(mostrarPassword ? "text" : "password")" class="form-input" placeholder="Contraseña" @bind="password" />
+                        <button class="toggle-password" @onclick="ToggleMostrarPassword">
+                            @(mostrarPassword ? "🙈" : "👁️")
+                        </button>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(mensajeError))
+                {
+                    <div class="alert-error">@mensajeError</div>
+                }
+
+                <button class="btn-primary" @onclick="HandleLogin" disabled="@cargando">
+                    <span class="btn-icon">💧</span>
+                    @(cargando ? "Accediendo..." : "Acceder")
+                </button>
+
+                <button class="btn-secondary" @onclick="IrARegistro">
+                    <span class="btn-icon">➕</span>
+                    Crear Cuenta
+                </button>
+            </div>
+        </div>
+    </div>
+}
+else if (vista == "registro")
+{
+    <div class="registro-container">
+        <div class="registro-card">
+            <div class="registro-header">
+                <div class="icon-group">
+                    <span>🌿</span>
+                    <span>💧</span>
+                    <span>🌱</span>
+                </div>
+                <h1>REGISTRAR NUEVO USUARIO</h1>
+                <p>Sistema de Riego Automático SmartDrop</p>
+            </div>
+
+            <div class="registro-form">
+                <div class="form-group">
+                    <label>
+                        <span class="label-icon purple">🆔</span>
+                        Identificación
+                    </label>
+                    <input type="text" placeholder="Ingrese su identificación" @bind="formRegistro.Identificacion" />
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <span class="label-icon blue">👤</span>
+                        Nombre Completo
+                    </label>
+                    <input type="text" placeholder="Ingrese su nombre completo" @bind="formRegistro.NombreCompleto" />
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <span class="label-icon green">📧</span>
+                        Correo Electrónico
+                    </label>
+                    <input type="email" placeholder="usuario@ejemplo.com" @bind="formRegistro.Correo" />
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <span class="label-icon orange">👨‍💼</span>
+                        Nombre de Usuario
+                    </label>
+                    <input type="text" placeholder="Ingrese nombre de usuario" @bind="formRegistro.NombreUsuario" />
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <span class="label-icon teal">🎭</span>
+                        Rol del Usuario
+                    </label>
+                    <select @bind="formRegistro.Rol">
+                        <option value="">Seleccionar rol</option>
+                        <option value="admin">Administrador</option>
+                        <option value="usuario">Usuario</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <span class="label-icon yellow">🔐</span>
+                        Contraseña
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="@(mostrarPasswordRegistro ? "text" : "password")" placeholder="Ingrese contraseña" @bind="formRegistro.Contrasena" />
+                        <button class="toggle-password" @onclick="ToggleMostrarPasswordRegistro">
+                            @(mostrarPasswordRegistro ? "🙈" : "👁️")
+                        </button>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(mensajeExito))
+                {
+                    <div class="alert-success">@mensajeExito</div>
+                }
+
+                <div class="button-group">
+                    <button class="btn-create" @onclick="HandleRegistro" disabled="@cargando">
+                        <span>➕</span>
+                        @(cargando ? "Creando..." : "CREAR USUARIO")
+                    </button>
+                    <button class="btn-back" @onclick="IrALogin">
+                        <span>⬅️</span>
+                        ATRÁS
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (vista == "dashboard")
+{
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <div class="header-left">
+                <span class="icon">🌿</span>
+                <span class="icon">💧</span>
+                <h1>SmartDrop</h1>
+            </div>
+            <div class="header-right">
+                <button class="nav-btn active">Dashboard</button>
+                <button class="nav-btn" @onclick="IrAHistorial">Historial</button>
+                <button class="nav-btn logout" @onclick="IrALogin">Salir</button>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="chart-card">
+                <h2>HUMEDAD DEL SUELO</h2>
+                <p class="chart-subtitle">Monitoreo en tiempo real</p>
+                <div class="chart-placeholder">
+                    @for (int i = 0; i < 6; i++)
+                    {
+                        var altura = Random.Shared.Next(30, 90);
+                        var valor = Random.Shared.Next(20, 100);
+                        <div class="chart-bar" style="height: @(altura)%">
+                            <span>@valor</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h2>TEMPERATURA</h2>
+                <p class="chart-subtitle">Grados Celsius</p>
+                <div class="chart-placeholder">
+                    @for (int i = 0; i < 6; i++)
+                    {
+                        var altura = Random.Shared.Next(40, 90);
+                        var valor = Random.Shared.Next(18, 35);
+                        <div class="chart-bar temp" style="height: @(altura)%">
+                            <span>@valor</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="controls-card">
+                <h2>CONTROLES</h2>
+                <div class="controls-content">
+                    <button class="control-btn primary" @onclick="HandleRecargar">
+                        <span>🔄</span>
+                        RECARGAR
+                    </button>
+                    <button class="control-btn success" @onclick="HandleRiegoManual">
+                        <span>▶️</span>
+                        RIEGO MANUAL
+                    </button>
+                    <div class="date-search">
+                        <h3>BUSCAR FECHA</h3>
+                        <input type="date" @bind="fechaBusqueda" />
+                        <button class="control-btn info" @onclick="HandleBuscarFecha">
+                            <span>🔍</span>
+                            BUSCAR
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="historial-area">
+            @if (cargandoHistorial)
+            {
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando datos...</p>
+                </div>
+            }
+            else
+            {
+                <div class="historial-content">
+                    <div class="historial-icon">💧</div>
+                    <h2>Historial de Datos</h2>
+                    <p>Los datos del sistema aparecerán aquí</p>
+                </div>
+            }
+        </div>
+    </div>
+}
+else if (vista == "historial")
+{
+    <div class="historial-container">
+        <div class="historial-header">
+            <div class="header-left">
+                <span class="icon">🌿</span>
+                <span class="icon">💧</span>
+                <h1>SmartDrop - Historial</h1>
+            </div>
+            <div class="header-right">
+                <button class="nav-btn" @onclick="IrADashboard">Dashboard</button>
+                <button class="nav-btn active">Historial</button>
+                <button class="nav-btn logout" @onclick="IrALogin">Salir</button>
+            </div>
+        </div>
+
+        <div class="historial-card">
+            <div class="card-header">
+                <h2>📊 HISTORIAL DE RIEGOS</h2>
+                <button class="btn-actualizar" @onclick="CargarHistorial">
+                    <span>🔄</span>
+                    Actualizar
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table class="historial-table">
+                    <thead>
+                        <tr>
+                            <th>🆔 ID</th>
+                            <th>📅 FECHA</th>
+                            <th>💧 HUMEDAD</th>
+                            <th>🌡️ TEMPERATURA</th>
+                            <th>📊 ESTADO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (cargandoHistorial)
+                        {
+                            <tr>
+                                <td colspan="5" class="loading-cell">
+                                    <div class="spinner"></div>
+                                    <p>Cargando historial...</p>
+                                </td>
+                            </tr>
+                        }
+                        else if (historialDatos == null || !historialDatos.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="empty-cell">
+                                    No hay datos disponibles
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var dato in historialDatos)
+                            {
+                                var badgeHumedad = dato.Humedad < 40 ? "danger" : dato.Humedad < 60 ? "warning" : "success";
+                                <tr>
+                                    <td>@dato.Id</td>
+                                    <td>@dato.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        <span class="badge @badgeHumedad">
+                                            @dato.Humedad.ToString("F1")%
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge temp">
+                                            @dato.Temperatura.ToString("F1")°C
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge status">
+                                            @dato.Estado
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string vista = "login";
+    private string usuario = "";
+    private string password = "";
+    private bool mostrarPassword = false;
+    private bool mostrarPasswordRegistro = false;
+    private bool cargando = false;
+    private bool cargandoHistorial = false;
+    private string mensajeError = "";
+    private string mensajeExito = "";
+    private DateTime fechaBusqueda = DateTime.Now;
+
+    private UsuarioModel formRegistro = new();
+    private List<DatosRiegoModel>? historialDatos;
+
+    // Métodos de navegación
+    private void IrALogin() => vista = "login";
+    private void IrARegistro() => vista = "registro";
+    private void IrADashboard() => vista = "dashboard";
+    private void IrAHistorial() => vista = "historial";
+
+    private void ToggleMostrarPassword() => mostrarPassword = !mostrarPassword;
+    private void ToggleMostrarPasswordRegistro() => mostrarPasswordRegistro = !mostrarPasswordRegistro;
+
+    private async Task HandleLogin()
+    {
+        mensajeError = "";
+
+        if (string.IsNullOrWhiteSpace(usuario) || string.IsNullOrWhiteSpace(password))
+        {
+            mensajeError = "Por favor complete todos los campos";
+            return;
+        }
+
+        cargando = true;
+        await Task.Delay(500);
+        vista = "dashboard";
+        cargando = false;
+    }
+
+    private async Task HandleRegistro()
+    {
+        mensajeError = "";
+        mensajeExito = "";
+
+        if (string.IsNullOrWhiteSpace(formRegistro.NombreUsuario) ||
+            string.IsNullOrWhiteSpace(formRegistro.Contrasena))
+        {
+            mensajeError = "Complete los campos requeridos";
+            return;
+        }
+
+        cargando = true;
+        await Task.Delay(500);
+        mensajeExito = "Usuario creado exitosamente";
+        cargando = false;
+
+        await Task.Delay(1500);
+        vista = "login";
+    }
+
+    private async Task HandleRecargar()
+    {
+        cargandoHistorial = true;
+        await Task.Delay(1000);
+        cargandoHistorial = false;
+    }
+
+    private void HandleRiegoManual()
+    {
+        // Lógica para iniciar riego manual
+    }
+
+    private void HandleBuscarFecha()
+    {
+        // Lógica para buscar por fecha
+    }
+
+    private async Task CargarHistorial()
+    {
+        cargandoHistorial = true;
+        try
+        {
+            historialDatos = await RiegoService.ObtenerHistorialAsync();
+        }
+        catch
+        {
+            historialDatos = new List<DatosRiegoModel>();
+        }
+        finally
+        {
+            cargandoHistorial = false;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (vista == "historial")
+        {
+            await CargarHistorial();
+        }
+    }
+}
