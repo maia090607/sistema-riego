@@ -8,10 +8,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Configurar HttpClient para consumir la API
+// Configurar HttpClientFactory para múltiples clientes
+builder.Services.AddHttpClient();
+
+// HttpClient principal para la API de riego
 builder.Services.AddScoped(sp => new HttpClient
 {
     BaseAddress = new Uri("https://localhost:7001") // URL de tu RiegoAPI
+});
+
+// HttpClient para la API del clima (Open-Meteo)
+builder.Services.AddHttpClient("WeatherAPI", client =>
+{
+    client.BaseAddress = new Uri("https://api.open-meteo.com/");
+    client.Timeout = TimeSpan.FromSeconds(10);
 });
 
 // Registrar servicios
@@ -38,5 +48,3 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
-
-

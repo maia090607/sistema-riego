@@ -1,55 +1,107 @@
 ﻿@using SmartDropUI.Models
 @using SmartDropUI.Services
 @inject AuthService AuthService
-@inject NavigationManager Navigation
 
 <div class="login-container">
+    <div class="login-decorations">
+        <div class="droplet droplet-1">💧</div>
+        <div class="droplet droplet-2">💧</div>
+        <div class="droplet droplet-3">💧</div>
+        <div class="leaf leaf-1">🌿</div>
+        <div class="leaf leaf-2">🍃</div>
+    </div>
 
-    <!-- formulario de login ... -->
+    <div class="login-card">
+        <div class="login-header">
+            <div class="logo">
+                <span>🌿</span>
+                <span>💧</span>
+            </div>
+            <h1 class="title">SmartDrop</h1>
+            <p class="subtitle">Sistema de Riego Automático</p>
+        </div>
 
-    <button class="btn-primary" @onclick="HandleLogin" disabled="@cargando">
-        <span class="btn-icon">💧</span>
-        @(cargando ? "Cargando..." : "Acceder")
-    </button>
+        <div class="login-form">
+            <div class="form-group">
+                <label>Usuario</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    <input type="text" class="form-input" placeholder="Usuario" @bind="usuario" />
+                </div>
+            </div>
 
-    <button class="btn-secondary" @onclick="IrARegistroClick">
-        <span class="btn-icon">➕</span>
-        Crear Cuenta
-    </button>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔒</span>
+                    <input type="@(mostrarPassword ? "text" : "password")" class="form-input" placeholder="Contraseña" @bind="password" />
+                    <button type="button" class="toggle-password" @onclick="ToggleMostrarPassword">
+                        @(mostrarPassword ? "🙈" : "👁️")
+                    </button>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(mensajeError))
+            {
+                <div class="alert-error">@mensajeError</div>
+            }
+
+            <button type="button" class="btn-primary" @onclick="HandleLogin" disabled="@cargando">
+                <span class="btn-icon">💧</span>
+                @(cargando ? "Accediendo..." : "Acceder")
+            </button>
+
+            <button type="button" class="btn-secondary" @onclick="IrARegistro">
+                <span class="btn-icon">✨</span>
+                Crear Cuenta
+            </button>
+        </div>
+    </div>
 </div>
 
 @code {
     [Parameter] public EventCallback OnLoginExitoso { get; set; }
     [Parameter] public EventCallback OnIrARegistro { get; set; }
 
-    private LoginModel loginModel = new();
+    private string usuario = "";
+    private string password = "";
     private bool mostrarPassword = false;
     private bool cargando = false;
     private string mensajeError = "";
 
+    private void ToggleMostrarPassword() => mostrarPassword = !mostrarPassword;
+
     private async Task HandleLogin()
     {
-        cargando = true;
         mensajeError = "";
 
-        if (string.IsNullOrWhiteSpace(loginModel.Usuario) ||
-            string.IsNullOrWhiteSpace(loginModel.Password))
+        if (string.IsNullOrWhiteSpace(usuario) || string.IsNullOrWhiteSpace(password))
         {
-            mensajeError = "Complete todos los campos";
-            cargando = false;
+            mensajeError = "Por favor complete todos los campos";
             return;
         }
 
-        var ok = await AuthService.LoginAsync(loginModel);
+        cargando = true;
 
-        if (ok)
+        var loginModel = new LoginModel
+        {
+            Usuario = usuario,
+            Password = password
+        };
+
+        bool loginExitoso = await AuthService.LoginAsync(loginModel);
+
+        if (loginExitoso)
+        {
             await OnLoginExitoso.InvokeAsync();
+        }
         else
+        {
             mensajeError = "Usuario o contraseña incorrectos";
+        }
 
         cargando = false;
     }
 
-    private async Task IrARegistroClick() =>
-        await OnIrARegistro.InvokeAsync();
+    private async Task IrARegistro() => await OnIrARegistro.InvokeAsync();
 }

@@ -13,6 +13,47 @@ body {
 }
 
 /* ========================================
+   ANIMACIONES GLOBALES
+======================================== */
+@keyframes aparecer {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.9);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes rotar-logo {
+    0% {
+        transform: rotate(-180deg) scale(0);
+    }
+
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========================================
    LOGIN - PANTALLA DE INICIO
 ======================================== */
 .login-container {
@@ -20,7 +61,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
     position: relative;
     overflow: hidden;
 }
@@ -71,17 +112,7 @@ body {
     animation-delay: 0.5s;
 }
 
-@keyframes float {
-    0%, 100% {
-        transform: translateY(0px);
-    }
-
-    50% {
-        transform: translateY(-20px);
-    }
-}
-
-/* Tarjeta de login */
+/* Tarjeta de login CON ANIMACIÓN */
 .login-card {
     background: white;
     border-radius: 20px;
@@ -90,11 +121,13 @@ body {
     max-width: 450px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     z-index: 1;
+    animation: aparecer 0.6s ease-out;
 }
 
 .login-header {
     text-align: center;
     margin-bottom: 2rem;
+    animation: aparecer 0.8s ease-out 0.2s both;
 }
 
 .logo {
@@ -103,6 +136,7 @@ body {
     gap: 0.5rem;
     font-size: 3rem;
     margin-bottom: 1rem;
+    animation: rotar-logo 1s ease-out;
 }
 
 .title {
@@ -117,11 +151,12 @@ body {
     font-size: 1rem;
 }
 
-/* Formulario */
+/* Formulario CON ANIMACIÓN */
 .login-form {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    animation: aparecer 0.8s ease-out 0.4s both;
 }
 
 .form-group {
@@ -260,6 +295,7 @@ body {
     width: 100%;
     max-width: 600px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: aparecer 0.6s ease-out;
 }
 
 .registro-header {
@@ -738,12 +774,6 @@ body {
     animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
 /* ========================================
    RESPONSIVE
 ======================================== */
@@ -758,5 +788,456 @@ body {
 
     .button-group {
         grid-template-columns: 1fr;
+    }
+}
+/* ========================================
+   DASHBOARD NUEVO DISEÑO
+======================================== */
+.dashboard-smartdrop {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    padding: 2rem;
+}
+
+.dashboard-header-nuevo {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+    .dashboard-header-nuevo h1 {
+        font-size: 2.5rem;
+        color: #047857;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-header-nuevo p {
+        color: #6b7280;
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+
+.btn-salir {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.7rem 1.5rem;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .btn-salir:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+    }
+
+/* Grid de tarjetas */
+.dashboard-grid-nuevo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Tarjetas de sensores */
+.card-sensor {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-top: 5px solid;
+    transition: all 0.3s ease;
+    animation: aparecer 0.6s ease-out;
+}
+
+    .card-sensor:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Colores de borde según tipo */
+    .card-sensor.temperatura {
+        border-top-color: #f59e0b;
+    }
+
+    .card-sensor.humedad-aire {
+        border-top-color: #10b981;
+    }
+
+    .card-sensor.bomba {
+        border-top-color: #3b82f6;
+    }
+
+    .card-sensor.ultimo-riego {
+        border-top-color: #10b981;
+    }
+
+    .card-sensor.pronostico {
+        border-top-color: #f59e0b;
+    }
+
+    .card-sensor.viento {
+        border-top-color: #3b82f6;
+    }
+
+    .card-sensor.programa {
+        border-top-color: #10b981;
+    }
+
+    .card-sensor.humedad-suelo {
+        border-top-color: #10b981;
+    }
+
+/* Iconos de sensores */
+.icon-sensor {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.card-sensor h3 {
+    color: #047857;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: 0.5px;
+}
+
+.card-sensor h4 {
+    color: #6b7280;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Valores de sensores */
+.valor-sensor {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-top: 0.5rem;
+}
+
+    .valor-sensor.estado {
+        color: #f59e0b;
+        font-size: 1.8rem;
+    }
+
+    .valor-sensor.direccion {
+        color: #3b82f6;
+        font-size: 1.8rem;
+    }
+
+/* Badges de estado */
+.estado-badge {
+    display: inline-block;
+    padding: 0.6rem 1.5rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+}
+
+    .estado-badge.activo {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .estado-badge.fecha {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .estado-badge.humedad {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-header-nuevo h1 {
+        font-size: 1.8rem;
+    }
+
+    .dashboard-grid-nuevo {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-salir {
+        position: static;
+        margin-top: 1rem;
+        width: 100%;
+    }
+}
+
+
+/* ========================================
+   DASHBOARD NUEVO DISEÑO
+======================================== */
+.dashboard-smartdrop {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    padding: 2rem;
+}
+
+.dashboard-header-nuevo {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+    .dashboard-header-nuevo h1 {
+        font-size: 2.5rem;
+        color: #047857;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-header-nuevo p {
+        color: #6b7280;
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+
+.btn-salir {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.7rem 1.5rem;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .btn-salir:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+    }
+
+/* Grid de tarjetas */
+.dashboard-grid-nuevo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Tarjetas de sensores */
+.card-sensor {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-top: 5px solid;
+    transition: all 0.3s ease;
+    animation: aparecer 0.6s ease-out;
+}
+
+    .card-sensor:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Colores de borde según tipo */
+    .card-sensor.temperatura {
+        border-top-color: #f59e0b;
+    }
+
+    .card-sensor.humedad-aire {
+        border-top-color: #10b981;
+    }
+
+    .card-sensor.bomba {
+        border-top-color: #3b82f6;
+    }
+
+    .card-sensor.ultimo-riego {
+        border-top-color: #10b981;
+    }
+
+    .card-sensor.pronostico {
+        border-top-color: #f59e0b;
+    }
+
+    .card-sensor.viento {
+        border-top-color: #3b82f6;
+    }
+
+    .card-sensor.programa {
+        border-top-color: #10b981;
+    }
+
+    .card-sensor.humedad-suelo {
+        border-top-color: #10b981;
+    }
+
+/* Iconos de sensores */
+.icon-sensor {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.card-sensor h3 {
+    color: #047857;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: 0.5px;
+}
+
+.card-sensor h4 {
+    color: #6b7280;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Valores de sensores */
+.valor-sensor {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-top: 0.5rem;
+}
+
+    .valor-sensor.estado {
+        color: #f59e0b;
+        font-size: 1.8rem;
+    }
+
+    .valor-sensor.direccion {
+        color: #3b82f6;
+        font-size: 1.8rem;
+    }
+
+/* Badges de estado */
+.estado-badge {
+    display: inline-block;
+    padding: 0.6rem 1.5rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+}
+
+    .estado-badge.activo {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .estado-badge.fecha {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .estado-badge.humedad {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+/* Estados de temperatura */
+.estado-mini {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    display: inline-block;
+}
+
+    .estado-mini.frio {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .estado-mini.normal {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .estado-mini.caliente {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .estado-mini.bajo {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .estado-mini.alto {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+/* Estados de bomba y programa */
+.estado-badge.inactivo {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+/* Estados de humedad del suelo */
+.estado-badge.seco {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.estado-badge.humedo {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.estado-badge.muy-humedo {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+/* Última actualización */
+.ultima-actualizacion {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+    .ultima-actualizacion p {
+        color: #6b7280;
+        font-weight: 600;
+        margin: 0;
+    }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-header-nuevo h1 {
+        font-size: 1.8rem;
+    }
+
+    .dashboard-grid-nuevo {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-salir {
+        position: static;
+        margin-top: 1rem;
+        width: 100%;
     }
 }

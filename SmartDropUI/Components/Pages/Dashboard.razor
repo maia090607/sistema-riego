@@ -1,43 +1,232 @@
 ﻿@using SmartDropUI.Models
 @using SmartDropUI.Services
-@implements IDisposable
 @inject RiegoService RiegoService
+@implements IDisposable
 
-<div class="dashboard-container">
-    <!-- contenido dashboard ... -->
+<div class="dashboard-smartdrop">
+    <div class="dashboard-header-nuevo">
+        <h1>SISTEMA DE RIEGO AUTOMÁTICO SMARTDROP</h1>
+        <p>Panel de Control y Monitoreo en Tiempo Real</p>
+        <button class="btn-salir" @onclick="CerrarSesion">Salir</button>
+    </div>
 
-    <button class="nav-btn" @onclick="IrHistorial">
-        Historial
-    </button>
+    <div class="dashboard-grid-nuevo">
+        <!-- Temperatura -->
+        <div class="card-sensor temperatura">
+            <div class="icon-sensor">🌡️</div>
+            <h3>TEMPERATURA</h3>
+            <div class="valor-sensor">@datosActuales.Temperatura°C</div>
+            <div class="estado-mini @ObtenerClaseTemperatura()">
+                @ObtenerEstadoTemperatura()
+            </div>
+        </div>
 
-    <button class="nav-btn logout" @onclick="CerrarSesion">
-        Salir
-    </button>
+        <!-- Humedad del Aire -->
+        <div class="card-sensor humedad-aire">
+            <div class="icon-sensor">💧</div>
+            <h3>HUMEDAD DEL AIRE</h3>
+            <div class="valor-sensor">@datosActuales.HumedadAire%</div>
+            <div class="estado-mini @ObtenerClaseHumedadAire()">
+                @ObtenerEstadoHumedadAire()
+            </div>
+        </div>
+
+        <!-- Bomba de Agua -->
+        <div class="card-sensor bomba">
+            <div class="icon-sensor">💧</div>
+            <h3>BOMBA DE AGUA</h3>
+            <h4>ESTADO</h4>
+            <div class="estado-badge @GetBombaClass()">
+                ● @GetBombaEstado()
+            </div>
+        </div>
+
+        <!-- Último Riego -->
+        <div class="card-sensor ultimo-riego">
+            <div class="icon-sensor">📅</div>
+            <h3>ÚLTIMO RIEGO</h3>
+            <h4>FECHA</h4>
+            <div class="estado-badge fecha">
+                @datosActuales.UltimoRiego.ToString("dd/MM/yyyy HH:mm")
+            </div>
+        </div>
+
+        <!-- Pronóstico -->
+        <div class="card-sensor pronostico">
+            <div class="icon-sensor">@ObtenerIconoClima()</div>
+            <h3>PRONÓSTICO</h3>
+            <div class="valor-sensor estado">@datosActuales.Pronostico</div>
+        </div>
+
+        <!-- Viento -->
+        <div class="card-sensor viento">
+            <div class="icon-sensor">🧭</div>
+            <h3>VIENTO</h3>
+            <div class="valor-sensor direccion">@datosActuales.DireccionViento</div>
+            <div class="estado-mini">@datosActuales.VelocidadViento km/h</div>
+        </div>
+
+        <!-- Estado del Programa -->
+        <div class="card-sensor programa">
+            <div class="icon-sensor">💻</div>
+            <h3>ESTADO DEL PROGRAMA</h3>
+            <h4>ESTADO</h4>
+            <div class="estado-badge @GetProgramaClass()">
+                ● @GetProgramaEstado()
+            </div>
+        </div>
+
+        <!-- Humedad del Suelo -->
+        <div class="card-sensor humedad-suelo">
+            <div class="icon-sensor">🌱</div>
+            <h3>HUMEDAD DEL SUELO</h3>
+            <div class="valor-sensor">@datosActuales.HumedadSuelo%</div>
+            <div class="estado-badge @ObtenerClaseHumedadSuelo()">
+                @ObtenerEstadoHumedadSuelo()
+            </div>
+        </div>
+    </div>
+
+    <div class="ultima-actualizacion">
+        <p>📡 Última actualización: @ultimaActualizacion.ToString("HH:mm:ss")</p>
+        <p style="font-size: 0.85rem; color: #9ca3af; margin-top: 0.5rem;">
+            ☁️ Datos meteorológicos de Valledupar en tiempo real
+        </p>
+    </div>
 </div>
 
 @code {
     [Parameter] public EventCallback OnIrAHistorial { get; set; }
     [Parameter] public EventCallback OnCerrarSesion { get; set; }
 
-    private List<DatoGrafica> datosHumedad = new();
-    private List<DatoGrafica> datosTemperatura = new();
-    private Timer? timer;
-    private bool cargando = false;
+    private DatosSensorModel datosActuales = new();
+    private DateTime ultimaActualizacion = DateTime.Now;
+    private System.Threading.Timer? timer;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        // inicializar datos...
-        timer = new Timer(Actualizar, null, 3000, 3000);
+        await CargarDatosSensores();
+
+        // Actualizar cada 10 minutos (600 segundos) para respetar límites de la API
+        timer = new System.Threading.Timer(async _ =>
+        {
+            await CargarDatosSensores();
+            await InvokeAsync(StateHasChanged);
+        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(600));
     }
 
-    private void Actualizar(object? _) =>
-        InvokeAsync(StateHasChanged);
+    private async Task CargarDatosSensores()
+    {
+        try
+        {
+            // LLAMAR AL SERVICIO REAL que obtiene datos del clima de Valledupar
+            datosActuales = await RiegoService.ObtenerDatosActualesAsync();
+            ultimaActualizacion = DateTime.Now;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar datos: {ex.Message}");
 
-    private async Task IrHistorial() =>
-        await OnIrAHistorial.InvokeAsync();
+            // Valores por defecto en caso de error
+            datosActuales = new DatosSensorModel
+            {
+                Temperatura = 0,
+                HumedadAire = 0,
+                HumedadSuelo = 0,
+                BombaActiva = false,
+                ProgramaOnline = false,
+                UltimoRiego = DateTime.Now,
+                Pronostico = "Error al cargar",
+                DireccionViento = "N/A",
+                VelocidadViento = 0
+            };
+        }
+    }
 
-    private async Task CerrarSesion() =>
+    private string ObtenerClaseTemperatura()
+    {
+        if (datosActuales.Temperatura < 20) return "frio";
+        if (datosActuales.Temperatura < 30) return "normal";
+        return "caliente";
+    }
+
+    private string ObtenerEstadoTemperatura()
+    {
+        if (datosActuales.Temperatura < 20) return "Frío";
+        if (datosActuales.Temperatura < 30) return "Normal";
+        return "Caliente";
+    }
+
+    private string ObtenerClaseHumedadAire()
+    {
+        if (datosActuales.HumedadAire < 40) return "bajo";
+        if (datosActuales.HumedadAire < 70) return "normal";
+        return "alto";
+    }
+
+    private string ObtenerEstadoHumedadAire()
+    {
+        if (datosActuales.HumedadAire < 40) return "Bajo";
+        if (datosActuales.HumedadAire < 70) return "Normal";
+        return "Alto";
+    }
+
+    private string ObtenerClaseHumedadSuelo()
+    {
+        if (datosActuales.HumedadSuelo < 30) return "seco";
+        if (datosActuales.HumedadSuelo < 60) return "humedo";
+        return "muy-humedo";
+    }
+
+    private string ObtenerEstadoHumedadSuelo()
+    {
+        if (datosActuales.HumedadSuelo < 30) return "Seco";
+        if (datosActuales.HumedadSuelo < 60) return "Húmedo";
+        return "Muy Húmedo";
+    }
+
+    private string ObtenerIconoClima()
+    {
+        if (datosActuales.Pronostico == "Despejado" || datosActuales.Pronostico == "Mayormente Despejado")
+            return "☀️";
+        if (datosActuales.Pronostico == "Parcialmente Nublado" || datosActuales.Pronostico == "Nublado")
+            return "☁️";
+        if (datosActuales.Pronostico == "Lluvioso" || datosActuales.Pronostico == "Llovizna" || datosActuales.Pronostico == "Chubascos")
+            return "🌧️";
+        if (datosActuales.Pronostico == "Tormentoso")
+            return "⛈️";
+        if (datosActuales.Pronostico == "Neblina")
+            return "🌫️";
+        return "☀️";
+    }
+
+    private string GetBombaClass()
+    {
+        return datosActuales.BombaActiva ? "activo" : "inactivo";
+    }
+
+    private string GetBombaEstado()
+    {
+        return datosActuales.BombaActiva ? "Activa" : "Inactiva";
+    }
+
+    private string GetProgramaClass()
+    {
+        return datosActuales.ProgramaOnline ? "activo" : "inactivo";
+    }
+
+    private string GetProgramaEstado()
+    {
+        return datosActuales.ProgramaOnline ? "Online" : "Offline";
+    }
+
+    private async Task CerrarSesion()
+    {
         await OnCerrarSesion.InvokeAsync();
+    }
 
-    public void Dispose() => timer?.Dispose();
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
 }
