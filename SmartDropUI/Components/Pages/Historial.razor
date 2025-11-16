@@ -24,22 +24,26 @@
         <div class="chart-card">
             <h2>GRÁFICA DE LA HUMEDAD DEL SUELO</h2>
             <p class="chart-subtitle">Humedad – Vacío</p>
-            <canvas id="chartHumedadSuelo" width="400" height="200"></canvas>
+            <div style="height: 300px; position: relative;">
+                <canvas id="chartHumedadSuelo"></canvas>
+            </div>
         </div>
 
         <!-- Gráfica de Temperatura -->
         <div class="chart-card">
             <h2>GRÁFICO DE LA TEMPERATURA DEL AMBIENTE</h2>
             <p class="chart-subtitle">Temperatura – Vacío</p>
-            <canvas id="chartTemperatura" width="400" height="200"></canvas>
+            <div style="height: 300px; position: relative;">
+                <canvas id="chartTemperatura"></canvas>
+            </div>
         </div>
 
         <!-- Controles -->
         <div class="controls-card">
             <h2>CONTROLES DEL SISTEMA</h2>
             <div class="controls-content">
-                <button class="control-btn success" @onclick="RecargarHistorial">
-                    🔄 RECARGAR HISTORIAL
+                <button class="control-btn success" @onclick="RecargarHistorial" disabled="@cargandoDatos">
+                    🔄 @(cargandoDatos ? "CARGANDO..." : "RECARGAR HISTORIAL")
                 </button>
                 <button class="control-btn primary" @onclick="IniciarRiegoManual">
                     💧 INICIAR RIEGO MANUAL
@@ -57,7 +61,7 @@
 
     <!-- Área de Historial de Datos -->
     <div class="historial-area">
-        @if (cargandoDatos)
+        @if (cargandoDatos && !datosHistorial.Any())
         {
             <div class="loading">
                 <div class="spinner"></div>
@@ -119,24 +123,38 @@
     private DateTime fechaBusqueda = DateTime.Now;
     private bool cargandoDatos = false;
     private System.Threading.Timer? timer;
+    private bool graficasInicializadas = false;
 
     protected override async Task OnInitializedAsync()
     {
         await CargarDatos();
-
-        // Actualizar cada 30 segundos
-        timer = new System.Threading.Timer(async _ =>
-        {
-            await CargarDatos();
-            await InvokeAsync(StateHasChanged);
-        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (firstRender && !graficasInicializadas)
         {
-            await DibujarGraficas();
+            try
+            {
+                // Esperar a que el DOM y Chart.js estén listos
+                await Task.Delay(1000);
+
+                // Inicializar las gráficas
+                await InicializarGraficas();
+                graficasInicializadas = true;
+
+                // Configurar timer para actualización automática
+                timer = new System.Threading.Timer(async _ =>
+                {
+                    await CargarDatos();
+                    await ActualizarGraficas();
+                    await InvokeAsync(StateHasChanged);
+                }, null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en OnAfterRenderAsync: {ex.Message}");
+            }
         }
     }
 
@@ -145,48 +163,194 @@
         try
         {
             cargandoDatos = true;
+            StateHasChanged();
 
             // Cargar historial
             datosHistorial = await RiegoService.ObtenerHistorialAsync();
 
-            // Generar datos para las gráficas (últimas 30 lecturas)
+            // Generar 30 puntos de datos para las gráficas
             datosParaGraficas.Clear();
             for (int i = 0; i < 30; i++)
             {
                 var datos = await RiegoService.ObtenerDatosActualesAsync();
                 datosParaGraficas.Add(datos);
-                await Task.Delay(100); // Pequeña pausa entre lecturas
+                await Task.Delay(50);
             }
 
             cargandoDatos = false;
-            await DibujarGraficas();
+            StateHasChanged();
+
+            // Actualizar gráficas si ya están inicializadas
+            if (graficasInicializadas)
+            {
+                await ActualizarGraficas();
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error al cargar datos: {ex.Message}");
             cargandoDatos = false;
+            StateHasChanged();
         }
     }
 
-    private async Task DibujarGraficas()
+    private async Task InicializarGraficas()
     {
+        if (!datosParaGraficas.Any()) return;
+
+        var labels = Enumerable.Range(1, 30).Select(i => i.ToString()).ToArray();
+        var valoresHumedad = datosParaGraficas.Select(d => (object)d.HumedadSuelo).ToArray();
+        var valoresTemp = datosParaGraficas.Select(d => (object)d.Temperatura).ToArray();
+
         try
         {
-            // Preparar datos para Chart.js
-            var labelsHumedad = datosParaGraficas.Select((d, i) => i.ToString()).ToArray();
-            var valoresHumedad = datosParaGraficas.Select(d => d.HumedadSuelo).ToArray();
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                if (typeof Chart === 'undefined') {
+                    console.error('Chart.js no está cargado');
+                } else {
+                    console.log('Chart.js está disponible');
+                }
+            ");
 
-            var labelsTemp = datosParaGraficas.Select((d, i) => i.ToString()).ToArray();
-            var valoresTemp = datosParaGraficas.Select(d => d.Temperatura).ToArray();
+            // Crear gráfica de humedad
+            await JSRuntime.InvokeVoidAsync("eval", $@"
+                (function() {{
+                    try {{
+                        const ctx = document.getElementById('chartHumedadSuelo');
+                        if (!ctx) {{
+                            console.error('Canvas chartHumedadSuelo no encontrado');
+                            return;
+                        }}
 
-            // Aquí iría el código JavaScript para dibujar con Chart.js
-            // Por ahora usamos datos simulados
-            StateHasChanged();
+                        if (window.chartHumedad) {{
+                            window.chartHumedad.destroy();
+                        }}
+
+                        window.chartHumedad = new Chart(ctx, {{
+                            type: 'line',
+                            data: {{
+                                labels: {System.Text.Json.JsonSerializer.Serialize(labels)},
+                                datasets: [{{
+                                    label: 'Humedad del Suelo (%)',
+                                    data: {System.Text.Json.JsonSerializer.Serialize(valoresHumedad)},
+                                    borderColor: '#10b981',
+                                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                    borderWidth: 3,
+                                    tension: 0.4,
+                                    fill: true,
+                                    pointRadius: 4,
+                                    pointBackgroundColor: '#10b981'
+                                }}]
+                            }},
+                            options: {{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {{
+                                    legend: {{
+                                        display: true,
+                                        position: 'top'
+                                    }}
+                                }},
+                                scales: {{
+                                    y: {{
+                                        beginAtZero: true,
+                                        max: 100,
+                                        ticks: {{
+                                            callback: function(value) {{
+                                                return value + '%';
+                                            }}
+                                        }}
+                                    }},
+                                    x: {{
+                                        title: {{
+                                            display: true,
+                                            text: 'Tiempo (m)'
+                                        }}
+                                    }}
+                                }}
+                            }}
+                        }});
+                        console.log('Gráfica de humedad creada');
+                    }} catch(e) {{
+                        console.error('Error al crear gráfica de humedad:', e);
+                    }}
+                }})();
+            ");
+
+            // Crear gráfica de temperatura
+            await JSRuntime.InvokeVoidAsync("eval", $@"
+                (function() {{
+                    try {{
+                        const ctx = document.getElementById('chartTemperatura');
+                        if (!ctx) {{
+                            console.error('Canvas chartTemperatura no encontrado');
+                            return;
+                        }}
+
+                        if (window.chartTemp) {{
+                            window.chartTemp.destroy();
+                        }}
+
+                        window.chartTemp = new Chart(ctx, {{
+                            type: 'line',
+                            data: {{
+                                labels: {System.Text.Json.JsonSerializer.Serialize(labels)},
+                                datasets: [{{
+                                    label: 'Temperatura (°C)',
+                                    data: {System.Text.Json.JsonSerializer.Serialize(valoresTemp)},
+                                    borderColor: '#ef4444',
+                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                    borderWidth: 3,
+                                    tension: 0.4,
+                                    fill: true,
+                                    pointRadius: 4,
+                                    pointBackgroundColor: '#ef4444'
+                                }}]
+                            }},
+                            options: {{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {{
+                                    legend: {{
+                                        display: true,
+                                        position: 'top'
+                                    }}
+                                }},
+                                scales: {{
+                                    y: {{
+                                        beginAtZero: true,
+                                        max: 40,
+                                        ticks: {{
+                                            callback: function(value) {{
+                                                return value + '°C';
+                                            }}
+                                        }}
+                                    }},
+                                    x: {{
+                                        title: {{
+                                            display: true,
+                                            text: 'Tiempo (m)'
+                                        }}
+                                    }}
+                                }}
+                            }}
+                        }});
+                        console.log('Gráfica de temperatura creada');
+                    }} catch(e) {{
+                        console.error('Error al crear gráfica de temperatura:', e);
+                    }}
+                }})();
+            ");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error al dibujar gráficas: {ex.Message}");
+            Console.WriteLine($"Error al inicializar gráficas: {ex.Message}");
         }
+    }
+
+    private async Task ActualizarGraficas()
+    {
+        await InicializarGraficas();
     }
 
     private async Task RecargarHistorial()
@@ -198,11 +362,7 @@
     {
         try
         {
-            var resultado = await RiegoService.ActivarRiegoManualAsync();
-            if (resultado)
-            {
-                Console.WriteLine("Riego manual iniciado correctamente");
-            }
+            await RiegoService.ActivarRiegoManualAsync();
         }
         catch (Exception ex)
         {
@@ -210,14 +370,10 @@
         }
     }
 
-    private async Task BuscarPorFecha()
+    private void BuscarPorFecha()
     {
-        // Filtrar datos por fecha
-        var datosFiltrados = datosHistorial
-            .Where(d => d.Fecha.Date == fechaBusqueda.Date)
-            .ToList();
-
-        datosHistorial = datosFiltrados;
+        var todosDatos = datosHistorial.ToList();
+        datosHistorial = todosDatos.Where(d => d.Fecha.Date == fechaBusqueda.Date).ToList();
         StateHasChanged();
     }
 
