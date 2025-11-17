@@ -561,16 +561,51 @@
 
         <!-- Sección: Configuración -->
         <div class="content-section @(seccionActiva == "configuracion" ? "active" : "")">
+
             <div class="welcome-section">
                 <h2 class="welcome-title">⚙️ Configuración del Sistema</h2>
                 <p class="welcome-text">
-                    Aquí podrás ajustar los parámetros del sistema, configurar alertas,
-                    establecer horarios de riego y personalizar las preferencias de monitoreo.
+                    Ajusta las configuraciones del sistema y administra tu información.
                 </p>
             </div>
-        </div>
-    </div>
-</div>
+
+            <div class="cards-grid">
+
+                <!-- TARJETA DE USUARIO -->
+                <div class="info-card" @onclick="() => mostrarUsuario = !mostrarUsuario"
+                     style="cursor: pointer;">
+                    <div class="card-header">
+                        <span class="card-icon">👤</span>
+                        <span class="card-badge">Abrir</span>
+                    </div>
+                    <h3 class="card-title">Usuario</h3>
+                    <p class="card-subtitle">Ver información del usuario</p>
+                </div>
+
+            </div>
+
+            <!-- CONTENIDO DEL USUARIO (solo aparece al dar clic) -->
+            @if (mostrarUsuario)
+            {
+                <div class="info-card" style="margin-top: 2rem;">
+                    <h2 class="card-title">Información del Usuario</h2>
+
+                    <p><strong>Nombre:</strong> Juan Pérez</p>
+                    <p><strong>Email:</strong> juanperez@gmail.com</p>
+                    <p><strong>Rol:</strong> Administrador</p>
+
+                    <button class="btn-modal-close" @onclick="() => mostrarUsuario = false"
+                            style="margin-top: 1.5rem;">
+                        Cerrar
+                    </button>
+                </div>
+            }
+
+        </div> <!-- Cierra sección configuración -->
+
+    </div> <!-- Cierra main-content -->
+
+</div> <!-- Cierra dashboard-layout -->
 
 @code {
     private string seccionActiva = "general";
@@ -592,4 +627,7 @@
             _ => "Dashboard"
         };
     }
+
+    private bool mostrarUsuario = false;
 }
+
