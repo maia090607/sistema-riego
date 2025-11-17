@@ -16,6 +16,7 @@ builder.Services.AddScoped(sp => new HttpClient
 // Registrar servicios
 builder.Services.AddScoped<RiegoService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<ClimaService>();
 
 // LocalStorage
 builder.Services.AddBlazoredLocalStorage();

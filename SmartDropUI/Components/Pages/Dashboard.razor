@@ -513,25 +513,105 @@
 
         <!-- Sección: Clima -->
         <div class="content-section @(seccionActiva == "clima" ? "active" : "")">
-            <div class="cards-grid">
-                <div class="info-card" style="border-left-color: #fbbf24;">
-                    <div class="card-header">
-                        <span class="card-icon">☀️</span>
+            @if (cargandoClima)
+            {
+                <div style="text-align: center; padding: 3rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+                    <p style="color: #6b7280; font-size: 1.1rem;">Cargando datos climáticos...</p>
+                </div>
+            }
+            else if (datosClima != null)
+            {
+                <div class="cards-grid">
+                    <div class="info-card" style="border-left-color: #f97316;">
+                        <div class="card-header">
+                            <span class="card-icon">🌡️</span>
+                        </div>
+                        <h3 class="card-title">Temperatura</h3>
+                        <div class="card-value" style="color: #f97316;">@datosClima.Temperatura.ToString("F1")°C</div>
+                        <p class="card-subtitle">Temperatura actual en Valledupar</p>
                     </div>
-                    <h3 class="card-title">Pronóstico</h3>
-                    <div class="card-value" style="font-size: 1.75rem; color: #fbbf24;">Despejado</div>
-                    <p class="card-subtitle">Condiciones favorables</p>
+
+                    <div class="info-card" style="border-left-color: #10b981;">
+                        <div class="card-header">
+                            <span class="card-icon">💧</span>
+                        </div>
+                        <h3 class="card-title">Humedad del Aire</h3>
+                        <div class="card-value" style="color: #10b981;">@datosClima.Humedad%</div>
+                        <p class="card-subtitle">Nivel de humedad relativa</p>
+                    </div>
+
+                    <div class="info-card" style="border-left-color: #fbbf24;">
+                        <div class="card-header">
+                            <span class="card-icon">@ObtenerIconoClima(datosClima.Descripcion)</span>
+                        </div>
+                        <h3 class="card-title">Pronóstico</h3>
+                        <div class="card-value" style="font-size: 1.5rem; color: #fbbf24; text-transform: capitalize;">
+                            @datosClima.Descripcion
+                        </div>
+                        <p class="card-subtitle">Condiciones actuales</p>
+                    </div>
+
+                    <div class="info-card" style="border-left-color: #06b6d4;">
+                        <div class="card-header">
+                            <span class="card-icon">💨</span>
+                        </div>
+                        <h3 class="card-title">Viento</h3>
+                        <div class="card-value" style="font-size: 1.5rem; color: #06b6d4;">
+                            @datosClima.VelocidadViento.ToString("F1") m/s
+                        </div>
+                        <p class="card-subtitle">Velocidad del viento</p>
+                    </div>
+
+                    @if (datosClima.ProbabilidadLluvia > 0)
+                    {
+                        <div class="info-card" style="border-left-color: #3b82f6;">
+                            <div class="card-header">
+                                <span class="card-icon">🌧️</span>
+                            </div>
+                            <h3 class="card-title">Probabilidad de Lluvia</h3>
+                            <div class="card-value" style="color: #3b82f6;">@((datosClima.ProbabilidadLluvia * 100).ToString("F0"))%</div>
+                            <p class="card-subtitle">Posibilidad de precipitación</p>
+                        </div>
+                    }
+
+                    <div class="info-card" style="border-left-color: #8b5cf6;">
+                        <div class="card-header">
+                            <span class="card-icon">🕐</span>
+                        </div>
+                        <h3 class="card-title">Última Actualización</h3>
+                        <div class="card-value" style="font-size: 1.25rem; color: #8b5cf6;">
+                            @datosClima.FechaHoraActualizacion.ToString("HH:mm")
+                        </div>
+                        <p class="card-subtitle">@datosClima.FechaHoraActualizacion.ToString("dd/MM/yyyy")</p>
+                    </div>
                 </div>
 
-                <div class="info-card" style="border-left-color: #06b6d4;">
-                    <div class="card-header">
-                        <span class="card-icon">💨</span>
-                    </div>
-                    <h3 class="card-title">Viento</h3>
-                    <div class="card-value" style="font-size: 1.75rem; color: #06b6d4;">Norte</div>
-                    <p class="card-subtitle">Dirección actual del viento</p>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn-modal-close" @onclick="ActualizarDatosClima"
+                            style="background: #10b981; color: white; border: none; padding: 0.875rem 2rem;
+                               border-radius: 0.75rem; font-weight: 600; cursor: pointer;
+                               display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <span>🔄</span>
+                        Actualizar Datos
+                    </button>
                 </div>
-            </div>
+            }
+            else
+            {
+                <div style="text-align: center; padding: 3rem; background: #fee2e2; border-radius: 1rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                    <h3 style="color: #991b1b; margin-bottom: 0.5rem;">Error al cargar datos climáticos</h3>
+                    <p style="color: #7f1d1d; margin-bottom: 1.5rem;">
+                        No se pudieron obtener los datos del clima de Valledupar
+                    </p>
+                    <button class="btn-modal-close" @onclick="ActualizarDatosClima"
+                            style="background: #ef4444; color: white; border: none; padding: 0.875rem 2rem;
+                               border-radius: 0.75rem; font-weight: 600; cursor: pointer;">
+                        Reintentar
+                    </button>
+                </div>
+            }
         </div>
 
         <!-- Sección: Control de Riego -->
@@ -606,13 +686,72 @@
     </div> <!-- Cierra main-content -->
 
 </div> <!-- Cierra dashboard-layout -->
-
 @code {
     private string seccionActiva = "general";
+    private bool mostrarUsuario = false;
+    private bool cargandoClima = false;
+    private DatosClimaModel? datosClima = null;
+
+    [Inject]
+    private ClimaService ClimaService { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarDatosClima();
+    }
 
     private void CambiarSeccion(string seccion)
     {
         seccionActiva = seccion;
+
+        if (seccion == "clima" && datosClima == null)
+        {
+            _ = CargarDatosClima();
+        }
+    }
+
+    private async Task CargarDatosClima()
+    {
+        cargandoClima = true;
+        StateHasChanged();
+
+        try
+        {
+            datosClima = await ClimaService.ObtenerClimaActualAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar datos climáticos: {ex.Message}");
+            datosClima = null;
+        }
+        finally
+        {
+            cargandoClima = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ActualizarDatosClima()
+    {
+        await CargarDatosClima();
+    }
+
+    private string ObtenerIconoClima(string descripcion)
+    {
+        descripcion = descripcion.ToLower();
+
+        if (descripcion.Contains("despejado") || descripcion.Contains("claro"))
+            return "☀️";
+        if (descripcion.Contains("nublado") || descripcion.Contains("nubes"))
+            return "☁️";
+        if (descripcion.Contains("lluvia"))
+            return "🌧️";
+        if (descripcion.Contains("tormenta"))
+            return "⛈️";
+        if (descripcion.Contains("niebla"))
+            return "🌫️";
+
+        return "🌤️";
     }
 
     private string GetTituloSeccion()
@@ -627,7 +766,5 @@
             _ => "Dashboard"
         };
     }
-
-    private bool mostrarUsuario = false;
 }
 
