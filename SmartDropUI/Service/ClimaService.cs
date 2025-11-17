@@ -10,7 +10,7 @@ namespace SmartDropUI.Services
 
         // ⚠️ OBTÉN TU API KEY EN: https://openweathermap.org/api
         // 🔴 CAMBIA "TU_API_KEY_AQUI" POR TU API KEY REAL
-        private const string ApiKey = "f72b8e28c9cf89b0274f75e745a42e30\r\n";
+        private const string ApiKey = "f9cf1efee6f151146803c6aeeaa85ae9";
 
         // Coordenadas de Valledupar, Cesar, Colombia
         private const double Latitud = 10.4631;
@@ -26,7 +26,7 @@ namespace SmartDropUI.Services
             // Validar que la API Key esté configurada
             if (string.IsNullOrEmpty(ApiKey) || ApiKey == "f72b8e28c9cf89b0274f75e745a42e30\r\n")
             {
-                Console.WriteLine("❌ ERROR: API Key no configurada. Ve a ClimaService.cs y reemplaza 'TU_API_KEY_AQUI' con tu API Key de OpenWeatherMap");
+                Console.WriteLine("❌ ERROR: API Key no configurada. Ve a ClimaService.cs y reemplaza 'f72b8e28c9cf89b0274f75e745a42e30\r\n' con tu API Key de OpenWeatherMap");
                 throw new InvalidOperationException("API Key no configurada. Obtén una en https://openweathermap.org/api");
             }
 

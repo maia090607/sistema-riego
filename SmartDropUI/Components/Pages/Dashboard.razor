@@ -766,6 +766,70 @@
             _ => "Dashboard"
         };
     }
+
+    // -----------------------------
+    // VARIABLES
+    // -----------------------------
+    private bool riegoManualActivo = false;
+    private int tiempoRiego = 0;
+    private System.Timers.Timer? timer;
+
+    // -----------------------------
+    // RECARGAR HISTORIAL
+    // -----------------------------
+    private async Task RecargarHistorial()
+    {
+        Console.WriteLine("Recargando historial...");
+        await Task.Delay(300); // Simulación
+        await InvokeAsync(StateHasChanged);
+    }
+
+    // -----------------------------
+    // INICIAR RIEGO MANUAL
+    // -----------------------------
+    private void IniciarRiegoManual()
+    {
+        riegoManualActivo = true;
+        tiempoRiego = 0;
+
+        timer = new System.Timers.Timer(1000);
+        timer.Elapsed += (s, e) =>
+        {
+            tiempoRiego++;
+            InvokeAsync(StateHasChanged);
+        };
+
+        timer.Start();
+    }
+
+    // -----------------------------
+    // DETENER RIEGO MANUAL
+    // -----------------------------
+    private void DetenerRiegoManual()
+    {
+        riegoManualActivo = false;
+
+        if (timer != null)
+        {
+            timer.Stop();
+            timer.Dispose();
+        }
+
+        Console.WriteLine($"Riego manual detenido luego de {tiempoRiego} segundos.");
+        tiempoRiego = 0;
+
+        StateHasChanged();
+    }
+
+    // -----------------------------
+    // LIMPIEZA AL CERRAR COMPONENTE
+    // -----------------------------
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+
+
 }
 
 
