@@ -1,0 +1,592 @@
+﻿n@page "/usuarios"
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Gestión de Usuarios - SmartDrop</PageTitle>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .usuarios-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 50%, #cffafe 100%);
+        padding: 2rem;
+    }
+
+    .usuarios-container {
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    .btn-back-menu {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        transition: all 0.3s ease;
+    }
+
+        .btn-back-menu:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .page-title {
+        font-size: 2.25rem;
+        font-weight: bold;
+        color: #10b981;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+        color: #6b7280;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr 350px;
+        gap: 2rem;
+    }
+
+    /* Sidebar izquierda - Perfil */
+    .profile-section {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        height: fit-content;
+    }
+
+    .profile-avatar {
+        width: 140px;
+        height: 140px;
+        background: #10b981;
+        border-radius: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 4rem;
+        color: white;
+    }
+
+    .btn-upload-photo {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 0.875rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+        .btn-upload-photo:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+    .profile-role-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #10b981;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-role-subtitle {
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+
+    /* Sección central - Información */
+    .info-section {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #10b981;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-input, .form-select {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: #f9fafb;
+    }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            background: white;
+        }
+
+    .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-action {
+        padding: 1rem;
+        border: none;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-edit {
+        background: #10b981;
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        border: 2px solid #10b981;
+    }
+
+        .btn-edit:hover {
+            background: white;
+            color: #10b981;
+            transform: translateY(-2px);
+        }
+
+    .btn-save {
+        background: #3b82f6;
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+        .btn-save:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+    .btn-close {
+        background: #6366f1;
+        color: white;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+        .btn-close:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+        }
+
+    .btn-delete {
+        background: #ef4444;
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+        .btn-delete:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+    /* Sidebar derecha - Lista de usuarios */
+    .users-list-section {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .list-title {
+        font-size: 1.125rem;
+        font-weight: bold;
+        color: #10b981;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .users-list {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .user-item {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+        .user-item:hover {
+            background: #f0fdf4;
+        }
+
+        .user-item.active {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+        }
+
+    .user-avatar-small {
+        width: 40px;
+        height: 40px;
+        background: #10b981;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .user-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+    }
+
+    .user-role {
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    .user-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-user-action {
+        background: none;
+        border: none;
+        color: #10b981;
+        cursor: pointer;
+        font-size: 0.85rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        transition: all 0.2s;
+    }
+
+        .btn-user-action:hover {
+            background: #f0fdf4;
+            color: #059669;
+        }
+
+    /* Scrollbar personalizado */
+    .users-list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .users-list::-webkit-scrollbar-track {
+        background: #f3f4f6;
+        border-radius: 4px;
+    }
+
+    .users-list::-webkit-scrollbar-thumb {
+        background: #10b981;
+        border-radius: 4px;
+    }
+
+        .users-list::-webkit-scrollbar-thumb:hover {
+            background: #059669;
+        }
+
+    @media (max-width: 1200px) {
+        .content-grid
+
+    {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    }
+</style>
+
+<div class="usuarios-page">
+    <div class="usuarios-container">
+        <button class="btn-back-menu" @onclick='() => Navigation.NavigateTo("/dashboard")'>
+            <span>⬅️</span>
+            Volver al Dashboard
+        </button>
+
+        <div class="page-header">
+            <h1 class="page-title">Panel de Gestión de Usuarios</h1>
+            <p class="page-subtitle">Administra y gestiona los usuarios del sistema SmartDrop</p>
+        </div>
+
+        <div class="content-grid">
+            <!-- Perfil del usuario -->
+            <div class="profile-section">
+                <div class="profile-avatar">
+                    👤
+                </div>
+                <button class="btn-upload-photo">
+                    <span>📁</span>
+                    Subir Foto
+                </button>
+                <h3 class="profile-role-title">@usuarioSeleccionado.Rol</h3>
+                <p class="profile-role-subtitle">Administrador del Sistema</p>
+            </div>
+
+            <!-- Información del usuario -->
+            <div class="info-section">
+                <h2 class="section-title">Información del Usuario</h2>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Identificación</label>
+                        <input type="text"
+                               class="form-input"
+                               @bind="usuarioSeleccionado.Identificacion"
+                               readonly="@(!modoEdicion)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nombre de Usuario</label>
+                        <input type="text"
+                               class="form-input"
+                               @bind="usuarioSeleccionado.NombreUsuario"
+                               readonly="@(!modoEdicion)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nombre Completo</label>
+                        <input type="text"
+                               class="form-input"
+                               @bind="usuarioSeleccionado.NombreCompleto"
+                               readonly="@(!modoEdicion)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email"
+                               class="form-input"
+                               @bind="usuarioSeleccionado.Correo"
+                               readonly="@(!modoEdicion)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Rol del Usuario</label>
+                        <select class="form-select"
+                                @bind="usuarioSeleccionado.Rol"
+                                disabled="@(!modoEdicion)">
+                            <option value="Administrador">Administrador</option>
+                            <option value="Operador">Operador</option>
+                            <option value="Invitado">Invitado</option>
+                            <option value="Supervisor">Supervisor</option>
+                            <option value="Técnico">Técnico</option>
+                            <option value="Monitorista">Monitorista</option>
+                            <option value="Analista de Riego">Analista de Riego</option>
+                            <option value="Usuario General">Usuario General</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-action btn-edit" @onclick="HabilitarEdicion">
+                        <span>✏️</span>
+                        Hacer Cambios
+                    </button>
+                    <button class="btn-action btn-save" @onclick="GuardarCambios">
+                        <span>💾</span>
+                        Guardar Cambios
+                    </button>
+                    <button class="btn-action btn-close" @onclick="CerrarSesion">
+                        <span>🚪</span>
+                        Cerrar Sesión
+                    </button>
+                    <button class="btn-action btn-delete" @onclick="EliminarUsuario">
+                        <span>🗑️</span>
+                        Eliminar Usuario
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lista de usuarios -->
+            <div class="users-list-section">
+                <h3 class="list-title">Lista de Usuarios Registrados</h3>
+                <div class="users-list">
+                    @foreach (var usuario in usuarios)
+                    {
+                        <div class="user-item @(usuario.Id == usuarioSeleccionado.Id ? "active" : "")"
+                             @onclick="() => SeleccionarUsuario(usuario)">
+                            <div class="user-avatar-small">👤</div>
+                            <div class="user-info">
+                                <div class="user-name">@usuario.NombreCompleto</div>
+                                <div class="user-role">@usuario.Rol</div>
+                            </div>
+                            <div class="user-actions">
+                                <button class="btn-user-action" @onclick:stopPropagation="true" @onclick="() => VerUsuario(usuario)">
+                                    Ver / Editar
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool modoEdicion = false;
+    private UsuarioGestionModel usuarioSeleccionado = new()
+    {
+        Id = 1,
+        Identificacion = "USR001",
+        NombreUsuario = "admin_user",
+        NombreCompleto = "Administrador Principal",
+        Correo = "admin@smartdrop.com",
+        Rol = "Administrador"
+    };
+
+    private List<UsuarioGestionModel> usuarios = new()
+    {
+        new() { Id = 1, NombreCompleto = "Usuario 1", Rol = "Administrador", Identificacion = "USR001", NombreUsuario = "admin", Correo = "admin@smartdrop.com" },
+        new() { Id = 2, NombreCompleto = "Usuario 2", Rol = "Operador", Identificacion = "USR002", NombreUsuario = "operador1", Correo = "operador@smartdrop.com" },
+        new() { Id = 3, NombreCompleto = "Usuario 3", Rol = "Invitado", Identificacion = "USR003", NombreUsuario = "invitado1", Correo = "invitado@smartdrop.com" },
+        new() { Id = 4, NombreCompleto = "Usuario 4", Rol = "Supervisor", Identificacion = "USR004", NombreUsuario = "supervisor1", Correo = "supervisor@smartdrop.com" },
+        new() { Id = 5, NombreCompleto = "Usuario 5", Rol = "Técnico", Identificacion = "USR005", NombreUsuario = "tecnico1", Correo = "tecnico@smartdrop.com" },
+        new() { Id = 6, NombreCompleto = "Usuario 6", Rol = "Monitorista", Identificacion = "USR006", NombreUsuario = "monitor1", Correo = "monitor@smartdrop.com" },
+        new() { Id = 7, NombreCompleto = "Usuario 7", Rol = "Analista de Riego", Identificacion = "USR007", NombreUsuario = "analista1", Correo = "analista@smartdrop.com" },
+        new() { Id = 8, NombreCompleto = "Usuario 8", Rol = "Usuario General", Identificacion = "USR008", NombreUsuario = "usuario1", Correo = "usuario@smartdrop.com" }
+    };
+
+    public class UsuarioGestionModel
+    {
+        public int Id { get; set; }
+        public string Identificacion { get; set; } = "";
+        public string NombreUsuario { get; set; } = "";
+        public string NombreCompleto { get; set; } = "";
+        public string Correo { get; set; } = "";
+        public string Rol { get; set; } = "";
+    }
+
+    private void SeleccionarUsuario(UsuarioGestionModel usuario)
+    {
+        usuarioSeleccionado = new UsuarioGestionModel
+        {
+            Id = usuario.Id,
+            Identificacion = usuario.Identificacion,
+            NombreUsuario = usuario.NombreUsuario,
+            NombreCompleto = usuario.NombreCompleto,
+            Correo = usuario.Correo,
+            Rol = usuario.Rol
+        };
+        modoEdicion = false;
+    }
+
+    private void VerUsuario(UsuarioGestionModel usuario)
+    {
+        SeleccionarUsuario(usuario);
+    }
+
+    private void HabilitarEdicion()
+    {
+        modoEdicion = true;
+    }
+
+    private async Task GuardarCambios()
+    {
+        if (modoEdicion)
+        {
+            var usuarioEnLista = usuarios.FirstOrDefault(u => u.Id == usuarioSeleccionado.Id);
+            if (usuarioEnLista != null)
+            {
+                usuarioEnLista.Identificacion = usuarioSeleccionado.Identificacion;
+                usuarioEnLista.NombreUsuario = usuarioSeleccionado.NombreUsuario;
+                usuarioEnLista.NombreCompleto = usuarioSeleccionado.NombreCompleto;
+                usuarioEnLista.Correo = usuarioSeleccionado.Correo;
+                usuarioEnLista.Rol = usuarioSeleccionado.Rol;
+            }
+            modoEdicion = false;
+        }
+        await Task.CompletedTask;
+    }
+
+    private void CerrarSesion()
+    {
+        Navigation.NavigateTo("/login");
+    }
+
+    private void EliminarUsuario()
+    {
+        var usuario = usuarios.FirstOrDefault(u => u.Id == usuarioSeleccionado.Id);
+        if (usuario != null)
+        {
+            usuarios.Remove(usuario);
+            if (usuarios.Any())
+            {
+                usuarioSeleccionado = usuarios.First();
+            }
+        }
+    }
+}

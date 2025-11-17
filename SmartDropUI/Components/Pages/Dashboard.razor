@@ -185,6 +185,24 @@
         box-shadow: 0 12px 24px rgba(16, 185, 129, 0.2);
     }
 
+    .card-graficos .card-icon {
+        color: #3b82f6;
+    }
+
+    .card-graficos:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.2);
+    }
+
+    .card-usuarios .card-icon {
+        color: #6366f1;
+    }
+
+    .card-usuarios:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(99, 102, 241, 0.2);
+    }
+
     @@media (max-width: 768px) {
         .dashboard-main-title {
             font-size: 1.75rem;
@@ -309,6 +327,16 @@
                 Ver Estadísticas
             </div>
         </div>
+
+        <!-- Usuarios -->
+        <div class="dashboard-card card-usuarios" @onclick="NavigateToUsers" style="cursor: pointer;">
+            <span class="card-icon">👥</span>
+            <h3 class="card-title">Usuarios</h3>
+            <h4 class="card-subtitle">Gestión</h4>
+            <div class="status-pill pill-active">
+                Administrar
+            </div>
+        </div>
     </div>
 </div>
 
@@ -329,5 +357,10 @@
     private void NavigateToGraphs()
     {
         Navigation.NavigateTo("/graficos");
+    }
+
+    private void NavigateToUsers()
+    {
+        Navigation.NavigateTo("/usuarios");
     }
 }
