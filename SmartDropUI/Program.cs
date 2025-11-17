@@ -1,5 +1,4 @@
 using Blazored.LocalStorage;
-using SmartDropUI.Components;
 using SmartDropUI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,7 +33,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-app.MapRazorComponents<App>()
+app.MapRazorComponents<SmartDropUI.Components.App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();

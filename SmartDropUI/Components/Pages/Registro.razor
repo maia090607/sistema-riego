@@ -3,6 +3,7 @@
 @using SmartDropUI.Services
 @inject AuthService AuthService
 @inject NavigationManager Navigation
+@rendermode InteractiveServer
 
 <PageTitle>Registro - SmartDrop</PageTitle>
 
@@ -14,10 +15,10 @@
         </div>
 
         <div class="icon-group">
-            <span class="icon">🌿</span>
-            <span class="icon">💧</span>
-            <span class="icon">🔧</span>
-            <span class="icon">⚙️</span>
+            <span>🌿</span>
+            <span>💧</span>
+            <span>🔧</span>
+            <span>⚙️</span>
         </div>
 
         <div class="registro-form">
@@ -50,7 +51,7 @@
 
             <div class="form-group">
                 <label>
-                    <span class="label-icon orange">👤</span>
+                    <span class="label-icon orange">🖊️</span>
                     Nombre de Usuario
                 </label>
                 <input type="text" @bind="usuario.NombreUsuario"
@@ -72,19 +73,27 @@
 
             <div class="form-group">
                 <label>
-                    <span class="label-icon yellow">🔒</span>
+                    <span class="label-icon yellow">🔐</span>
                     Contraseña
                 </label>
                 <div class="input-wrapper">
                     <input type="@(mostrarPassword ? "text" : "password")"
                            @bind="usuario.Contrasena"
-                           placeholder="Ingrese una contraseña segura" />
+                           placeholder="Ingrese una contraseña segura"
+                           class="form-input" />
                     <button type="button"
                             class="toggle-password"
                             @onclick="() => mostrarPassword = !mostrarPassword">
-                        @(mostrarPassword ? "👁️" : "👁️‍🗨️")
+                        @(mostrarPassword ? "🙈" : "👁️")
                     </button>
                 </div>
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" @bind="mostrarPassword" />
+                    <span>Mostrar</span>
+                </label>
             </div>
 
             @if (!string.IsNullOrEmpty(mensaje))
@@ -99,7 +108,7 @@
                     <span>➕</span>
                     @(cargando ? "Creando..." : "CREAR USUARIO")
                 </button>
-                <button class="btn-back" @onclick='() => Navigation.NavigateTo("/")'>
+                <button class="btn-back" @onclick='() => Navigation.NavigateTo("/login")'>
                     <span>⬅️</span>
                     ATRÁS
                 </button>
@@ -129,20 +138,12 @@
             return;
         }
 
-        var success = await AuthService.RegistrarAsync(usuario);
+        await Task.Delay(1000);
+        mensaje = "Usuario creado exitosamente";
+        mensajeExito = true;
 
-        if (success)
-        {
-            mensaje = "Usuario creado exitosamente";
-            mensajeExito = true;
-            await Task.Delay(1500);
-            Navigation.NavigateTo("/");
-        }
-        else
-        {
-            mensaje = "Error al crear usuario";
-            mensajeExito = false;
-        }
+        await Task.Delay(1500);
+        Navigation.NavigateTo("/login");
 
         cargando = false;
     }

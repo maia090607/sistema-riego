@@ -3,172 +3,149 @@
 @using SmartDropUI.Services
 @inject RiegoService RiegoService
 @inject NavigationManager Navigation
-@implements IDisposable
+@rendermode InteractiveServer
 
 <PageTitle>Dashboard - SmartDrop</PageTitle>
 
 <div class="dashboard-container">
     <div class="dashboard-header">
         <div class="header-left">
-            <span class="icon">🌿</span>
-            <span class="icon">💧</span>
-            <h1>SmartDrop Dashboard</h1>
+            <h1>SISTEMA DE RIEGO AUTOMÁTICO SMARTDROP</h1>
         </div>
         <div class="header-right">
-            <button class="nav-btn active">Dashboard</button>
-            <button class="nav-btn" @onclick='() => Navigation.NavigateTo("/historial")'>Historial</button>
-            <button class="nav-btn logout" @onclick='() => Navigation.NavigateTo("/")'>Salir</button>
+            <button class="nav-btn logout" @onclick='() => Navigation.NavigateTo("/login")'>Salir</button>
         </div>
     </div>
 
-    <div class="dashboard-grid">
-        <!-- Gráfica de Humedad -->
-        <div class="chart-card">
-            <h2>GRÁFICA DE LA HUMEDAD DEL SUELO</h2>
-            <p class="chart-subtitle">Humedad – Tiempo Real</p>
-            <div class="chart-placeholder">
-                @foreach (var dato in datosHumedad.TakeLast(6))
-                {
-                    <div class="chart-bar" style="height: @(dato.Valor)%">
-                        <span>@dato.Valor.ToString("F0")%</span>
-                    </div>
-                }
-            </div>
+    <p style="text-align: center; color: var(--gray-600); margin-bottom: 2rem; font-size: 1.1rem;">
+        Panel de Control y Monitoreo en Tiempo Real
+    </p>
+
+    <div class="dashboard-grid-custom">
+        <!-- Temperatura -->
+        <div class="info-card">
+            <div class="card-icon" style="font-size: 3rem;">🌡️</div>
+            <h3>TEMPERATURA</h3>
+            <div class="card-value" style="color: #f97316;">90.8°C</div>
         </div>
 
-        <!-- Gráfica de Temperatura -->
-        <div class="chart-card">
-            <h2>GRÁFICO DE LA TEMPERATURA DEL AMBIENTE</h2>
-            <p class="chart-subtitle">Temperatura – Tiempo Real</p>
-            <div class="chart-placeholder">
-                @foreach (var dato in datosTemperatura.TakeLast(6))
-                {
-                    <div class="chart-bar temp" style="height: @(dato.Valor * 2)%">
-                        <span>@dato.Valor.ToString("F1")°C</span>
-                    </div>
-                }
-            </div>
+        <!-- Humedad del Aire -->
+        <div class="info-card">
+            <div class="card-icon" style="font-size: 3rem; color: var(--green-primary);">💧</div>
+            <h3>HUMEDAD DEL AIRE</h3>
+            <div class="card-value" style="color: var(--green-primary);">H</div>
         </div>
 
-        <!-- Panel de Controles -->
-        <div class="controls-card">
-            <h2>CONTROLES DEL SISTEMA</h2>
-            <div class="controls-content">
-                <button class="control-btn primary" @onclick="RecargarHistorial" disabled="@cargando">
-                    <span>🔄</span>
-                    RECARGAR HISTORIAL
-                </button>
-
-                <button class="control-btn success" @onclick="IniciarRiego">
-                    <span>▶️</span>
-                    INICIAR RIEGO MANUAL
-                </button>
-
-                <div class="date-search">
-                    <h3>BUSCAR POR FECHA</h3>
-                    <input type="date" @bind="fechaBusqueda" />
-                    <button class="control-btn info" @onclick="BuscarPorFecha">
-                        <span>🔍</span>
-                        BUSCAR
-                    </button>
-                </div>
-            </div>
+        <!-- Bomba de Agua -->
+        <div class="info-card">
+            <div class="card-icon" style="font-size: 3rem; color: var(--blue-primary);">⚙️</div>
+            <h3>BOMBA DE AGUA</h3>
+            <h4>ESTADO</h4>
+            <div class="status-badge active">● Activa</div>
         </div>
-    </div>
 
-    <!-- Área de Historial -->
-    <div class="historial-area">
-        <div class="historial-content">
-            @if (cargando)
-            {
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Cargando registros históricos...</p>
-                </div>
-            }
-            else
-            {
-                <div class="historial-icon">📊</div>
-                <h2>Área de Historial de Datos</h2>
-                <p>Los registros históricos del sistema aparecerán aquí</p>
-            }
+        <!-- Último Riego -->
+        <div class="info-card">
+            <div class="card-icon" style="font-size: 3rem; color: var(--green-primary);">📅</div>
+            <h3>ÚLTIMO RIEGO</h3>
+            <h4>FECHA</h4>
+            <div class="status-badge">Hoy 08:30</div>
+        </div>
+
+        <!-- Pronóstico -->
+        <div class="info-card">
+            <div class="card-icon" style="font-size: 3rem; color: #fbbf24;">☀️</div>
+            <h3>PRONÓSTICO</h3>
+            <div class="card-value" style="color: #f97316;">Despejado</div>
+        </div>
+
+        <!-- Viento -->
+        <div class="info-card">
+            <div class="card-icon" style="font-size: 3rem; color: var(--blue-primary);">🧭</div>
+            <h3>VIENTO</h3>
+            <div class="card-value" style="color: var(--blue-primary);">Norte</div>
+        </div>
+
+        <!-- Estado del Programa -->
+        <div class="info-card">
+            <div class="card-icon" style="font-size: 3rem; color: var(--green-primary);">💻</div>
+            <h3>ESTADO DEL PROGRAMA</h3>
+            <h4>ESTADO</h4>
+            <div class="status-badge active">● Online</div>
+        </div>
+
+        <!-- Humedad del Suelo -->
+        <div class="info-card">
+            <div class="card-icon" style="font-size: 3rem; color: #92400e;">🌱</div>
+            <h3>HUMEDAD DEL SUELO</h3>
+            <div class="status-badge">Humedad</div>
         </div>
     </div>
 </div>
 
-@code {
-    private List<DatoGrafica> datosHumedad = new();
-    private List<DatoGrafica> datosTemperatura = new();
-    private DateTime fechaBusqueda = DateTime.Today;
-    private bool cargando = false;
-    private Timer? timer;
+<style>
+    .dashboard-grid-custom {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
 
-    protected override void OnInitialized()
-    {
-        // Inicializar datos
-        for (int i = 0; i < 6; i++)
-        {
-            datosHumedad.Add(new DatoGrafica 
-            { 
-                Tiempo = i * 5, 
-                Valor = Random.Shared.Next(40, 70) 
-            });
-            datosTemperatura.Add(new DatoGrafica 
-            { 
-                Tiempo = i * 5, 
-                Valor = Random.Shared.Next(20, 28) 
-            });
+    .info-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border-top: 4px solid;
+        border-image: linear-gradient(90deg, var(--green-primary), var(--blue-primary)) 1;
+    }
+
+        .info-card h3 {
+            font-size: 0.9rem;
+            color: var(--green-primary);
+            font-weight: bold;
+            margin: 1rem 0 0.5rem 0;
+            letter-spacing: 0.5px;
         }
 
-        // Actualizar datos cada 3 segundos
-        timer = new Timer(ActualizarDatos, null, 3000, 3000);
+        .info-card h4 {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            margin: 0.5rem 0;
+            font-weight: 600;
+        }
+
+    .card-value {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-top: 0.5rem;
     }
 
-    private void ActualizarDatos(object? state)
-    {
-        InvokeAsync(() =>
-        {
-            // Humedad
-            datosHumedad.RemoveAt(0);
-            datosHumedad.Add(new DatoGrafica
-            {
-                Tiempo = datosHumedad[^1].Tiempo + 5,
-                Valor = Math.Clamp(datosHumedad[^1].Valor + Random.Shared.Next(-5, 6), 20, 100)
-            });
-
-            // Temperatura
-            datosTemperatura.RemoveAt(0);
-            datosTemperatura.Add(new DatoGrafica
-            {
-                Tiempo = datosTemperatura[^1].Tiempo + 5,
-                Valor = Math.Clamp(datosTemperatura[^1].Valor + Random.Shared.Next(-2, 3), 18, 35)
-            });
-
-            StateHasChanged();
-        });
+    .status-badge {
+        display: inline-block;
+        background-color: #d1fae5;
+        color: #065f46;
+        padding: 0.5rem 1.5rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
     }
 
-    private async Task RecargarHistorial()
-    {
-        cargando = true;
-        await Task.Delay(1500);
-        cargando = false;
+        .status-badge.active {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+        color: var(--green-primary);
     }
 
-    private async Task IniciarRiego()
-    {
-        await RiegoService.IniciarRiegoManualAsync();
+    @@media (max-width: 768px) {
+        .dashboard-grid-custom {
+            grid-template-columns: 1fr;
+        }
     }
-
-    private async Task BuscarPorFecha()
-    {
-        cargando = true;
-        await Task.Delay(1000);
-        cargando = false;
-    }
-
-    public void Dispose()
-    {
-        timer?.Dispose();
-    }
-}
+</style>
