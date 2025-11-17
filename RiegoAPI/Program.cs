@@ -3,12 +3,17 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi;
+using RiegoAPI.Controllers;
+using RiegoAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ===========================
 // CONFIGURACIÓN DE SERVICIOS
 // ===========================
+
+builder.Services.AddSingleton<IArduinoService, ArduinoService>();
+builder.Services.AddControllers();
 
 
 // LA CONFIGURACION DE SWAGGER ESTABA REPETIDA, TENIA DOS Y CADA UNA SU INICIALIZACION, QUITE LA PRIMERA QUE SE VEIA MAS BASICA
