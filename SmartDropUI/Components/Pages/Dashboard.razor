@@ -526,6 +526,12 @@
         </div>
 
         <nav class="menu-section">
+            <div class="menu-title">Principal</div>
+            <div class="menu-item active" @onclick='() => Navigation.NavigateTo("/dashboard")'>
+                <span class="menu-icon">🎛️</span>
+                Panel de Control
+            </div>
+
             <div class="menu-title">Gestión</div>
             <div class="menu-item" @onclick='() => Navigation.NavigateTo("/plantas")'>
                 <span class="menu-icon">🌱</span>
@@ -541,10 +547,6 @@
             </div>
 
             <div class="menu-title">Sistema</div>
-            <div class="menu-item active" @onclick='() => Navigation.NavigateTo("/dashboard")'>
-                <span class="menu-icon">💧</span>
-                Control de Riego
-            </div>
             <div class="menu-item" @onclick='() => Navigation.NavigateTo("/historial-completo")'>
                 <span class="menu-icon">⚙️</span>
                 Configuración
