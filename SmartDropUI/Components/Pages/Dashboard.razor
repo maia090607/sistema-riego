@@ -7,145 +7,278 @@
 
 <PageTitle>Dashboard - SmartDrop</PageTitle>
 
-<div class="dashboard-container">
-    <div class="dashboard-header">
-        <div class="header-left">
-            <h1>SISTEMA DE RIEGO AUTOMÁTICO SMARTDROP</h1>
-        </div>
-        <div class="header-right">
-            <button class="nav-btn logout" @onclick='() => Navigation.NavigateTo("/login")'>Salir</button>
-        </div>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .dashboard-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 50%, #cffafe 100%);
+        padding: 2rem 1.5rem;
+    }
+
+    .dashboard-title-section {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .dashboard-main-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #10b981;
+        margin-bottom: 0.5rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .dashboard-subtitle {
+        font-size: 1.1rem;
+        color: #6b7280;
+        margin-bottom: 2.5rem;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .dashboard-card {
+        background: white;
+        border-radius: 1.25rem;
+        padding: 2.5rem 2rem;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+    .card-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .card-title {
+        font-size: 0.875rem;
+        font-weight: bold;
+        color: #10b981;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-subtitle {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        margin: 0.75rem 0 0.5rem 0;
+    }
+
+    .card-value {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-top: 0.75rem;
+    }
+
+    .value-orange {
+        color: #f97316;
+    }
+
+    .value-green {
+        color: #10b981;
+    }
+
+    .value-blue {
+        color: #3b82f6;
+    }
+
+    .value-yellow {
+        color: #f59e0b;
+    }
+
+    .status-pill {
+        display: inline-block;
+        padding: 0.625rem 1.75rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-top: 0.75rem;
+    }
+
+    .pill-active {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .pill-info {
+        background-color: #ccfbf1;
+        color: #0f766e;
+    }
+
+    .pill-neutral {
+        background-color: #e0f2fe;
+        color: #075985;
+    }
+
+    /* Estilos específicos para cada tarjeta */
+    .card-temperatura .card-icon {
+        color: #f97316;
+    }
+
+    .card-humedad-aire .card-icon {
+        color: #10b981;
+    }
+
+    .card-bomba .card-icon {
+        color: #3b82f6;
+    }
+
+    .card-riego .card-icon {
+        color: #10b981;
+    }
+
+    .card-pronostico .card-icon {
+        color: #f59e0b;
+    }
+
+    .card-viento .card-icon {
+        color: #3b82f6;
+    }
+
+    .card-programa .card-icon {
+        color: #10b981;
+    }
+
+    .card-suelo .card-icon {
+        color: #92400e;
+    }
+
+    @@media (max-width: 768px) {
+        .dashboard-main-title {
+            font-size: 1.75rem;
+        }
+
+        .dashboard-subtitle {
+            font-size: 1rem;
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+        }
+    }
+
+    @@media (min-width: 769px) and (max-width: 1024px) {
+        .dashboard-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (min-width: 1025px) {
+        .dashboard-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+</style>
+
+<div class="dashboard-page">
+    <div class="dashboard-title-section">
+        <h1 class="dashboard-main-title">Sistema de Riego Automático SmartDrop</h1>
+        <p class="dashboard-subtitle">Panel de Control y Monitoreo en Tiempo Real</p>
     </div>
 
-    <p style="text-align: center; color: var(--gray-600); margin-bottom: 2rem; font-size: 1.1rem;">
-        Panel de Control y Monitoreo en Tiempo Real
-    </p>
-
-    <div class="dashboard-grid-custom">
+    <div class="dashboard-grid">
         <!-- Temperatura -->
-        <div class="info-card">
-            <div class="card-icon" style="font-size: 3rem;">🌡️</div>
-            <h3>TEMPERATURA</h3>
-            <div class="card-value" style="color: #f97316;">90.8°C</div>
+        <div class="dashboard-card card-temperatura">
+            <span class="card-icon">🌡️</span>
+            <h3 class="card-title">Temperatura</h3>
+            <div class="card-value value-orange">90.8°C</div>
         </div>
 
         <!-- Humedad del Aire -->
-        <div class="info-card">
-            <div class="card-icon" style="font-size: 3rem; color: var(--green-primary);">💧</div>
-            <h3>HUMEDAD DEL AIRE</h3>
-            <div class="card-value" style="color: var(--green-primary);">H</div>
+        <div class="dashboard-card card-humedad-aire">
+            <span class="card-icon">💧</span>
+            <h3 class="card-title">Humedad del Aire</h3>
+            <div class="card-value value-green">H</div>
         </div>
 
         <!-- Bomba de Agua -->
-        <div class="info-card">
-            <div class="card-icon" style="font-size: 3rem; color: var(--blue-primary);">⚙️</div>
-            <h3>BOMBA DE AGUA</h3>
-            <h4>ESTADO</h4>
-            <div class="status-badge active">● Activa</div>
+        <div class="dashboard-card card-bomba">
+            <span class="card-icon">⚙️</span>
+            <h3 class="card-title">Bomba de Agua</h3>
+            <h4 class="card-subtitle">Estado</h4>
+            <div class="status-pill pill-active">● Activa</div>
         </div>
 
         <!-- Último Riego -->
-        <div class="info-card">
-            <div class="card-icon" style="font-size: 3rem; color: var(--green-primary);">📅</div>
-            <h3>ÚLTIMO RIEGO</h3>
-            <h4>FECHA</h4>
-            <div class="status-badge">Hoy 08:30</div>
+        <div class="dashboard-card card-riego">
+            <span class="card-icon">📅</span>
+            <h3 class="card-title">Último Riego</h3>
+            <h4 class="card-subtitle">Fecha</h4>
+            <div class="status-pill pill-info">Hoy 08:30</div>
         </div>
 
         <!-- Pronóstico -->
-        <div class="info-card">
-            <div class="card-icon" style="font-size: 3rem; color: #fbbf24;">☀️</div>
-            <h3>PRONÓSTICO</h3>
-            <div class="card-value" style="color: #f97316;">Despejado</div>
+        <div class="dashboard-card card-pronostico">
+            <span class="card-icon">☀️</span>
+            <h3 class="card-title">Pronóstico</h3>
+            <div class="card-value value-yellow">Despejado</div>
         </div>
 
         <!-- Viento -->
-        <div class="info-card">
-            <div class="card-icon" style="font-size: 3rem; color: var(--blue-primary);">🧭</div>
-            <h3>VIENTO</h3>
-            <div class="card-value" style="color: var(--blue-primary);">Norte</div>
+        <div class="dashboard-card card-viento">
+            <span class="card-icon">🧭</span>
+            <h3 class="card-title">Viento</h3>
+            <div class="card-value value-blue">Norte</div>
         </div>
 
         <!-- Estado del Programa -->
-        <div class="info-card">
-            <div class="card-icon" style="font-size: 3rem; color: var(--green-primary);">💻</div>
-            <h3>ESTADO DEL PROGRAMA</h3>
-            <h4>ESTADO</h4>
-            <div class="status-badge active">● Online</div>
+        <div class="dashboard-card card-programa">
+            <span class="card-icon">💻</span>
+            <h3 class="card-title">Estado del Programa</h3>
+            <h4 class="card-subtitle">Estado</h4>
+            <div class="status-pill pill-active">● Online</div>
         </div>
 
         <!-- Humedad del Suelo -->
-        <div class="info-card">
-            <div class="card-icon" style="font-size: 3rem; color: #92400e;">🌱</div>
-            <h3>HUMEDAD DEL SUELO</h3>
-            <div class="status-badge">Humedad</div>
+        <div class="dashboard-card card-suelo">
+            <span class="card-icon">🌱</span>
+            <h3 class="card-title">Humedad del Suelo</h3>
+            <div class="status-pill pill-neutral">Humedad</div>
         </div>
     </div>
 </div>
 
-<style>
-    .dashboard-grid-custom {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // Aquí puedes cargar datos reales desde el servicio
+        await Task.CompletedTask;
     }
-
-    .info-card {
-        background: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        border-top: 4px solid;
-        border-image: linear-gradient(90deg, var(--green-primary), var(--blue-primary)) 1;
-    }
-
-        .info-card h3 {
-            font-size: 0.9rem;
-            color: var(--green-primary);
-            font-weight: bold;
-            margin: 1rem 0 0.5rem 0;
-            letter-spacing: 0.5px;
-        }
-
-        .info-card h4 {
-            font-size: 0.75rem;
-            color: var(--gray-600);
-            margin: 0.5rem 0;
-            font-weight: 600;
-        }
-
-    .card-value {
-        font-size: 2rem;
-        font-weight: bold;
-        margin-top: 0.5rem;
-    }
-
-    .status-badge {
-        display: inline-block;
-        background-color: #d1fae5;
-        color: #065f46;
-        padding: 0.5rem 1.5rem;
-        border-radius: 9999px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
-    }
-
-        .status-badge.active {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-
-    .dashboard-header h1 {
-        font-size: 1.5rem;
-        color: var(--green-primary);
-    }
-
-    @@media (max-width: 768px) {
-        .dashboard-grid-custom {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
+}
