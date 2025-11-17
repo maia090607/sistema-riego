@@ -3,6 +3,8 @@
 @using SmartDropUI.Services
 @inject RiegoService RiegoService
 @inject NavigationManager Navigation
+@inject ClimaService ClimaService
+@inject ArduinoService ArduinoService
 @rendermode InteractiveServer
 @implements IDisposable
 
@@ -919,6 +921,8 @@
     </div> <!-- Cierra main-content -->
 
 </div> <!-- Cierra dashboard-layout -->
+@* REEMPLAZA TODA LA SECCIÓN @code de Dashboard.razor con esto: *@
+
 @code {
     private string seccionActiva = "general";
     private bool mostrarUsuario = false;
@@ -929,14 +933,49 @@
     private bool riegoManualActivo = false;
     private int tiempoRiego = 0;
     private System.Timers.Timer? timer;
-    private string estadoBomba = "Automático"; // "Automático" o "Manual"
+    private string estadoBomba = "Automático";
 
-    [Inject]
-    private ClimaService ClimaService { get; set; } = default!;
+    // Variables para Arduino
+    private DatosArduinoModel? datosArduino;
+    private System.Timers.Timer? timerActualizacion;
 
     protected override async Task OnInitializedAsync()
     {
         await CargarDatosClima();
+        await InicializarArduino();
+    }
+
+    private async Task InicializarArduino()
+    {
+        try
+        {
+            // Suscribirse a los eventos del Arduino
+            ArduinoService.DatosRecibidos += OnDatosArduinoRecibidos;
+
+            // Timer para actualizar estado cada 2 segundos
+            timerActualizacion = new System.Timers.Timer(2000);
+            timerActualizacion.Elapsed += async (s, e) =>
+            {
+                datosArduino = await ArduinoService.ObtenerEstadoAsync();
+                await InvokeAsync(StateHasChanged);
+            };
+            timerActualizacion.Start();
+
+            // Obtener estado inicial
+            datosArduino = await ArduinoService.ObtenerEstadoAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"⚠️ Error al inicializar Arduino: {ex.Message}");
+        }
+    }
+
+    private void OnDatosArduinoRecibidos(DatosArduinoModel datos)
+    {
+        datosArduino = datos;
+        riegoManualActivo = datos.BombaEncendida && datos.ModoManual;
+        estadoBomba = datos.ModoManual ? "Manual" : "Automático";
+        InvokeAsync(StateHasChanged);
     }
 
     private void CambiarSeccion(string seccion)
@@ -1007,43 +1046,61 @@
     }
 
     // ========================================
-    // FUNCIONES DE RIEGO MANUAL
+    // FUNCIONES DE RIEGO MANUAL CON ARDUINO
     // ========================================
 
-    private void IniciarRiegoManual()
+    private async Task IniciarRiegoManual()
     {
-        riegoManualActivo = true;
-        estadoBomba = "Manual";
-        tiempoRiego = 0;
+        var exito = await ArduinoService.IniciarRiegoManualAsync();
 
-        // Crear y configurar el timer
-        timer = new System.Timers.Timer(1000); // 1 segundo
-        timer.Elapsed += (s, e) =>
+        if (exito)
         {
-            tiempoRiego++;
-            InvokeAsync(StateHasChanged);
-        };
+            riegoManualActivo = true;
+            estadoBomba = "Manual";
+            tiempoRiego = 0;
 
-        timer.Start();
-        Console.WriteLine("✅ Riego manual iniciado");
+            // Timer para mostrar tiempo transcurrido
+            timer = new System.Timers.Timer(1000);
+            timer.Elapsed += (s, e) =>
+            {
+                tiempoRiego++;
+                InvokeAsync(StateHasChanged);
+            };
+            timer.Start();
+
+            Console.WriteLine("✅ Riego manual iniciado desde Blazor");
+        }
+        else
+        {
+            Console.WriteLine("❌ Error al iniciar riego manual");
+        }
     }
 
-    private void DetenerRiegoManual()
+    private async Task DetenerRiegoManual()
     {
-        riegoManualActivo = false;
-        estadoBomba = "Automático";
+        var exito = await ArduinoService.DetenerRiegoManualAsync();
 
-        if (timer != null)
+        if (exito)
         {
-            timer.Stop();
-            timer.Dispose();
-            timer = null;
+            riegoManualActivo = false;
+
+            if (timer != null)
+            {
+                timer.Stop();
+                timer.Dispose();
+                timer = null;
+            }
+
+            Console.WriteLine($"⛔ Riego manual detenido. Duración: {tiempoRiego} segundos");
+            tiempoRiego = 0;
+
+            // Volver a modo automático
+            await Task.Delay(1000);
+            await ArduinoService.ActivarModoAutomaticoAsync();
+            estadoBomba = "Automático";
+
+            StateHasChanged();
         }
-
-        Console.WriteLine($"⛔ Riego manual detenido. Duración: {tiempoRiego} segundos");
-        tiempoRiego = 0;
-
-        StateHasChanged();
     }
 
     private string FormatearTiempo(int segundosTotales)
@@ -1064,5 +1121,13 @@
             timer.Stop();
             timer.Dispose();
         }
+
+        if (timerActualizacion != null)
+        {
+            timerActualizacion.Stop();
+            timerActualizacion.Dispose();
+        }
+
+        ArduinoService.DatosRecibidos -= OnDatosArduinoRecibidos;
     }
 }

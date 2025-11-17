@@ -1,4 +1,4 @@
-using Blazored.LocalStorage;
+﻿using Blazored.LocalStorage;
 using SmartDropUI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +17,15 @@ builder.Services.AddScoped(sp => new HttpClient
 builder.Services.AddScoped<RiegoService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ClimaService>();
+
+// Registrar ArduinoService como singleton
+builder.Services.AddSingleton<ArduinoService>(sp =>
+{
+    // ⚠️ CAMBIA "COM3" POR TU PUERTO REAL (ej: COM4, COM5, etc.)
+    var arduino = new ArduinoService("COM11", 9600);
+    arduino.Conectar();
+    return arduino;
+});
 
 // LocalStorage
 builder.Services.AddBlazoredLocalStorage();
