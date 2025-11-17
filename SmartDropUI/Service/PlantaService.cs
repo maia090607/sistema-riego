@@ -1,13 +1,15 @@
 ﻿using SmartDropUI.Models;
+using System.Net.Http.Json;
 
 namespace SmartDropUI.Services
 {
+    /// Servicio para gestión de plantas del sistema
     public class PlantaService
     {
         private readonly HttpClient _httpClient;
-        private const bool MODO_PRUEBA = true;
+        private const bool MODO_PRUEBA = false; // Cambiar a false para usar API real
 
-        // Lista simulada de plantas
+        // Plantas simuladas para modo de prueba
         private static List<PlantaModel> plantasSimuladas = new List<PlantaModel>
         {
             new PlantaModel
@@ -53,6 +55,7 @@ namespace SmartDropUI.Services
             _httpClient = httpClient;
         }
 
+        /// Obtener todas las plantas registradas
         public async Task<List<PlantaModel>> ObtenerPlantasAsync()
         {
             if (MODO_PRUEBA)
@@ -74,6 +77,7 @@ namespace SmartDropUI.Services
             }
         }
 
+        /// Obtener una planta específica por ID
         public async Task<PlantaModel?> ObtenerPlantaPorIdAsync(int id)
         {
             if (MODO_PRUEBA)
@@ -94,6 +98,7 @@ namespace SmartDropUI.Services
             }
         }
 
+        /// Registrar una nueva planta
         public async Task<bool> RegistrarPlantaAsync(PlantaModel planta)
         {
             if (MODO_PRUEBA)
@@ -118,6 +123,7 @@ namespace SmartDropUI.Services
             }
         }
 
+        /// Actualizar una planta existente
         public async Task<bool> ActualizarPlantaAsync(PlantaModel planta)
         {
             if (MODO_PRUEBA)
@@ -146,6 +152,7 @@ namespace SmartDropUI.Services
             }
         }
 
+        /// Eliminar una planta del sistema
         public async Task<bool> EliminarPlantaAsync(int id)
         {
             if (MODO_PRUEBA)

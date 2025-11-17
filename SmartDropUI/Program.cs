@@ -4,15 +4,18 @@ using SmartDropUI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-// Add services to the container.
+// ===================================
+// SERVICIOS DE BLAZOR
+// ===================================
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Configurar HttpClientFactory para múltiples clientes
+// ===================================
+// HTTP CLIENTS
+// ===================================
 builder.Services.AddHttpClient();
 
-// HttpClient principal para la API de riego
+// Configurar HttpClient para consumir la API
 builder.Services.AddScoped(sp => new HttpClient
 {
     BaseAddress = new Uri("https://localhost:7001") // URL de tu RiegoAPI
@@ -25,17 +28,23 @@ builder.Services.AddHttpClient("WeatherAPI", client =>
     client.Timeout = TimeSpan.FromSeconds(10);
 });
 
-// Registrar servicios
+// ===================================
+// SERVICIOS DE LA APLICACIÓN
+// ===================================
 builder.Services.AddScoped<RiegoService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PlantaService>();
 
-// LocalStorage
+// ===================================
+// LOCAL STORAGE
+// ===================================
 builder.Services.AddBlazoredLocalStorage();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ===================================
+// CONFIGURACIÓN DEL PIPELINE
+// ===================================
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");

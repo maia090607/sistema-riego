@@ -1,6 +1,8 @@
 ﻿@using SmartDropUI.Models
 @using SmartDropUI.Services
 @inject RiegoService RiegoService
+@inject NavigationManager Navigation
+@inject AuthService AuthService
 @implements IDisposable
 
 <div class="dashboard-smartdrop">
@@ -8,11 +10,19 @@
         <h1>SISTEMA DE RIEGO AUTOMÁTICO SMARTDROP</h1>
         <p>Panel de Control y Monitoreo en Tiempo Real</p>
         <button class="btn-salir" @onclick="CerrarSesion">Salir</button>
-        @inject NavigationManager Navigation
-        <button class="nav-btn" @onclick="IrAPlantas">🌱 Plantas</button>
     </div>
 
     <div class="dashboard-grid-nuevo">
+        <!-- Botón de Plantas -->
+        <div class="card-sensor plantas" @onclick="IrAPlantas" style="cursor: pointer;">
+            <div class="icon-sensor">🌱</div>
+            <h3>PLANTAS</h3>
+            <div class="estado-badge ver-plantas">
+                📋 Gestionar
+            </div>
+        </div>
+
+        <!-- Temperatura -->
         <div class="card-sensor temperatura">
             <div class="icon-sensor">🌡️</div>
             <h3>TEMPERATURA</h3>
@@ -22,6 +32,7 @@
             </div>
         </div>
 
+        <!-- Humedad del Aire -->
         <div class="card-sensor humedad-aire">
             <div class="icon-sensor">💧</div>
             <h3>HUMEDAD DEL AIRE</h3>
@@ -31,6 +42,7 @@
             </div>
         </div>
 
+        <!-- Bomba de Agua -->
         <div class="card-sensor bomba">
             <div class="icon-sensor">💧</div>
             <h3>BOMBA DE AGUA</h3>
@@ -40,6 +52,7 @@
             </div>
         </div>
 
+        <!-- Último Riego -->
         <div class="card-sensor ultimo-riego">
             <div class="icon-sensor">📅</div>
             <h3>ÚLTIMO RIEGO</h3>
@@ -49,12 +62,14 @@
             </div>
         </div>
 
+        <!-- Pronóstico -->
         <div class="card-sensor pronostico">
             <div class="icon-sensor">@ObtenerIconoClima()</div>
             <h3>PRONÓSTICO</h3>
             <div class="valor-sensor estado">@datosActuales.Pronostico</div>
         </div>
 
+        <!-- Viento -->
         <div class="card-sensor viento">
             <div class="icon-sensor">🧭</div>
             <h3>VIENTO</h3>
@@ -62,6 +77,7 @@
             <div class="estado-mini">@datosActuales.VelocidadViento km/h</div>
         </div>
 
+        <!-- Estado del Programa -->
         <div class="card-sensor programa">
             <div class="icon-sensor">💻</div>
             <h3>ESTADO DEL PROGRAMA</h3>
@@ -71,21 +87,13 @@
             </div>
         </div>
 
+        <!-- Humedad del Suelo -->
         <div class="card-sensor humedad-suelo">
             <div class="icon-sensor">🌱</div>
             <h3>HUMEDAD DEL SUELO</h3>
             <div class="valor-sensor">@datosActuales.HumedadSuelo%</div>
             <div class="estado-badge @ObtenerClaseHumedadSuelo()">
                 @ObtenerEstadoHumedadSuelo()
-            </div>
-        </div>
-
-        <div class="card-sensor graficas" @onclick="IrAHistorial" style="cursor: pointer;">
-            <div class="icon-sensor">📊</div>
-            <h3>VER GRÁFICAS</h3>
-            <h4>HISTÓRICO</h4>
-            <div class="estado-badge ver-graficas">
-                📈 Ver Datos
             </div>
         </div>
     </div>
@@ -99,17 +107,23 @@
 </div>
 
 @code {
-    [Parameter] public EventCallback OnIrAHistorial { get; set; }
-    [Parameter] public EventCallback OnCerrarSesion { get; set; }
-
     private DatosSensorModel datosActuales = new();
     private DateTime ultimaActualizacion = DateTime.Now;
     private System.Threading.Timer? timer;
 
     protected override async Task OnInitializedAsync()
     {
+        // Verificar autenticación
+        var autenticado = await AuthService.IsAuthenticatedAsync();
+        if (!autenticado)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
         await CargarDatosSensores();
 
+        // Actualizar cada 10 minutos
         timer = new System.Threading.Timer(async _ =>
         {
             await CargarDatosSensores();
@@ -127,19 +141,7 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Error al cargar datos: {ex.Message}");
-
-            datosActuales = new DatosSensorModel
-            {
-                Temperatura = 0,
-                HumedadAire = 0,
-                HumedadSuelo = 0,
-                BombaActiva = false,
-                ProgramaOnline = false,
-                UltimoRiego = DateTime.Now,
-                Pronostico = "Error al cargar",
-                DireccionViento = "N/A",
-                VelocidadViento = 0
-            };
+            datosActuales = new DatosSensorModel();
         }
     }
 
@@ -148,6 +150,13 @@
         Navigation.NavigateTo("/plantas");
     }
 
+    private async Task CerrarSesion()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/login");
+    }
+
+    // Métodos auxiliares para clases CSS
     private string ObtenerClaseTemperatura()
     {
         if (datosActuales.Temperatura < 20) return "frio";
@@ -192,57 +201,26 @@
 
     private string ObtenerIconoClima()
     {
-        if (datosActuales.Pronostico == "Despejado" || datosActuales.Pronostico == "Mayormente Despejado")
+        if (datosActuales.Pronostico.Contains("Despejado"))
             return "☀️";
-        if (datosActuales.Pronostico == "Parcialmente Nublado" || datosActuales.Pronostico == "Nublado")
+        if (datosActuales.Pronostico.Contains("Nublado"))
             return "☁️";
-        if (datosActuales.Pronostico == "Lluvioso" || datosActuales.Pronostico == "Llovizna" || datosActuales.Pronostico == "Chubascos")
+        if (datosActuales.Pronostico.Contains("Lluv") || datosActuales.Pronostico.Contains("Chubasco"))
             return "🌧️";
-        if (datosActuales.Pronostico == "Tormentoso")
+        if (datosActuales.Pronostico.Contains("Tormenta"))
             return "⛈️";
-        if (datosActuales.Pronostico == "Neblina")
+        if (datosActuales.Pronostico.Contains("Neblina"))
             return "🌫️";
         return "☀️";
     }
 
-    private string GetBombaClass()
-    {
-        return datosActuales.BombaActiva ? "activo" : "inactivo";
-    }
-
-    private string GetBombaEstado()
-    {
-        return datosActuales.BombaActiva ? "Activa" : "Inactiva";
-    }
-
-    private string GetProgramaClass()
-    {
-        return datosActuales.ProgramaOnline ? "activo" : "inactivo";
-    }
-
-    private string GetProgramaEstado()
-    {
-        return datosActuales.ProgramaOnline ? "Online" : "Offline";
-    }
-
-    private async Task IrAHistorial()
-    {
-        await OnIrAHistorial.InvokeAsync();
-    }
-
-    private async Task CerrarSesion()
-    {
-        await OnCerrarSesion.InvokeAsync();
-    }
+    private string GetBombaClass() => datosActuales.BombaActiva ? "activo" : "inactivo";
+    private string GetBombaEstado() => datosActuales.BombaActiva ? "Activa" : "Inactiva";
+    private string GetProgramaClass() => datosActuales.ProgramaOnline ? "activo" : "inactivo";
+    private string GetProgramaEstado() => datosActuales.ProgramaOnline ? "Online" : "Offline";
 
     public void Dispose()
     {
         timer?.Dispose();
     }
 }
-
-
-
-
-
-

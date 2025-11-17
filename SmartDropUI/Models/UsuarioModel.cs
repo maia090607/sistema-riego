@@ -1,5 +1,6 @@
 ﻿namespace SmartDropUI.Models
 {
+
     public class UsuarioModel
     {
         public int Id { get; set; }
@@ -9,7 +10,6 @@
         public string NombreUsuario { get; set; } = string.Empty;
         public string Rol { get; set; } = string.Empty;
         public string Contrasena { get; set; } = string.Empty;
+        public DateTime FechaRegistro { get; set; } = DateTime.Now;
     }
-
-    
 }

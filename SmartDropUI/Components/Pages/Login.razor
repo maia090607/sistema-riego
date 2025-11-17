@@ -1,24 +1,28 @@
 ﻿@using SmartDropUI.Models
 @using SmartDropUI.Services
 @inject AuthService AuthService
+@inject NavigationManager Navigation
 
 <div class="login-container">
+    <!-- Decoraciones animadas -->
     <div class="login-decorations">
-        <div class="droplet droplet-1">💧</div>
-        <div class="droplet droplet-2">💧</div>
-        <div class="droplet droplet-3">💧</div>
-        <div class="leaf leaf-1">🌿</div>
-        <div class="leaf leaf-2">🍃</div>
+        <span class="droplet droplet-1">💧</span>
+        <span class="droplet droplet-2">💧</span>
+        <span class="droplet droplet-3">💧</span>
+        <span class="leaf leaf-1">🌿</span>
+        <span class="leaf leaf-2">🌱</span>
     </div>
 
+    <!-- Tarjeta de login -->
     <div class="login-card">
         <div class="login-header">
             <div class="logo">
                 <span>🌿</span>
                 <span>💧</span>
+                <span>🌱</span>
             </div>
             <h1 class="title">SmartDrop</h1>
-            <p class="subtitle">Sistema de Riego Automático</p>
+            <p class="subtitle">Sistema de Riego Automático Inteligente</p>
         </div>
 
         <div class="login-form">
@@ -26,7 +30,10 @@
                 <label>Usuario</label>
                 <div class="input-wrapper">
                     <span class="input-icon">👤</span>
-                    <input type="text" class="form-input" placeholder="Usuario" @bind="usuario" />
+                    <input type="text"
+                           @bind="loginModel.Usuario"
+                           placeholder="Ingrese su usuario"
+                           class="form-input" />
                 </div>
             </div>
 
@@ -34,8 +41,13 @@
                 <label>Contraseña</label>
                 <div class="input-wrapper">
                     <span class="input-icon">🔒</span>
-                    <input type="@(mostrarPassword ? "text" : "password")" class="form-input" placeholder="Contraseña" @bind="password" />
-                    <button type="button" class="toggle-password" @onclick="ToggleMostrarPassword">
+                    <input type="@(mostrarPassword ? "text" : "password")"
+                           @bind="loginModel.Password"
+                           placeholder="Ingrese su contraseña"
+                           class="form-input" />
+                    <button type="button"
+                            class="toggle-password"
+                            @onclick="() => mostrarPassword = !mostrarPassword">
                         @(mostrarPassword ? "🙈" : "👁️")
                     </button>
                 </div>
@@ -43,65 +55,60 @@
 
             @if (!string.IsNullOrEmpty(mensajeError))
             {
-                <div class="alert-error">@mensajeError</div>
+                <div class="alert-error">
+                    ❌ @mensajeError
+                </div>
             }
 
-            <button type="button" class="btn-primary" @onclick="HandleLogin" disabled="@cargando">
-                <span class="btn-icon">💧</span>
-                @(cargando ? "Accediendo..." : "Acceder")
+            <button class="btn-primary"
+                    @onclick="HandleLogin"
+                    disabled="@cargando">
+                <span class="btn-icon">🚀</span>
+                @(cargando ? "Iniciando sesión..." : "INICIAR SESIÓN")
             </button>
 
-            <button type="button" class="btn-secondary" @onclick="IrARegistro">
+            <button class="btn-secondary"
+                    @onclick="IrARegistro">
                 <span class="btn-icon">✨</span>
-                Crear Cuenta
+                CREAR CUENTA
             </button>
         </div>
     </div>
 </div>
 
 @code {
-    [Parameter] public EventCallback OnLoginExitoso { get; set; }
-    [Parameter] public EventCallback OnIrARegistro { get; set; }
-
-    private string usuario = "";
-    private string password = "";
+    private LoginModel loginModel = new();
     private bool mostrarPassword = false;
     private bool cargando = false;
     private string mensajeError = "";
-
-    private void ToggleMostrarPassword() => mostrarPassword = !mostrarPassword;
 
     private async Task HandleLogin()
     {
         mensajeError = "";
 
-        if (string.IsNullOrWhiteSpace(usuario) || string.IsNullOrWhiteSpace(password))
+        if (string.IsNullOrWhiteSpace(loginModel.Usuario) ||
+            string.IsNullOrWhiteSpace(loginModel.Password))
         {
             mensajeError = "Por favor complete todos los campos";
             return;
         }
 
         cargando = true;
+        bool success = await AuthService.LoginAsync(loginModel);
+        cargando = false;
 
-        var loginModel = new LoginModel
+        if (success)
         {
-            Usuario = usuario,
-            Password = password
-        };
-
-        bool loginExitoso = await AuthService.LoginAsync(loginModel);
-
-        if (loginExitoso)
-        {
-            await OnLoginExitoso.InvokeAsync();
+            Navigation.NavigateTo("/");
         }
         else
         {
             mensajeError = "Usuario o contraseña incorrectos";
         }
-
-        cargando = false;
     }
 
-    private async Task IrARegistro() => await OnIrARegistro.InvokeAsync();
+    private void IrARegistro()
+    {
+        Navigation.NavigateTo("/registro");
+    }
 }

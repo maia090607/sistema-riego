@@ -1,0 +1,252 @@
+﻿@using SmartDropUI.Models
+@using SmartDropUI.Services
+@inject PlantaService PlantaService
+@inject NavigationManager Navigation
+@inject AuthService AuthService
+
+<div class="agregar-container">
+    <div class="agregar-header">
+        <h1>@(PlantaIdParam.HasValue ? "✏️ EDITAR PLANTA" : "➕ AGREGAR NUEVA PLANTA")</h1>
+        <button class="btn-back" @onclick="Volver">
+            ← Atrás
+        </button>
+    </div>
+
+    <div class="form-container">
+        <!-- Sección del Formulario -->
+        <div class="form-section">
+            <div class="form-header">
+                <span class="icon">🌱</span>
+                <h2>Información de la Planta</h2>
+            </div>
+
+            <div class="form-group">
+                <label>Nombre de la Planta</label>
+                <input type="text"
+                       @bind="planta.Nombre"
+                       placeholder="Ej: Rosa Roja Premium" />
+            </div>
+
+            <div class="form-group">
+                <label>ID de Planta</label>
+                <input type="text"
+                       @bind="planta.IdPlanta"
+                       placeholder="Ej: PLT001" />
+            </div>
+
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea @bind="planta.Descripcion"
+                          rows="4"
+                          placeholder="Descripción detallada de la planta, sus características y cuidados..."></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Humedad Óptima (%)</label>
+                    <input type="number"
+                           @bind="planta.HumedadOptima"
+                           placeholder="70"
+                           min="0"
+                           max="100" />
+                </div>
+
+                <div class="form-group">
+                    <label>Temperatura Óptima (°C)</label>
+                    <input type="number"
+                           @bind="planta.TemperaturaOptima"
+                           placeholder="20"
+                           min="0"
+                           max="50" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Nivel de Luz Óptima</label>
+                <select @bind="planta.LuzOptima">
+                    <option value="">Seleccionar...</option>
+                    <option value="Baja">Baja</option>
+                    <option value="Media">Media</option>
+                    <option value="Alta">Alta</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Emoji/Icono de la Planta</label>
+                <input type="text"
+                       @bind="planta.ImagenUrl"
+                       placeholder="🌹"
+                       maxlength="2" />
+                <small style="color: #6b7280;">Ingresa un emoji que represente la planta</small>
+            </div>
+
+            @if (!string.IsNullOrEmpty(mensajeError))
+            {
+                <div class="alert-error">
+                    ❌ @mensajeError
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(mensajeExito))
+            {
+                <div class="alert-success">
+                    ✅ @mensajeExito
+                </div>
+            }
+
+            <div class="form-actions">
+                <button class="btn-save" @onclick="Guardar" disabled="@guardando">
+                    @(guardando ? "⏳ Guardando..." : PlantaIdParam.HasValue ? "✅ Actualizar Planta" : "✅ Guardar Planta")
+                </button>
+                <button class="btn-cancel" @onclick="Volver" disabled="@guardando">
+                    ❌ Cancelar
+                </button>
+            </div>
+        </div>
+
+        <!-- Sección de Vista Previa -->
+        <div class="preview-section">
+            <h3>Vista Previa</h3>
+            <div class="preview-card">
+                <div class="planta-icon-large">
+                    @(string.IsNullOrEmpty(planta.ImagenUrl) ? "🌱" : planta.ImagenUrl)
+                </div>
+                <h3>@(string.IsNullOrEmpty(planta.Nombre) ? "Nombre de la planta" : planta.Nombre)</h3>
+                <p class="preview-id">@(string.IsNullOrEmpty(planta.IdPlanta) ? "ID de planta" : planta.IdPlanta)</p>
+
+                @if (!string.IsNullOrEmpty(planta.Descripcion))
+                {
+                    <p class="preview-description">@planta.Descripcion</p>
+                }
+
+                <div class="preview-specs">
+                    <div>
+                        <span>💧</span>
+                        <span>@planta.HumedadOptima%</span>
+                    </div>
+                    <div>
+                        <span>🌡️</span>
+                        <span>@planta.TemperaturaOptima°C</span>
+                    </div>
+                    <div>
+                        <span>☀️</span>
+                        <span>@(string.IsNullOrEmpty(planta.LuzOptima) ? "N/A" : planta.LuzOptima)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>💡 Consejos</h4>
+                <ul>
+                    <li>Usa un emoji que represente bien tu planta</li>
+                    <li>La descripción ayuda a identificar cuidados especiales</li>
+                    <li>Los valores óptimos se usan para alertas automáticas</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int? PlantaIdParam { get; set; }
+
+    private PlantaModel planta = new();
+    private bool guardando = false;
+    private string mensajeError = "";
+    private string mensajeExito = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Verificar autenticación
+        var autenticado = await AuthService.IsAuthenticatedAsync();
+        if (!autenticado)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        // Si estamos editando, cargar la planta
+        if (PlantaIdParam.HasValue)
+        {
+            var plantaExistente = await PlantaService.ObtenerPlantaPorIdAsync(PlantaIdParam.Value);
+            if (plantaExistente != null)
+            {
+                planta = plantaExistente;
+            }
+            else
+            {
+                mensajeError = "Planta no encontrada";
+            }
+        }
+    }
+
+    private async Task Guardar()
+    {
+        mensajeError = "";
+        mensajeExito = "";
+
+        // Validaciones
+        if (string.IsNullOrWhiteSpace(planta.Nombre))
+        {
+            mensajeError = "El nombre de la planta es requerido";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(planta.IdPlanta))
+        {
+            mensajeError = "El ID de la planta es requerido";
+            return;
+        }
+
+        if (planta.HumedadOptima < 0 || planta.HumedadOptima > 100)
+        {
+            mensajeError = "La humedad debe estar entre 0 y 100%";
+            return;
+        }
+
+        if (planta.TemperaturaOptima < 0 || planta.TemperaturaOptima > 50)
+        {
+            mensajeError = "La temperatura debe estar entre 0 y 50°C";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(planta.LuzOptima))
+        {
+            mensajeError = "Debe seleccionar el nivel de luz óptima";
+            return;
+        }
+
+        guardando = true;
+
+        bool resultado;
+        if (PlantaIdParam.HasValue)
+        {
+            resultado = await PlantaService.ActualizarPlantaAsync(planta);
+        }
+        else
+        {
+            resultado = await PlantaService.RegistrarPlantaAsync(planta);
+        }
+
+        guardando = false;
+
+        if (resultado)
+        {
+            mensajeExito = PlantaIdParam.HasValue
+                ? "¡Planta actualizada exitosamente!"
+                : "¡Planta registrada exitosamente!";
+
+            await Task.Delay(1500);
+            Navigation.NavigateTo("/plantas");
+        }
+        else
+        {
+            mensajeError = "Error al guardar la planta. Intente nuevamente.";
+        }
+    }
+
+    private void Volver()
+    {
+        Navigation.NavigateTo("/plantas");
+    }
+}

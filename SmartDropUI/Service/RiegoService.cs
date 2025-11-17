@@ -4,11 +4,12 @@ using System.Text.Json.Serialization;
 
 namespace SmartDropUI.Services
 {
+    /// Servicio para gestión de riego y sensores
     public class RiegoService
     {
         private readonly HttpClient _httpClient;
         private readonly HttpClient _weatherClient;
-        private const bool MODO_PRUEBA = true; // Cambiar a false cuando conectes Arduino
+        private const bool MODO_PRUEBA = false; // Cambiar a false cuando conectes Arduino
 
         public RiegoService(HttpClient httpClient, IHttpClientFactory httpClientFactory)
         {
@@ -16,25 +17,25 @@ namespace SmartDropUI.Services
             _weatherClient = httpClientFactory.CreateClient("WeatherAPI");
         }
 
-        // Obtener datos actuales de sensores
+        /// Obtener datos actuales de todos los sensores y clima
         public async Task<DatosSensorModel> ObtenerDatosActualesAsync()
         {
             if (MODO_PRUEBA)
             {
-                // OBTENER DATOS REALES DEL CLIMA DE VALLEDUPAR
+                // Obtener datos reales del clima de Valledupar
                 var datosClima = await ObtenerClimaValleduparAsync();
 
-                // SIMULACIÓN - Solo humedad del suelo y bomba (datos del sensor local)
+                // Combinar con datos simulados de sensores locales
                 return await Task.FromResult(new DatosSensorModel
                 {
-                    // DATOS REALES DEL CLIMA DE VALLEDUPAR
+                    // Datos reales del clima
                     Temperatura = datosClima.Temperatura,
                     HumedadAire = datosClima.HumedadAire,
                     Pronostico = datosClima.Pronostico,
                     DireccionViento = datosClima.DireccionViento,
                     VelocidadViento = datosClima.VelocidadViento,
 
-                    // DATOS DEL SISTEMA LOCAL (Simulados hasta conectar Arduino)
+                    // Datos simulados del sistema local
                     HumedadSuelo = Random.Shared.Next(20, 100),
                     BombaActiva = Random.Shared.Next(0, 2) == 1,
                     ProgramaOnline = true,
@@ -43,7 +44,6 @@ namespace SmartDropUI.Services
             }
             else
             {
-                // MODO API REAL - Conectar con Arduino/Backend
                 try
                 {
                     var response = await _httpClient.GetFromJsonAsync<DatosSensorModel>("api/sensores/actuales");
@@ -57,12 +57,12 @@ namespace SmartDropUI.Services
             }
         }
 
-        // Obtener datos del clima real de Valledupar usando Open-Meteo API
+        /// Obtener datos del clima real de Valledupar usando Open-Meteo API
         private async Task<ClimaValleduparModel> ObtenerClimaValleduparAsync()
         {
             try
             {
-                Console.WriteLine("Intentando obtener clima de Valledupar...");
+                Console.WriteLine("🌦️ Obteniendo clima de Valledupar...");
 
                 // Coordenadas de Valledupar: 10.4631°N, -73.2532°W
                 var url = "https://api.open-meteo.com/v1/forecast?latitude=10.4631&longitude=-73.2532&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m&timezone=America/Bogota";
@@ -71,7 +71,7 @@ namespace SmartDropUI.Services
 
                 if (response?.Current != null)
                 {
-                    Console.WriteLine($"Clima obtenido: Temp={response.Current.Temperature2m}°C, Humedad={response.Current.RelativeHumidity2m}%");
+                    Console.WriteLine($"✅ Clima obtenido: {response.Current.Temperature2m}°C, {response.Current.RelativeHumidity2m}%");
 
                     return new ClimaValleduparModel
                     {
@@ -83,16 +83,15 @@ namespace SmartDropUI.Services
                     };
                 }
 
-                Console.WriteLine("Response.Current es null");
+                Console.WriteLine("⚠️ Response.Current es null");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al obtener clima: {ex.Message}");
-                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                Console.WriteLine($"❌ Error al obtener clima: {ex.Message}");
             }
 
             // Valores por defecto si falla la API
-            Console.WriteLine("Usando valores por defecto del clima");
+            Console.WriteLine("📊 Usando valores por defecto del clima");
             return new ClimaValleduparModel
             {
                 Temperatura = 32,
@@ -103,7 +102,7 @@ namespace SmartDropUI.Services
             };
         }
 
-        // Convertir código de clima de Open-Meteo a descripción en español
+        /// Convertir código de clima de Open-Meteo a descripción en español
         private string ObtenerPronosticoDesdeCode(int code)
         {
             return code switch
@@ -121,7 +120,7 @@ namespace SmartDropUI.Services
             };
         }
 
-        // Convertir dirección del viento en grados a punto cardinal
+        /// Convertir dirección del viento en grados a punto cardinal
         private string ObtenerDireccionViento(double grados)
         {
             var direcciones = new[] { "Norte", "Noreste", "Este", "Sureste", "Sur", "Suroeste", "Oeste", "Noroeste" };
@@ -129,12 +128,11 @@ namespace SmartDropUI.Services
             return direcciones[index];
         }
 
-        // Obtener historial de riegos
+        /// Obtener historial de riegos realizados
         public async Task<List<DatosRiegoModel>> ObtenerHistorialAsync()
         {
             if (MODO_PRUEBA)
             {
-                // SIMULACIÓN - Datos de ejemplo
                 var historial = new List<DatosRiegoModel>();
                 for (int i = 1; i <= 10; i++)
                 {
@@ -164,12 +162,14 @@ namespace SmartDropUI.Services
             }
         }
 
-        // Activar riego manual
+        /// Activar riego manual del sistema
         public async Task<bool> ActivarRiegoManualAsync()
         {
             if (MODO_PRUEBA)
             {
-                await Task.Delay(1000); // Simular delay
+                Console.WriteLine("💧 Activando riego manual...");
+                await Task.Delay(1000);
+                Console.WriteLine("✅ Riego activado");
                 return true;
             }
             else
@@ -188,13 +188,14 @@ namespace SmartDropUI.Services
         }
     }
 
-    // Modelo para respuesta de Open-Meteo API
+    /// Modelo de respuesta de la API de Open-Meteo
     public class OpenMeteoResponse
     {
         [JsonPropertyName("current")]
         public CurrentWeather? Current { get; set; }
     }
 
+    /// Datos actuales del clima
     public class CurrentWeather
     {
         [JsonPropertyName("temperature_2m")]
@@ -211,5 +212,5 @@ namespace SmartDropUI.Services
 
         [JsonPropertyName("wind_direction_10m")]
         public double WindDirection10m { get; set; }
-    }    
+    }
 }

@@ -4,12 +4,15 @@ using System.Net.Http.Json;
 
 namespace SmartDropUI.Services
 {
+    /// <summary>
+    /// Servicio de autenticación y gestión de usuarios
+    /// </summary>
     public class AuthService
     {
         private readonly HttpClient _httpClient;
         private readonly ILocalStorageService _localStorage;
 
-        // CAMBIAR A true PARA USAR API REAL
+        // 👉 Dejar true mientras pruebas sin API
         private const bool MODO_PRUEBA = true;
 
         public AuthService(HttpClient httpClient, ILocalStorageService localStorage)
@@ -18,11 +21,13 @@ namespace SmartDropUI.Services
             _localStorage = localStorage;
         }
 
+        // --------------------------------------------------------------------------------------------------------------------
+        // LOGIN
+        // --------------------------------------------------------------------------------------------------------------------
         public async Task<bool> LoginAsync(LoginModel login)
         {
             if (MODO_PRUEBA)
             {
-                // MODO DE PRUEBA - Sin API
                 var usuariosValidos = new Dictionary<string, (string password, string rol)>
                 {
                     { "admin", ("admin123", "admin") },
@@ -37,18 +42,18 @@ namespace SmartDropUI.Services
                     await _localStorage.SetItemAsync("userRole", usuariosValidos[login.Usuario].rol);
                     return true;
                 }
-
                 return false;
             }
             else
             {
-                // MODO API REAL
                 try
                 {
                     var response = await _httpClient.PostAsJsonAsync("api/auth/login", login);
+
                     if (response.IsSuccessStatusCode)
                     {
                         var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
                         if (result != null && result.Success)
                         {
                             await _localStorage.SetItemAsync("userName", result.Usuario);
@@ -56,6 +61,7 @@ namespace SmartDropUI.Services
                             return true;
                         }
                     }
+
                     return false;
                 }
                 catch (Exception ex)
@@ -66,34 +72,41 @@ namespace SmartDropUI.Services
             }
         }
 
+        // --------------------------------------------------------------------------------------------------------------------
+        // REGISTRO
+        // --------------------------------------------------------------------------------------------------------------------
         public async Task<bool> RegistrarAsync(UsuarioModel usuario)
         {
             if (MODO_PRUEBA)
             {
-                // Simulación de registro exitoso
-                return await Task.FromResult(true);
+                await Task.Delay(500);
+                return true;
             }
-            else
+
+            try
             {
-                try
-                {
-                    var response = await _httpClient.PostAsJsonAsync("api/auth/registro", usuario);
-                    return response.IsSuccessStatusCode;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error en registro: {ex.Message}");
-                    return false;
-                }
+                var response = await _httpClient.PostAsJsonAsync("api/auth/registro", usuario);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en registro: {ex.Message}");
+                return false;
             }
         }
 
+        // --------------------------------------------------------------------------------------------------------------------
+        // LOGOUT
+        // --------------------------------------------------------------------------------------------------------------------
         public async Task LogoutAsync()
         {
             await _localStorage.RemoveItemAsync("userName");
             await _localStorage.RemoveItemAsync("userRole");
         }
 
+        // --------------------------------------------------------------------------------------------------------------------
+        // VALIDACIONES
+        // --------------------------------------------------------------------------------------------------------------------
         public async Task<bool> IsAuthenticatedAsync()
         {
             var userName = await _localStorage.GetItemAsync<string>("userName");
@@ -119,3 +132,4 @@ namespace SmartDropUI.Services
         public string Rol { get; set; } = string.Empty;
     }
 }
+
