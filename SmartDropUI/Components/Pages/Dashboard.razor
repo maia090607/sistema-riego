@@ -175,122 +175,6 @@
         font-size: 0.875rem;
     }
 
-    /* Debug Panel */
-    .debug-panel {
-        background: #f9fafb;
-        border-left: 4px solid #f59e0b;
-        border-radius: 0.5rem;
-        padding: 1rem;
-        margin-bottom: 2rem;
-        font-family: 'Courier New', monospace;
-        font-size: 0.875rem;
-    }
-
-    .debug-title {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-weight: 600;
-        color: #92400e;
-        margin-bottom: 0.75rem;
-    }
-
-    .debug-item {
-        display: flex;
-        gap: 0.5rem;
-        margin-bottom: 0.25rem;
-    }
-
-    .debug-label {
-        font-weight: 600;
-        color: #374151;
-    }
-
-    .debug-value {
-        color: #059669;
-    }
-
-    .debug-false {
-        color: #dc2626;
-    }
-
-    .debug-warning {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-        color: #b45309;
-        font-weight: 600;
-    }
-
-    /* Cards Grid */
-    .cards-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .info-card {
-        background: white;
-        border-radius: 1.5rem;
-        padding: 2.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        text-align: center;
-        border-left: 6px solid #10b981;
-        transition: all 0.3s;
-    }
-
-        .info-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
-
-    .card-icon {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-    }
-
-    .card-title {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #6b7280;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 1rem;
-    }
-
-    .card-value {
-        font-size: 3rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-    }
-
-    .card-status-badge {
-        display: inline-block;
-        padding: 0.5rem 1.5rem;
-        border-radius: 9999px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .badge-inactive {
-        background: #f3f4f6;
-        color: #6b7280;
-    }
-
-    .badge-active {
-        background: #d1fae5;
-        color: #065f46;
-    }
-
-    .badge-online {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
     /* Control Panel Section */
     .control-panel-section {
         background: white;
@@ -394,101 +278,19 @@
         color: #92400e;
     }
 
-    /* Button Section */
-    .button-info-section {
-        background: #fef3c7;
-        border-left: 4px solid #eab308;
-        border-radius: 1rem;
-        padding: 1.5rem 2rem;
-        margin-bottom: 2rem;
+    .badge-inactive {
+        background: #f3f4f6;
+        color: #6b7280;
     }
 
-    .button-state-title {
-        font-weight: 600;
-        color: #854d0e;
-        margin-bottom: 0.5rem;
+    .badge-active {
+        background: #d1fae5;
+        color: #065f46;
     }
 
-    .button-state-value {
-        font-size: 1.25rem;
-        font-weight: bold;
-        color: #65a30d;
-    }
-
-    .manual-control-section {
-        background: white;
-        border-radius: 1.5rem;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        margin-bottom: 2rem;
-    }
-
-    .control-title {
-        font-size: 1.25rem;
-        font-weight: bold;
-        color: #10b981;
-        text-align: center;
-        margin-bottom: 1.5rem;
-    }
-
-    .btn-manual {
-        width: 100%;
-        background: #10b981;
-        color: white;
-        border: none;
-        padding: 1.25rem;
-        border-radius: 0.75rem;
-        font-weight: 600;
-        font-size: 1.1rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.75rem;
-        transition: all 0.3s;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    }
-
-        .btn-manual:hover:not(:disabled) {
-            background: #059669;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-        }
-
-        .btn-manual:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .btn-manual.visible {
-            display: flex;
-        }
-
-        .btn-manual.hidden {
-            display: none;
-        }
-
-    .info-text {
-        background: #f0f9ff;
-        border-left: 4px solid #3b82f6;
-        border-radius: 0.5rem;
-        padding: 1rem;
-        margin-top: 1rem;
-    }
-
-    .info-title {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-weight: 600;
+    .badge-online {
+        background: #dbeafe;
         color: #1e40af;
-        margin-bottom: 0.5rem;
-    }
-
-    .info-description {
-        color: #475569;
-        font-size: 0.9rem;
-        line-height: 1.5;
     }
 
     @@media (max-width: 1024px) {
@@ -498,10 +300,6 @@
 
         .main-content {
             margin-left: 0;
-        }
-
-        .cards-grid {
-            grid-template-columns: 1fr;
         }
 
         .control-cards-grid {
@@ -547,6 +345,10 @@
             </div>
 
             <div class="menu-title">Sistema</div>
+            <div class="menu-item" @onclick='() => Navigation.NavigateTo("/riego")'>
+                <span class="menu-icon">💧</span>
+                Riego
+            </div>
             <div class="menu-item" @onclick='() => Navigation.NavigateTo("/historial-completo")'>
                 <span class="menu-icon">⚙️</span>
                 Configuración
@@ -565,66 +367,10 @@
     <main class="main-content">
         <div class="top-bar">
             <div class="top-bar-left">
-                <span class="top-bar-icon">💧</span>
-                <h2 class="top-bar-title">BOMBA DE AGUA</h2>
+                <span class="top-bar-icon">🎛️</span>
+                <h2 class="top-bar-title">PANEL DE CONTROL</h2>
             </div>
-            <div class="mode-badge">@estadoBomba</div>
-        </div>
-
-        <!-- Debug Panel -->
-        <div class="debug-panel">
-            <div class="debug-title">
-                <span>🔍</span>
-                Estado del Sistema (Debug):
-            </div>
-            <div class="debug-item">
-                <span class="debug-label">riegoManualActivo:</span>
-                <span class="@(riegoManualActivo ? "debug-value" : "debug-false")">@riegoManualActivo</span>
-            </div>
-            <div class="debug-item">
-                <span class="debug-label">esperandoRespuesta:</span>
-                <span class="@(esperandoRespuesta ? "debug-value" : "debug-false")">@esperandoRespuesta</span>
-            </div>
-            <div class="debug-item">
-                <span class="debug-label">estadoBomba:</span>
-                <span class="debug-value">@estadoBomba</span>
-            </div>
-            <div class="debug-item">
-                <span class="debug-label">tiempoRiego:</span>
-                <span class="debug-value">@tiempoRiego segundos</span>
-            </div>
-            @if (!ArduinoService.EstaConectado)
-            {
-                <div class="debug-warning">
-                    <span>⚠️</span>
-                    Arduino no conectado
-                </div>
-            }
-        </div>
-
-        <!-- Cards Grid -->
-        <div class="cards-grid">
-            <div class="info-card">
-                <div class="card-icon">💧</div>
-                <div class="card-title">BOMBA DE AGUA</div>
-                <div class="card-value">@(bombaActiva ? "ON" : "OFF")</div>
-                <div class="card-status-badge @(bombaActiva ? "badge-active" : "badge-inactive")">
-                    @(bombaActiva ? "ACTIVA" : "INACTIVA")
-                </div>
-                <p style="margin-top: 1rem; color: #6b7280; font-size: 0.9rem;">
-                    @(bombaActiva ? "Sistema de bombeo activo" : "Sistema de bombeo detenido")
-                </p>
-            </div>
-
-            <div class="info-card">
-                <div class="card-icon">💻</div>
-                <div class="card-title">ESTADO DEL PROGRAMA</div>
-                <div class="card-value">Activo</div>
-                <div class="card-status-badge badge-online">ONLINE</div>
-                <p style="margin-top: 1rem; color: #6b7280; font-size: 0.9rem;">
-                    Sistema funcionando correctamente
-                </p>
-            </div>
+            <div class="mode-badge">Sistema Activo</div>
         </div>
 
         <!-- Panel de Control en Tiempo Real -->
@@ -680,7 +426,7 @@
                 <!-- Estado del Programa -->
                 <div class="control-card status-card">
                     <div class="control-card-icon">💻</div>
-                    <div class="control-card-title">ESTADO DEL PROGRAMA ESTADO</div>
+                    <div class="control-card-title">ESTADO DEL PROGRAMA</div>
                     <div class="control-card-badge badge-online">Online</div>
                 </div>
 
@@ -692,60 +438,24 @@
                 </div>
             </div>
         </div>
-
-        <!-- Manual Control -->
-        <div class="manual-control-section">
-            <h3 class="control-title">💧 INICIAR RIEGO MANUAL</h3>
-
-            <button class="btn-manual @(botonIniciarVisible ? "visible" : "hidden")"
-                    @onclick="IniciarRiegoManual"
-                    disabled="@esperandoRespuesta">
-                <span>💧</span>
-                @(esperandoRespuesta ? "INICIANDO..." : "INICIAR RIEGO MANUAL")
-            </button>
-
-            <div class="info-text">
-                <div class="info-title">
-                    <span>ℹ️</span>
-                    Información sobre el Riego Manual
-                </div>
-                <p class="info-description">
-                    El modo manual te permite controlar directamente el sistema de riego.
-                    Mientras esté activo, el sistema automático estará deshabilitado.
-                    No olvides detener el riego manual cuando termines para evitar el desperdicio de agua.
-                </p>
-            </div>
-        </div>
     </main>
 </div>
 
 @code {
-    // ========================================
-    // VARIABLES DE ESTADO
-    // ========================================
-    private bool riegoManualActivo = false;
-    private bool esperandoRespuesta = false;
-    private string estadoBomba = "Automático";
-    private bool bombaActiva = false;
-    private int tiempoRiego = 0;
-    private bool botonIniciarVisible = true;
-
-    // Variables para el clima
+    // Variables para el clima y estado
     private double temperaturaActual = 0;
     private int humedadAire = 0;
     private string descripcionClima = "Cargando...";
     private string direccionViento = "Norte";
     private string ultimoRiego = "08:30";
-
-    private Timer? timer;
-    private Timer? timerActualizacion;
+    private bool bombaActiva = false;
 
     // ========================================
     // INICIALIZACIÓN
     // ========================================
     protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine("🎯 [DASHBOARD] Iniciando componente Dashboard...");
+        Console.WriteLine("🎯 [DASHBOARD] Iniciando Panel de Control...");
 
         // Cargar datos del clima
         await CargarDatosClimaAsync();
@@ -798,182 +508,9 @@
     // ========================================
     private void OnDatosArduinoRecibidos(DatosArduinoModel datos)
     {
-        Console.WriteLine($"📡 [DASHBOARD] Datos recibidos del Arduino - Bomba: {datos.BombaEncendida}, Modo: {datos.ModoManual}");
-
+        Console.WriteLine($"📡 [DASHBOARD] Datos recibidos del Arduino - Bomba: {datos.BombaEncendida}");
         bombaActiva = datos.BombaEncendida;
-        riegoManualActivo = datos.ModoManual;
-
-        if (datos.ModoManual)
-        {
-            estadoBomba = "Manual";
-        }
-        else
-        {
-            estadoBomba = "Automático";
-        }
-
         InvokeAsync(StateHasChanged);
-    }
-
-    // ========================================
-    // ACTUALIZAR ESTADO DESDE ARDUINO
-    // ========================================
-    private async Task ActualizarEstadoAsync()
-    {
-        if (!ArduinoService.EstaConectado)
-        {
-            Console.WriteLine("⚠️ [DASHBOARD] Arduino no conectado en ActualizarEstadoAsync");
-            return;
-        }
-
-        try
-        {
-            var estado = await ArduinoService.ObtenerEstadoAsync();
-            if (estado != null)
-            {
-                bombaActiva = estado.BombaEncendida;
-                riegoManualActivo = estado.ModoManual;
-
-                if (estado.ModoManual)
-                {
-                    estadoBomba = "Manual";
-                }
-                else
-                {
-                    estadoBomba = "Automático";
-                }
-
-                await InvokeAsync(StateHasChanged);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ [DASHBOARD] Error al actualizar estado: {ex.Message}");
-        }
-    }
-
-    // ========================================
-    // MÉTODO PRINCIPAL: INICIAR RIEGO MANUAL
-    // ========================================
-    private async Task IniciarRiegoManual()
-    {
-        Console.WriteLine("🚀 [DASHBOARD] ========== INICIANDO RIEGO MANUAL ==========");
-        Console.WriteLine($"📊 Estado previo - riegoManualActivo: {riegoManualActivo}, esperandoRespuesta: {esperandoRespuesta}");
-
-        if (esperandoRespuesta)
-        {
-            Console.WriteLine("⏳ [DASHBOARD] Ya hay una operación en curso, esperando...");
-            return;
-        }
-
-        esperandoRespuesta = true;
-        StateHasChanged();
-
-        try
-        {
-            Console.WriteLine("📤 [DASHBOARD] Enviando comando MANUAL_ON al Arduino...");
-            bool exito = await ArduinoService.IniciarRiegoManualAsync();
-
-            Console.WriteLine($"📥 [DASHBOARD] Respuesta del Arduino: {(exito ? "ÉXITO ✅" : "FALLO ❌")}");
-
-            if (exito)
-            {
-                Console.WriteLine("✅ [DASHBOARD] Comando MANUAL_ON enviado exitosamente");
-
-                riegoManualActivo = true;
-                estadoBomba = "Manual";
-                tiempoRiego = 0;
-                botonIniciarVisible = false;
-
-                // Iniciar temporizador
-                timer = new Timer(1000);
-                timer.Elapsed += (s, e) =>
-                {
-                    tiempoRiego++;
-                    InvokeAsync(StateHasChanged);
-                };
-                timer.Start();
-                Console.WriteLine("⏱️ [DASHBOARD] Temporizador de riego iniciado");
-
-                StateHasChanged();
-
-                // Esperar 30 segundos
-                Console.WriteLine("⏳ [DASHBOARD] Esperando 30 segundos antes de detener...");
-                await Task.Delay(30000);
-
-                // Detener riego
-                await DetenerRiegoManual();
-            }
-            else
-            {
-                Console.WriteLine("❌ [DASHBOARD] Error al enviar comando MANUAL_ON");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ [DASHBOARD] Excepción al iniciar riego manual: {ex.Message}");
-            Console.WriteLine($"StackTrace: {ex.StackTrace}");
-        }
-        finally
-        {
-            esperandoRespuesta = false;
-            StateHasChanged();
-            Console.WriteLine("🏁 [DASHBOARD] ========== FIN INICIAR RIEGO MANUAL ==========");
-        }
-    }
-
-    // ========================================
-    // DETENER RIEGO MANUAL
-    // ========================================
-    private async Task DetenerRiegoManual()
-    {
-        Console.WriteLine("🛑 [DASHBOARD] ========== DETENIENDO RIEGO MANUAL ==========");
-
-        esperandoRespuesta = true;
-        StateHasChanged();
-
-        try
-        {
-            // Detener temporizador
-            if (timer != null)
-            {
-                timer.Stop();
-                timer.Dispose();
-                timer = null;
-                Console.WriteLine("⏱️ [DASHBOARD] Temporizador detenido");
-            }
-
-            riegoManualActivo = false;
-            botonIniciarVisible = true;
-            StateHasChanged();
-
-            // Enviar comando al Arduino
-            Console.WriteLine("📤 [DASHBOARD] Enviando comando MANUAL_OFF...");
-            bool exito = await ArduinoService.DetenerRiegoManualAsync();
-
-            if (exito)
-            {
-                Console.WriteLine("✅ [DASHBOARD] Comando MANUAL_OFF enviado correctamente");
-
-                await Task.Delay(500);
-
-                await ArduinoService.ActivarModoAutomaticoAsync();
-                estadoBomba = "Automático";
-
-                StateHasChanged();
-                Console.WriteLine("✅ [DASHBOARD] Sistema vuelto a modo automático");
-            }
-            else
-            {
-                Console.WriteLine("❌ [DASHBOARD] Error al enviar comando MANUAL_OFF");
-            }
-        }
-        finally
-        {
-            esperandoRespuesta = false;
-            StateHasChanged();
-            Console.WriteLine("🏁 [DASHBOARD] ========== FIN DETENER RIEGO MANUAL ==========");
-        }
     }
 
     // ========================================
@@ -982,21 +519,7 @@
     public void Dispose()
     {
         Console.WriteLine("🧹 [DASHBOARD] Limpiando recursos...");
-
-        if (timer != null)
-        {
-            timer.Stop();
-            timer.Dispose();
-        }
-
-        if (timerActualizacion != null)
-        {
-            timerActualizacion.Stop();
-            timerActualizacion.Dispose();
-        }
-
         ArduinoService.DatosRecibidos -= OnDatosArduinoRecibidos;
-
         Console.WriteLine("✅ [DASHBOARD] Recursos liberados correctamente");
     }
 }
