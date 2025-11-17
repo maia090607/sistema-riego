@@ -1,0 +1,628 @@
+﻿@page "/graficos"
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Gráficos - SmartDrop</PageTitle>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .graficos-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 50%, #cffafe 100%);
+        padding: 2rem;
+    }
+
+    .graficos-container {
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    .btn-back-menu {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        transition: all 0.3s ease;
+    }
+
+        .btn-back-menu:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #10b981;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .chart-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .chart-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #10b981;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .chart-subtitle {
+        font-size: 0.9rem;
+        color: #6b7280;
+        font-style: italic;
+    }
+
+    .chart-container {
+        background: #f9fafb;
+        border-radius: 1rem;
+        padding: 2rem;
+        min-height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .chart-svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .controls-sidebar {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .controls-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #10b981;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+    }
+
+    .control-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-control {
+        width: 100%;
+        padding: 1rem;
+        border: none;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+    }
+
+    .btn-reload {
+        background: #10b981;
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+        .btn-reload:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+    .btn-manual {
+        background: #10b981;
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+        .btn-manual:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+    .search-section {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .search-title {
+        font-size: 1rem;
+        font-weight: bold;
+        color: #10b981;
+        text-align: center;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+    }
+
+    .date-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        color: #374151;
+    }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+    .btn-search {
+        background: #3b82f6;
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+        .btn-search:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+    .historial-section {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        grid-column: 1 / -1;
+    }
+
+    .historial-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .historial-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #10b981;
+        margin-bottom: 0.5rem;
+    }
+
+    .historial-subtitle {
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+
+    .loading-container {
+        background: #f0fdf4;
+        border-radius: 1rem;
+        padding: 3rem;
+        text-align: center;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading-icon {
+        font-size: 4rem;
+        color: #10b981;
+        margin-bottom: 1rem;
+        animation: spin 2s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .loading-text {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #10b981;
+    }
+
+    .historial-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1.5rem;
+    }
+
+        .historial-table thead {
+            background: #10b981;
+            color: white;
+        }
+
+        .historial-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.5px;
+        }
+
+        .historial-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+        }
+
+        .historial-table tbody tr:hover {
+            background: #f0fdf4;
+        }
+
+    .badge {
+        display: inline-block;
+        padding: 0.375rem 0.875rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .badge-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-warning {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .badge-info {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    /* Estilos para el SVG de las gráficas */
+    .line-chart-humedad {
+        stroke: #10b981;
+        stroke-width: 3;
+        fill: none;
+    }
+
+    .line-chart-temp {
+        stroke: #ef4444;
+        stroke-width: 3;
+        fill: none;
+    }
+
+    .chart-point {
+        fill: currentColor;
+    }
+
+    .chart-axis {
+        stroke: #9ca3af;
+        stroke-width: 2;
+    }
+
+    .chart-grid {
+        stroke: #e5e7eb;
+        stroke-width: 1;
+        stroke-dasharray: 4;
+    }
+
+    .chart-label {
+        fill: #6b7280;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    @@media (max-width: 1200px) {
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="graficos-page">
+    <div class="graficos-container">
+        <button class="btn-back-menu" @onclick='() => Navigation.NavigateTo("/dashboard")'>
+            <span>⬅️</span>
+            Volver al Dashboard
+        </button>
+
+        <h1 class="page-title">Análisis y Estadísticas del Sistema</h1>
+
+        <div class="charts-grid">
+            <!-- Gráfica de Humedad del Suelo -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2 class="chart-title">Gráfica de la Humedad del Suelo</h2>
+                    <p class="chart-subtitle">Humedad – Vacío</p>
+                </div>
+                <div class="chart-container">
+                    <svg viewBox="0 0 400 250" class="chart-svg">
+                        <!-- Ejes -->
+                        <line x1="50" y1="200" x2="370" y2="200" class="chart-axis" />
+                        <line x1="50" y1="30" x2="50" y2="200" class="chart-axis" />
+
+                        <!-- Etiquetas Y -->
+                        <text x="25" y="35" class="chart-label">100</text>
+                        <text x="30" y="90" class="chart-label">75</text>
+                        <text x="30" y="145" class="chart-label">50</text>
+                        <text x="30" y="200" class="chart-label">25</text>
+                        <text x="35" y="210" class="chart-label">0</text>
+
+                        <!-- Etiquetas X -->
+                        <text x="70" y="220" class="chart-label">5</text>
+                        <text x="130" y="220" class="chart-label">10</text>
+                        <text x="190" y="220" class="chart-label">15</text>
+                        <text x="250" y="220" class="chart-label">20</text>
+                        <text x="310" y="220" class="chart-label">25</text>
+
+                        <!-- Título eje X -->
+                        <text x="180" y="240" class="chart-label" style="font-weight: 600;">Tiempo (m)</text>
+
+                        <!-- Línea de datos -->
+                        <polyline points="70,165 100,155 130,150 160,145 190,120 220,135 250,125 280,145 310,140 340,150"
+                                  class="line-chart-humedad" />
+
+                        <!-- Puntos de datos -->
+                        <circle cx="70" cy="165" r="4" class="chart-point" style="color: #10b981;" />
+                        <circle cx="130" cy="150" r="4" class="chart-point" style="color: #10b981;" />
+                        <circle cx="190" cy="120" r="4" class="chart-point" style="color: #10b981;" />
+                        <circle cx="250" cy="125" r="4" class="chart-point" style="color: #10b981;" />
+                        <circle cx="310" cy="140" r="4" class="chart-point" style="color: #10b981;" />
+                        <circle cx="340" cy="150" r="4" class="chart-point" style="color: #10b981;" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Gráfica de Temperatura del Ambiente -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2 class="chart-title">Gráfico de la Temperatura del Ambiente</h2>
+                    <p class="chart-subtitle">Temperatura – Vacío</p>
+                </div>
+                <div class="chart-container">
+                    <svg viewBox="0 0 400 250" class="chart-svg">
+                        <!-- Ejes -->
+                        <line x1="50" y1="200" x2="370" y2="200" class="chart-axis" />
+                        <line x1="50" y1="30" x2="50" y2="200" class="chart-axis" />
+
+                        <!-- Etiquetas Y -->
+                        <text x="25" y="35" class="chart-label">35</text>
+                        <text x="25" y="70" class="chart-label">30</text>
+                        <text x="25" y="110" class="chart-label">25</text>
+                        <text x="25" y="150" class="chart-label">20</text>
+                        <text x="25" y="200" class="chart-label">15</text>
+
+                        <!-- Etiquetas X -->
+                        <text x="70" y="220" class="chart-label">5</text>
+                        <text x="130" y="220" class="chart-label">10</text>
+                        <text x="190" y="220" class="chart-label">15</text>
+                        <text x="250" y="220" class="chart-label">20</text>
+                        <text x="310" y="220" class="chart-label">25</text>
+
+                        <!-- Título eje X -->
+                        <text x="180" y="240" class="chart-label" style="font-weight: 600;">Tiempo (m)</text>
+
+                        <!-- Línea de datos -->
+                        <polyline points="70,145 100,140 130,140 160,135 190,110 220,100 250,105 280,115 310,120 340,125"
+                                  class="line-chart-temp" />
+
+                        <!-- Puntos de datos -->
+                        <circle cx="70" cy="145" r="4" class="chart-point" style="color: #ef4444;" />
+                        <circle cx="130" cy="140" r="4" class="chart-point" style="color: #ef4444;" />
+                        <circle cx="190" cy="110" r="4" class="chart-point" style="color: #ef4444;" />
+                        <circle cx="220" cy="100" r="4" class="chart-point" style="color: #ef4444;" />
+                        <circle cx="280" cy="115" r="4" class="chart-point" style="color: #ef4444;" />
+                        <circle cx="340" cy="125" r="4" class="chart-point" style="color: #ef4444;" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Controles del Sistema -->
+            <div class="controls-sidebar">
+                <h3 class="controls-title">Controles del Sistema</h3>
+                <div class="control-group">
+                    <button class="btn-control btn-reload" @onclick="RecargarHistorial">
+                        <span>🔄</span>
+                        RECARGAR HISTORIAL
+                    </button>
+                    <button class="btn-control btn-manual" @onclick="IniciarRiegoManual">
+                        <span>💧</span>
+                        INICIAR RIEGO MANUAL
+                    </button>
+                </div>
+
+                <div class="search-section">
+                    <h4 class="search-title">Buscar por Fecha</h4>
+                    <input type="date"
+                           class="date-input"
+                           @bind="fechaBusqueda" />
+                    <button class="btn-control btn-search" @onclick="BuscarPorFecha">
+                        <span>🔍</span>
+                        BUSCAR
+                    </button>
+                </div>
+            </div>
+
+            <!-- Historial de Datos -->
+            <div class="historial-section">
+                <div class="historial-header">
+                    <div class="loading-icon">🔄</div>
+                    <h3 class="historial-title">Área de Historial de Datos</h3>
+                    <p class="historial-subtitle">Los registros históricos del sistema aparecerán aquí</p>
+                </div>
+
+                @if (cargando)
+                {
+                    <div class="loading-container">
+                        <div class="loading-icon">⏳</div>
+                        <div class="loading-text">Cargando datos históricos...</div>
+                    </div>
+                }
+                else if (historialDatos.Any())
+                {
+                    <table class="historial-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Humedad (%)</th>
+                                <th>Temperatura (°C)</th>
+                                <th>Estado del Riego</th>
+                                <th>Nivel de Agua</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var dato in historialDatos)
+                            {
+                                <tr>
+                                    <td>@dato.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        <span class="badge @GetHumedadClass(dato.Humedad)">
+                                            @dato.Humedad.ToString("F1")%
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @GetTemperaturaClass(dato.Temperatura)">
+                                            @dato.Temperatura.ToString("F1")°C
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-info">@dato.EstadoRiego</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @GetNivelAguaClass(dato.NivelAgua)">
+                                            @dato.NivelAgua
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool cargando = false;
+    private DateTime fechaBusqueda = DateTime.Now;
+    private List<DatoHistorial> historialDatos = new();
+
+    public class DatoHistorial
+    {
+        public DateTime Fecha { get; set; }
+        public double Humedad { get; set; }
+        public double Temperatura { get; set; }
+        public string EstadoRiego { get; set; } = "";
+        public string NivelAgua { get; set; } = "";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarDatosIniciales();
+    }
+
+    private async Task CargarDatosIniciales()
+    {
+        cargando = true;
+        await Task.Delay(1500);
+
+        // Datos de ejemplo
+        historialDatos = new List<DatoHistorial>
+        {
+            new() { Fecha = DateTime.Now.AddHours(-1), Humedad = 65.5, Temperatura = 24.3, EstadoRiego = "Activo", NivelAgua = "Alto" },
+            new() { Fecha = DateTime.Now.AddHours(-2), Humedad = 58.2, Temperatura = 26.1, EstadoRiego = "Inactivo", NivelAgua = "Medio" },
+            new() { Fecha = DateTime.Now.AddHours(-3), Humedad = 45.8, Temperatura = 28.5, EstadoRiego = "Activo", NivelAgua = "Alto" },
+            new() { Fecha = DateTime.Now.AddHours(-4), Humedad = 72.1, Temperatura = 22.7, EstadoRiego = "Completado", NivelAgua = "Medio" },
+            new() { Fecha = DateTime.Now.AddHours(-5), Humedad = 55.9, Temperatura = 25.4, EstadoRiego = "Inactivo", NivelAgua = "Bajo" }
+        };
+
+        cargando = false;
+    }
+
+    private async Task RecargarHistorial()
+    {
+        await CargarDatosIniciales();
+    }
+
+    private async Task IniciarRiegoManual()
+    {
+        // Lógica para iniciar riego manual
+        await Task.CompletedTask;
+    }
+
+    private async Task BuscarPorFecha()
+    {
+        cargando = true;
+        await Task.Delay(1000);
+        // Aquí filtrarías los datos según la fecha seleccionada
+        cargando = false;
+    }
+
+    private string GetHumedadClass(double humedad)
+    {
+        if (humedad < 40) return "badge-danger";
+        if (humedad < 60) return "badge-warning";
+        return "badge-success";
+    }
+
+    private string GetTemperaturaClass(double temperatura)
+    {
+        if (temperatura < 18 || temperatura > 30) return "badge-danger";
+        if (temperatura < 20 || temperatura > 28) return "badge-warning";
+        return "badge-success";
+    }
+
+    private string GetNivelAguaClass(string nivel)
+    {
+        return nivel.ToLower() switch
+        {
+            "bajo" => "badge-danger",
+            "medio" => "badge-warning",
+            "alto" => "badge-success",
+            _ => "badge-info"
+        };
+    }
+}

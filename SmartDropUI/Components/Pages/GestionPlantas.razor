@@ -1,0 +1,680 @@
+﻿@page "/gestion-plantas"
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Gestión de Plantas - SmartDrop</PageTitle>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .gestion-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 50%, #cffafe 100%);
+        padding: 0;
+    }
+
+    .header-bar {
+        background: #10b981;
+        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: white;
+    }
+
+    .header-icon {
+        font-size: 1.5rem;
+    }
+
+    .header-title {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .header-dots {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .dot {
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    .dot-orange {
+        background: #f97316;
+    }
+
+    .dot-gray {
+        background: #6b7280;
+    }
+
+    .dot-red {
+        background: #ef4444;
+    }
+
+    .btn-back {
+        background: white;
+        color: #10b981;
+        border: 2px solid white;
+        padding: 0.625rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        margin: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+        .btn-back:hover {
+            background: #f0fdf4;
+            transform: translateY(-2px);
+        }
+
+    .main-title {
+        text-align: center;
+        font-size: 2.25rem;
+        font-weight: bold;
+        color: #10b981;
+        margin: 1.5rem 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .content-container {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 2rem;
+        padding: 0 2rem 2rem 2rem;
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-icon {
+        font-size: 1.5rem;
+        color: #10b981;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-input, .form-textarea {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+    .form-textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: #d1d5db;
+        }
+
+    .id-group {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .id-input {
+        flex: 1;
+    }
+
+    .btn-search-id {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 0.875rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .btn-search-id:hover {
+            background: #2563eb;
+        }
+
+    .list-section {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .plant-item {
+        background: #f9fafb;
+        border-left: 4px solid #10b981;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .plant-item:hover {
+            background: #f0fdf4;
+            transform: translateX(4px);
+        }
+
+    .plant-item-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+
+    .plant-icon {
+        font-size: 1.25rem;
+    }
+
+    .plant-item-details {
+        font-size: 0.875rem;
+        color: #6b7280;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 1rem;
+        border: none;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-register {
+        background: #10b981;
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+        .btn-register:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+    .btn-delete {
+        background: #ef4444;
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+        .btn-delete:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+    .btn-update {
+        background: #3b82f6;
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+        .btn-update:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+    .btn-show {
+        background: #10b981;
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+        .btn-show:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+    .sidebar-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .image-upload-section {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .upload-area {
+        border: 3px dashed #10b981;
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        background: #f0fdf4;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .upload-area:hover {
+            background: #dcfce7;
+            border-color: #059669;
+        }
+
+    .upload-icon {
+        font-size: 4rem;
+        color: #10b981;
+        margin-bottom: 1rem;
+    }
+
+    .upload-title {
+        font-weight: 600;
+        color: #10b981;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-subtitle {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    .btn-upload {
+        background: #10b981;
+        color: white;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+        .btn-upload:hover {
+            background: #059669;
+        }
+
+    .info-card {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        text-align: center;
+    }
+
+    .info-card-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #10b981;
+    }
+
+    .info-card-title {
+        font-size: 1.125rem;
+        font-weight: bold;
+        color: #1f2937;
+        margin-bottom: 1rem;
+    }
+
+    .info-card-text {
+        font-size: 0.9rem;
+        color: #6b7280;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-features {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #f3f4f6;
+    }
+
+    .feature {
+        text-align: center;
+    }
+
+    .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .feature-label {
+        font-size: 0.8rem;
+        color: #6b7280;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 1200px) {
+        .content-container {
+            grid-template-columns: 1fr;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="gestion-page">
+    <div class="header-bar">
+        <div class="header-left">
+            <span class="header-icon">🌿</span>
+            <span class="header-title">Sistema de Riego Automático - Registrar Planta</span>
+        </div>
+        <div class="header-dots">
+            <div class="dot dot-orange"></div>
+            <div class="dot dot-gray"></div>
+            <div class="dot dot-red"></div>
+        </div>
+    </div>
+
+    <button class="btn-back" @onclick='() => Navigation.NavigateTo("/plantas")'>
+        <span>⬅️</span>
+        Atrás
+    </button>
+
+    <h1 class="main-title">Agregar una Nueva Planta</h1>
+
+    <div class="content-container">
+        <div>
+            <div class="form-section">
+                <h2 class="section-title">
+                    <span class="section-icon">🌿</span>
+                    Información de la Planta
+                </h2>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nombre</label>
+                        <input type="text"
+                               class="form-input"
+                               placeholder="Rosa Roja Premium"
+                               @bind="planta.Nombre" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">ID</label>
+                        <div class="id-group">
+                            <input type="text"
+                                   class="form-input id-input"
+                                   placeholder="PLT001"
+                                   @bind="planta.Id" />
+                            <button class="btn-search-id">Buscar</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-textarea"
+                                  placeholder="Rosa ornamental de jardín con flores rojas intensas. Requiere riego moderado y luz solar directa."
+                                  @bind="planta.Descripcion"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Humedad Óptima (%)</label>
+                        <input type="number"
+                               class="form-input"
+                               placeholder="70"
+                               @bind="planta.HumedadOptima" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Temperatura Óptima (°C)</label>
+                        <input type="number"
+                               class="form-input"
+                               placeholder="20"
+                               @bind="planta.TemperaturaOptima" />
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="form-label">Luz Óptima</label>
+                        <input type="text"
+                               class="form-input"
+                               placeholder="Luz Media"
+                               @bind="planta.LuzOptima" />
+                    </div>
+                </div>
+
+                <h2 class="section-title">
+                    <span class="section-icon">🌱</span>
+                    Lista de Plantas Registradas
+                </h2>
+
+                <div class="list-section">
+                    @if (plantasRegistradas.Any())
+                    {
+                        @foreach (var p in plantasRegistradas)
+                        {
+                            <div class="plant-item">
+                                <div class="plant-item-title">
+                                    <span class="plant-icon">🌹</span>
+                                    @p.Nombre
+                                </div>
+                                <div class="plant-item-details">
+                                    <span>Humedad: @p.HumedadOptima%</span>
+                                    <span>Temp: @p.TemperaturaOptima°C</span>
+                                    <span>Luz: @p.LuzOptima</span>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                            No hay plantas registradas aún
+                        </div>
+                    }
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-register" @onclick="RegistrarPlanta">
+                        <span>➕</span>
+                        Registrar Planta
+                    </button>
+                    <button class="btn btn-delete" @onclick="EliminarPlanta">
+                        <span>🗑️</span>
+                        Eliminar Planta
+                    </button>
+                    <button class="btn btn-update" @onclick="ActualizarInformacion">
+                        <span>✔️</span>
+                        Actualizar Información
+                    </button>
+                    <button class="btn btn-show" @onclick="MostrarPlantas">
+                        <span>👁️</span>
+                        Mostrar Plantas
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="image-upload-section">
+                <h2 class="section-title">
+                    <span class="section-icon">📷</span>
+                    Imagen de la Planta
+                </h2>
+                <div class="upload-area">
+                    <div class="upload-icon">🌿</div>
+                    <div class="upload-title">Vista previa de la imagen</div>
+                    <div class="upload-subtitle">Rosa Roja Premium - Imagen seleccionada</div>
+                </div>
+                <button class="btn btn-upload">
+                    <span>📁</span>
+                    Subir Imagen
+                </button>
+            </div>
+
+            <div class="info-card">
+                <div class="info-card-icon">🌿</div>
+                <h3 class="info-card-title">Sistema de Riego Inteligente</h3>
+                <p class="info-card-text">
+                    Automatiza el cuidado de tus plantas con tecnología avanzada de monitoreo y riego automático
+                </p>
+                <div class="info-features">
+                    <div class="feature">
+                        <div class="feature-icon">💧</div>
+                        <div class="feature-label">Riego</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">💡</div>
+                        <div class="feature-label">Luz</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🌿</div>
+                        <div class="feature-label">Plantas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private PlantaModel planta = new();
+    private List<PlantaModel> plantasRegistradas = new()
+    {
+        new PlantaModel
+        {
+            Nombre = "Rosa Roja Premium",
+            HumedadOptima = 70,
+            TemperaturaOptima = 20,
+            LuzOptima = "Media"
+        },
+        new PlantaModel
+        {
+            Nombre = "Helecho Boston",
+            HumedadOptima = 80,
+            TemperaturaOptima = 18,
+            LuzOptima = "Baja"
+        },
+        new PlantaModel
+        {
+            Nombre = "Cactus del Desierto",
+            HumedadOptima = 30,
+            TemperaturaOptima = 25,
+            LuzOptima = "Alta"
+        }
+    };
+
+    public class PlantaModel
+    {
+        public string Id { get; set; } = "";
+        public string Nombre { get; set; } = "";
+        public string Descripcion { get; set; } = "";
+        public double TemperaturaOptima { get; set; }
+        public double HumedadOptima { get; set; }
+        public string LuzOptima { get; set; } = "";
+    }
+
+    private async Task RegistrarPlanta()
+    {
+        if (!string.IsNullOrEmpty(planta.Nombre))
+        {
+            plantasRegistradas.Add(new PlantaModel
+            {
+                Id = planta.Id,
+                Nombre = planta.Nombre,
+                Descripcion = planta.Descripcion,
+                HumedadOptima = planta.HumedadOptima,
+                TemperaturaOptima = planta.TemperaturaOptima,
+                LuzOptima = planta.LuzOptima
+            });
+
+            planta = new PlantaModel();
+            await Task.CompletedTask;
+        }
+    }
+
+    private void EliminarPlanta()
+    {
+        // Lógica para eliminar planta
+    }
+
+    private void ActualizarInformacion()
+    {
+        // Lógica para actualizar información
+    }
+
+    private void MostrarPlantas()
+    {
+        Navigation.NavigateTo("/plantas");
+    }
+}

@@ -176,6 +176,15 @@
         color: #92400e;
     }
 
+    .card-plantas .card-icon {
+        color: #10b981;
+    }
+
+    .card-plantas:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(16, 185, 129, 0.2);
+    }
+
     @@media (max-width: 768px) {
         .dashboard-main-title {
             font-size: 1.75rem;
@@ -272,13 +281,53 @@
             <h3 class="card-title">Humedad del Suelo</h3>
             <div class="status-pill pill-neutral">Humedad</div>
         </div>
+
+        <!-- Plantas -->
+        <div class="dashboard-card card-plantas" @onclick="NavigateToPlants" style="cursor: pointer;">
+            <span class="card-icon">🌿</span>
+            <h3 class="card-title">Plantas</h3>
+            <h4 class="card-subtitle">Gestión</h4>
+            @if (totalPlantas > 0)
+            {
+                <div class="card-value value-green">@totalPlantas</div>
+                <div class="status-pill pill-active">Ver Plantas</div>
+            }
+            else
+            {
+                <div class="status-pill pill-info" style="background-color: #3b82f6; color: white;">
+                    + Agregar Planta
+                </div>
+            }
+        </div>
+
+        <!-- Gráficos -->
+        <div class="dashboard-card card-graficos" @onclick="NavigateToGraphs" style="cursor: pointer;">
+            <span class="card-icon">📊</span>
+            <h3 class="card-title">Gráficos</h3>
+            <h4 class="card-subtitle">Análisis</h4>
+            <div class="status-pill pill-info" style="background-color: #3b82f6; color: white;">
+                Ver Estadísticas
+            </div>
+        </div>
     </div>
 </div>
 
 @code {
+    private int totalPlantas = 0; // Cambia este valor según tus datos reales
+
     protected override async Task OnInitializedAsync()
     {
-        // Aquí puedes cargar datos reales desde el servicio
+        // Aquí puedes cargar el número de plantas desde el servicio
         await Task.CompletedTask;
+    }
+
+    private void NavigateToPlants()
+    {
+        Navigation.NavigateTo("/plantas");
+    }
+
+    private void NavigateToGraphs()
+    {
+        Navigation.NavigateTo("/graficos");
     }
 }

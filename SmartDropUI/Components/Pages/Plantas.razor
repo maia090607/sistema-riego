@@ -1,0 +1,420 @@
+﻿@page "/plantas"
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Plantas - SmartDrop</PageTitle>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .plantas-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 50%, #cffafe 100%);
+        padding: 2rem;
+    }
+
+    .btn-back-menu {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        transition: all 0.3s ease;
+    }
+
+        .btn-back-menu:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+    .plantas-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .search-section {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+    }
+
+    .search-title {
+        font-size: 1.75rem;
+        font-weight: bold;
+        color: #10b981;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-style: italic;
+    }
+
+    .search-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+
+    .search-select {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        background: white;
+        color: #374151;
+    }
+
+        .search-select:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+    .btn {
+        width: 100%;
+        padding: 1rem;
+        border: none;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        margin-bottom: 0.75rem;
+    }
+
+    .btn-search {
+        background: #3b82f6;
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+        .btn-search:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+    .btn-manage {
+        background: #3b82f6;
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+        .btn-manage:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+    .btn-icon {
+        font-size: 1.25rem;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .info-section {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .info-card {
+        background: #f9fafb;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border: 2px solid #e5e7eb;
+    }
+
+    .info-card-title {
+        font-size: 0.75rem;
+        font-weight: bold;
+        color: #10b981;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.5px;
+    }
+
+    .info-card-label {
+        font-size: 0.85rem;
+        color: #6b7280;
+        font-style: italic;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-card-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #1f2937;
+    }
+
+    .description-section {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .description-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #10b981;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+    }
+
+    .description-content {
+        background: #f0fdf4;
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .description-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #10b981;
+    }
+
+    .description-text {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #10b981;
+        margin-bottom: 0.5rem;
+    }
+
+    .description-hint {
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+
+    .additional-info {
+        background: #f0fdf4;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .additional-info-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        color: #10b981;
+    }
+
+    .additional-info-text {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #10b981;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+    }
+
+    .btn-add-plant {
+        background: #3b82f6;
+        color: white;
+        padding: 1.25rem 2.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+        .btn-add-plant:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+    @@media (max-width: 1024px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="plantas-page">
+    <div class="plantas-container">
+        @if (plantas.Any())
+        {
+            <!-- Sección de búsqueda -->
+            <div class="search-section">
+                <h2 class="search-title">BUSCA TU PLANTA</h2>
+                <label class="search-label">Seleccionar Planta</label>
+                <select class="search-select" @bind="plantaSeleccionada">
+                    <option value="">-- Selecciona una planta --</option>
+                    @foreach (var planta in plantas)
+                    {
+                        <option value="@planta.Id">@planta.Nombre</option>
+                    }
+                </select>
+                <button class="btn btn-search" @onclick="BuscarPlanta">
+                    <span class="btn-icon">🔍</span>
+                    BUSCAR PLANTA
+                </button>
+                <button class="btn btn-manage" @onclick="AbrirGestionPlantas">
+                    <span class="btn-icon">🌿</span>
+                    MANIPULAR PLANTAS
+                </button>
+            </div>
+
+            <div class="content-grid">
+                <!-- Sección de información -->
+                <div class="info-section">
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-card-title">Identificación</div>
+                            <div class="info-card-label">Id</div>
+                            <div class="info-card-value">--</div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-card-title">Temperatura</div>
+                            <div class="info-card-label">Temperatura</div>
+                            <div class="info-card-value">--</div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-card-title">Nombre de la Planta</div>
+                            <div class="info-card-label">Nombre</div>
+                            <div class="info-card-value">--</div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-card-title">Humedad</div>
+                            <div class="info-card-label">Humedad</div>
+                            <div class="info-card-value">--</div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-card-title">Luz Necesaria</div>
+                            <div class="info-card-label">Luz</div>
+                            <div class="info-card-value">--</div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-card-title">Riego</div>
+                            <div class="info-card-label">Frecuencia</div>
+                            <div class="info-card-value">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección de descripción -->
+                <div class="description-section">
+                    <h3 class="description-title">Descripción</h3>
+                    <div class="description-content">
+                        <div class="description-icon">🌱</div>
+                        <div class="description-text">Selecciona una planta</div>
+                        <div class="description-hint">Elige una planta del menú para ver su información detallada</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="additional-info">
+                <div class="additional-info-icon">🍃</div>
+                <div class="additional-info-text">Información adicional del sistema de riego</div>
+            </div>
+        }
+        else
+        {
+            <!-- Estado vacío - sin plantas -->
+            <div class="search-section">
+                <h2 class="search-title">BUSCA TU PLANTA</h2>
+                <div class="description-content empty-state">
+                    <div class="description-icon">🌱</div>
+                    <div class="description-text">No hay plantas registradas</div>
+                    <div class="description-hint" style="margin-bottom: 2rem;">
+                        Comienza agregando tu primera planta al sistema
+                    </div>
+                    <button class="btn-add-plant" @onclick="AbrirGestionPlantas">
+                        <span>➕</span>
+                        Agregar Planta
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<PlantaModel> plantas = new();
+    private string plantaSeleccionada = "";
+
+    public class PlantaModel
+    {
+        public string Id { get; set; } = "";
+        public string Nombre { get; set; } = "";
+        public string Descripcion { get; set; } = "";
+        public double TemperaturaOptima { get; set; }
+        public double HumedadOptima { get; set; }
+        public string LuzNecesaria { get; set; } = "";
+        public string FrecuenciaRiego { get; set; } = "";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Aquí cargarías las plantas desde tu servicio
+        // Por ahora dejamos la lista vacía para mostrar el estado inicial
+        await Task.CompletedTask;
+    }
+
+    private void BuscarPlanta()
+    {
+        if (!string.IsNullOrEmpty(plantaSeleccionada))
+        {
+            // Lógica para buscar y mostrar información de la planta
+        }
+    }
+
+    private void AbrirGestionPlantas()
+    {
+        Navigation.NavigateTo("/gestion-plantas");
+    }
+}
