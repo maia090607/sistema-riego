@@ -27,12 +27,12 @@ namespace SmartDropUI.Services
                 _serialPort.DataReceived += OnDataReceived;
                 _serialPort.Open();
                 _isConnected = true;
-                Console.WriteLine($"✅ Conectado al Arduino en {_portName}");
+                Console.WriteLine($"✅ [ARDUINO] Conectado al Arduino en {_portName}");
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error al conectar con Arduino: {ex.Message}");
+                Console.WriteLine($"❌ [ARDUINO] Error al conectar: {ex.Message}");
                 _isConnected = false;
                 return false;
             }
@@ -47,27 +47,36 @@ namespace SmartDropUI.Services
                     _serialPort.Close();
                 }
                 _isConnected = false;
-                Console.WriteLine("🔌 Desconectado del Arduino");
+                Console.WriteLine("🔌 [ARDUINO] Desconectado del Arduino");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error al desconectar: {ex.Message}");
+                Console.WriteLine($"❌ [ARDUINO] Error al desconectar: {ex.Message}");
             }
         }
 
         public async Task<bool> IniciarRiegoManualAsync()
         {
-            return await EnviarComandoAsync("MANUAL_ON");
+            Console.WriteLine("📤 [ARDUINO] Enviando comando MANUAL_ON...");
+            var resultado = await EnviarComandoAsync("MANUAL_ON");
+            Console.WriteLine($"📥 [ARDUINO] Resultado MANUAL_ON: {resultado}");
+            return resultado;
         }
 
         public async Task<bool> DetenerRiegoManualAsync()
         {
-            return await EnviarComandoAsync("MANUAL_OFF");
+            Console.WriteLine("📤 [ARDUINO] Enviando comando MANUAL_OFF...");
+            var resultado = await EnviarComandoAsync("MANUAL_OFF");
+            Console.WriteLine($"📥 [ARDUINO] Resultado MANUAL_OFF: {resultado}");
+            return resultado;
         }
 
         public async Task<bool> ActivarModoAutomaticoAsync()
         {
-            return await EnviarComandoAsync("AUTO");
+            Console.WriteLine("📤 [ARDUINO] Enviando comando AUTO...");
+            var resultado = await EnviarComandoAsync("AUTO");
+            Console.WriteLine($"📥 [ARDUINO] Resultado AUTO: {resultado}");
+            return resultado;
         }
 
         public async Task<bool> EstablecerLimiteHumedadAsync(int limite)
@@ -79,7 +88,7 @@ namespace SmartDropUI.Services
         {
             if (!_isConnected || _serialPort?.IsOpen != true)
             {
-                Console.WriteLine("⚠️ Arduino no conectado");
+                Console.WriteLine("⚠️ [ARDUINO] Arduino no conectado, no se puede obtener estado");
                 return null;
             }
 
@@ -87,11 +96,17 @@ namespace SmartDropUI.Services
             {
                 await EnviarComandoAsync("GET_STATUS");
                 await Task.Delay(200); // Esperar respuesta
+
+                if (UltimosDatos != null)
+                {
+                    Console.WriteLine($"📊 [ARDUINO] Estado obtenido - Humedad: {UltimosDatos.Humedad}, Bomba: {UltimosDatos.BombaEncendida}, Modo: {UltimosDatos.ModoManual}");
+                }
+
                 return UltimosDatos;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error al obtener estado: {ex.Message}");
+                Console.WriteLine($"❌ [ARDUINO] Error al obtener estado: {ex.Message}");
                 return null;
             }
         }
@@ -100,7 +115,7 @@ namespace SmartDropUI.Services
         {
             if (!_isConnected || _serialPort?.IsOpen != true)
             {
-                Console.WriteLine("⚠️ No se puede enviar comando, Arduino no conectado");
+                Console.WriteLine("⚠️ [ARDUINO] No se puede enviar comando, Arduino no conectado");
                 return false;
             }
 
@@ -109,13 +124,13 @@ namespace SmartDropUI.Services
                 await Task.Run(() =>
                 {
                     _serialPort.WriteLine(comando);
-                    Console.WriteLine($"📤 Comando enviado: {comando}");
+                    Console.WriteLine($"✅ [ARDUINO] Comando enviado: {comando}");
                 });
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error al enviar comando: {ex.Message}");
+                Console.WriteLine($"❌ [ARDUINO] Error al enviar comando '{comando}': {ex.Message}");
                 return false;
             }
         }
@@ -134,7 +149,7 @@ namespace SmartDropUI.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error al recibir datos: {ex.Message}");
+                Console.WriteLine($"❌ [ARDUINO] Error al recibir datos: {ex.Message}");
             }
         }
 
@@ -157,23 +172,25 @@ namespace SmartDropUI.Services
                         };
 
                         UltimosDatos = datos;
-                        DatosRecibidos?.Invoke(datos);
 
-                        Console.WriteLine($"📊 Humedad: {datos.Humedad}, Bomba: {(datos.BombaEncendida ? "ON" : "OFF")}, Modo: {(datos.ModoManual ? "Manual" : "Automático")}");
+                        Console.WriteLine($"📊 [ARDUINO] Datos procesados - Humedad: {datos.Humedad}, Bomba: {(datos.BombaEncendida ? "ON" : "OFF")}, Modo: {(datos.ModoManual ? "Manual" : "Automático")}");
+
+                        // ✅ Notificar a los suscriptores (Dashboard)
+                        DatosRecibidos?.Invoke(datos);
                     }
                 }
                 else if (data.StartsWith("OK:"))
                 {
-                    Console.WriteLine($"✅ {data}");
+                    Console.WriteLine($"✅ [ARDUINO] {data}");
                 }
                 else
                 {
-                    Console.WriteLine($"📨 Arduino: {data}");
+                    Console.WriteLine($"📨 [ARDUINO] Mensaje: {data}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error al procesar datos: {ex.Message}");
+                Console.WriteLine($"❌ [ARDUINO] Error al procesar datos: {ex.Message}");
             }
         }
 

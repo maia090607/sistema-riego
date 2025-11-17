@@ -763,9 +763,44 @@
         </div>
 
         <!-- Sección: Control de Riego -->
+        <!-- Sección: Control de Riego - VERSIÓN LIMPIA Y FUNCIONAL -->
         <div class="content-section @(seccionActiva == "riego" ? "active" : "")">
             <div class="riego-control-panel">
                 <h2 class="riego-control-title">💧 Sistema de Control de Riego 💧</h2>
+
+                <!-- Panel de Debug -->
+                <div style="background: #f3f4f6; border-radius: 1rem; padding: 1.5rem; margin-bottom: 2rem; font-family: monospace; font-size: 0.85rem;">
+                    <div style="font-weight: bold; margin-bottom: 0.5rem; color: #374151;">🔍 Estado del Sistema (Debug):</div>
+                    <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem;">
+                        <span style="color: #6b7280;">riegoManualActivo:</span>
+                        <span style="font-weight: bold; color: @(riegoManualActivo ? "#10b981" : "#ef4444");">@riegoManualActivo</span>
+
+                        <span style="color: #6b7280;">esperandoRespuesta:</span>
+                        <span style="font-weight: bold; color: @(esperandoRespuesta ? "#f59e0b" : "#6b7280");">@esperandoRespuesta</span>
+
+                        <span style="color: #6b7280;">estadoBomba:</span>
+                        <span style="font-weight: bold;">@estadoBomba</span>
+
+                        <span style="color: #6b7280;">tiempoRiego:</span>
+                        <span style="font-weight: bold;">@tiempoRiego segundos</span>
+
+                        @if (datosArduino != null)
+                        {
+                            <span style="color: #6b7280;">Arduino - Bomba:</span>
+                            <span style="font-weight: bold; color: @(datosArduino.BombaEncendida ? "#10b981" : "#ef4444");">@(datosArduino.BombaEncendida ? "ON" : "OFF")</span>
+
+                            <span style="color: #6b7280;">Arduino - Modo:</span>
+                            <span style="font-weight: bold;">@(datosArduino.ModoManual ? "MANUAL" : "AUTO")</span>
+
+                            <span style="color: #6b7280;">Arduino - Humedad:</span>
+                            <span style="font-weight: bold;">@datosArduino.Humedad</span>
+                        }
+                        else
+                        {
+                            <span style="color: #ef4444;" colspan="2">⚠️ Arduino no conectado</span>
+                        }
+                    </div>
+                </div>
 
                 <!-- Grid con las dos tarjetas principales -->
                 <div class="cards-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 2rem;">
@@ -794,16 +829,37 @@
                     </div>
                 </div>
 
-                <!-- Panel de control de riego manual -->
+                <!-- Indicador de estado del botón -->
+                <div style="margin-bottom: 1rem; padding: 1rem; background: #fef3c7; border-radius: 0.75rem; text-align: center;">
+                    <strong>Estado del Botón:</strong>
+                    @if (!riegoManualActivo)
+                    {
+                        <span style="color: #10b981; font-weight: bold;">✅ Botón INICIAR debe estar visible</span>
+                    }
+                    else
+                    {
+                        <span style="color: #ef4444; font-weight: bold;">✅ Botón DETENER debe estar visible</span>
+                    }
+                </div>
+
+                <!-- Panel de control - SOLO UNA VERSIÓN -->
                 @if (!riegoManualActivo)
                 {
-                    <button class="btn-riego btn-iniciar" @onclick="IniciarRiegoManual">
+                    <!-- Mostrar botón INICIAR -->
+                    <button class="btn-riego btn-iniciar"
+                            @onclick="IniciarRiegoManual"
+                            disabled="@esperandoRespuesta"
+                            style="cursor: pointer;">
                         <span style="font-size: 1.5rem;">💧</span>
-                        INICIAR RIEGO MANUAL
+                        @(esperandoRespuesta ? "INICIANDO..." : "INICIAR RIEGO MANUAL")
                     </button>
+                    <div style="text-align: center; margin-top: 0.5rem; color: #10b981; font-weight: bold;">
+                        ✅ Botón INICIAR está visible
+                    </div>
                 }
                 else
                 {
+                    <!-- Mostrar banner y botón DETENER -->
                     <div class="riego-activo-banner">
                         <div class="riego-activo-icon">💧</div>
                         <div class="riego-activo-title">Riego Manual en Progreso</div>
@@ -813,10 +869,16 @@
                         </div>
                     </div>
 
-                    <button class="btn-riego btn-detener" @onclick="DetenerRiegoManual">
+                    <button class="btn-riego btn-detener"
+                            @onclick="DetenerRiegoManual"
+                            disabled="@esperandoRespuesta"
+                            style="cursor: pointer;">
                         <span style="font-size: 1.5rem;">⛔</span>
-                        DETENER RIEGO MANUAL
+                        @(esperandoRespuesta ? "DETENIENDO..." : "DETENER RIEGO MANUAL")
                     </button>
+                    <div style="text-align: center; margin-top: 0.5rem; color: #ef4444; font-weight: bold;">
+                        ✅ Botón DETENER está visible
+                    </div>
                 }
 
                 <!-- Información adicional -->
@@ -921,7 +983,6 @@
     </div> <!-- Cierra main-content -->
 
 </div> <!-- Cierra dashboard-layout -->
-@* REEMPLAZA TODA LA SECCIÓN @code de Dashboard.razor con esto: *@
 
 @code {
     private string seccionActiva = "general";
@@ -930,7 +991,9 @@
     private DatosClimaModel? datosClima = null;
 
     // Variables para control de riego manual
+    // ✅ SOLUCIÓN: Usar estado local que NO dependa del Arduino
     private bool riegoManualActivo = false;
+    private bool esperandoRespuesta = false;
     private int tiempoRiego = 0;
     private System.Timers.Timer? timer;
     private string estadoBomba = "Automático";
@@ -956,8 +1019,12 @@
             timerActualizacion = new System.Timers.Timer(2000);
             timerActualizacion.Elapsed += async (s, e) =>
             {
-                datosArduino = await ArduinoService.ObtenerEstadoAsync();
-                await InvokeAsync(StateHasChanged);
+                // Solo actualizar si NO estamos esperando respuesta de un comando manual
+                if (!esperandoRespuesta)
+                {
+                    datosArduino = await ArduinoService.ObtenerEstadoAsync();
+                    await InvokeAsync(StateHasChanged);
+                }
             };
             timerActualizacion.Start();
 
@@ -972,9 +1039,21 @@
 
     private void OnDatosArduinoRecibidos(DatosArduinoModel datos)
     {
+        Console.WriteLine($"📡 Datos recibidos - Bomba: {datos.BombaEncendida}, Modo: {datos.ModoManual}, riegoManualActivo: {riegoManualActivo}");
+        
         datosArduino = datos;
-        riegoManualActivo = datos.BombaEncendida && datos.ModoManual;
-        estadoBomba = datos.ModoManual ? "Manual" : "Automático";
+        
+        // ✅ IMPORTANTE: Solo actualizar si NO estamos en medio de una operación manual
+        if (!esperandoRespuesta)
+        {
+            // Solo cambiar el estado si el Arduino reporta algo diferente a lo esperado
+            // Y NO estamos controlando manualmente
+            if (!riegoManualActivo)
+            {
+                estadoBomba = datos.ModoManual ? "Manual" : "Automático";
+            }
+        }
+        
         InvokeAsync(StateHasChanged);
     }
 
@@ -1046,44 +1125,75 @@
     }
 
     // ========================================
-    // FUNCIONES DE RIEGO MANUAL CON ARDUINO
+    // FUNCIONES DE RIEGO MANUAL - VERSIÓN MEJORADA
     // ========================================
 
     private async Task IniciarRiegoManual()
     {
-        var exito = await ArduinoService.IniciarRiegoManualAsync();
-
-        if (exito)
+        if (esperandoRespuesta) return; // Evitar doble clic
+        
+        Console.WriteLine("🔵 [UI] Iniciando riego manual...");
+        esperandoRespuesta = true;
+        
+        try
         {
-            riegoManualActivo = true;
-            estadoBomba = "Manual";
-            tiempoRiego = 0;
+            var exito = await ArduinoService.IniciarRiegoManualAsync();
 
-            // Timer para mostrar tiempo transcurrido
-            timer = new System.Timers.Timer(1000);
-            timer.Elapsed += (s, e) =>
+            if (exito)
             {
-                tiempoRiego++;
-                InvokeAsync(StateHasChanged);
-            };
-            timer.Start();
+                // ✅ Establecer estado INMEDIATAMENTE sin esperar al Arduino
+                riegoManualActivo = true;
+                estadoBomba = "Manual";
+                tiempoRiego = 0;
 
-            Console.WriteLine("✅ Riego manual iniciado desde Blazor");
+                Console.WriteLine("✅ [UI] Estado local: Riego ACTIVO");
+
+                // Forzar actualización visual ANTES de cualquier otra cosa
+                StateHasChanged();
+
+                // Esperar un momento para asegurar que el UI se actualizó
+                await Task.Delay(100);
+
+                // Iniciar timer para contar tiempo
+                timer = new System.Timers.Timer(1000);
+                timer.Elapsed += async (s, e) =>
+                {
+                    tiempoRiego++;
+                    await InvokeAsync(StateHasChanged);
+                };
+                timer.Start();
+
+                Console.WriteLine("✅ [UI] Timer iniciado, botón DETENER debe estar visible");
+            }
+            else
+            {
+                Console.WriteLine("❌ [UI] Error al iniciar riego manual");
+            }
         }
-        else
+        finally
         {
-            Console.WriteLine("❌ Error al iniciar riego manual");
+            esperandoRespuesta = false;
         }
     }
 
     private async Task DetenerRiegoManual()
     {
-        var exito = await ArduinoService.DetenerRiegoManualAsync();
+        if (esperandoRespuesta) return; // Evitar doble clic
+        
+        Console.WriteLine("🔴 [UI] Deteniendo riego manual...");
+        esperandoRespuesta = true;
 
-        if (exito)
+        try
         {
+            // ✅ PRIMERO: Actualizar el UI ANTES de enviar comando
             riegoManualActivo = false;
+            Console.WriteLine("✅ [UI] Estado local: Riego INACTIVO");
+            
+            // Forzar actualización visual inmediata
+            StateHasChanged();
+            await Task.Delay(100); // Dar tiempo al UI para actualizar
 
+            // Detener el timer
             if (timer != null)
             {
                 timer.Stop();
@@ -1091,15 +1201,38 @@
                 timer = null;
             }
 
-            Console.WriteLine($"⛔ Riego manual detenido. Duración: {tiempoRiego} segundos");
+            int duracionTotal = tiempoRiego;
             tiempoRiego = 0;
 
-            // Volver a modo automático
-            await Task.Delay(1000);
-            await ArduinoService.ActivarModoAutomaticoAsync();
-            estadoBomba = "Automático";
+            Console.WriteLine($"⏱️ [UI] Duración del riego: {duracionTotal} segundos");
+            Console.WriteLine("✅ [UI] Botón INICIAR debe estar visible ahora");
 
-            StateHasChanged();
+            // SEGUNDO: Enviar comando al Arduino
+            var exito = await ArduinoService.DetenerRiegoManualAsync();
+
+            if (exito)
+            {
+                Console.WriteLine("✅ [ARDUINO] Comando MANUAL_OFF enviado correctamente");
+                
+                // Pequeña pausa
+                await Task.Delay(500);
+                
+                // Volver a modo automático
+                await ArduinoService.ActivarModoAutomaticoAsync();
+                estadoBomba = "Automático";
+                
+                StateHasChanged();
+                Console.WriteLine("✅ [ARDUINO] Sistema vuelto a modo automático");
+            }
+            else
+            {
+                Console.WriteLine("❌ [ARDUINO] Error al enviar comando MANUAL_OFF");
+                // Mantener el estado local aunque falle el Arduino
+            }
+        }
+        finally
+        {
+            esperandoRespuesta = false;
         }
     }
 
