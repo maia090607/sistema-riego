@@ -291,6 +291,109 @@
         color: #1e40af;
     }
 
+    /* Control Panel Section */
+    .control-panel-section {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+
+    .panel-title {
+        font-size: 1.75rem;
+        font-weight: bold;
+        color: #10b981;
+        text-align: center;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .panel-subtitle {
+        text-align: center;
+        color: #6b7280;
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .control-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+    }
+
+    .control-card {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        border-top: 4px solid #10b981;
+        transition: all 0.3s;
+    }
+
+        .control-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+    .control-card-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .control-card-title {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #10b981;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.75rem;
+    }
+
+    .control-card-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .temp-value {
+        color: #f97316;
+    }
+
+    .humidity-value {
+        color: #3b82f6;
+    }
+
+    .forecast-value {
+        font-size: 1rem;
+        color: #f59e0b;
+    }
+
+    .wind-value {
+        color: #6366f1;
+    }
+
+    .control-card-badge {
+        display: inline-block;
+        padding: 0.5rem 1.25rem;
+        border-radius: 9999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-time {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-soil {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
     /* Button Section */
     .button-info-section {
         background: #fef3c7;
@@ -398,6 +501,16 @@
         }
 
         .cards-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .control-cards-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .control-cards-grid {
             grid-template-columns: 1fr;
         }
     }
@@ -512,13 +625,69 @@
             </div>
         </div>
 
-        <!-- Button Info -->
-        <div class="button-info-section">
-            <div class="button-state-title">
-                Estado del Botón: ✅ Botón INICIAR debe estar visible
-            </div>
-            <div class="button-state-value">
-                Botón está @(botonIniciarVisible ? "VISIBLE ✓" : "OCULTO ✗")
+        <!-- Panel de Control en Tiempo Real -->
+        <div class="control-panel-section">
+            <h2 class="panel-title">SISTEMA DE RIEGO AUTOMÁTICO SMARTDROP</h2>
+            <p class="panel-subtitle">Panel de Control y Monitoreo en Tiempo Real</p>
+
+            <div class="control-cards-grid">
+                <!-- Temperatura -->
+                <div class="control-card temp-card">
+                    <div class="control-card-icon">🌡️</div>
+                    <div class="control-card-title">TEMPERATURA</div>
+                    <div class="control-card-value temp-value">@temperaturaActual°C</div>
+                </div>
+
+                <!-- Humedad del Aire -->
+                <div class="control-card humidity-card">
+                    <div class="control-card-icon">💧</div>
+                    <div class="control-card-title">HUMEDAD DEL AIRE</div>
+                    <div class="control-card-value humidity-value">@humedadAire%</div>
+                </div>
+
+                <!-- Estado Bomba -->
+                <div class="control-card pump-card">
+                    <div class="control-card-icon">💧</div>
+                    <div class="control-card-title">BOMBA DE AGUA ESTADO</div>
+                    <div class="control-card-badge @(bombaActiva ? "badge-active" : "badge-inactive")">
+                        @(bombaActiva ? "Activa" : "Inactiva")
+                    </div>
+                </div>
+
+                <!-- Último Riego -->
+                <div class="control-card date-card">
+                    <div class="control-card-icon">📅</div>
+                    <div class="control-card-title">ÚLTIMO RIEGO FECHA</div>
+                    <div class="control-card-badge badge-time">Hoy @ultimoRiego</div>
+                </div>
+
+                <!-- Pronóstico -->
+                <div class="control-card forecast-card">
+                    <div class="control-card-icon">☀️</div>
+                    <div class="control-card-title">PRONÓSTICO</div>
+                    <div class="control-card-value forecast-value">@descripcionClima</div>
+                </div>
+
+                <!-- Viento -->
+                <div class="control-card wind-card">
+                    <div class="control-card-icon">🧭</div>
+                    <div class="control-card-title">VIENTO</div>
+                    <div class="control-card-value wind-value">@direccionViento</div>
+                </div>
+
+                <!-- Estado del Programa -->
+                <div class="control-card status-card">
+                    <div class="control-card-icon">💻</div>
+                    <div class="control-card-title">ESTADO DEL PROGRAMA ESTADO</div>
+                    <div class="control-card-badge badge-online">Online</div>
+                </div>
+
+                <!-- Humedad del Suelo -->
+                <div class="control-card soil-card">
+                    <div class="control-card-icon">🌱</div>
+                    <div class="control-card-title">HUMEDAD DEL SUELO</div>
+                    <div class="control-card-badge badge-soil">Humedad</div>
+                </div>
             </div>
         </div>
 
@@ -559,6 +728,13 @@
     private int tiempoRiego = 0;
     private bool botonIniciarVisible = true;
 
+    // Variables para el clima
+    private double temperaturaActual = 0;
+    private int humedadAire = 0;
+    private string descripcionClima = "Cargando...";
+    private string direccionViento = "Norte";
+    private string ultimoRiego = "08:30";
+
     private Timer? timer;
     private Timer? timerActualizacion;
 
@@ -569,22 +745,50 @@
     {
         Console.WriteLine("🎯 [DASHBOARD] Iniciando componente Dashboard...");
 
+        // Cargar datos del clima
+        await CargarDatosClimaAsync();
+
         // Suscribirse a eventos del Arduino
         ArduinoService.DatosRecibidos += OnDatosArduinoRecibidos;
+    }
 
-        // Verificar conexión del Arduino
-        if (!ArduinoService.EstaConectado)
+    // ========================================
+    // CARGAR DATOS DEL CLIMA
+    // ========================================
+    private async Task CargarDatosClimaAsync()
+    {
+        try
         {
-            Console.WriteLine("⚠️ [DASHBOARD] Arduino no conectado, intentando conectar...");
-            ArduinoService.Conectar();
+            Console.WriteLine("🌤️ [DASHBOARD] Cargando datos del clima...");
+            var datosClima = await ClimaService.ObtenerClimaActualAsync();
+
+            if (datosClima != null)
+            {
+                temperaturaActual = datosClima.Temperatura;
+                humedadAire = datosClima.Humedad;
+                descripcionClima = datosClima.Descripcion;
+
+                // Determinar dirección del viento
+                if (datosClima.VelocidadViento < 1)
+                    direccionViento = "Calma";
+                else if (datosClima.VelocidadViento < 5)
+                    direccionViento = "Norte";
+                else if (datosClima.VelocidadViento < 10)
+                    direccionViento = "Noroeste";
+                else
+                    direccionViento = "Fuerte";
+
+                Console.WriteLine($"✅ [DASHBOARD] Clima: {temperaturaActual}°C, {humedadAire}%");
+                StateHasChanged();
+            }
         }
-
-        // Configurar timer de actualización
-        timerActualizacion = new Timer(2000);
-        timerActualizacion.Elapsed += async (s, e) => await ActualizarEstadoAsync();
-        timerActualizacion.Start();
-
-        await ActualizarEstadoAsync();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [DASHBOARD] Error clima: {ex.Message}");
+            temperaturaActual = 25.0;
+            humedadAire = 60;
+            descripcionClima = "No disponible";
+        }
     }
 
     // ========================================
