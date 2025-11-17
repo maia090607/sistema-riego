@@ -89,6 +89,21 @@ body {
     animation: float 5s infinite 2s;
 }
 
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1.5rem;
+    color: #4b5563;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+    font-weight: 500;
+    position: relative;
+}
+
+
+
 @keyframes bounce {
     0%, 100% {
         transform: translateY(0);
@@ -782,3 +797,83 @@ body {
         font-size: 2.5rem;
     }
 }
+
+/* Tarjetas grandes para Control de Riego */
+.info-card-large {
+    background: white;
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-left: 6px solid #10b981;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+    .info-card-large:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+.card-icon-large {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.card-title-large {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+}
+
+.card-value-large {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.card-status-badge {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+}
+
+.badge-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-inactive {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.badge-online {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.card-subtitle-large {
+    font-size: 0.95rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+}
+
+.tiempo-transcurrido {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    color: white;
+    opacity: 0.95;
+}
+
+    .tiempo-transcurrido strong {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }

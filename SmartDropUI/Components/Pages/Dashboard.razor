@@ -4,6 +4,7 @@
 @inject RiegoService RiegoService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
+@implements IDisposable
 
 <PageTitle>Dashboard - SmartDrop</PageTitle>
 
@@ -219,6 +220,11 @@
         margin-bottom: 2rem;
     }
 
+    .card-badge.manual {
+        background: #ffedd5;
+        color: #9a3412;
+    }
+
     .info-card {
         background: white;
         border-radius: 1rem;
@@ -337,6 +343,130 @@
             gap: 1rem;
         }
     }
+
+
+    /* Control de Riego Section */
+    .riego-control-panel {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+    }
+
+    .riego-control-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #10b981;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .btn-riego {
+        width: 100%;
+        padding: 1.25rem;
+        border: none;
+        border-radius: 0.75rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .btn-iniciar {
+        background: #10b981;
+        color: white;
+    }
+
+        .btn-iniciar:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+    .btn-detener {
+        background: #ef4444;
+        color: white;
+    }
+
+        .btn-detener:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+    .riego-activo-banner {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        text-align: center;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .riego-activo-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        animation: pulse-water 2s infinite;
+    }
+
+    @@keyframes pulse-water {
+        0%, 100%
+
+    {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+
+    }
+
+    .riego-activo-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .riego-activo-subtitle {
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+
+    .info-alert {
+        background: #f0fdf4;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border-left: 4px solid #10b981;
+        margin-top: 2rem;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .info-alert-icon {
+        font-size: 1.5rem;
+    }
+
+    .info-alert-content h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #065f46;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-alert-content p {
+        font-size: 0.9rem;
+        color: #059669;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+
 </style>
 
 <div class="dashboard-layout">
@@ -614,31 +744,133 @@
             }
         </div>
 
+
+        <!-- Tarjeta de Bomba de Agua en la sección General -->
+
+        <div class="info-card" @onclick='() => Navigation.NavigateTo("/graficos")'
+             style="cursor: pointer;">
+            <div class="card-header">
+                <span class="card-icon">💧</span>
+                <span class="card-badge @(estadoBomba == "Manual" ? "manual" : "")">
+                    @estadoBomba
+                </span>
+            </div>
+            <h3 class="card-title">Bomba de Agua</h3>
+            <div class="card-value">@(riegoManualActivo ? "ON" : "OFF")</div>
+            <p class="card-subtitle">Click para ver gráficos</p>
+        </div>
+
         <!-- Sección: Control de Riego -->
         <div class="content-section @(seccionActiva == "riego" ? "active" : "")">
-            <div class="cards-grid">
-                <div class="info-card" style="border-left-color: #3b82f6;">
-                    <div class="card-header">
-                        <span class="card-icon">💦</span>
-                        <span class="card-badge">Activa</span>
+            <div class="riego-control-panel">
+                <h2 class="riego-control-title">💧 Sistema de Control de Riego 💧</h2>
+
+                <!-- Grid con las dos tarjetas principales -->
+                <div class="cards-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 2rem;">
+                    <!-- Tarjeta Bomba de Agua -->
+                    <div class="info-card-large" style="border-left-color: #3b82f6;">
+                        <div class="card-icon-large">💦</div>
+                        <h3 class="card-title-large">BOMBA DE AGUA</h3>
+                        <div class="card-value-large" style="color: #3b82f6;">
+                            @(riegoManualActivo ? "ON" : "OFF")
+                        </div>
+                        <div class="card-status-badge @(riegoManualActivo ? "badge-active" : "badge-inactive")">
+                            @(riegoManualActivo ? "Activa" : "Inactiva")
+                        </div>
+                        <p class="card-subtitle-large">
+                            @(riegoManualActivo ? "Sistema de bombeo operando" : "Sistema de bombeo detenido")
+                        </p>
                     </div>
-                    <h3 class="card-title">Bomba de Agua</h3>
-                    <div class="card-value" style="color: #3b82f6;">ON</div>
-                    <p class="card-subtitle">Sistema de bombeo operando</p>
+
+                    <!-- Tarjeta Estado del Programa -->
+                    <div class="info-card-large" style="border-left-color: #10b981;">
+                        <div class="card-icon-large">🖥️</div>
+                        <h3 class="card-title-large">ESTADO DEL PROGRAMA</h3>
+                        <div class="card-value-large" style="color: #10b981;">Activo</div>
+                        <div class="card-status-badge badge-online">Online</div>
+                        <p class="card-subtitle-large">Sistema funcionando correctamente</p>
+                    </div>
                 </div>
 
-                <div class="info-card">
-                    <div class="card-header">
-                        <span class="card-icon">🖥️</span>
-                        <span class="card-badge">Online</span>
+                <!-- Panel de control de riego manual -->
+                @if (!riegoManualActivo)
+                {
+                    <button class="btn-riego btn-iniciar" @onclick="IniciarRiegoManual">
+                        <span style="font-size: 1.5rem;">💧</span>
+                        INICIAR RIEGO MANUAL
+                    </button>
+                }
+                else
+                {
+                    <div class="riego-activo-banner">
+                        <div class="riego-activo-icon">💧</div>
+                        <div class="riego-activo-title">Riego Manual en Progreso</div>
+                        <div class="riego-activo-subtitle">La bomba está funcionando en modo manual</div>
+                        <div class="tiempo-transcurrido">
+                            Tiempo transcurrido: <strong>@FormatearTiempo(tiempoRiego)</strong>
+                        </div>
                     </div>
-                    <h3 class="card-title">Estado del Programa</h3>
-                    <div class="card-value" style="font-size: 1.75rem;">Activo</div>
-                    <p class="card-subtitle">Sistema funcionando correctamente</p>
+
+                    <button class="btn-riego btn-detener" @onclick="DetenerRiegoManual">
+                        <span style="font-size: 1.5rem;">⛔</span>
+                        DETENER RIEGO MANUAL
+                    </button>
+                }
+
+                <!-- Información adicional -->
+                <div class="info-alert">
+                    <span class="info-alert-icon">ℹ️</span>
+                    <div class="info-alert-content">
+                        <h3>Información sobre el Riego Manual</h3>
+                        <p>
+                            El modo manual te permite controlar directamente el sistema de riego.
+                            Mientras esté activo, el sistema automático estará deshabilitado.
+                            No olvides detener el riego manual cuando termines para evitar el desperdicio de agua.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- Sección: Configuración -->
+        <div class="content-section @(seccionActiva == "configuracion" ? "active" : "")">
+            <div class="welcome-section">
+                <h2 class="welcome-title">⚙️ Configuración del Sistema</h2>
+                <p class="welcome-text">
+                    Ajusta las configuraciones del sistema y administra tu información.
+                </p>
+            </div>
+
+            <div class="cards-grid">
+                <!-- TARJETA DE USUARIO -->
+                <div class="info-card" @onclick="() => mostrarUsuario = !mostrarUsuario"
+                     style="cursor: pointer;">
+                    <div class="card-header">
+                        <span class="card-icon">👤</span>
+                        <span class="card-badge">Abrir</span>
+                    </div>
+                    <h3 class="card-title">Usuario</h3>
+                    <p class="card-subtitle">Ver información del usuario</p>
+                </div>
+            </div>
+
+            <!-- CONTENIDO DEL USUARIO (solo aparece al dar clic) -->
+            @if (mostrarUsuario)
+            {
+                <div class="info-card" style="margin-top: 2rem;">
+                    <h2 class="card-title">Información del Usuario</h2>
+
+                    <p><strong>Nombre:</strong> Juan Pérez</p>
+                    <p><strong>Email:</strong> juanperez@gmail.com</p>
+                    <p><strong>Rol:</strong> Administrador</p>
+
+                    <button class="btn-riego btn-iniciar" @onclick="() => mostrarUsuario = false"
+                            style="margin-top: 1.5rem; max-width: 300px; margin-left: auto; margin-right: auto;">
+                        Cerrar
+                    </button>
+                </div>
+            }
+        </div>
         <!-- Sección: Configuración -->
         <div class="content-section @(seccionActiva == "configuracion" ? "active" : "")">
 
@@ -675,10 +907,11 @@
                     <p><strong>Rol:</strong> Administrador</p>
 
                     <button class="btn-modal-close" @onclick="() => mostrarUsuario = false"
-                            style="margin-top: 1.5rem;">
+                    style="margin-top: 1.5rem;">
                         Cerrar
                     </button>
                 </div>
+
             }
 
         </div> <!-- Cierra sección configuración -->
@@ -691,6 +924,12 @@
     private bool mostrarUsuario = false;
     private bool cargandoClima = false;
     private DatosClimaModel? datosClima = null;
+
+    // Variables para control de riego manual
+    private bool riegoManualActivo = false;
+    private int tiempoRiego = 0;
+    private System.Timers.Timer? timer;
+    private string estadoBomba = "Automático"; // "Automático" o "Manual"
 
     [Inject]
     private ClimaService ClimaService { get; set; } = default!;
@@ -767,32 +1006,18 @@
         };
     }
 
-    // -----------------------------
-    // VARIABLES
-    // -----------------------------
-    private bool riegoManualActivo = false;
-    private int tiempoRiego = 0;
-    private System.Timers.Timer? timer;
+    // ========================================
+    // FUNCIONES DE RIEGO MANUAL
+    // ========================================
 
-    // -----------------------------
-    // RECARGAR HISTORIAL
-    // -----------------------------
-    private async Task RecargarHistorial()
-    {
-        Console.WriteLine("Recargando historial...");
-        await Task.Delay(300); // Simulación
-        await InvokeAsync(StateHasChanged);
-    }
-
-    // -----------------------------
-    // INICIAR RIEGO MANUAL
-    // -----------------------------
     private void IniciarRiegoManual()
     {
         riegoManualActivo = true;
+        estadoBomba = "Manual";
         tiempoRiego = 0;
 
-        timer = new System.Timers.Timer(1000);
+        // Crear y configurar el timer
+        timer = new System.Timers.Timer(1000); // 1 segundo
         timer.Elapsed += (s, e) =>
         {
             tiempoRiego++;
@@ -800,36 +1025,44 @@
         };
 
         timer.Start();
+        Console.WriteLine("✅ Riego manual iniciado");
     }
 
-    // -----------------------------
-    // DETENER RIEGO MANUAL
-    // -----------------------------
     private void DetenerRiegoManual()
     {
         riegoManualActivo = false;
+        estadoBomba = "Automático";
 
         if (timer != null)
         {
             timer.Stop();
             timer.Dispose();
+            timer = null;
         }
 
-        Console.WriteLine($"Riego manual detenido luego de {tiempoRiego} segundos.");
+        Console.WriteLine($"⛔ Riego manual detenido. Duración: {tiempoRiego} segundos");
         tiempoRiego = 0;
 
         StateHasChanged();
     }
 
-    // -----------------------------
-    // LIMPIEZA AL CERRAR COMPONENTE
-    // -----------------------------
-    public void Dispose()
+    private string FormatearTiempo(int segundosTotales)
     {
-        timer?.Dispose();
+        int minutos = segundosTotales / 60;
+        int segundos = segundosTotales % 60;
+        return $"{minutos:D2}:{segundos:D2}";
     }
 
+    // ========================================
+    // LIMPIEZA AL CERRAR COMPONENTE
+    // ========================================
 
+    public void Dispose()
+    {
+        if (timer != null)
+        {
+            timer.Stop();
+            timer.Dispose();
+        }
+    }
 }
-
-
