@@ -1,7 +1,4 @@
-﻿/* ========================================
-   ESTILOS GLOBALES
-======================================== */
-* {
+﻿* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -9,32 +6,23 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow-x: hidden;
 }
 
-/* ========================================
-   ANIMACIONES GLOBALES
-======================================== */
-@keyframes aparecer {
-    0% {
-        opacity: 0;
-        transform: translateY(-30px) scale(0.9);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+/* === PÁGINA DE LOGIN === */
+.login-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
 }
 
-@keyframes rotar-logo {
-    0% {
-        transform: rotate(-180deg) scale(0);
-    }
-
-    100% {
-        transform: rotate(0deg) scale(1);
-    }
+.floating-icon {
+    position: absolute;
+    font-size: 2rem;
+    animation: float 6s ease-in-out infinite;
 }
 
 @keyframes float {
@@ -47,1454 +35,249 @@ body {
     }
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* ========================================
-   LOGIN - PANTALLA DE INICIO
-======================================== */
-.login-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-    position: relative;
-    overflow: hidden;
-}
-
-/* Decoraciones animadas */
-.login-decorations {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-}
-
-.droplet, .leaf {
-    position: absolute;
-    font-size: 3rem;
-    animation: float 4s ease-in-out infinite;
-}
-
-.droplet-1 {
-    top: 10%;
-    left: 10%;
-    animation-delay: 0s;
-}
-
-.droplet-2 {
-    top: 60%;
-    right: 15%;
-    animation-delay: 1s;
-}
-
-.droplet-3 {
-    bottom: 20%;
-    left: 20%;
-    animation-delay: 2s;
-}
-
-.leaf-1 {
-    top: 30%;
-    right: 10%;
-    animation-delay: 1.5s;
-}
-
-.leaf-2 {
-    bottom: 40%;
-    right: 30%;
-    animation-delay: 0.5s;
-}
-
-/* Tarjeta de login CON ANIMACIÓN */
 .login-card {
     background: white;
+    padding: 2.5rem;
     border-radius: 20px;
-    padding: 3rem 2.5rem;
-    width: 100%;
-    max-width: 450px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    z-index: 1;
-    animation: aparecer 0.6s ease-out;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    width: 400px;
+    z-index: 10;
 }
 
-.login-header {
-    text-align: center;
-    margin-bottom: 2rem;
-    animation: aparecer 0.8s ease-out 0.2s both;
-}
-
-.logo {
+.logo-container {
     display: flex;
     justify-content: center;
-    gap: 0.5rem;
-    font-size: 3rem;
+    gap: 15px;
     margin-bottom: 1rem;
-    animation: rotar-logo 1s ease-out;
+    font-size: 2.5rem;
 }
 
-.title {
-    font-size: 2.5rem;
-    color: #5a67d8;
-    font-weight: 700;
+h1 {
+    color: #5b7fff;
+    text-align: center;
     margin-bottom: 0.5rem;
+    font-size: 2rem;
 }
 
 .subtitle {
-    color: #718096;
-    font-size: 1rem;
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
 }
 
-/* Formulario CON ANIMACIÓN */
-.login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    animation: aparecer 0.8s ease-out 0.4s both;
+.input-group {
+    margin-bottom: 1.5rem;
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-    .form-group label {
-        color: #4a5568;
-        font-weight: 600;
-        font-size: 0.95rem;
+    .input-group label {
+        display: block;
+        color: #555;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
     }
 
 .input-wrapper {
-    position: relative;
     display: flex;
     align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0.75rem;
+    background: #f9f9f9;
 }
 
-.input-icon {
-    position: absolute;
-    left: 1rem;
-    font-size: 1.2rem;
-}
+    .input-wrapper input {
+        border: none;
+        outline: none;
+        background: transparent;
+        flex: 1;
+        font-size: 1rem;
+        margin-left: 0.5rem;
+    }
 
-.form-input {
+.btn {
     width: 100%;
-    padding: 0.9rem 1rem 0.9rem 3rem;
-    border: 2px solid #e2e8f0;
+    padding: 1rem;
+    border: none;
     border-radius: 10px;
     font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-    .form-input:focus {
-        outline: none;
-        border-color: #5a67d8;
-        box-shadow: 0 0 0 3px rgba(90, 103, 216, 0.1);
-    }
-
-.toggle-password {
-    position: absolute;
-    right: 1rem;
-    background: none;
-    border: none;
-    font-size: 1.3rem;
+    font-weight: bold;
     cursor: pointer;
-    transition: transform 0.2s;
-}
-
-    .toggle-password:hover {
-        transform: scale(1.2);
-    }
-
-/* Botones */
-.btn-primary, .btn-secondary {
-    padding: 1rem;
-    border: none;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
+    gap: 10px;
 }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #5b7fff;
     color: white;
-}
-
-    .btn-primary:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-primary:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-.btn-secondary {
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-    color: white;
-}
-
-    .btn-secondary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(72, 187, 120, 0.4);
-    }
-
-.btn-icon {
-    font-size: 1.2rem;
-}
-
-/* Alertas */
-.alert-error, .alert-success {
-    padding: 1rem;
-    border-radius: 10px;
-    font-weight: 500;
-    text-align: center;
-}
-
-.alert-error {
-    background: #fed7d7;
-    color: #c53030;
-    border: 1px solid #fc8181;
-}
-
-.alert-success {
-    background: #c6f6d5;
-    color: #22543d;
-    border: 1px solid #9ae6b4;
-}
-
-/* ========================================
-   REGISTRO
-======================================== */
-.registro-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 2rem;
-}
-
-.registro-card {
-    background: white;
-    border-radius: 20px;
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 600px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: aparecer 0.6s ease-out;
-}
-
-.registro-header {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.icon-group {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    font-size: 3rem;
     margin-bottom: 1rem;
 }
 
-.registro-header h1 {
-    font-size: 1.8rem;
-    color: #5a67d8;
-    margin-bottom: 0.5rem;
-}
-
-.registro-header p {
-    color: #718096;
-}
-
-.registro-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-}
-
-    .registro-form .form-group label {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #4a5568;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-
-.label-icon {
-    font-size: 1.2rem;
-    padding: 0.3rem 0.5rem;
-    border-radius: 5px;
-}
-
-    .label-icon.purple {
-        background: #e9d5ff;
-    }
-
-    .label-icon.blue {
-        background: #dbeafe;
-    }
-
-    .label-icon.green {
-        background: #d1fae5;
-    }
-
-    .label-icon.orange {
-        background: #fed7aa;
-    }
-
-    .label-icon.teal {
-        background: #ccfbf1;
-    }
-
-    .label-icon.yellow {
-        background: #fef3c7;
-    }
-
-.registro-form input,
-.registro-form select {
-    width: 100%;
-    padding: 0.9rem 1rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 1rem;
-}
-
-    .registro-form input:focus,
-    .registro-form select:focus {
-        outline: none;
-        border-color: #5a67d8;
-        box-shadow: 0 0 0 3px rgba(90, 103, 216, 0.1);
-    }
-
-.button-group {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.btn-create, .btn-back {
-    padding: 1rem;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
-}
-
-.btn-create {
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+.btn-secondary {
+    background: #4caf50;
     color: white;
 }
 
-    .btn-create:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(72, 187, 120, 0.4);
-    }
-
-.btn-back {
-    background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%);
-    color: #2d3748;
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    text-align: center;
 }
 
-    .btn-back:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(160, 174, 192, 0.4);
-    }
+.alert-danger {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef5350;
+}
 
-/* ========================================
-   DASHBOARD
-======================================== */
-.dashboard-container {
+/* === DASHBOARD === */
+.dashboard-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 1rem;
+    background: linear-gradient(135deg, #a8edea 0%, #c8f5e8 100%);
+    padding: 2rem;
 }
 
 .dashboard-header {
-    background: white;
-    padding: 1.5rem 2rem;
-    border-radius: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    text-align: center;
     margin-bottom: 2rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-    .header-left .icon {
-        font-size: 2rem;
+    .dashboard-header h1 {
+        color: #2d8659;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
     }
 
-    .header-left h1 {
-        font-size: 2rem;
-        color: #5a67d8;
+    .dashboard-header p {
+        color: #999;
+        font-size: 1.1rem;
     }
 
-.header-right {
-    display: flex;
-    gap: 1rem;
-}
-
-.nav-btn {
-    padding: 0.7rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    background: #edf2f7;
-    color: #4a5568;
-    transition: all 0.3s ease;
-}
-
-    .nav-btn:hover {
-        background: #e2e8f0;
-        transform: translateY(-2px);
-    }
-
-    .nav-btn.active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-    .nav-btn.logout {
-        background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
-        color: white;
-    }
-
-        .nav-btn.logout:hover {
-            box-shadow: 0 5px 15px rgba(252, 129, 129, 0.4);
-        }
-
-/* Grid del dashboard */
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 2rem;
-    margin-bottom: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-.chart-card, .controls-card {
+.card {
     background: white;
     border-radius: 15px;
     padding: 2rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-top: 4px solid;
+    border-image: linear-gradient(90deg, #2d8659, #5b7fff) 1;
+    transition: transform 0.3s;
 }
 
-    .chart-card h2, .controls-card h2 {
-        color: #2d3748;
-        margin-bottom: 0.5rem;
-        font-size: 1.4rem;
+    .card:hover {
+        transform: translateY(-5px);
     }
 
-.chart-subtitle {
-    color: #718096;
-    margin-bottom: 1.5rem;
-}
-
-.chart-placeholder {
-    display: flex;
-    justify-content: space-around;
-    align-items: flex-end;
-    height: 200px;
-    gap: 1rem;
-}
-
-.chart-bar {
-    width: 100%;
-    background: linear-gradient(to top, #667eea, #764ba2);
-    border-radius: 10px 10px 0 0;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 0.5rem;
-    color: white;
-    font-weight: 700;
-    transition: all 0.3s ease;
-}
-
-    .chart-bar:hover {
-        transform: scaleY(1.05);
-    }
-
-    .chart-bar.temp {
-        background: linear-gradient(to top, #f6ad55, #ed8936);
-    }
-
-/* Controles */
-.controls-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.control-btn {
-    padding: 1rem;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
-}
-
-    .control-btn.primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-    .control-btn.success {
-        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-        color: white;
-    }
-
-    .control-btn.info {
-        background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-        color: white;
-    }
-
-    .control-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-.date-search {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 2px solid #e2e8f0;
-}
-
-    .date-search h3 {
-        color: #4a5568;
-        margin-bottom: 0.5rem;
-        font-size: 1rem;
-    }
-
-    .date-search input {
-        width: 100%;
-        padding: 0.8rem;
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        margin-bottom: 0.5rem;
-    }
-
-/* Área de historial */
-.historial-area {
-    background: white;
-    border-radius: 15px;
-    padding: 3rem;
+.card-icon {
+    font-size: 3rem;
     text-align: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.historial-content {
-    color: #718096;
-}
-
-.historial-icon {
-    font-size: 4rem;
     margin-bottom: 1rem;
 }
 
-.historial-content h2 {
-    color: #2d3748;
+.card-title {
+    text-align: center;
+    color: #2d8659;
+    font-size: 0.9rem;
+    font-weight: bold;
     margin-bottom: 0.5rem;
+    text-transform: uppercase;
 }
 
-/* ========================================
-   HISTORIAL
-======================================== */
-.historial-container {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 1rem;
+.card-value {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
 }
 
-.historial-header {
-    background: white;
-    padding: 1.5rem 2rem;
-    border-radius: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.historial-card {
-    background: white;
-    border-radius: 15px;
-    padding: 2rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-}
-
-    .card-header h2 {
-        color: #2d3748;
-        font-size: 1.5rem;
+    .card-value.temperature {
+        color: #ff9800;
     }
 
-.btn-actualizar {
-    padding: 0.7rem 1.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .card-value.humidity {
+        color: #2d8659;
+    }
+
+    .card-value.wind {
+        color: #5b7fff;
+    }
+
+    .card-value.forecast {
+        color: #ff9800;
+    }
+
+.status-badge {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.status-active {
+    background: #d4f4e7;
+    color: #2d8659;
+}
+
+.status-inactive {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.status-online {
+    background: #d4f4e7;
+    color: #2d8659;
+}
+
+.status-humid {
+    background: #d4f4e7;
+    color: #2d8659;
+}
+
+.logout-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 0.75rem 1.5rem;
+    background: #ff5252;
     color: white;
     border: none;
     border-radius: 8px;
-    font-weight: 600;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
+    font-weight: bold;
+    transition: all 0.3s;
+    z-index: 1000;
 }
 
-    .btn-actualizar:hover {
+    .logout-btn:hover {
+        background: #ff1744;
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
     }
 
-/* Tabla */
-.table-container {
-    overflow-x: auto;
-}
-
-.historial-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-    .historial-table thead {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-    .historial-table th {
-        padding: 1rem;
-        text-align: left;
-        font-weight: 600;
-    }
-
-    .historial-table td {
-        padding: 1rem;
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .historial-table tbody tr:hover {
-        background: #f7fafc;
-    }
-
-.badge {
-    display: inline-block;
-    padding: 0.4rem 0.8rem;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-    .badge.success {
-        background: #c6f6d5;
-        color: #22543d;
-    }
-
-    .badge.warning {
-        background: #feebc8;
-        color: #7c2d12;
-    }
-
-    .badge.danger {
-        background: #fed7d7;
-        color: #c53030;
-    }
-
-    .badge.temp {
-        background: #feebc8;
-        color: #7c2d12;
-    }
-
-    .badge.status {
-        background: #bee3f8;
-        color: #2c5282;
-    }
-
-.loading-cell, .empty-cell {
-    padding: 3rem;
-    text-align: center;
-    color: #718096;
-}
-
-/* Loading spinner */
-.loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-}
-
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid #e2e8f0;
-    border-top-color: #667eea;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-/* ========================================
-   RESPONSIVE
-======================================== */
+/* Responsive */
 @media (max-width: 768px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
     }
 
-    .header-right {
-        flex-direction: column;
+    .login-card {
+        width: 90%;
+        margin: 1rem;
     }
-
-    .button-group {
-        grid-template-columns: 1fr;
-    }
-}
-/* ========================================
-   DASHBOARD NUEVO DISEÑO
-======================================== */
-.dashboard-smartdrop {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-    padding: 2rem;
-}
-
-.dashboard-header-nuevo {
-    text-align: center;
-    margin-bottom: 2rem;
-    position: relative;
-}
-
-    .dashboard-header-nuevo h1 {
-        font-size: 2.5rem;
-        color: #047857;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .dashboard-header-nuevo p {
-        color: #6b7280;
-        font-size: 1.2rem;
-        font-weight: 500;
-    }
-
-.btn-salir {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 0.7rem 1.5rem;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-    .btn-salir:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
-    }
-
-/* Grid de tarjetas */
-.dashboard-grid-nuevo {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-/* Tarjetas de sensores */
-.card-sensor {
-    background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    border-top: 5px solid;
-    transition: all 0.3s ease;
-    animation: aparecer 0.6s ease-out;
-}
-
-    .card-sensor:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-    }
-
-    /* Colores de borde según tipo */
-    .card-sensor.temperatura {
-        border-top-color: #f59e0b;
-    }
-
-    .card-sensor.humedad-aire {
-        border-top-color: #10b981;
-    }
-
-    .card-sensor.bomba {
-        border-top-color: #3b82f6;
-    }
-
-    .card-sensor.ultimo-riego {
-        border-top-color: #10b981;
-    }
-
-    .card-sensor.pronostico {
-        border-top-color: #f59e0b;
-    }
-
-    .card-sensor.viento {
-        border-top-color: #3b82f6;
-    }
-
-    .card-sensor.programa {
-        border-top-color: #10b981;
-    }
-
-    .card-sensor.humedad-suelo {
-        border-top-color: #10b981;
-    }
-
-/* Iconos de sensores */
-.icon-sensor {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-}
-
-.card-sensor h3 {
-    color: #047857;
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    letter-spacing: 0.5px;
-}
-
-.card-sensor h4 {
-    color: #6b7280;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-/* Valores de sensores */
-.valor-sensor {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin-top: 0.5rem;
-}
-
-    .valor-sensor.estado {
-        color: #f59e0b;
-        font-size: 1.8rem;
-    }
-
-    .valor-sensor.direccion {
-        color: #3b82f6;
-        font-size: 1.8rem;
-    }
-
-/* Badges de estado */
-.estado-badge {
-    display: inline-block;
-    padding: 0.6rem 1.5rem;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 1rem;
-    margin-top: 0.5rem;
-}
-
-    .estado-badge.activo {
-        background: #d1fae5;
-        color: #047857;
-    }
-
-    .estado-badge.fecha {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
-    .estado-badge.humedad {
-        background: #d1fae5;
-        color: #047857;
-    }
-
-/* Responsive */
-@media (max-width: 768px) {
-    .dashboard-header-nuevo h1 {
-        font-size: 1.8rem;
-    }
-
-    .dashboard-grid-nuevo {
-        grid-template-columns: 1fr;
-    }
-
-    .btn-salir {
-        position: static;
-        margin-top: 1rem;
-        width: 100%;
-    }
-}
-
-
-/* ========================================
-   DASHBOARD NUEVO DISEÑO
-======================================== */
-.dashboard-smartdrop {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-    padding: 2rem;
-}
-
-.dashboard-header-nuevo {
-    text-align: center;
-    margin-bottom: 2rem;
-    position: relative;
-}
-
-    .dashboard-header-nuevo h1 {
-        font-size: 2.5rem;
-        color: #047857;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .dashboard-header-nuevo p {
-        color: #6b7280;
-        font-size: 1.2rem;
-        font-weight: 500;
-    }
-
-.btn-salir {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 0.7rem 1.5rem;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-    .btn-salir:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
-    }
-
-/* Grid de tarjetas */
-.dashboard-grid-nuevo {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-/* Tarjetas de sensores */
-.card-sensor {
-    background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    border-top: 5px solid;
-    transition: all 0.3s ease;
-    animation: aparecer 0.6s ease-out;
-}
-
-    .card-sensor:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-    }
-
-    /* Colores de borde según tipo */
-    .card-sensor.temperatura {
-        border-top-color: #f59e0b;
-    }
-
-    .card-sensor.humedad-aire {
-        border-top-color: #10b981;
-    }
-
-    .card-sensor.bomba {
-        border-top-color: #3b82f6;
-    }
-
-    .card-sensor.ultimo-riego {
-        border-top-color: #10b981;
-    }
-
-    .card-sensor.pronostico {
-        border-top-color: #f59e0b;
-    }
-
-    .card-sensor.viento {
-        border-top-color: #3b82f6;
-    }
-
-    .card-sensor.programa {
-        border-top-color: #10b981;
-    }
-
-    .card-sensor.humedad-suelo {
-        border-top-color: #10b981;
-    }
-
-/* Iconos de sensores */
-.icon-sensor {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-}
-
-.card-sensor h3 {
-    color: #047857;
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    letter-spacing: 0.5px;
-}
-
-.card-sensor h4 {
-    color: #6b7280;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-/* Valores de sensores */
-.valor-sensor {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin-top: 0.5rem;
-}
-
-    .valor-sensor.estado {
-        color: #f59e0b;
-        font-size: 1.8rem;
-    }
-
-    .valor-sensor.direccion {
-        color: #3b82f6;
-        font-size: 1.8rem;
-    }
-
-/* Badges de estado */
-.estado-badge {
-    display: inline-block;
-    padding: 0.6rem 1.5rem;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 1rem;
-    margin-top: 0.5rem;
-}
-
-    .estado-badge.activo {
-        background: #d1fae5;
-        color: #047857;
-    }
-
-    .estado-badge.fecha {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
-    .estado-badge.humedad {
-        background: #d1fae5;
-        color: #047857;
-    }
-
-/* Estados de temperatura */
-.estado-mini {
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-top: 0.5rem;
-    padding: 0.3rem 0.8rem;
-    border-radius: 15px;
-    display: inline-block;
-}
-
-    .estado-mini.frio {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
-    .estado-mini.normal {
-        background: #d1fae5;
-        color: #047857;
-    }
-
-    .estado-mini.caliente {
-        background: #fee2e2;
-        color: #dc2626;
-    }
-
-    .estado-mini.bajo {
-        background: #fef3c7;
-        color: #92400e;
-    }
-
-    .estado-mini.alto {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
-/* Estados de bomba y programa */
-.estado-badge.inactivo {
-    background: #f3f4f6;
-    color: #6b7280;
-}
-
-/* Estados de humedad del suelo */
-.estado-badge.seco {
-    background: #fee2e2;
-    color: #dc2626;
-}
-
-.estado-badge.humedo {
-    background: #d1fae5;
-    color: #047857;
-}
-
-.estado-badge.muy-humedo {
-    background: #dbeafe;
-    color: #1e40af;
-}
-
-/* Última actualización */
-.ultima-actualizacion {
-    text-align: center;
-    margin-top: 2rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 15px;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-    .ultima-actualizacion p {
-        color: #6b7280;
-        font-weight: 600;
-        margin: 0;
-    }
-
-/* Responsive */
-@media (max-width: 768px) {
-    .dashboard-header-nuevo h1 {
-        font-size: 1.8rem;
-    }
-
-    .dashboard-grid-nuevo {
-        grid-template-columns: 1fr;
-    }
-
-    .btn-salir {
-        position: static;
-        margin-top: 1rem;
-        width: 100%;
-    }
-}
-
-/* ========================================
-   TARJETA DE GRÁFICAS
-======================================== */
-.card-sensor.graficas {
-    border-top-color: #8b5cf6;
-    transition: all 0.3s ease;
-}
-
-    .card-sensor.graficas:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 20px 50px rgba(139, 92, 246, 0.3);
-        border-top-width: 8px;
-    }
-
-.estado-badge.ver-graficas {
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-    color: white;
-    font-size: 1.1rem;
-    padding: 0.8rem 1.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.card-sensor.graficas:hover .estado-badge.ver-graficas {
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-    transform: scale(1.05);
-}
-
-.card-sensor.graficas .icon-sensor {
-    animation: pulse-graph 2s ease-in-out infinite;
-}
-
-/* Animación para el icono de gráficas */
-@keyframes pulse-graph {
-    0%, 100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.1);
-    }
-}
-
-
-/* ========================================
-   ESTILOS PARA LAS GRÁFICAS
-======================================== */
-.chart-card canvas {
-    max-height: 300px;
-    margin: 1rem 0;
-}
-
-.chart-card {
-    min-height: 400px;
-}
-
-/* Mejorar botones del historial */
-.nav-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.plantas-container {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-    padding: 1rem;
-}
-
-.plantas-header {
-    background: white;
-    padding: 1.5rem 2rem;
-    border-radius: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.empty-state {
-    background: white;
-    border-radius: 20px;
-    padding: 4rem 2rem;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-.empty-icon {
-    font-size: 5rem;
-    margin-bottom: 1rem;
-}
-
-.empty-state h2 {
-    color: #047857;
-    margin-bottom: 0.5rem;
-}
-
-.empty-state p {
-    color: #6b7280;
-    margin-bottom: 2rem;
-}
-
-.btn-add-first {
-    padding: 1rem 2rem;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-    .btn-add-first:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
-    }
-
-.plantas-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 2rem;
-}
-
-.planta-card {
-    background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    border-top: 5px solid #10b981;
-}
-
-    .planta-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-    }
-
-.planta-icon {
-    font-size: 4rem;
-    text-align: center;
-    margin-bottom: 1rem;
-}
-
-.planta-card h3 {
-    color: #047857;
-    margin-bottom: 0.5rem;
-    text-align: center;
-}
-
-.planta-id {
-    text-align: center;
-    color: #6b7280;
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-}
-
-.planta-descripcion {
-    color: #4b5563;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    font-size: 0.95rem;
-    line-height: 1.5;
-}
-
-.planta-specs {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: #f9fafb;
-    border-radius: 10px;
-}
-
-.spec {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.3rem;
-}
-
-.spec-icon {
-    font-size: 1.5rem;
-}
-
-.planta-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-}
-
-.btn-edit, .btn-delete {
-    padding: 0.7rem;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn-edit {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-}
-
-    .btn-edit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
-    }
-
-.btn-delete {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
-}
-
-    .btn-delete:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
-    }
-
-.loading-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 400px;
-}
-
-/* Tarjeta de Plantas */
-.card-sensor.plantas {
-    border-top-color: #10b981;
-    cursor: pointer;
-}
-
-    .card-sensor.plantas:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 20px 50px rgba(16, 185, 129, 0.3);
-        border-top-width: 8px;
-    }
-
-.estado-badge.ver-plantas {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    font-size: 1.1rem;
-    padding: 0.8rem 1.5rem;
-}
-
-/* Contenedor de botones en header */
-.header-buttons {
-    position: absolute;
-    top: 0;
-    right: 0;
-    display: flex;
-    gap: 0.5rem;
 }

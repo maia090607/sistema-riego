@@ -1,114 +1,97 @@
-﻿@using SmartDropUI.Models
-@using SmartDropUI.Services
-@inject AuthService AuthService
+﻿@page "/login"
 @inject NavigationManager Navigation
+@inject AuthService AuthService
 
-<div class="login-container">
-    <!-- Decoraciones animadas -->
-    <div class="login-decorations">
-        <span class="droplet droplet-1">💧</span>
-        <span class="droplet droplet-2">💧</span>
-        <span class="droplet droplet-3">💧</span>
-        <span class="leaf leaf-1">🌿</span>
-        <span class="leaf leaf-2">🌱</span>
-    </div>
+<div class="login-page">
+    <div class="floating-icon" style="top: 10%; left: 10%;">💧</div>
+    <div class="floating-icon" style="top: 20%; right: 15%;">🌱</div>
+    <div class="floating-icon" style="bottom: 15%; left: 15%;">💧</div>
+    <div class="floating-icon" style="bottom: 25%; right: 10%;">🌿</div>
 
-    <!-- Tarjeta de login -->
     <div class="login-card">
-        <div class="login-header">
-            <div class="logo">
-                <span>🌿</span>
-                <span>💧</span>
-                <span>🌱</span>
+        <div class="logo-container">
+            <span>🌿</span>
+            <span>💧</span>
+            <span>🌱</span>
+        </div>
+        <h1>SmartDrop</h1>
+        <p class="subtitle">Sistema de Riego Automático Inteligente</p>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <div class="input-group">
+            <label>Usuario</label>
+            <div class="input-wrapper">
+                <span>👤</span>
+                <input type="text" @bind="username" placeholder="admin" />
             </div>
-            <h1 class="title">SmartDrop</h1>
-            <p class="subtitle">Sistema de Riego Automático Inteligente</p>
         </div>
 
-        <div class="login-form">
-            <div class="form-group">
-                <label>Usuario</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">👤</span>
-                    <input type="text"
-                           @bind="loginModel.Usuario"
-                           placeholder="Ingrese su usuario"
-                           class="form-input" />
-                </div>
+        <div class="input-group">
+            <label>Contraseña</label>
+            <div class="input-wrapper">
+                <span>🔒</span>
+                <input type="@(showPassword ? "text" : "password")" @bind="password" placeholder="admin123" @onkeypress="HandleKeyPress" />
+                <span style="cursor: pointer;" @onclick="TogglePassword">👁️</span>
             </div>
-
-            <div class="form-group">
-                <label>Contraseña</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">🔒</span>
-                    <input type="@(mostrarPassword ? "text" : "password")"
-                           @bind="loginModel.Password"
-                           placeholder="Ingrese su contraseña"
-                           class="form-input" />
-                    <button type="button"
-                            class="toggle-password"
-                            @onclick="() => mostrarPassword = !mostrarPassword">
-                        @(mostrarPassword ? "🙈" : "👁️")
-                    </button>
-                </div>
-            </div>
-
-            @if (!string.IsNullOrEmpty(mensajeError))
-            {
-                <div class="alert-error">
-                    ❌ @mensajeError
-                </div>
-            }
-
-            <button class="btn-primary"
-                    @onclick="HandleLogin"
-                    disabled="@cargando">
-                <span class="btn-icon">🚀</span>
-                @(cargando ? "Iniciando sesión..." : "INICIAR SESIÓN")
-            </button>
-
-            <button class="btn-secondary"
-                    @onclick="IrARegistro">
-                <span class="btn-icon">✨</span>
-                CREAR CUENTA
-            </button>
         </div>
+
+        <button class="btn btn-primary" @onclick="IniciarSesion">
+            <span>🚀</span>
+            INICIAR SESIÓN
+        </button>
+
+        <button class="btn btn-secondary" @onclick="CrearCuenta">
+            <span>✨</span>
+            CREAR CUENTA
+        </button>
     </div>
 </div>
 
 @code {
-    private LoginModel loginModel = new();
-    private bool mostrarPassword = false;
-    private bool cargando = false;
-    private string mensajeError = "";
+    private string username = "";
+    private string password = "";
+    private string errorMessage = "";
+    private bool showPassword = false;
 
-    private async Task HandleLogin()
+    private void TogglePassword()
     {
-        mensajeError = "";
+        showPassword = !showPassword;
+    }
 
-        if (string.IsNullOrWhiteSpace(loginModel.Usuario) ||
-            string.IsNullOrWhiteSpace(loginModel.Password))
+    private async Task IniciarSesion()
+    {
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
         {
-            mensajeError = "Por favor complete todos los campos";
+            errorMessage = "Por favor ingrese usuario y contraseña";
             return;
         }
 
-        cargando = true;
-        bool success = await AuthService.LoginAsync(loginModel);
-        cargando = false;
+        var result = await AuthService.Login(username, password);
 
-        if (success)
+        if (result)
         {
-            Navigation.NavigateTo("/");
+            Navigation.NavigateTo("/dashboard");
         }
         else
         {
-            mensajeError = "Usuario o contraseña incorrectos";
+            errorMessage = "Usuario o contraseña incorrectos";
         }
     }
 
-    private void IrARegistro()
+    private void CrearCuenta()
     {
         Navigation.NavigateTo("/registro");
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await IniciarSesion();
+        }
     }
 }

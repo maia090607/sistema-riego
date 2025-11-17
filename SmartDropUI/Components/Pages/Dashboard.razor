@@ -1,226 +1,112 @@
-﻿@using SmartDropUI.Models
-@using SmartDropUI.Services
-@inject RiegoService RiegoService
+﻿@page "/dashboard"
 @inject NavigationManager Navigation
 @inject AuthService AuthService
-@implements IDisposable
+@inject RiegoService RiegoService
 
-<div class="dashboard-smartdrop">
-    <div class="dashboard-header-nuevo">
+@if (!AuthService.IsAuthenticated)
+{
+    Navigation.NavigateTo("/login");
+}
+
+<div class="dashboard-page">
+    <button class="logout-btn" @onclick="CerrarSesion">🚪 Cerrar Sesión</button>
+
+    <div class="dashboard-header">
         <h1>SISTEMA DE RIEGO AUTOMÁTICO SMARTDROP</h1>
         <p>Panel de Control y Monitoreo en Tiempo Real</p>
-        <button class="btn-salir" @onclick="CerrarSesion">Salir</button>
     </div>
 
-    <div class="dashboard-grid-nuevo">
-        <!-- Botón de Plantas -->
-        <div class="card-sensor plantas" @onclick="IrAPlantas" style="cursor: pointer;">
-            <div class="icon-sensor">🌱</div>
-            <h3>PLANTAS</h3>
-            <div class="estado-badge ver-plantas">
-                📋 Gestionar
-            </div>
-        </div>
-
+    <div class="dashboard-grid">
         <!-- Temperatura -->
-        <div class="card-sensor temperatura">
-            <div class="icon-sensor">🌡️</div>
-            <h3>TEMPERATURA</h3>
-            <div class="valor-sensor">@datosActuales.Temperatura°C</div>
-            <div class="estado-mini @ObtenerClaseTemperatura()">
-                @ObtenerEstadoTemperatura()
-            </div>
+        <div class="card">
+            <div class="card-icon">🌡️</div>
+            <div class="card-title">Temperatura</div>
+            <div class="card-value temperature">@datosRiego.Temperatura°C</div>
         </div>
 
         <!-- Humedad del Aire -->
-        <div class="card-sensor humedad-aire">
-            <div class="icon-sensor">💧</div>
-            <h3>HUMEDAD DEL AIRE</h3>
-            <div class="valor-sensor">@datosActuales.HumedadAire%</div>
-            <div class="estado-mini @ObtenerClaseHumedadAire()">
-                @ObtenerEstadoHumedadAire()
-            </div>
+        <div class="card">
+            <div class="card-icon">💧</div>
+            <div class="card-title">Humedad del Aire</div>
+            <div class="card-value humidity">@datosRiego.HumedadAire</div>
         </div>
 
         <!-- Bomba de Agua -->
-        <div class="card-sensor bomba">
-            <div class="icon-sensor">💧</div>
-            <h3>BOMBA DE AGUA</h3>
-            <h4>ESTADO</h4>
-            <div class="estado-badge @GetBombaClass()">
-                ● @GetBombaEstado()
+        <div class="card">
+            <div class="card-icon">⚙️</div>
+            <div class="card-title">Bomba de Agua Estado</div>
+            <div style="text-align: center;">
+                <span class="status-badge @(datosRiego.BombaActiva ? "status-active" : "status-inactive")">
+                    ● @(datosRiego.BombaActiva ? "Activa" : "Inactiva")
+                </span>
             </div>
         </div>
 
         <!-- Último Riego -->
-        <div class="card-sensor ultimo-riego">
-            <div class="icon-sensor">📅</div>
-            <h3>ÚLTIMO RIEGO</h3>
-            <h4>FECHA</h4>
-            <div class="estado-badge fecha">
-                @datosActuales.UltimoRiego.ToString("dd/MM/yyyy HH:mm")
+        <div class="card">
+            <div class="card-icon">📅</div>
+            <div class="card-title">Último Riego Fecha</div>
+            <div style="text-align: center;">
+                <span class="status-badge status-online">@datosRiego.UltimoRiego</span>
             </div>
         </div>
 
         <!-- Pronóstico -->
-        <div class="card-sensor pronostico">
-            <div class="icon-sensor">@ObtenerIconoClima()</div>
-            <h3>PRONÓSTICO</h3>
-            <div class="valor-sensor estado">@datosActuales.Pronostico</div>
+        <div class="card">
+            <div class="card-icon">☀️</div>
+            <div class="card-title">Pronóstico</div>
+            <div class="card-value forecast">@datosRiego.Pronostico</div>
         </div>
 
         <!-- Viento -->
-        <div class="card-sensor viento">
-            <div class="icon-sensor">🧭</div>
-            <h3>VIENTO</h3>
-            <div class="valor-sensor direccion">@datosActuales.DireccionViento</div>
-            <div class="estado-mini">@datosActuales.VelocidadViento km/h</div>
+        <div class="card">
+            <div class="card-icon">💨</div>
+            <div class="card-title">Viento</div>
+            <div class="card-value wind">@datosRiego.Viento</div>
         </div>
 
         <!-- Estado del Programa -->
-        <div class="card-sensor programa">
-            <div class="icon-sensor">💻</div>
-            <h3>ESTADO DEL PROGRAMA</h3>
-            <h4>ESTADO</h4>
-            <div class="estado-badge @GetProgramaClass()">
-                ● @GetProgramaEstado()
+        <div class="card">
+            <div class="card-icon">💻</div>
+            <div class="card-title">Estado del Programa</div>
+            <div style="text-align: center;">
+                <span class="status-badge status-online">● Online</span>
             </div>
         </div>
 
         <!-- Humedad del Suelo -->
-        <div class="card-sensor humedad-suelo">
-            <div class="icon-sensor">🌱</div>
-            <h3>HUMEDAD DEL SUELO</h3>
-            <div class="valor-sensor">@datosActuales.HumedadSuelo%</div>
-            <div class="estado-badge @ObtenerClaseHumedadSuelo()">
-                @ObtenerEstadoHumedadSuelo()
+        <div class="card">
+            <div class="card-icon">🌱</div>
+            <div class="card-title">Humedad del Suelo</div>
+            <div style="text-align: center;">
+                <span class="status-badge status-humid">@datosRiego.HumedadSuelo</span>
             </div>
         </div>
-    </div>
-
-    <div class="ultima-actualizacion">
-        <p>📡 Última actualización: @ultimaActualizacion.ToString("HH:mm:ss")</p>
-        <p style="font-size: 0.85rem; color: #9ca3af; margin-top: 0.5rem;">
-            ☁️ Datos meteorológicos de Valledupar en tiempo real
-        </p>
     </div>
 </div>
 
 @code {
-    private DatosSensorModel datosActuales = new();
-    private DateTime ultimaActualizacion = DateTime.Now;
-    private System.Threading.Timer? timer;
+    private DatosRiegoModel datosRiego = new DatosRiegoModel();
 
     protected override async Task OnInitializedAsync()
     {
-        // Verificar autenticación
-        var autenticado = await AuthService.IsAuthenticatedAsync();
-        if (!autenticado)
+        if (!AuthService.IsAuthenticated)
         {
             Navigation.NavigateTo("/login");
             return;
         }
 
-        await CargarDatosSensores();
-
-        // Actualizar cada 10 minutos
-        timer = new System.Threading.Timer(async _ =>
-        {
-            await CargarDatosSensores();
-            await InvokeAsync(StateHasChanged);
-        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(600));
+        await CargarDatos();
     }
 
-    private async Task CargarDatosSensores()
+    private async Task CargarDatos()
     {
-        try
-        {
-            datosActuales = await RiegoService.ObtenerDatosActualesAsync();
-            ultimaActualizacion = DateTime.Now;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error al cargar datos: {ex.Message}");
-            datosActuales = new DatosSensorModel();
-        }
+        datosRiego = await RiegoService.ObtenerDatosRiego();
     }
 
-    private void IrAPlantas()
+    private void CerrarSesion()
     {
-        Navigation.NavigateTo("/plantas");
-    }
-
-    private async Task CerrarSesion()
-    {
-        await AuthService.LogoutAsync();
+        AuthService.Logout();
         Navigation.NavigateTo("/login");
-    }
-
-    // Métodos auxiliares para clases CSS
-    private string ObtenerClaseTemperatura()
-    {
-        if (datosActuales.Temperatura < 20) return "frio";
-        if (datosActuales.Temperatura < 30) return "normal";
-        return "caliente";
-    }
-
-    private string ObtenerEstadoTemperatura()
-    {
-        if (datosActuales.Temperatura < 20) return "Frío";
-        if (datosActuales.Temperatura < 30) return "Normal";
-        return "Caliente";
-    }
-
-    private string ObtenerClaseHumedadAire()
-    {
-        if (datosActuales.HumedadAire < 40) return "bajo";
-        if (datosActuales.HumedadAire < 70) return "normal";
-        return "alto";
-    }
-
-    private string ObtenerEstadoHumedadAire()
-    {
-        if (datosActuales.HumedadAire < 40) return "Bajo";
-        if (datosActuales.HumedadAire < 70) return "Normal";
-        return "Alto";
-    }
-
-    private string ObtenerClaseHumedadSuelo()
-    {
-        if (datosActuales.HumedadSuelo < 30) return "seco";
-        if (datosActuales.HumedadSuelo < 60) return "humedo";
-        return "muy-humedo";
-    }
-
-    private string ObtenerEstadoHumedadSuelo()
-    {
-        if (datosActuales.HumedadSuelo < 30) return "Seco";
-        if (datosActuales.HumedadSuelo < 60) return "Húmedo";
-        return "Muy Húmedo";
-    }
-
-    private string ObtenerIconoClima()
-    {
-        if (datosActuales.Pronostico.Contains("Despejado"))
-            return "☀️";
-        if (datosActuales.Pronostico.Contains("Nublado"))
-            return "☁️";
-        if (datosActuales.Pronostico.Contains("Lluv") || datosActuales.Pronostico.Contains("Chubasco"))
-            return "🌧️";
-        if (datosActuales.Pronostico.Contains("Tormenta"))
-            return "⛈️";
-        if (datosActuales.Pronostico.Contains("Neblina"))
-            return "🌫️";
-        return "☀️";
-    }
-
-    private string GetBombaClass() => datosActuales.BombaActiva ? "activo" : "inactivo";
-    private string GetBombaEstado() => datosActuales.BombaActiva ? "Activa" : "Inactiva";
-    private string GetProgramaClass() => datosActuales.ProgramaOnline ? "activo" : "inactivo";
-    private string GetProgramaEstado() => datosActuales.ProgramaOnline ? "Online" : "Offline";
-
-    public void Dispose()
-    {
-        timer?.Dispose();
     }
 }

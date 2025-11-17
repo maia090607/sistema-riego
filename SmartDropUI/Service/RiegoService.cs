@@ -1,216 +1,110 @@
 ﻿using SmartDropUI.Models;
-using System.Net.Http.Json;
-using System.Text.Json.Serialization;
 
-namespace SmartDropUI.Services
+namespace SmartDropUI.Service
 {
-    /// Servicio para gestión de riego y sensores
     public class RiegoService
     {
-        private readonly HttpClient _httpClient;
-        private readonly HttpClient _weatherClient;
-        private const bool MODO_PRUEBA = false; // Cambiar a false cuando conectes Arduino
+        private List<DatosRiegoModel> historial = new List<DatosRiegoModel>();
 
-        public RiegoService(HttpClient httpClient, IHttpClientFactory httpClientFactory)
+        public RiegoService()
         {
-            _httpClient = httpClient;
-            _weatherClient = httpClientFactory.CreateClient("WeatherAPI");
+            // Generar datos de ejemplo para el historial
+            GenerarHistorialEjemplo();
         }
 
-        /// Obtener datos actuales de todos los sensores y clima
-        public async Task<DatosSensorModel> ObtenerDatosActualesAsync()
+        public Task<DatosRiegoModel> ObtenerDatosRiego()
         {
-            if (MODO_PRUEBA)
+            var datos = new DatosRiegoModel
             {
-                // Obtener datos reales del clima de Valledupar
-                var datosClima = await ObtenerClimaValleduparAsync();
-
-                // Combinar con datos simulados de sensores locales
-                return await Task.FromResult(new DatosSensorModel
-                {
-                    // Datos reales del clima
-                    Temperatura = datosClima.Temperatura,
-                    HumedadAire = datosClima.HumedadAire,
-                    Pronostico = datosClima.Pronostico,
-                    DireccionViento = datosClima.DireccionViento,
-                    VelocidadViento = datosClima.VelocidadViento,
-
-                    // Datos simulados del sistema local
-                    HumedadSuelo = Random.Shared.Next(20, 100),
-                    BombaActiva = Random.Shared.Next(0, 2) == 1,
-                    ProgramaOnline = true,
-                    UltimoRiego = DateTime.Now.AddHours(-Random.Shared.Next(1, 12))
-                });
-            }
-            else
-            {
-                try
-                {
-                    var response = await _httpClient.GetFromJsonAsync<DatosSensorModel>("api/sensores/actuales");
-                    return response ?? new DatosSensorModel();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error al obtener datos: {ex.Message}");
-                    return new DatosSensorModel();
-                }
-            }
-        }
-
-        /// Obtener datos del clima real de Valledupar usando Open-Meteo API
-        private async Task<ClimaValleduparModel> ObtenerClimaValleduparAsync()
-        {
-            try
-            {
-                Console.WriteLine("🌦️ Obteniendo clima de Valledupar...");
-
-                // Coordenadas de Valledupar: 10.4631°N, -73.2532°W
-                var url = "https://api.open-meteo.com/v1/forecast?latitude=10.4631&longitude=-73.2532&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m&timezone=America/Bogota";
-
-                var response = await _weatherClient.GetFromJsonAsync<OpenMeteoResponse>(url);
-
-                if (response?.Current != null)
-                {
-                    Console.WriteLine($"✅ Clima obtenido: {response.Current.Temperature2m}°C, {response.Current.RelativeHumidity2m}%");
-
-                    return new ClimaValleduparModel
-                    {
-                        Temperatura = (int)Math.Round(response.Current.Temperature2m),
-                        HumedadAire = response.Current.RelativeHumidity2m,
-                        Pronostico = ObtenerPronosticoDesdeCode(response.Current.WeatherCode),
-                        DireccionViento = ObtenerDireccionViento(response.Current.WindDirection10m),
-                        VelocidadViento = (int)Math.Round(response.Current.WindSpeed10m)
-                    };
-                }
-
-                Console.WriteLine("⚠️ Response.Current es null");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Error al obtener clima: {ex.Message}");
-            }
-
-            // Valores por defecto si falla la API
-            Console.WriteLine("📊 Usando valores por defecto del clima");
-            return new ClimaValleduparModel
-            {
-                Temperatura = 32,
-                HumedadAire = 60,
+                Id = historial.Count + 1,
+                Fecha = DateTime.Now,
+                Temperatura = 90.8,
+                HumedadAire = "H",
+                Humedad = 75.0,
+                BombaActiva = true,
+                UltimoRiego = DateTime.Now.ToString("'Hoy' HH:mm"),
                 Pronostico = "Despejado",
-                DireccionViento = "Norte",
-                VelocidadViento = 10
+                Viento = "Norte",
+                HumedadSuelo = "Humedad",
+                Estado = "Activo"
             };
+
+            return Task.FromResult(datos);
         }
 
-        /// Convertir código de clima de Open-Meteo a descripción en español
-        private string ObtenerPronosticoDesdeCode(int code)
+        public Task<DatosRiegoModel> ObtenerDatosActualesAsync()
         {
-            return code switch
-            {
-                0 => "Despejado",
-                1 => "Mayormente Despejado",
-                2 => "Parcialmente Nublado",
-                3 => "Nublado",
-                45 or 48 => "Neblina",
-                51 or 53 or 55 => "Llovizna",
-                61 or 63 or 65 => "Lluvioso",
-                80 or 81 or 82 => "Chubascos",
-                95 or 96 or 99 => "Tormentoso",
-                _ => "Parcialmente Nublado"
-            };
+            return ObtenerDatosRiego();
         }
 
-        /// Convertir dirección del viento en grados a punto cardinal
-        private string ObtenerDireccionViento(double grados)
+        public Task<List<DatosRiegoModel>> ObtenerHistorial()
         {
-            var direcciones = new[] { "Norte", "Noreste", "Este", "Sureste", "Sur", "Suroeste", "Oeste", "Noroeste" };
-            var index = (int)Math.Round(grados / 45.0) % 8;
-            return direcciones[index];
+            return Task.FromResult(historial);
         }
 
-        /// Obtener historial de riegos realizados
-        public async Task<List<DatosRiegoModel>> ObtenerHistorialAsync()
+        public Task<List<DatosRiegoModel>> ObtenerHistorialAsync()
         {
-            if (MODO_PRUEBA)
-            {
-                var historial = new List<DatosRiegoModel>();
-                for (int i = 1; i <= 10; i++)
-                {
-                    historial.Add(new DatosRiegoModel
-                    {
-                        Id = i,
-                        Fecha = DateTime.Now.AddDays(-i),
-                        Humedad = Random.Shared.Next(20, 90),
-                        Temperatura = Random.Shared.Next(18, 35),
-                        Estado = Random.Shared.Next(0, 2) == 1 ? "Regado" : "Sin riego"
-                    });
-                }
-                return await Task.FromResult(historial);
-            }
-            else
-            {
-                try
-                {
-                    var response = await _httpClient.GetFromJsonAsync<List<DatosRiegoModel>>("api/riego/historial");
-                    return response ?? new List<DatosRiegoModel>();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error al obtener historial: {ex.Message}");
-                    return new List<DatosRiegoModel>();
-                }
-            }
+            return Task.FromResult(historial);
         }
 
-        /// Activar riego manual del sistema
+        public Task<bool> ActivarBomba()
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> DesactivarBomba()
+        {
+            return Task.FromResult(true);
+        }
+
         public async Task<bool> ActivarRiegoManualAsync()
         {
-            if (MODO_PRUEBA)
+            // Crear un nuevo registro de riego
+            var nuevoRiego = new DatosRiegoModel
             {
-                Console.WriteLine("💧 Activando riego manual...");
-                await Task.Delay(1000);
-                Console.WriteLine("✅ Riego activado");
-                return true;
-            }
-            else
+                Id = historial.Count + 1,
+                Fecha = DateTime.Now,
+                Temperatura = 90.8 + new Random().Next(-5, 5),
+                HumedadAire = "H",
+                Humedad = 75.0 + new Random().Next(-10, 10),
+                BombaActiva = true,
+                UltimoRiego = DateTime.Now.ToString("'Hoy' HH:mm"),
+                Pronostico = "Despejado",
+                Viento = "Norte",
+                HumedadSuelo = "Humedad",
+                Estado = "Activo"
+            };
+
+            historial.Insert(0, nuevoRiego);
+
+            // Simular tiempo de riego
+            await Task.Delay(1000);
+
+            return true;
+        }
+
+        private void GenerarHistorialEjemplo()
+        {
+            var random = new Random();
+            var estados = new[] { "Activo", "Completado", "Programado" };
+
+            for (int i = 10; i >= 1; i--)
             {
-                try
+                historial.Add(new DatosRiegoModel
                 {
-                    var response = await _httpClient.PostAsync("api/riego/manual", null);
-                    return response.IsSuccessStatusCode;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error al activar riego: {ex.Message}");
-                    return false;
-                }
+                    Id = 11 - i,
+                    Fecha = DateTime.Now.AddDays(-i),
+                    Temperatura = 85 + random.Next(-10, 15),
+                    HumedadAire = random.Next(40, 80) + "%",
+                    Humedad = 60 + random.Next(-15, 20),
+                    BombaActiva = random.Next(0, 2) == 1,
+                    UltimoRiego = DateTime.Now.AddDays(-i).ToString("dd/MM/yyyy HH:mm"),
+                    Pronostico = random.Next(0, 2) == 1 ? "Despejado" : "Nublado",
+                    Viento = new[] { "Norte", "Sur", "Este", "Oeste" }[random.Next(0, 4)],
+                    HumedadSuelo = random.Next(50, 90) + "%",
+                    Estado = estados[random.Next(0, estados.Length)]
+                });
             }
         }
-    }
-
-    /// Modelo de respuesta de la API de Open-Meteo
-    public class OpenMeteoResponse
-    {
-        [JsonPropertyName("current")]
-        public CurrentWeather? Current { get; set; }
-    }
-
-    /// Datos actuales del clima
-    public class CurrentWeather
-    {
-        [JsonPropertyName("temperature_2m")]
-        public double Temperature2m { get; set; }
-
-        [JsonPropertyName("relative_humidity_2m")]
-        public int RelativeHumidity2m { get; set; }
-
-        [JsonPropertyName("weather_code")]
-        public int WeatherCode { get; set; }
-
-        [JsonPropertyName("wind_speed_10m")]
-        public double WindSpeed10m { get; set; }
-
-        [JsonPropertyName("wind_direction_10m")]
-        public double WindDirection10m { get; set; }
     }
 }

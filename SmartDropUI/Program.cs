@@ -1,50 +1,23 @@
-using Blazored.LocalStorage;
-using SmartDropUI.Components;
-using SmartDropUI.Services;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
+using SmartDropUI.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ===================================
-// SERVICIOS DE BLAZOR
-// ===================================
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+// Add services to the container.
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
 
-// ===================================
-// HTTP CLIENTS
-// ===================================
-builder.Services.AddHttpClient();
+// Registrar servicios
+builder.Services.AddSingleton<AuthService>();
+builder.Services.AddSingleton<RiegoService>();
 
-// Configurar HttpClient para consumir la API
-builder.Services.AddScoped(sp => new HttpClient
-{
-    BaseAddress = new Uri("https://localhost:7001") // URL de tu RiegoAPI
-});
-
-// HttpClient para la API del clima (Open-Meteo)
-builder.Services.AddHttpClient("WeatherAPI", client =>
-{
-    client.BaseAddress = new Uri("https://api.open-meteo.com/");
-    client.Timeout = TimeSpan.FromSeconds(10);
-});
-
-// ===================================
-// SERVICIOS DE LA APLICACIÓN
-// ===================================
-builder.Services.AddScoped<RiegoService>();
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<PlantaService>();
-
-// ===================================
-// LOCAL STORAGE
-// ===================================
-builder.Services.AddBlazoredLocalStorage();
+// Agregar HttpClient
+builder.Services.AddScoped<HttpClient>();
 
 var app = builder.Build();
 
-// ===================================
-// CONFIGURACIÓN DEL PIPELINE
-// ===================================
+// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -53,9 +26,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseAntiforgery();
+app.UseRouting();
 
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+app.MapBlazorHub();
+app.MapFallbackToPage("/_Host");
 
 app.Run();
