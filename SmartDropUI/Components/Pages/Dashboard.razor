@@ -508,7 +508,7 @@
     // ========================================
     private void OnDatosArduinoRecibidos(DatosArduinoModel datos)
     {
-        Console.WriteLine($"📡 [DASHBOARD] Datos recibidos del Arduino - Bomba: {datos.BombaEncendida}");
+        // Solo actualizamos bombaActiva, NO riegoManualActivo
         bombaActiva = datos.BombaEncendida;
         InvokeAsync(StateHasChanged);
     }
