@@ -618,17 +618,20 @@
 
     private void ActualizarGraficaHumedad(int nuevaHumedad)
     {
+        // Asegurar que la humedad esté en rango válido (0-100)
+        var humedadAjustada = Math.Max(0, Math.Min(100, nuevaHumedad));
+
         datosHumedad.Add(new DatoGrafica
         {
             Tiempo = contadorTiempo++,
-            Valor = nuevaHumedad
+            Valor = humedadAjustada
         });
 
-        // Mantener solo los últimos 15 puntos
+        // Mantener solo los últimos 15 puntos para que no se salga del eje
         if (datosHumedad.Count > 15)
         {
             datosHumedad.RemoveAt(0);
-            // Reajustar índices de tiempo
+            // Reajustar índices de tiempo para mantener continuidad visual
             for (int i = 0; i < datosHumedad.Count; i++)
             {
                 datosHumedad[i].Tiempo = i;
@@ -636,7 +639,7 @@
         }
 
         ultimaActualizacion = DateTime.Now;
-        Console.WriteLine($"📊 [GRÁFICOS] Humedad actualizada: {nuevaHumedad}%");
+        Console.WriteLine($"📊 [GRÁFICOS] Humedad actualizada: {humedadAjustada}%");
     }
 
     private async Task ActualizarDatosAutomaticamente()

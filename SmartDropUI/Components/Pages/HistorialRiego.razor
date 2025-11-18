@@ -1,6 +1,11 @@
 ﻿@page "/historial-riego"
+@using SmartDropUI.Services
+@using SmartDropUI.Models
+@using System.Timers
 @inject NavigationManager Navigation
+@inject HistorialRiegoService HistorialService
 @rendermode InteractiveServer
+@implements IDisposable
 
 <PageTitle>Historial de Riego - SmartDrop</PageTitle>
 
@@ -60,7 +65,6 @@
         color: #6b7280;
     }
 
-    /* Tabs Navigation */
     .tabs-container {
         background: white;
         border-radius: 1rem;
@@ -97,12 +101,12 @@
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
 
-    /* Section Card */
     .section-card {
         background: white;
         border-radius: 1.5rem;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         overflow: hidden;
+        margin-bottom: 2rem;
     }
 
     .section-header {
@@ -123,7 +127,6 @@
         padding: 2rem;
     }
 
-    /* Empty State */
     .empty-state {
         text-align: center;
         padding: 3rem 2rem;
@@ -152,7 +155,84 @@
         line-height: 1.5;
     }
 
-    /* Search Section */
+    .history-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 1.5rem;
+    }
+
+        .history-table thead {
+            background: #f8fafc;
+        }
+
+        .history-table th {
+            padding: 1rem;
+            text-align: left;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .history-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.95rem;
+            color: #334155;
+        }
+
+        .history-table tbody tr {
+            transition: background 0.2s ease;
+        }
+
+            .history-table tbody tr:hover {
+                background: #f8fafc;
+            }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.375rem 0.875rem;
+        border-radius: 9999px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .badge-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-warning {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .controls-section {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .controls-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #10b981;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+    }
+
     .search-section {
         margin-bottom: 2rem;
     }
@@ -185,14 +265,6 @@
             box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
         }
 
-    .date-label {
-        font-size: 0.8rem;
-        color: #94a3b8;
-        margin-top: 0.5rem;
-        display: block;
-    }
-
-    /* Button Group */
     .button-group {
         display: flex;
         gap: 1rem;
@@ -253,7 +325,6 @@
             box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
         }
 
-    /* Alert Card */
     .alert-card {
         background: #fefce8;
         border-left: 4px solid #eab308;
@@ -291,62 +362,38 @@
         margin-top: 0.5rem;
     }
 
-    /* History Table */
-    .history-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        margin-top: 1.5rem;
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+        gap: 1rem;
     }
 
-        .history-table thead {
-            background: #f8fafc;
-        }
-
-        .history-table th {
-            padding: 1rem;
-            text-align: left;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #475569;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .history-table td {
-            padding: 1rem;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 0.95rem;
-            color: #334155;
-        }
-
-        .history-table tbody tr {
-            transition: background 0.2s ease;
-        }
-
-            .history-table tbody tr:hover {
-                background: #f8fafc;
-            }
-
-    .status-badge {
+    .loading-spinner {
         display: inline-block;
-        padding: 0.375rem 0.875rem;
-        border-radius: 9999px;
-        font-size: 0.8rem;
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f4f6;
+        border-top-color: #10b981;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        to
+
+    {
+        transform: rotate(360deg);
+    }
+
+    }
+
+    .loading-text {
+        font-size: 1.1rem;
         font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-    }
-
-    .badge-success {
-        background: #d1fae5;
-        color: #065f46;
-    }
-
-    .badge-warning {
-        background: #fef3c7;
-        color: #92400e;
+        color: #10b981;
     }
 
     @@media (max-width: 768px) {
@@ -381,7 +428,6 @@
             <p class="page-subtitle">Panel de Control y Monitoreo Avanzado</p>
         </div>
 
-        <!-- Tabs -->
         <div class="tabs-container">
             <button class="tab-button @(pestanaActiva == "riegos" ? "active" : "")"
                     @onclick='() => pestanaActiva = "riegos"'>
@@ -397,49 +443,28 @@
 
         @if (pestanaActiva == "riegos")
         {
-            <!-- Historial de Riegos -->
+            <!-- Historial de Riegos ARRIBA -->
             <div class="section-card">
                 <div class="section-header">
                     <h2>HISTORIAL DE RIEGOS EN LAS PLANTAS</h2>
                 </div>
                 <div class="section-body">
-                    <div class="empty-state">
-                        <div class="empty-icon">💧</div>
-                        <h3 class="empty-title">Historial de Riegos</h3>
-                        <p class="empty-description">
-                            Los registros de riego de las plantas aparecerán aquí<br />
-                            Datos de fechas, horarios y duración de cada riego
-                        </p>
-                    </div>
-
-                    <div class="search-section">
-                        <label class="search-label">Buscar Historial</label>
-                        <input type="date"
-                               class="date-input"
-                               @bind="fechaRiegos"
-                               placeholder="Selecciona una fecha" />
-                        <span class="date-label">FECHA ACTUAL</span>
-                    </div>
-
-                    <div class="button-group">
-                        <button class="btn btn-search" @onclick="BuscarRiegos">
-                            <span>🔍</span>
-                            Buscar
-                        </button>
-                        <button class="btn btn-clear" @onclick="LimpiarBusquedaRiegos">
-                            <span>🗑️</span>
-                            Limpiar
-                        </button>
-                    </div>
-
-                    @if (mostrarResultadosRiegos && historialRiegos.Any())
+                    @if (cargandoRiegos)
+                    {
+                        <div class="loading-container">
+                            <div class="loading-spinner"></div>
+                            <div class="loading-text">Cargando historial...</div>
+                        </div>
+                    }
+                    else if (mostrarResultadosRiegos && historialRiegos.Any())
                     {
                         <table class="history-table">
                             <thead>
                                 <tr>
                                     <th>Fecha</th>
                                     <th>Horario</th>
-                                    <th>Duración</th>
+                                    <th>Humedad (%)</th>
+                                    <th>Temperatura (°C)</th>
                                     <th>Estado</th>
                                 </tr>
                             </thead>
@@ -448,56 +473,87 @@
                                 {
                                     <tr>
                                         <td>@riego.Fecha.ToString("dd/MM/yyyy")</td>
-                                        <td>@riego.Horario</td>
-                                        <td>@riego.Duracion</td>
+                                        <td>@riego.Fecha.ToString("HH:mm:ss")</td>
                                         <td>
-                                            <span class="status-badge badge-success">@riego.Estado</span>
+                                            <span class="status-badge @ObtenerClaseHumedad(riego.Humedad)">
+                                                @riego.Humedad.ToString("F1")%
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge @ObtenerClaseTemperatura(riego.Temperatura)">
+                                                @riego.Temperatura.ToString("F1")°C
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge badge-success">Completado</span>
                                         </td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
                     }
+                    else
+                    {
+                        <div class="empty-state">
+                            <div class="empty-icon">💧</div>
+                            <h3 class="empty-title">Historial de Riegos</h3>
+                            <p class="empty-description">
+                                Los registros de riego de las plantas aparecerán aquí<br />
+                                Datos de fechas, horarios y duración de cada riego
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Controles ABAJO -->
+            <div class="controls-section">
+                <h3 class="controls-title">Controles del Sistema</h3>
+
+                <div class="search-section">
+                    <label class="search-label">Buscar Historial</label>
+                    <input type="date"
+                           class="date-input"
+                           @bind="fechaRiegos" />
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-search" @onclick="BuscarRiegos">
+                        <span>🔍</span>
+                        Buscar
+                    </button>
+                    <button class="btn btn-clear" @onclick="LimpiarBusquedaRiegos">
+                        <span>🗑️</span>
+                        Limpiar
+                    </button>
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                    <button class="btn btn-reload" @onclick="RecargarRiegos">
+                        <span>🔄</span>
+                        Recargar
+                    </button>
                 </div>
             </div>
         }
         else
         {
-            <!-- Historial de Alertas -->
+            <!-- Historial de Alertas ARRIBA -->
             <div class="section-card">
                 <div class="section-header">
                     <h2>HISTORIAL DE ALERTAS DEL PROGRAMA</h2>
                 </div>
                 <div class="section-body">
-                    <div class="empty-state">
-                        <div class="empty-icon">⚠️</div>
-                        <h3 class="empty-title">Historial de Alertas</h3>
-                        <p class="empty-description">
-                            Las alertas y notificaciones del sistema aparecerán aquí<br />
-                            Alertas de mantenimiento, errores y estados del sistema
-                        </p>
-                    </div>
-
-                    <button class="btn btn-reload" @onclick="RecargarAlertas">
-                        <span>🔄</span>
-                        Recargar
-                    </button>
-
-                    <div class="search-section" style="margin-top: 2rem;">
-                        <label class="search-label">Buscar Alertas</label>
-                        <input type="date"
-                               class="date-input"
-                               @bind="fechaAlertas" />
-                    </div>
-
-                    <button class="btn btn-search" @onclick="BuscarAlertas">
-                        <span>🔍</span>
-                        Buscar
-                    </button>
-
-                    @if (mostrarResultadosAlertas && historialAlertas.Any())
+                    @if (cargandoAlertas)
                     {
-                        <div style="margin-top: 2rem;">
+                        <div class="loading-container">
+                            <div class="loading-spinner"></div>
+                            <div class="loading-text">Cargando alertas...</div>
+                        </div>
+                    }
+                    else if (mostrarResultadosAlertas && historialAlertas.Any())
+                    {
+                        <div>
                             @foreach (var alerta in historialAlertas)
                             {
                                 <div class="alert-card">
@@ -513,7 +569,40 @@
                             }
                         </div>
                     }
+                    else
+                    {
+                        <div class="empty-state">
+                            <div class="empty-icon">⚠️</div>
+                            <h3 class="empty-title">Historial de Alertas</h3>
+                            <p class="empty-description">
+                                Las alertas y notificaciones del sistema aparecerán aquí<br />
+                                Alertas de mantenimiento, errores y estados del sistema
+                            </p>
+                        </div>
+                    }
                 </div>
+            </div>
+
+            <!-- Controles ABAJO -->
+            <div class="controls-section">
+                <h3 class="controls-title">Controles del Sistema</h3>
+
+                <button class="btn btn-reload" @onclick="RecargarAlertas">
+                    <span>🔄</span>
+                    Recargar
+                </button>
+
+                <div class="search-section" style="margin-top: 2rem;">
+                    <label class="search-label">Buscar Alertas</label>
+                    <input type="date"
+                           class="date-input"
+                           @bind="fechaAlertas" />
+                </div>
+
+                <button class="btn btn-search" @onclick="BuscarAlertas">
+                    <span>🔍</span>
+                    Buscar
+                </button>
             </div>
         }
     </div>
@@ -525,17 +614,12 @@
     private DateTime fechaAlertas = DateTime.Now;
     private bool mostrarResultadosRiegos = false;
     private bool mostrarResultadosAlertas = false;
+    private bool cargandoRiegos = false;
+    private bool cargandoAlertas = false;
 
-    private List<RiegoHistorial> historialRiegos = new();
+    private List<HistorialRiegoModel> historialRiegos = new();
     private List<AlertaHistorial> historialAlertas = new();
-
-    public class RiegoHistorial
-    {
-        public DateTime Fecha { get; set; }
-        public string Horario { get; set; } = "";
-        public string Duracion { get; set; } = "";
-        public string Estado { get; set; } = "";
-    }
+    private System.Timers.Timer? actualizacionTimer;
 
     public class AlertaHistorial
     {
@@ -545,18 +629,78 @@
         public string Tipo { get; set; } = "";
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarDatosIniciales();
+
+        // Timer para actualizar cada 5 segundos
+        actualizacionTimer = new System.Timers.Timer(5000);
+        actualizacionTimer.Elapsed += async (sender, e) => await ActualizarDatosAutomaticamente();
+        actualizacionTimer.AutoReset = true;
+        actualizacionTimer.Start();
+    }
+
+    private async Task CargarDatosIniciales()
+    {
+        cargandoRiegos = true;
+
+        try
+        {
+            var historial = await HistorialService.ObtenerHistorialAsync();
+
+            if (historial != null && historial.Any())
+            {
+                historialRiegos = historial.OrderByDescending(h => h.Fecha).Take(20).ToList();
+                mostrarResultadosRiegos = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [HISTORIAL] Error: {ex.Message}");
+        }
+        finally
+        {
+            cargandoRiegos = false;
+        }
+    }
+
+    private async Task ActualizarDatosAutomaticamente()
+    {
+        if (mostrarResultadosRiegos && pestanaActiva == "riegos")
+        {
+            await CargarDatosIniciales();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
     private async Task BuscarRiegos()
     {
-        await Task.Delay(500);
+        cargandoRiegos = true;
+        mostrarResultadosRiegos = false;
 
-        historialRiegos = new List<RiegoHistorial>
+        try
         {
-            new() { Fecha = fechaRiegos, Horario = "08:30 AM", Duracion = "15 min", Estado = "Completado" },
-            new() { Fecha = fechaRiegos.AddDays(-1), Horario = "08:30 AM", Duracion = "15 min", Estado = "Completado" },
-            new() { Fecha = fechaRiegos.AddDays(-2), Horario = "08:30 AM", Duracion = "18 min", Estado = "Completado" },
-        };
+            var resultados = await HistorialService.ObtenerPorFechaAsync(fechaRiegos);
 
-        mostrarResultadosRiegos = true;
+            if (resultados != null && resultados.Any())
+            {
+                historialRiegos = resultados.OrderByDescending(h => h.Fecha).ToList();
+                mostrarResultadosRiegos = true;
+            }
+            else
+            {
+                historialRiegos = new List<HistorialRiegoModel>();
+                mostrarResultadosRiegos = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [HISTORIAL] Error en búsqueda: {ex.Message}");
+        }
+        finally
+        {
+            cargandoRiegos = false;
+        }
     }
 
     private void LimpiarBusquedaRiegos()
@@ -566,8 +710,15 @@
         fechaRiegos = DateTime.Now;
     }
 
+    private async Task RecargarRiegos()
+    {
+        await CargarDatosIniciales();
+    }
+
     private async Task BuscarAlertas()
     {
+        cargandoAlertas = true;
+
         await Task.Delay(500);
 
         historialAlertas = new List<AlertaHistorial>
@@ -589,12 +740,35 @@
         };
 
         mostrarResultadosAlertas = true;
+        cargandoAlertas = false;
     }
 
     private async Task RecargarAlertas()
     {
+        cargandoAlertas = true;
         historialAlertas.Clear();
         mostrarResultadosAlertas = false;
         await Task.Delay(300);
+        cargandoAlertas = false;
+    }
+
+    private string ObtenerClaseHumedad(float humedad)
+    {
+        if (humedad < 30) return "badge-danger";
+        if (humedad < 60) return "badge-warning";
+        return "badge-success";
+    }
+
+    private string ObtenerClaseTemperatura(float temperatura)
+    {
+        if (temperatura < 15 || temperatura > 35) return "badge-danger";
+        if (temperatura < 18 || temperatura > 30) return "badge-warning";
+        return "badge-success";
+    }
+
+    public void Dispose()
+    {
+        actualizacionTimer?.Stop();
+        actualizacionTimer?.Dispose();
     }
 }
