@@ -3,10 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using RiegoAPI.DTO.Mappers;
 using RiegoAPI.DTO.Request;
 using RiegoAPI.DTOs.Response;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace RiegoAPI.Controllers
 {
@@ -245,5 +241,7 @@ namespace RiegoAPI.Controllers
 
             return Ok(ApiResponseDTO<object>.Success(resumen, "Resumen de alertas"));
         }
+
+
     }
 }
