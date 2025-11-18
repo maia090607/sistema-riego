@@ -38,23 +38,16 @@
 
     .line-chart-humedad {
         stroke: #10b981;
-        stroke-width: 3;
+        stroke-width: 4;
         fill: none;
+        transition: all 0.5s ease;
     }
 
     .line-chart-temp {
         stroke: #ef4444;
-        stroke-width: 3;
+        stroke-width: 4;
         fill: none;
-    }
-
-    .chart-point {
-        fill: currentColor;
-    }
-
-    .chart-point-active {
-        stroke: white;
-        stroke-width: 2;
+        transition: all 0.5s ease;
     }
 
     .loading-spinner {
@@ -68,12 +61,9 @@
     }
 
     @@keyframes spin {
-        to
-
-    {
-        transform: rotate(360deg);
-    }
-
+        to {
+            transform: rotate(360deg);
+        }
     }
 
     .graficos-container {
@@ -363,6 +353,16 @@
         margin-top: 1rem;
     }
 
+    .current-value {
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: #f0fdf4;
+        border-radius: 0.5rem;
+    }
+
     @@media (max-width: 1024px) {
         .charts-grid {
             grid-template-columns: 1fr;
@@ -388,8 +388,8 @@
             <!-- Gráfica de Humedad del Suelo -->
             <div class="chart-card">
                 <div class="chart-header">
-                    <h2 class="chart-title">Gráfica de la Humedad del Suelo</h2>
-                    <p class="chart-subtitle">Últimos @datosHumedad.Count registros - Actualización en tiempo real</p>
+                    <h2 class="chart-title">Humedad del Suelo en Tiempo Real</h2>
+                    <p class="chart-subtitle">Actualización automática cada 2 segundos</p>
                 </div>
                 <div class="chart-container">
                     @if (cargandoHumedad)
@@ -399,40 +399,63 @@
                             <span style="color: #10b981; font-weight: 600;">Cargando datos...</span>
                         </div>
                     }
-                    else if (datosHumedad.Any())
+                    else
                     {
                         <svg viewBox="0 0 400 250" class="chart-svg">
-                            <!-- Ejes -->
+                            <!-- Grid horizontal -->
+                            <line x1="50" y1="30" x2="370" y2="30" stroke="#d1fae5" stroke-width="1" stroke-dasharray="2,2" />
+                            <line x1="50" y1="72.5" x2="370" y2="72.5" stroke="#d1fae5" stroke-width="1" stroke-dasharray="2,2" />
+                            <line x1="50" y1="115" x2="370" y2="115" stroke="#d1fae5" stroke-width="1" stroke-dasharray="2,2" />
+                            <line x1="50" y1="157.5" x2="370" y2="157.5" stroke="#d1fae5" stroke-width="1" stroke-dasharray="2,2" />
+
+                            <!-- Ejes principales -->
                             <line x1="50" y1="200" x2="370" y2="200" class="chart-axis" />
                             <line x1="50" y1="30" x2="50" y2="200" class="chart-axis" />
 
                             <!-- Etiquetas eje Y -->
-                            <text x="25" y="35" class="chart-label">100</text>
-                            <text x="30" y="90" class="chart-label">75</text>
-                            <text x="30" y="145" class="chart-label">50</text>
-                            <text x="30" y="200" class="chart-label">25</text>
-                            <text x="35" y="210" class="chart-label">0</text>
+                            <text x="20" y="35" class="chart-label">100</text>
+                            <text x="25" y="77" class="chart-label">75</text>
+                            <text x="25" y="120" class="chart-label">50</text>
+                            <text x="25" y="162" class="chart-label">25</text>
+                            <text x="30" y="205" class="chart-label">0</text>
 
                             <!-- Título eje X -->
-                            <text x="180" y="240" class="chart-label">Tiempo (segundos)</text>
+                            <text x="180" y="240" class="chart-label">Tiempo →</text>
 
-                            <!-- Línea de la gráfica -->
-                            <polyline points="@GenerarPuntosHumedad()" class="line-chart-humedad" />
+                            <!-- LÍNEA HORIZONTAL ANIMADA -->
+                            <line x1="50"
+                                  y1="@CalcularPosicionHumedad()"
+                                  x2="370"
+                                  y2="@CalcularPosicionHumedad()"
+                                  class="line-chart-humedad" />
 
-                            <!-- Puntos de datos -->
-                            @foreach (var punto in ObtenerPuntosVisuales(datosHumedad))
-                            {
-                                <circle cx="@punto.X" cy="@punto.Y" r="5" class="chart-point-active" style="fill: #10b981;" />
-                            }
+                            <!-- Indicador del valor actual -->
+                            <circle cx="370"
+                                    cy="@CalcularPosicionHumedad()"
+                                    r="6"
+                                    fill="#10b981"
+                                    stroke="white"
+                                    stroke-width="2">
+                                <animate attributeName="r"
+                                         from="6"
+                                         to="8"
+                                         dur="1s"
+                                         repeatCount="indefinite" />
+                            </circle>
+
+                            <!-- Texto del valor actual -->
+                            <text x="375"
+                                  y="@(CalcularPosicionHumedad() - 10)"
+                                  class="chart-label"
+                                  font-weight="bold"
+                                  fill="#10b981">
+                                @valorActualHumedad.ToString("F1")%
+                            </text>
                         </svg>
                     }
-                    else
-                    {
-                        <div style="text-align: center; color: #6b7280;">
-                            <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
-                            <div style="font-weight: 600;">No hay datos disponibles</div>
-                        </div>
-                    }
+                </div>
+                <div class="current-value" style="color: #10b981;">
+                    Valor Actual: @valorActualHumedad.ToString("F1")%
                 </div>
                 <div class="update-time">
                     Última actualización: @ultimaActualizacion.ToString("HH:mm:ss")
@@ -442,8 +465,8 @@
             <!-- Gráfica de Temperatura -->
             <div class="chart-card">
                 <div class="chart-header">
-                    <h2 class="chart-title">Gráfico de la Temperatura del Ambiente</h2>
-                    <p class="chart-subtitle">Últimos @datosTemperatura.Count registros - Actualización en tiempo real</p>
+                    <h2 class="chart-title">Temperatura del Ambiente en Tiempo Real</h2>
+                    <p class="chart-subtitle">Actualización automática cada 2 segundos</p>
                 </div>
                 <div class="chart-container">
                     @if (cargandoTemperatura)
@@ -453,40 +476,63 @@
                             <span style="color: #ef4444; font-weight: 600;">Cargando datos...</span>
                         </div>
                     }
-                    else if (datosTemperatura.Any())
+                    else
                     {
                         <svg viewBox="0 0 400 250" class="chart-svg">
-                            <!-- Ejes -->
+                            <!-- Grid horizontal -->
+                            <line x1="50" y1="30" x2="370" y2="30" stroke="#fee2e2" stroke-width="1" stroke-dasharray="2,2" />
+                            <line x1="50" y1="72.5" x2="370" y2="72.5" stroke="#fee2e2" stroke-width="1" stroke-dasharray="2,2" />
+                            <line x1="50" y1="115" x2="370" y2="115" stroke="#fee2e2" stroke-width="1" stroke-dasharray="2,2" />
+                            <line x1="50" y1="157.5" x2="370" y2="157.5" stroke="#fee2e2" stroke-width="1" stroke-dasharray="2,2" />
+
+                            <!-- Ejes principales -->
                             <line x1="50" y1="200" x2="370" y2="200" class="chart-axis" />
                             <line x1="50" y1="30" x2="50" y2="200" class="chart-axis" />
 
                             <!-- Etiquetas eje Y -->
-                            <text x="25" y="35" class="chart-label">40</text>
-                            <text x="25" y="70" class="chart-label">35</text>
-                            <text x="25" y="110" class="chart-label">30</text>
-                            <text x="25" y="150" class="chart-label">25</text>
-                            <text x="25" y="200" class="chart-label">20</text>
+                            <text x="20" y="35" class="chart-label">45</text>
+                            <text x="20" y="77" class="chart-label">40</text>
+                            <text x="20" y="120" class="chart-label">35</text>
+                            <text x="20" y="162" class="chart-label">30</text>
+                            <text x="20" y="205" class="chart-label">25</text>
 
                             <!-- Título eje X -->
-                            <text x="180" y="240" class="chart-label">Tiempo (minutos)</text>
+                            <text x="180" y="240" class="chart-label">Tiempo →</text>
 
-                            <!-- Línea de la gráfica -->
-                            <polyline points="@GenerarPuntosTemperatura()" class="line-chart-temp" />
+                            <!-- LÍNEA HORIZONTAL ANIMADA -->
+                            <line x1="50"
+                                  y1="@CalcularPosicionTemperatura()"
+                                  x2="370"
+                                  y2="@CalcularPosicionTemperatura()"
+                                  class="line-chart-temp" />
 
-                            <!-- Puntos de datos -->
-                            @foreach (var punto in ObtenerPuntosVisualesTemp(datosTemperatura))
-                            {
-                                <circle cx="@punto.X" cy="@punto.Y" r="5" class="chart-point" style="color: #ef4444; fill: #ef4444;" />
-                            }
+                            <!-- Indicador del valor actual -->
+                            <circle cx="370"
+                                    cy="@CalcularPosicionTemperatura()"
+                                    r="6"
+                                    fill="#ef4444"
+                                    stroke="white"
+                                    stroke-width="2">
+                                <animate attributeName="r"
+                                         from="6"
+                                         to="8"
+                                         dur="1s"
+                                         repeatCount="indefinite" />
+                            </circle>
+
+                            <!-- Texto del valor actual -->
+                            <text x="375"
+                                  y="@(CalcularPosicionTemperatura() - 10)"
+                                  class="chart-label"
+                                  font-weight="bold"
+                                  fill="#ef4444">
+                                @valorActualTemperatura.ToString("F1")°C
+                            </text>
                         </svg>
                     }
-                    else
-                    {
-                        <div style="text-align: center; color: #6b7280;">
-                            <div style="font-size: 3rem; margin-bottom: 1rem;">🌡️</div>
-                            <div style="font-weight: 600;">No hay datos disponibles</div>
-                        </div>
-                    }
+                </div>
+                <div class="current-value" style="color: #ef4444;">
+                    Valor Actual: @valorActualTemperatura.ToString("F1")°C
                 </div>
                 <div class="update-time">
                     Última actualización: @ultimaActualizacion.ToString("HH:mm:ss")
@@ -582,16 +628,11 @@
     private DateTime ultimaActualizacion = DateTime.Now;
     private List<HistorialRiegoModel> historialDatos = new();
 
-    private List<DatoGrafica> datosHumedad = new();
-    private List<DatoGrafica> datosTemperatura = new();
-    private System.Timers.Timer? actualizacionTimer;
-    private int contadorTiempo = 0;
+    // Valores actuales para las líneas horizontales
+    private double valorActualHumedad = 50;
+    private double valorActualTemperatura = 25;
 
-    public class PuntoVisual
-    {
-        public double X { get; set; }
-        public double Y { get; set; }
-    }
+    private System.Timers.Timer? actualizacionTimer;
 
     protected override async Task OnInitializedAsync()
     {
@@ -611,35 +652,10 @@
 
     private void OnDatosArduinoRecibidos(DatosArduinoModel datos)
     {
-        // Actualizar datos de humedad en tiempo real
-        ActualizarGraficaHumedad(datos.Humedad);
-        InvokeAsync(StateHasChanged);
-    }
-
-    private void ActualizarGraficaHumedad(int nuevaHumedad)
-    {
-        // Asegurar que la humedad esté en rango válido (0-100)
-        var humedadAjustada = Math.Max(0, Math.Min(100, nuevaHumedad));
-
-        datosHumedad.Add(new DatoGrafica
-        {
-            Tiempo = contadorTiempo++,
-            Valor = humedadAjustada
-        });
-
-        // Mantener solo los últimos 15 puntos para que no se salga del eje
-        if (datosHumedad.Count > 15)
-        {
-            datosHumedad.RemoveAt(0);
-            // Reajustar índices de tiempo para mantener continuidad visual
-            for (int i = 0; i < datosHumedad.Count; i++)
-            {
-                datosHumedad[i].Tiempo = i;
-            }
-        }
-
+        // Actualizar valor actual de humedad
+        valorActualHumedad = Math.Max(0, Math.Min(100, datos.Humedad));
         ultimaActualizacion = DateTime.Now;
-        Console.WriteLine($"📊 [GRÁFICOS] Humedad actualizada: {humedadAjustada}%");
+        InvokeAsync(StateHasChanged);
     }
 
     private async Task ActualizarDatosAutomaticamente()
@@ -650,19 +666,20 @@
             var clima = await ClimaService.ObtenerClimaActualAsync();
             if (clima != null)
             {
-                ActualizarGraficaTemperatura((float)clima.Temperatura);
+                valorActualTemperatura = Math.Max(25, Math.Min(45, clima.Temperatura));
             }
 
             // Obtener estado del Arduino
             var estado = await ArduinoService.ObtenerEstadoAsync();
             if (estado != null)
             {
-                ActualizarGraficaHumedad(estado.Humedad);
+                valorActualHumedad = Math.Max(0, Math.Min(100, estado.Humedad));
             }
 
             // Actualizar historial
             await CargarHistorialReciente();
 
+            ultimaActualizacion = DateTime.Now;
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
@@ -671,26 +688,19 @@
         }
     }
 
-    private void ActualizarGraficaTemperatura(float nuevaTemperatura)
+    private double CalcularPosicionHumedad()
     {
-        datosTemperatura.Add(new DatoGrafica
-        {
-            Tiempo = datosTemperatura.Count,
-            Valor = nuevaTemperatura
-        });
+        // Mapear 0-100% al rango 200-30px (invertido, porque el eje Y va de arriba a abajo)
+        // 0% = y:200, 100% = y:30
+        return 200 - (valorActualHumedad * 1.7);
+    }
 
-        // Mantener solo los últimos 10 puntos
-        if (datosTemperatura.Count > 10)
-        {
-            datosTemperatura.RemoveAt(0);
-            for (int i = 0; i < datosTemperatura.Count; i++)
-            {
-                datosTemperatura[i].Tiempo = i;
-            }
-        }
-
-        ultimaActualizacion = DateTime.Now;
-        Console.WriteLine($"🌡️ [GRÁFICOS] Temperatura actualizada: {nuevaTemperatura}°C");
+    private double CalcularPosicionTemperatura()
+    {
+        // Mapear 25-45°C al rango 200-30px
+        // 25°C = y:200, 45°C = y:30
+        var valorNormalizado = (valorActualTemperatura - 25) / 20.0; // Normalizar a 0-1
+        return 200 - (valorNormalizado * 170); // Escalar al rango visual
     }
 
     private async Task CargarDatosIniciales()
@@ -704,24 +714,15 @@
             // Cargar historial completo
             await CargarHistorialReciente();
 
-            // Inicializar gráficas con datos históricos
+            // Inicializar valores actuales desde el historial
             if (historialDatos.Any())
             {
-                var ultimosRegistros = historialDatos.OrderByDescending(h => h.Fecha).Take(15).Reverse().ToList();
-
-                datosHumedad = ultimosRegistros.Select((h, index) => new DatoGrafica
+                var ultimoRegistro = historialDatos.OrderByDescending(h => h.Fecha).FirstOrDefault();
+                if (ultimoRegistro != null)
                 {
-                    Tiempo = index,
-                    Valor = h.Humedad
-                }).ToList();
-
-                datosTemperatura = ultimosRegistros.Take(10).Select((h, index) => new DatoGrafica
-                {
-                    Tiempo = index,
-                    Valor = h.Temperatura
-                }).ToList();
-
-                contadorTiempo = datosHumedad.Count;
+                    valorActualHumedad = ultimoRegistro.Humedad;
+                    valorActualTemperatura = ultimoRegistro.Temperatura;
+                }
 
                 Console.WriteLine($"✅ [GRÁFICOS] Datos iniciales cargados");
             }
@@ -753,60 +754,6 @@
         {
             Console.WriteLine($"❌ [GRÁFICOS] Error al cargar historial: {ex.Message}");
         }
-    }
-
-    private string GenerarPuntosHumedad()
-    {
-        if (!datosHumedad.Any()) return "";
-
-        var ancho = 320.0 / Math.Max(datosHumedad.Count - 1, 1);
-        var puntos = datosHumedad.Select((d, i) =>
-        {
-            var x = 50 + (i * ancho);
-            var y = 200 - (d.Valor * 1.7);
-            return $"{x},{y}";
-        });
-
-        return string.Join(" ", puntos);
-    }
-
-    private string GenerarPuntosTemperatura()
-    {
-        if (!datosTemperatura.Any()) return "";
-
-        var ancho = 320.0 / Math.Max(datosTemperatura.Count - 1, 1);
-        var puntos = datosTemperatura.Select((d, i) =>
-        {
-            var x = 50 + (i * ancho);
-            var y = 200 - ((d.Valor - 15) * 8.5);
-            return $"{x},{y}";
-        });
-
-        return string.Join(" ", puntos);
-    }
-
-    private List<PuntoVisual> ObtenerPuntosVisuales(List<DatoGrafica> datos)
-    {
-        if (!datos.Any()) return new List<PuntoVisual>();
-
-        var ancho = 320.0 / Math.Max(datos.Count - 1, 1);
-        return datos.Select((d, i) => new PuntoVisual
-        {
-            X = 50 + (i * ancho),
-            Y = 200 - (d.Valor * 1.7)
-        }).ToList();
-    }
-
-    private List<PuntoVisual> ObtenerPuntosVisualesTemp(List<DatoGrafica> datos)
-    {
-        if (!datos.Any()) return new List<PuntoVisual>();
-
-        var ancho = 320.0 / Math.Max(datos.Count - 1, 1);
-        return datos.Select((d, i) => new PuntoVisual
-        {
-            X = 50 + (i * ancho),
-            Y = 200 - ((d.Valor - 15) * 8.5)
-        }).ToList();
     }
 
     private void VolverDashboard()
