@@ -61,7 +61,6 @@ var app = builder.Build();
 // ===================================
 // PIPELINE HTTP
 // ===================================
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -69,7 +68,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+//app.UseStaticFiles();
 app.UseCors("AllowAll");
 app.UseAuthorization();
 app.MapControllers();
@@ -77,12 +76,20 @@ app.MapControllers();
 // Redirigir raíz a Swagger
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
+// Obtener las URLs dinámicamente
+var urls = app.Configuration.GetValue<string>("ASPNETCORE_URLS") ??
+           builder.Configuration.GetSection("applicationUrl").Value ??
+           "https://localhost:5001;http://localhost:5000";
+
+var httpsUrl = urls.Split(';').FirstOrDefault(u => u.StartsWith("https")) ?? "https://localhost:5001";
+var puerto = app.Configuration.GetValue<string>("SerialPort:Puerto") ?? "COM3";
+
 Console.WriteLine("════════════════════════════════════════════════════");
 Console.WriteLine("  🌱 API SMARTDROP - Sistema de Riego Automático");
 Console.WriteLine("════════════════════════════════════════════════════");
-Console.WriteLine($"🌐 API: https://localhost:7068");
-Console.WriteLine($"📚 Swagger: https://localhost:7068/swagger");
-Console.WriteLine($"🔌 Puerto Serial: {app.Configuration.GetValue<string>("SerialPort:Puerto")}");
+Console.WriteLine($"🌐 API: {httpsUrl}");
+Console.WriteLine($"📚 Swagger: {httpsUrl}/swagger");
+Console.WriteLine($"🔌 Puerto Serial: {puerto}");
 Console.WriteLine("════════════════════════════════════════════════════");
 Console.WriteLine();
 
