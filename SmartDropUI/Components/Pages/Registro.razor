@@ -340,8 +340,6 @@
                     <span class="label-icon icon-purple">🆔</span>
                     Identificación
                 </label>
-         
-                
                 <input type="text"
                        @bind="usuario.Identificacion"
                        placeholder="Ingrese su identificación"
@@ -421,37 +419,17 @@
 
             @if (!string.IsNullOrEmpty(mensajeExito))
             {
-                <p class="mensaje-exito">@mensajeExito</p>
-            }
-
-            @if (!string.IsNullOrEmpty(mensajeExito))
-            {
                 <div class="alert alert-success">
                     @mensajeExito
                 </div>
             }
 
-
-            @if (!string.IsNullOrEmpty(mensaje))
+            @if (!string.IsNullOrEmpty(mensajeError))
             {
-                <div class="alert alert-danger">
-                    @mensaje
+                <div class="alert alert-error">
+                    @mensajeError
                 </div>
             }
-
-            <button type="button"
-                    @onclick="HandleRegistro"
-                    disabled="@cargando"
-                    class="btn btn-primary">
-                @if (cargando)
-                {
-                    <span>⏳ Registrando...</span>
-                }
-                else
-                {
-                    <span>Registrarse</span>
-                }
-            </button>
 
             <div class="button-row">
                 <button class="btn btn-create" @onclick="HandleRegistro" disabled="@cargando">
@@ -468,58 +446,52 @@
 </div>
 
 @code {
-    // ✅ USAR UsuarioModel en lugar de Usuario
     private Usuario usuario = new Usuario();
-    private string mensaje = "";
-    private string mensajeExito = "";
     private bool mostrarPassword = false;
     private bool cargando = false;
+    private string mensajeError = string.Empty;
+    private string mensajeExito = string.Empty;
 
     private async Task HandleRegistro()
     {
+        mensajeError = string.Empty;
+        mensajeExito = string.Empty;
+
         // Validaciones
         if (usuario.Identificacion <= 0)
         {
-            mensaje = "❌ Ingrese una identificación válida";
-            mensajeExito = "";
+            mensajeError = "❌ Ingrese una identificación válida";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(usuario.NombreCompleto))
         {
-            mensaje = "❌ Ingrese su nombre completo";
-            mensajeExito = "";
+            mensajeError = "❌ Ingrese su nombre completo";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(usuario.Correo) || !usuario.Correo.Contains("@"))
         {
-            mensaje = "❌ Ingrese un correo válido";
-            mensajeExito = "";
+            mensajeError = "❌ Ingrese un correo válido";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(usuario.NombreUsuario))
         {
-            mensaje = "❌ Ingrese un nombre de usuario";
-            mensajeExito = "";
+            mensajeError = "❌ Ingrese un nombre de usuario";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(usuario.Contrasena) || usuario.Contrasena.Length < 6)
         {
-            mensaje = "❌ La contraseña debe tener al menos 6 caracteres";
-            mensajeExito = "";
+            mensajeError = "❌ La contraseña debe tener al menos 6 caracteres";
             return;
         }
 
         cargando = true;
-        mensaje = "";
-        mensajeExito = "";
 
         try
         {
-            // Mapear campos para la API
             var usuarioAPI = new
             {
                 idUsuario = usuario.Identificacion,
@@ -536,9 +508,6 @@
             if (response.IsSuccessStatusCode)
             {
                 mensajeExito = "✅ Usuario registrado correctamente";
-                mensaje = "";
-
-                // ✅ Limpiar formulario
                 usuario = new Usuario();
 
                 await Task.Delay(2000);
@@ -547,23 +516,16 @@
             else
             {
                 var error = await response.Content.ReadAsStringAsync();
-                mensaje = $"❌ Error: {error}";
-                mensajeExito = "";
+                mensajeError = $"❌ Error: {error}";
             }
         }
         catch (Exception ex)
         {
-            mensaje = $"❌ Error: {ex.Message}";
-            mensajeExito = "";
+            mensajeError = $"❌ Error: {ex.Message}";
         }
         finally
         {
             cargando = false;
         }
-    }
-
-    private void ToggleMostrarPassword()
-    {
-        mostrarPassword = !mostrarPassword;
     }
 }

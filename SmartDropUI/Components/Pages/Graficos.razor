@@ -1,6 +1,12 @@
 ﻿@page "/graficos"
+@using SmartDropUI.Services
+@using SmartDropUI.Models
+@using System.Timers
 @inject NavigationManager Navigation
+@inject HistorialRiegoService HistorialService
+@inject HttpClient Http
 @rendermode InteractiveServer
+@implements IDisposable
 
 <PageTitle>Gráficos - SmartDrop</PageTitle>
 
@@ -15,6 +21,53 @@
         min-height: 100vh;
         background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 50%, #cffafe 100%);
         padding: 2rem;
+    }
+    
+    .chart-label {
+        fill: #6b7280;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    
+    .chart-axis {
+        stroke: #9ca3af;
+        stroke-width: 2;
+    }
+    
+    .line-chart-humedad {
+        stroke: #10b981;
+        stroke-width: 3;
+        fill: none;
+    }
+    
+    .line-chart-temp {
+        stroke: #ef4444;
+        stroke-width: 3;
+        fill: none;
+    }
+    
+    .chart-point {
+        fill: currentColor;
+    }
+    
+    .chart-point-active {
+        fill: #10b981;
+        stroke: white;
+        stroke-width: 2;
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f4f6;
+        border-top-color: #10b981;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
     }
 
     .graficos-container {
@@ -232,23 +285,6 @@
         justify-content: center;
     }
 
-    .loading-icon {
-        font-size: 4rem;
-        color: #10b981;
-        margin-bottom: 1rem;
-        animation: spin 2s linear infinite;
-    }
-
-    @@keyframes spin {
-        0% {
-            transform: rotate(0deg);
-        }
-
-        100% {
-            transform: rotate(360deg);
-        }
-    }
-
     .loading-text {
         font-size: 1.1rem;
         font-weight: 600;
@@ -308,9 +344,27 @@
         color: #991b1b;
     }
 
-    .badge-info {
-        background: #dbeafe;
-        color: #1e40af;
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .graficos-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 50%, #cffafe 100%);
+        padding: 2rem;
+    }
+
+    .chart-label {
+        fill: #6b7280;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .chart-axis {
+        stroke: #9ca3af;
+        stroke-width: 2;
     }
 
     .line-chart-humedad {
@@ -329,23 +383,55 @@
         fill: currentColor;
     }
 
-    .chart-axis {
-        stroke: #9ca3af;
+    .chart-point-active {
+        fill: #10b981;
+        stroke: white;
         stroke-width: 2;
     }
 
-    .chart-label {
-        fill: #6b7280;
-        font-size: 12px;
-        font-weight: 500;
+    .loading-spinner {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f4f6;
+        border-top-color: #10b981;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
     }
 
-    @@media (max-width: 1200px) {
-        .charts-grid {
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .graficos-container {
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+    
+    @@media (max-width: 1024px) {
+        .sidebar {
+            transform: translateX(-100%);
+        }
+
+        .main-content {
+            margin-left: 0;
+        }
+
+        .cards-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .cards-grid {
             grid-template-columns: 1fr;
         }
     }
+
 </style>
+
 
 <div class="graficos-page">
     <div class="graficos-container">
@@ -361,32 +447,55 @@
             <div class="chart-card">
                 <div class="chart-header">
                     <h2 class="chart-title">Gráfica de la Humedad del Suelo</h2>
-                    <p class="chart-subtitle">Humedad – Vacío</p>
+                    <p class="chart-subtitle">Últimos @datosHumedad.Count registros</p>
                 </div>
                 <div class="chart-container">
-                    <svg viewBox="0 0 400 250" class="chart-svg">
-                        <line x1="50" y1="200" x2="370" y2="200" class="chart-axis" />
-                        <line x1="50" y1="30" x2="50" y2="200" class="chart-axis" />
-                        <text x="25" y="35" class="chart-label">100</text>
-                        <text x="30" y="90" class="chart-label">75</text>
-                        <text x="30" y="145" class="chart-label">50</text>
-                        <text x="30" y="200" class="chart-label">25</text>
-                        <text x="35" y="210" class="chart-label">0</text>
-                        <text x="70" y="220" class="chart-label">5</text>
-                        <text x="130" y="220" class="chart-label">10</text>
-                        <text x="190" y="220" class="chart-label">15</text>
-                        <text x="250" y="220" class="chart-label">20</text>
-                        <text x="310" y="220" class="chart-label">25</text>
-                        <text x="180" y="240" class="chart-label" style="font-weight: 600;">Tiempo (m)</text>
-                        <polyline points="70,165 100,155 130,150 160,145 190,120 220,135 250,125 280,145 310,140 340,150"
-                                  class="line-chart-humedad" />
-                        <circle cx="70" cy="165" r="4" class="chart-point" style="color: #10b981;" />
-                        <circle cx="130" cy="150" r="4" class="chart-point" style="color: #10b981;" />
-                        <circle cx="190" cy="120" r="4" class="chart-point" style="color: #10b981;" />
-                        <circle cx="250" cy="125" r="4" class="chart-point" style="color: #10b981;" />
-                        <circle cx="310" cy="140" r="4" class="chart-point" style="color: #10b981;" />
-                        <circle cx="340" cy="150" r="4" class="chart-point" style="color: #10b981;" />
-                    </svg>
+                    @if (cargandoHumedad)
+                    {
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                            <div class="loading-spinner"></div>
+                            <span style="color: #10b981; font-weight: 600;">Cargando datos...</span>
+                        </div>
+                    }
+                    else if (datosHumedad.Any())
+                    {
+                        <svg viewBox="0 0 400 250" class="chart-svg">
+                            <!-- Ejes -->
+                            <line x1="50" y1="200" x2="370" y2="200" class="chart-axis" />
+                            <line x1="50" y1="30" x2="50" y2="200" class="chart-axis" />
+                            
+                            <!-- Etiquetas eje Y -->
+                            <text x="25" y="35" class="chart-label">100</text>
+                            <text x="30" y="90" class="chart-label">75</text>
+                            <text x="30" y="145" class="chart-label">50</text>
+                            <text x="30" y="200" class="chart-label">25</text>
+                            <text x="35" y="210" class="chart-label">0</text>
+                            
+                            <!-- Etiquetas eje X -->
+                            @for (int i = 0; i < Math.Min(datosHumedad.Count, 6); i++)
+                            {
+                                var xPos = 70 + (i * 60);
+                                @: x="@xPos" y="220" class="chart-label">@i
+                            }
+                            <text x="180" y="240" class="chart-label">Registros</text>
+                            
+                            <!-- Línea de la gráfica -->
+                            <polyline points="@GenerarPuntosHumedad()" class="line-chart-humedad" />
+                            
+                            <!-- Puntos de datos -->
+                            @foreach (var punto in ObtenerPuntosVisuales(datosHumedad))
+                            {
+                                <circle cx="@punto.X" cy="@punto.Y" r="4" class="chart-point-active" />
+                            }
+                        </svg>
+                    }
+                    else
+                    {
+                        <div style="text-align: center; color: #6b7280;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+                            <div style="font-weight: 600;">No hay datos disponibles</div>
+                        </div>
+                    }
                 </div>
             </div>
 
@@ -394,32 +503,55 @@
             <div class="chart-card">
                 <div class="chart-header">
                     <h2 class="chart-title">Gráfico de la Temperatura del Ambiente</h2>
-                    <p class="chart-subtitle">Temperatura – Vacío</p>
+                    <p class="chart-subtitle">Últimos @datosTemperatura.Count registros</p>
                 </div>
                 <div class="chart-container">
-                    <svg viewBox="0 0 400 250" class="chart-svg">
-                        <line x1="50" y1="200" x2="370" y2="200" class="chart-axis" />
-                        <line x1="50" y1="30" x2="50" y2="200" class="chart-axis" />
-                        <text x="25" y="35" class="chart-label">35</text>
-                        <text x="25" y="70" class="chart-label">30</text>
-                        <text x="25" y="110" class="chart-label">25</text>
-                        <text x="25" y="150" class="chart-label">20</text>
-                        <text x="25" y="200" class="chart-label">15</text>
-                        <text x="70" y="220" class="chart-label">5</text>
-                        <text x="130" y="220" class="chart-label">10</text>
-                        <text x="190" y="220" class="chart-label">15</text>
-                        <text x="250" y="220" class="chart-label">20</text>
-                        <text x="310" y="220" class="chart-label">25</text>
-                        <text x="180" y="240" class="chart-label" style="font-weight: 600;">Tiempo (m)</text>
-                        <polyline points="70,145 100,140 130,140 160,135 190,110 220,100 250,105 280,115 310,120 340,125"
-                                  class="line-chart-temp" />
-                        <circle cx="70" cy="145" r="4" class="chart-point" style="color: #ef4444;" />
-                        <circle cx="130" cy="140" r="4" class="chart-point" style="color: #ef4444;" />
-                        <circle cx="190" cy="110" r="4" class="chart-point" style="color: #ef4444;" />
-                        <circle cx="220" cy="100" r="4" class="chart-point" style="color: #ef4444;" />
-                        <circle cx="280" cy="115" r="4" class="chart-point" style="color: #ef4444;" />
-                        <circle cx="340" cy="125" r="4" class="chart-point" style="color: #ef4444;" />
-                    </svg>
+                    @if (cargandoTemperatura)
+                    {
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                            <div class="loading-spinner"></div>
+                            <span style="color: #ef4444; font-weight: 600;">Cargando datos...</span>
+                        </div>
+                    }
+                    else if (datosTemperatura.Any())
+                    {
+                        <svg viewBox="0 0 400 250" class="chart-svg">
+                            <!-- Ejes -->
+                            <line x1="50" y1="200" x2="370" y2="200" class="chart-axis" />
+                            <line x1="50" y1="30" x2="50" y2="200" class="chart-axis" />
+                            
+                            <!-- Etiquetas eje Y -->
+                            <text x="25" y="35" class="chart-label">40</text>
+                            <text x="25" y="70" class="chart-label">35</text>
+                            <text x="25" y="110" class="chart-label">30</text>
+                            <text x="25" y="150" class="chart-label">25</text>
+                            <text x="25" y="200" class="chart-label">20</text>
+                            
+                            <!-- Etiquetas eje X -->
+                            @for (int i = 0; i < Math.Min(datosTemperatura.Count, 6); i++)
+                            {
+                                var xPos = 70 + (i * 60);
+                                <text> x="@xPos" y="220" class="chart-label">@i</text>
+                            }
+                            <text x="180" y="240" class="chart-label">Registros</text>
+                            
+                            <!-- Línea de la gráfica -->
+                            <polyline points="@GenerarPuntosTemperatura()" class="line-chart-temp" />
+                            
+                            <!-- Puntos de datos -->
+                            @foreach (var punto in ObtenerPuntosVisualesTemp(datosTemperatura))
+                            {
+                                <circle cx="@punto.X" cy="@punto.Y" r="4" class="chart-point" style="color: #ef4444;" />
+                            }
+                        </svg>
+                    }
+                    else
+                    {
+                        <div style="text-align: center; color: #6b7280;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🌡️</div>
+                            <div style="font-weight: 600;">No hay datos disponibles</div>
+                        </div>
+                    }
                 </div>
             </div>
 
@@ -448,15 +580,14 @@
             <!-- Historial -->
             <div class="historial-section">
                 <div class="historial-header">
-                    <div class="loading-icon">🔄</div>
-                    <h3 class="historial-title">Área de Historial de Datos</h3>
-                    <p class="historial-subtitle">Los registros históricos del sistema aparecerán aquí</p>
+                    <h3 class="historial-title">Historial de Riego</h3>
+                    <p class="historial-subtitle">Registros históricos del sistema</p>
                 </div>
 
                 @if (cargando)
                 {
                     <div class="loading-container">
-                        <div class="loading-icon">⏳</div>
+                        <div class="loading-spinner"></div>
                         <div class="loading-text">Cargando datos históricos...</div>
                     </div>
                 }
@@ -468,8 +599,6 @@
                                 <th>Fecha y Hora</th>
                                 <th>Humedad (%)</th>
                                 <th>Temperatura (°C)</th>
-                                <th>Estado del Riego</th>
-                                <th>Nivel de Agua</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -487,18 +616,17 @@
                                             @dato.Temperatura.ToString("F1")°C
                                         </span>
                                     </td>
-                                    <td>
-                                        <span class="badge badge-info">@dato.EstadoRiego</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge @ObtenerClaseNivelAgua(dato.NivelAgua)">
-                                            @dato.NivelAgua
-                                        </span>
-                                    </td>
                                 </tr>
                             }
                         </tbody>
                     </table>
+                }
+                else
+                {
+                    <div class="loading-container">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+                        <div class="loading-text">No hay datos históricos disponibles</div>
+                    </div>
                 }
             </div>
         </div>
@@ -507,38 +635,135 @@
 
 @code {
     private bool cargando = false;
+    private bool cargandoHumedad = false;
+    private bool cargandoTemperatura = false;
     private DateTime fechaBusqueda = DateTime.Now;
-    private List<HistorialDato> historialDatos = new();
+    private List<HistorialRiegoModel> historialDatos = new();
+    
+    // ✅ NOMBRES CORRECTOS para las gráficas
+    private List<DatoGrafica> datosHumedad = new();
+    private List<DatoGrafica> datosTemperatura = new();
+    private System.Timers.Timer? actualizacionTimer;
 
-    public class HistorialDato
+    public class PuntoVisual
     {
-        public DateTime Fecha { get; set; }
-        public double Humedad { get; set; }
-        public double Temperatura { get; set; }
-        public string EstadoRiego { get; set; } = "";
-        public string NivelAgua { get; set; } = "";
+        public double X { get; set; }
+        public double Y { get; set; }
     }
 
     protected override async Task OnInitializedAsync()
     {
         await CargarDatosIniciales();
+        
+        // Timer para actualizar cada 10 segundos
+        actualizacionTimer = new System.Timers.Timer(10000);
+        actualizacionTimer.Elapsed += async (sender, e) => await ActualizarDatosAutomaticamente();
+        actualizacionTimer.AutoReset = true;
+        actualizacionTimer.Start();
+    }
+
+    private async Task ActualizarDatosAutomaticamente()
+    {
+        await CargarDatosIniciales();
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task CargarDatosIniciales()
     {
         cargando = true;
-        await Task.Delay(1500);
+        cargandoHumedad = true;
+        cargandoTemperatura = true;
 
-        historialDatos = new List<HistorialDato>
+        try
         {
-            new() { Fecha = DateTime.Now.AddHours(-1), Humedad = 65.5, Temperatura = 24.3, EstadoRiego = "Activo", NivelAgua = "Alto" },
-            new() { Fecha = DateTime.Now.AddHours(-2), Humedad = 58.2, Temperatura = 26.1, EstadoRiego = "Inactivo", NivelAgua = "Medio" },
-            new() { Fecha = DateTime.Now.AddHours(-3), Humedad = 45.8, Temperatura = 28.5, EstadoRiego = "Activo", NivelAgua = "Alto" },
-            new() { Fecha = DateTime.Now.AddHours(-4), Humedad = 72.1, Temperatura = 22.7, EstadoRiego = "Completado", NivelAgua = "Medio" },
-            new() { Fecha = DateTime.Now.AddHours(-5), Humedad = 55.9, Temperatura = 25.4, EstadoRiego = "Inactivo", NivelAgua = "Bajo" }
-        };
+            // ✅ Obtener datos del historial desde la BD
+            var historial = await HistorialService.ObtenerHistorialAsync();
+            
+            if (historial != null && historial.Any())
+            {
+                historialDatos = historial.OrderByDescending(h => h.Fecha).Take(10).ToList();
+                
+                // ✅ Procesar datos para gráficas (últimos 10 registros)
+                var ultimosRegistros = historial.OrderByDescending(h => h.Fecha).Take(10).Reverse().ToList();
+                
+                datosHumedad = ultimosRegistros.Select((h, index) => new DatoGrafica
+                {
+                    Tiempo = index,
+                    Valor = h.Humedad
+                }).ToList();
+                
+                datosTemperatura = ultimosRegistros.Select((h, index) => new DatoGrafica
+                {
+                    Tiempo = index,
+                    Valor = h.Temperatura
+                }).ToList();
+                
+                Console.WriteLine($"✅ [GRÁFICOS] Cargados {historialDatos.Count} registros");
+            }
+            else
+            {
+                Console.WriteLine("⚠️ [GRÁFICOS] No hay datos disponibles");
+                historialDatos = new List<HistorialRiegoModel>();
+                datosHumedad = new List<DatoGrafica>();
+                datosTemperatura = new List<DatoGrafica>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [GRÁFICOS] Error al cargar datos: {ex.Message}");
+        }
+        finally
+        {
+            cargando = false;
+            cargandoHumedad = false;
+            cargandoTemperatura = false;
+        }
+    }
 
-        cargando = false;
+    private string GenerarPuntosHumedad()
+    {
+        if (!datosHumedad.Any()) return "";
+        
+        var puntos = datosHumedad.Select((d, i) =>
+        {
+            var x = 70 + (i * 60);
+            var y = 200 - (d.Valor * 1.7); // Escala: 0-100% → 200-30px
+            return $"{x},{y}";
+        });
+        
+        return string.Join(" ", puntos);
+    }
+
+    private string GenerarPuntosTemperatura()
+    {
+        if (!datosTemperatura.Any()) return "";
+        
+        var puntos = datosTemperatura.Select((d, i) =>
+        {
+            var x = 70 + (i * 60);
+            var y = 200 - ((d.Valor - 15) * 8.5); // Escala: 15-35°C → 200-30px
+            return $"{x},{y}";
+        });
+        
+        return string.Join(" ", puntos);
+    }
+
+    private List<PuntoVisual> ObtenerPuntosVisuales(List<DatoGrafica> datos)
+    {
+        return datos.Select((d, i) => new PuntoVisual
+        {
+            X = 70 + (i * 60),
+            Y = 200 - (d.Valor * 1.7)
+        }).ToList();
+    }
+
+    private List<PuntoVisual> ObtenerPuntosVisualesTemp(List<DatoGrafica> datos)
+    {
+        return datos.Select((d, i) => new PuntoVisual
+        {
+            X = 70 + (i * 60),
+            Y = 200 - ((d.Valor - 15) * 8.5)
+        }).ToList();
     }
 
     private void VolverDashboard()
@@ -559,32 +784,49 @@
     private async Task BuscarPorFecha()
     {
         cargando = true;
-        await Task.Delay(1000);
-        cargando = false;
+        
+        try
+        {
+            var resultados = await HistorialService.ObtenerPorFechaAsync(fechaBusqueda);
+            
+            if (resultados != null && resultados.Any())
+            {
+                historialDatos = resultados;
+                Console.WriteLine($"✅ [GRÁFICOS] {resultados.Count} registros encontrados para {fechaBusqueda:dd/MM/yyyy}");
+            }
+            else
+            {
+                Console.WriteLine($"⚠️ [GRÁFICOS] No hay registros para {fechaBusqueda:dd/MM/yyyy}");
+                historialDatos = new List<HistorialRiegoModel>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [GRÁFICOS] Error en búsqueda: {ex.Message}");
+        }
+        finally
+        {
+            cargando = false;
+        }
     }
 
-    private string ObtenerClaseHumedad(double humedad)
+    private string ObtenerClaseHumedad(float humedad)
     {
-        if (humedad < 40) return "badge-danger";
+        if (humedad < 30) return "badge-danger";
         if (humedad < 60) return "badge-warning";
         return "badge-success";
     }
 
-    private string ObtenerClaseTemperatura(double temperatura)
+    private string ObtenerClaseTemperatura(float temperatura)
     {
-        if (temperatura < 18 || temperatura > 30) return "badge-danger";
-        if (temperatura < 20 || temperatura > 28) return "badge-warning";
+        if (temperatura < 15 || temperatura > 35) return "badge-danger";
+        if (temperatura < 18 || temperatura > 30) return "badge-warning";
         return "badge-success";
     }
 
-    private string ObtenerClaseNivelAgua(string nivel)
+    public void Dispose()
     {
-        return nivel.ToLower() switch
-        {
-            "bajo" => "badge-danger",
-            "medio" => "badge-warning",
-            "alto" => "badge-success",
-            _ => "badge-info"
-        };
+        actualizacionTimer?.Stop();
+        actualizacionTimer?.Dispose();
     }
 }

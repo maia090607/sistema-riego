@@ -8,9 +8,9 @@
 @inject NavigationManager Navigation
 @inject ApiService ApiService
 @inject ILogger<Dashboard> Logger
+@inject HistorialRiegoService HistorialService
 @rendermode InteractiveServer
 @implements IDisposable
-@inject HistorialRiegoService HistorialService
 
 <PageTitle>Dashboard - SmartDrop</PageTitle>
 
@@ -275,29 +275,23 @@
     }
 
     @@media (max-width: 1024px) {
-        .sidebar
+        .sidebar {
+            transform: translateX(-100%);
+        }
 
-    {
-        transform: translateX(-100%);
-    }
+        .main-content {
+            margin-left: 0;
+        }
 
-    .main-content {
-        margin-left: 0;
-    }
-
-    .cards-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
+        .cards-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
 
     @@media (max-width: 640px) {
-        .cards-grid
-
-    {
-        grid-template-columns: 1fr;
-    }
-
+        .cards-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
@@ -466,6 +460,7 @@
     {
         ArduinoService.DatosRecibidos += OnDatosArduinoRecibidos;
         await CargarUltimoRiegoAsync();
+        await ActualizarDatosClimaAsync();
 
         actualizacionTimer = new System.Timers.Timer(5000);
         actualizacionTimer.Elapsed += async (sender, e) => await ActualizarDatosAsync();
@@ -509,11 +504,35 @@
                 bombaActiva = estado.BombaEncendida;
             }
             await CargarUltimoRiegoAsync();
+            await ActualizarDatosClimaAsync();
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"❌ [DASHBOARD] Error: {ex.Message}");
+        }
+    }
+
+    private async Task ActualizarDatosClimaAsync()
+    {
+        try
+        {
+            var datosClima = await ClimaService.ObtenerClimaActualAsync();
+
+            if (datosClima != null)
+            {
+                temperaturaActual = (float)datosClima.Temperatura;
+                humedadAire = datosClima.Humedad;
+                viento = $"{datosClima.VelocidadViento:F1} m/s";
+                pronostico = datosClima.Descripcion;
+
+                Console.WriteLine($"🌤️ [DASHBOARD] Clima: {temperaturaActual}°C, {humedadAire}%");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [DASHBOARD] Error clima: {ex.Message}");
+            pronostico = "Error al cargar";
         }
     }
 
