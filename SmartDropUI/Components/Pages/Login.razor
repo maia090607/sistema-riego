@@ -279,7 +279,31 @@
             font-size: 3rem;
         }
     }
+
+    
+    .login-container {
+        width: 100%;
+        max-width: 400px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    .login-title {
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .login-button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 15px;
+        cursor: pointer;
+    }
+
 </style>
+
 
 <div class="login-page">
     <div class="decorations">
@@ -302,6 +326,8 @@
         </div>
 
         <div class="login-form-container">
+
+            <!-- Usuario -->
             <div class="form-field">
                 <label>Usuario</label>
                 <div class="input-group">
@@ -313,14 +339,17 @@
                 </div>
             </div>
 
+            <!-- Contraseña -->
             <div class="form-field">
                 <label>Contraseña</label>
                 <div class="input-group">
                     <span class="input-icon">🔒</span>
+
                     <input type="@(mostrarPassword ? "text" : "password")"
                            @bind="loginModel.Password"
                            placeholder="Contraseña"
                            class="form-control" />
+
                     <button type="button"
                             class="password-toggle"
                             @onclick="() => mostrarPassword = !mostrarPassword">
@@ -329,35 +358,52 @@
                 </div>
             </div>
 
+            <!-- Alertas -->
             @if (!string.IsNullOrEmpty(mensajeError))
             {
                 <div class="alert alert-error">@mensajeError</div>
             }
 
-            <button class="btn btn-primary" @onclick="HandleLogin" disabled="@cargando">
+            @if (!string.IsNullOrEmpty(mensajeExito))
+            {
+                <div class="alert alert-success">@mensajeExito</div>
+            }
+
+            <!-- Botón Ingresar -->
+            <button class="btn btn-primary"
+                    @onclick="HandleLogin"
+                    disabled="@cargando">
                 <span class="btn-icon">💧</span>
                 @(cargando ? "Accediendo..." : "Acceder")
             </button>
 
-            <button class="btn btn-secondary" @onclick='() => Navigation.NavigateTo("/registro")'>
+            <!-- Botón Crear Cuenta -->
+            <button class="btn btn-secondary"
+                    @onclick='() => Navigation.NavigateTo("/registro")'>
                 <span class="btn-icon">✨</span>
                 Crear Cuenta
             </button>
+
         </div>
     </div>
 </div>
 
 @code {
+
     private LoginModel loginModel = new();
     private bool mostrarPassword = false;
     private bool cargando = false;
+
     private string mensajeError = string.Empty;
+    private string mensajeExito = string.Empty;
 
     private async Task HandleLogin()
     {
         cargando = true;
         mensajeError = string.Empty;
+        mensajeExito = string.Empty;
 
+        // Validación
         if (string.IsNullOrWhiteSpace(loginModel.Usuario) ||
             string.IsNullOrWhiteSpace(loginModel.Password))
         {
@@ -366,8 +412,22 @@
             return;
         }
 
-        await Task.Delay(500);
-        Navigation.NavigateTo("/dashboard");
+        // Login
+        var (success, message) = await AuthService.LoginAsync(
+            loginModel.Usuario, loginModel.Password);
+
+        if (success)
+        {
+            mensajeExito = message;
+
+            await Task.Delay(500);
+            Navigation.NavigateTo("/dashboard", forceLoad: true);
+        }
+        else
+        {
+            mensajeError = message;
+        }
+
         cargando = false;
     }
 }

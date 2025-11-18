@@ -15,7 +15,7 @@ namespace SmartDropUI.Services
             _logger = logger;
         }
 
-        // ✅ Usuario en lugar de UsuarioModel
+        // ✅ Obtener usuarios (usando UsuarioModel que es el mismo que Usuario)
         public async Task<List<Usuario>?> ObtenerUsuariosAsync()
         {
             try
@@ -30,6 +30,7 @@ namespace SmartDropUI.Services
                     return null;
                 }
 
+                // ✅ La API devuelve directamente la lista
                 var usuarios = await response.Content.ReadFromJsonAsync<List<Usuario>>();
 
                 _logger.LogInformation($"✅ [API] {usuarios?.Count ?? 0} usuarios obtenidos");

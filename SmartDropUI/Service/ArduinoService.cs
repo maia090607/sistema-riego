@@ -9,14 +9,15 @@ namespace SmartDropUI.Services
         private readonly string _portName;
         private readonly int _baudRate;
         private bool _isConnected = false;
+        private readonly HistorialRiegoService? _historialService;
 
-        // Evento para notificar cambios en los datos
         public event Action<DatosArduinoModel>? DatosRecibidos;
 
-        public ArduinoService(string portName = "COM3", int baudRate = 9600)
+        public ArduinoService(string portName = "COM3", int baudRate = 9600, HistorialRiegoService? historialService = null)
         {
             _portName = portName;
             _baudRate = baudRate;
+            _historialService = historialService;
         }
 
         public bool Conectar()
@@ -63,9 +64,39 @@ namespace SmartDropUI.Services
             return resultado;
         }
 
+        // ✅ GUARDAR EN BD AL DETENER RIEGO
         public async Task<bool> DetenerRiegoManualAsync()
         {
             Console.WriteLine("📤 [ARDUINO] Enviando comando MANUAL_OFF...");
+
+            // ✅ Guardar datos antes de detener
+            if (UltimosDatos != null && _historialService != null)
+            {
+                try
+                {
+                    var historial = new HistorialRiegoModel
+                    {
+                        Fecha = DateTime.Now,
+                        Humedad = UltimosDatos.Humedad,
+                        Temperatura = 0 // ✅ Obtener de sensor si está disponible
+                    };
+
+                    bool guardado = await _historialService.GuardarRiegoAsync(historial);
+                    if (guardado)
+                    {
+                        Console.WriteLine("💾 [ARDUINO] Historial guardado en BD");
+                    }
+                    else
+                    {
+                        Console.WriteLine("⚠️ [ARDUINO] No se pudo guardar el historial");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ [ARDUINO] Error al guardar historial: {ex.Message}");
+                }
+            }
+
             var resultado = await EnviarComandoAsync("MANUAL_OFF");
             Console.WriteLine($"📥 [ARDUINO] Resultado MANUAL_OFF: {resultado}");
             return resultado;
@@ -88,18 +119,18 @@ namespace SmartDropUI.Services
         {
             if (!_isConnected || _serialPort?.IsOpen != true)
             {
-                Console.WriteLine("⚠️ [ARDUINO] Arduino no conectado, no se puede obtener estado");
+                Console.WriteLine("⚠️ [ARDUINO] Arduino no conectado");
                 return null;
             }
 
             try
             {
                 await EnviarComandoAsync("GET_STATUS");
-                await Task.Delay(200); // Esperar respuesta
+                await Task.Delay(200);
 
                 if (UltimosDatos != null)
                 {
-                    Console.WriteLine($"📊 [ARDUINO] Estado obtenido - Humedad: {UltimosDatos.Humedad}, Bomba: {UltimosDatos.BombaEncendida}, Modo: {UltimosDatos.ModoManual}");
+                    Console.WriteLine($"📊 [ARDUINO] Estado obtenido - Humedad: {UltimosDatos.Humedad}, Bomba: {UltimosDatos.BombaEncendida}");
                 }
 
                 return UltimosDatos;
@@ -115,7 +146,7 @@ namespace SmartDropUI.Services
         {
             if (!_isConnected || _serialPort?.IsOpen != true)
             {
-                Console.WriteLine("⚠️ [ARDUINO] No se puede enviar comando, Arduino no conectado");
+                Console.WriteLine("⚠️ [ARDUINO] No se puede enviar comando");
                 return false;
             }
 
@@ -173,19 +204,10 @@ namespace SmartDropUI.Services
 
                         UltimosDatos = datos;
 
-                        Console.WriteLine($"📊 [ARDUINO] Datos procesados - Humedad: {datos.Humedad}, Bomba: {(datos.BombaEncendida ? "ON" : "OFF")}, Modo: {(datos.ModoManual ? "Manual" : "Automático")}");
+                        Console.WriteLine($"📊 [ARDUINO] Humedad: {datos.Humedad}%, Bomba: {(datos.BombaEncendida ? "ON" : "OFF")}");
 
-                        // ✅ Notificar a los suscriptores (Dashboard)
                         DatosRecibidos?.Invoke(datos);
                     }
-                }
-                else if (data.StartsWith("OK:"))
-                {
-                    Console.WriteLine($"✅ [ARDUINO] {data}");
-                }
-                else
-                {
-                    Console.WriteLine($"📨 [ARDUINO] Mensaje: {data}");
                 }
             }
             catch (Exception ex)

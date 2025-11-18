@@ -49,5 +49,25 @@ namespace SmartDropUI.Services
                 return null;
             }
         }
+
+        public async Task<List<Usuario>> ObtenerUsuariosAsync()
+        {   
+            try
+            {
+                var response = await _httpClient.GetAsync("api/usuarios");
+
+                if (!response.IsSuccessStatusCode)
+                    return new List<Usuario>();
+
+                var data = await response.Content.ReadFromJsonAsync<List<Usuario>>();
+                return data ?? new List<Usuario>();
+            }
+            catch
+            {
+                return new List<Usuario>();
+            }
+        }
+
+
     }
 }

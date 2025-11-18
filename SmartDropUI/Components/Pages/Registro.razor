@@ -468,11 +468,10 @@
 </div>
 
 @code {
+    // ✅ USAR UsuarioModel en lugar de Usuario
     private Usuario usuario = new Usuario();
     private string mensaje = "";
-    private string mensajeError = "";
     private string mensajeExito = "";
-    private bool mostrarError = false;
     private bool mostrarPassword = false;
     private bool cargando = false;
 
@@ -539,6 +538,7 @@
                 mensajeExito = "✅ Usuario registrado correctamente";
                 mensaje = "";
 
+                // ✅ Limpiar formulario
                 usuario = new Usuario();
 
                 await Task.Delay(2000);
