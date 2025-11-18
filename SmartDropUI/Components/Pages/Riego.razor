@@ -555,6 +555,8 @@
                     InvokeAsync(StateHasChanged);
                 };
                 timer.Start();
+
+                // ✅ NO detenemos automáticamente, el usuario debe hacer clic en "DETENER"
             }
         }
         finally

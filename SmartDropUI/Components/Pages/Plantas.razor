@@ -303,7 +303,7 @@
                     MANIPULAR PLANTAS
                 </button>
             </div>
-
+            
             <div class="content-grid">
                 <!-- Sección de información -->
                 <div class="info-section">
@@ -345,6 +345,43 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- REEMPLAZA SOLO LA SECCIÓN DEL MENÚ EN Plantas.razor -->
+                <!-- No tiene sidebar, no requiere cambios -->
+                <!-- NOTA: Plantas.razor no tiene sidebar en el código proporcionado. -->
+                <!-- Si agregas un sidebar posteriormente, usa este menú: -->
+
+                <nav class="menu-section">
+                    <div class="menu-title">Principal</div>
+                    <div class="menu-item" @onclick='() => Navigation.NavigateTo("/dashboard")'>
+                        <span class="menu-icon">🎛️</span>
+                        Panel de Control
+                    </div>
+
+                    <div class="menu-title">Gestión</div>
+                    <div class="menu-item active" @onclick='() => Navigation.NavigateTo("/plantas")'>
+                        <span class="menu-icon">🌱</span>
+                        Plantas
+                    </div>
+                    <div class="menu-item" @onclick='() => Navigation.NavigateTo("/graficos")'>
+                        <span class="menu-icon">📊</span>
+                        Gráficos
+                    </div>
+                    <div class="menu-item" @onclick='() => Navigation.NavigateTo("/usuarios")'>
+                        <span class="menu-icon">👥</span>
+                        Usuarios
+                    </div>
+
+                    <div class="menu-title">Sistema</div>
+                    <div class="menu-item" @onclick='() => Navigation.NavigateTo("/riego")'>
+                        <span class="menu-icon">💧</span>
+                        Riego
+                    </div>
+                    <div class="menu-item" @onclick='() => Navigation.NavigateTo("/historial-riego")'>
+                        <span class="menu-icon">📋</span>
+                        Historial Riego
+                    </div>
+                </nav>
 
                 <!-- Sección de descripción -->
                 <div class="description-section">

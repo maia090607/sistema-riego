@@ -8,7 +8,7 @@
     body {
         margin: 0;
         padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     .graficos-page {
@@ -93,7 +93,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        position: relative;
     }
 
     .chart-svg {
@@ -117,10 +116,6 @@
         text-transform: uppercase;
     }
 
-    .control-group {
-        margin-bottom: 1.5rem;
-    }
-
     .btn-control {
         width: 100%;
         padding: 1rem;
@@ -135,11 +130,11 @@
         gap: 0.5rem;
         transition: all 0.3s ease;
         margin-bottom: 1rem;
+        color: white;
     }
 
     .btn-reload {
         background: #10b981;
-        color: white;
         box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
@@ -150,7 +145,6 @@
 
     .btn-manual {
         background: #10b981;
-        color: white;
         box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
@@ -193,7 +187,6 @@
 
     .btn-search {
         background: #3b82f6;
-        color: white;
         box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
 
@@ -320,7 +313,6 @@
         color: #1e40af;
     }
 
-    /* Estilos para el SVG de las gráficas */
     .line-chart-humedad {
         stroke: #10b981;
         stroke-width: 3;
@@ -342,12 +334,6 @@
         stroke-width: 2;
     }
 
-    .chart-grid {
-        stroke: #e5e7eb;
-        stroke-width: 1;
-        stroke-dasharray: 4;
-    }
-
     .chart-label {
         fill: #6b7280;
         font-size: 12px;
@@ -363,7 +349,7 @@
 
 <div class="graficos-page">
     <div class="graficos-container">
-        <button class="btn-back-menu" @onclick='() => Navigation.NavigateTo("/dashboard")'>
+        <button class="btn-back-menu" @onclick="VolverDashboard">
             <span>⬅️</span>
             Volver al Dashboard
         </button>
@@ -379,32 +365,21 @@
                 </div>
                 <div class="chart-container">
                     <svg viewBox="0 0 400 250" class="chart-svg">
-                        <!-- Ejes -->
                         <line x1="50" y1="200" x2="370" y2="200" class="chart-axis" />
                         <line x1="50" y1="30" x2="50" y2="200" class="chart-axis" />
-
-                        <!-- Etiquetas Y -->
                         <text x="25" y="35" class="chart-label">100</text>
                         <text x="30" y="90" class="chart-label">75</text>
                         <text x="30" y="145" class="chart-label">50</text>
                         <text x="30" y="200" class="chart-label">25</text>
                         <text x="35" y="210" class="chart-label">0</text>
-
-                        <!-- Etiquetas X -->
                         <text x="70" y="220" class="chart-label">5</text>
                         <text x="130" y="220" class="chart-label">10</text>
                         <text x="190" y="220" class="chart-label">15</text>
                         <text x="250" y="220" class="chart-label">20</text>
                         <text x="310" y="220" class="chart-label">25</text>
-
-                        <!-- Título eje X -->
                         <text x="180" y="240" class="chart-label" style="font-weight: 600;">Tiempo (m)</text>
-
-                        <!-- Línea de datos -->
                         <polyline points="70,165 100,155 130,150 160,145 190,120 220,135 250,125 280,145 310,140 340,150"
                                   class="line-chart-humedad" />
-
-                        <!-- Puntos de datos -->
                         <circle cx="70" cy="165" r="4" class="chart-point" style="color: #10b981;" />
                         <circle cx="130" cy="150" r="4" class="chart-point" style="color: #10b981;" />
                         <circle cx="190" cy="120" r="4" class="chart-point" style="color: #10b981;" />
@@ -415,7 +390,7 @@
                 </div>
             </div>
 
-            <!-- Gráfica de Temperatura del Ambiente -->
+            <!-- Gráfica de Temperatura -->
             <div class="chart-card">
                 <div class="chart-header">
                     <h2 class="chart-title">Gráfico de la Temperatura del Ambiente</h2>
@@ -423,32 +398,21 @@
                 </div>
                 <div class="chart-container">
                     <svg viewBox="0 0 400 250" class="chart-svg">
-                        <!-- Ejes -->
                         <line x1="50" y1="200" x2="370" y2="200" class="chart-axis" />
                         <line x1="50" y1="30" x2="50" y2="200" class="chart-axis" />
-
-                        <!-- Etiquetas Y -->
                         <text x="25" y="35" class="chart-label">35</text>
                         <text x="25" y="70" class="chart-label">30</text>
                         <text x="25" y="110" class="chart-label">25</text>
                         <text x="25" y="150" class="chart-label">20</text>
                         <text x="25" y="200" class="chart-label">15</text>
-
-                        <!-- Etiquetas X -->
                         <text x="70" y="220" class="chart-label">5</text>
                         <text x="130" y="220" class="chart-label">10</text>
                         <text x="190" y="220" class="chart-label">15</text>
                         <text x="250" y="220" class="chart-label">20</text>
                         <text x="310" y="220" class="chart-label">25</text>
-
-                        <!-- Título eje X -->
                         <text x="180" y="240" class="chart-label" style="font-weight: 600;">Tiempo (m)</text>
-
-                        <!-- Línea de datos -->
                         <polyline points="70,145 100,140 130,140 160,135 190,110 220,100 250,105 280,115 310,120 340,125"
                                   class="line-chart-temp" />
-
-                        <!-- Puntos de datos -->
                         <circle cx="70" cy="145" r="4" class="chart-point" style="color: #ef4444;" />
                         <circle cx="130" cy="140" r="4" class="chart-point" style="color: #ef4444;" />
                         <circle cx="190" cy="110" r="4" class="chart-point" style="color: #ef4444;" />
@@ -459,25 +423,21 @@
                 </div>
             </div>
 
-            <!-- Controles del Sistema -->
+            <!-- Controles -->
             <div class="controls-sidebar">
                 <h3 class="controls-title">Controles del Sistema</h3>
-                <div class="control-group">
-                    <button class="btn-control btn-reload" @onclick="RecargarHistorial">
-                        <span>🔄</span>
-                        RECARGAR HISTORIAL
-                    </button>
-                    <button class="btn-control btn-manual" @onclick="IniciarRiegoManual">
-                        <span>💧</span>
-                        INICIAR RIEGO MANUAL
-                    </button>
-                </div>
+                <button class="btn-control btn-reload" @onclick="RecargarHistorial">
+                    <span>🔄</span>
+                    RECARGAR HISTORIAL
+                </button>
+                <button class="btn-control btn-manual" @onclick="IrARiego">
+                    <span>💧</span>
+                    INICIAR RIEGO MANUAL
+                </button>
 
                 <div class="search-section">
                     <h4 class="search-title">Buscar por Fecha</h4>
-                    <input type="date"
-                           class="date-input"
-                           @bind="fechaBusqueda" />
+                    <input type="date" class="date-input" @bind="fechaBusqueda" />
                     <button class="btn-control btn-search" @onclick="BuscarPorFecha">
                         <span>🔍</span>
                         BUSCAR
@@ -485,7 +445,7 @@
                 </div>
             </div>
 
-            <!-- Historial de Datos -->
+            <!-- Historial -->
             <div class="historial-section">
                 <div class="historial-header">
                     <div class="loading-icon">🔄</div>
@@ -518,12 +478,12 @@
                                 <tr>
                                     <td>@dato.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
                                     <td>
-                                        <span class="badge @GetHumedadClass(dato.Humedad)">
+                                        <span class="badge @ObtenerClaseHumedad(dato.Humedad)">
                                             @dato.Humedad.ToString("F1")%
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge @GetTemperaturaClass(dato.Temperatura)">
+                                        <span class="badge @ObtenerClaseTemperatura(dato.Temperatura)">
                                             @dato.Temperatura.ToString("F1")°C
                                         </span>
                                     </td>
@@ -531,7 +491,7 @@
                                         <span class="badge badge-info">@dato.EstadoRiego</span>
                                     </td>
                                     <td>
-                                        <span class="badge @GetNivelAguaClass(dato.NivelAgua)">
+                                        <span class="badge @ObtenerClaseNivelAgua(dato.NivelAgua)">
                                             @dato.NivelAgua
                                         </span>
                                     </td>
@@ -548,9 +508,9 @@
 @code {
     private bool cargando = false;
     private DateTime fechaBusqueda = DateTime.Now;
-    private List<DatoHistorial> historialDatos = new();
+    private List<HistorialDato> historialDatos = new();
 
-    public class DatoHistorial
+    public class HistorialDato
     {
         public DateTime Fecha { get; set; }
         public double Humedad { get; set; }
@@ -569,8 +529,7 @@
         cargando = true;
         await Task.Delay(1500);
 
-        // Datos de ejemplo
-        historialDatos = new List<DatoHistorial>
+        historialDatos = new List<HistorialDato>
         {
             new() { Fecha = DateTime.Now.AddHours(-1), Humedad = 65.5, Temperatura = 24.3, EstadoRiego = "Activo", NivelAgua = "Alto" },
             new() { Fecha = DateTime.Now.AddHours(-2), Humedad = 58.2, Temperatura = 26.1, EstadoRiego = "Inactivo", NivelAgua = "Medio" },
@@ -582,40 +541,43 @@
         cargando = false;
     }
 
+    private void VolverDashboard()
+    {
+        Navigation.NavigateTo("/dashboard");
+    }
+
+    private void IrARiego()
+    {
+        Navigation.NavigateTo("/riego");
+    }
+
     private async Task RecargarHistorial()
     {
         await CargarDatosIniciales();
-    }
-
-    private async Task IniciarRiegoManual()
-    {
-        // Lógica para iniciar riego manual
-        await Task.CompletedTask;
     }
 
     private async Task BuscarPorFecha()
     {
         cargando = true;
         await Task.Delay(1000);
-        // Aquí filtrarías los datos según la fecha seleccionada
         cargando = false;
     }
 
-    private string GetHumedadClass(double humedad)
+    private string ObtenerClaseHumedad(double humedad)
     {
         if (humedad < 40) return "badge-danger";
         if (humedad < 60) return "badge-warning";
         return "badge-success";
     }
 
-    private string GetTemperaturaClass(double temperatura)
+    private string ObtenerClaseTemperatura(double temperatura)
     {
         if (temperatura < 18 || temperatura > 30) return "badge-danger";
         if (temperatura < 20 || temperatura > 28) return "badge-warning";
         return "badge-success";
     }
 
-    private string GetNivelAguaClass(string nivel)
+    private string ObtenerClaseNivelAgua(string nivel)
     {
         return nivel.ToLower() switch
         {

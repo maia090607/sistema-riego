@@ -470,6 +470,40 @@
                 </div>
             </div>
 
+            <!-- MENÚ EN Usuarios.razor -->
+
+            <nav class="menu-section">
+                <div class="menu-title">Principal</div>
+                <div class="menu-item" @onclick='() => Navigation.NavigateTo("/dashboard")'>
+                    <span class="menu-icon">🎛️</span>
+                    Panel de Control
+                </div>
+
+                <div class="menu-title">Gestión</div>
+                <div class="menu-item" @onclick='() => Navigation.NavigateTo("/plantas")'>
+                    <span class="menu-icon">🌱</span>
+                    Plantas
+                </div>
+                <div class="menu-item" @onclick='() => Navigation.NavigateTo("/graficos")'>
+                    <span class="menu-icon">📊</span>
+                    Gráficos
+                </div>
+                <div class="menu-item active" @onclick='() => Navigation.NavigateTo("/usuarios")'>
+                    <span class="menu-icon">👥</span>
+                    Usuarios
+                </div>
+
+                <div class="menu-title">Sistema</div>
+                <div class="menu-item" @onclick='() => Navigation.NavigateTo("/riego")'>
+                    <span class="menu-icon">💧</span>
+                    Riego
+                </div>
+                <div class="menu-item" @onclick='() => Navigation.NavigateTo("/historial-riego")'>
+                    <span class="menu-icon">📋</span>
+                    Historial Riego
+                </div>
+            </nav>
+
             <!-- Lista de usuarios -->
             <div class="users-list-section">
                 <h3 class="list-title">Lista de Usuarios Registrados</h3>
