@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
 using RiegoAPI.DTOs.Request;
+using RiegoAPI.DTOs.Response;
+using static System.Net.WebRequestMethods;
 
 namespace RiegoAPI.Controllers
 {
@@ -11,7 +14,7 @@ namespace RiegoAPI.Controllers
         public IActionResult Login([FromBody] LoginRequestDTO request)
         {
             // Aquí irá tu lógica de autenticación
-            if (request.NombreUsuario == "admin" && request.Password == "admin")
+            if (request.NombreUsuario == "admin" && request.Password == "admin123")
             {
                 return Ok(new { token = "token_simulado_123" });
             }
@@ -25,5 +28,4 @@ namespace RiegoAPI.Controllers
             return Ok(new { message = "Usuario creado exitosamente" });
         }
     }
-
 }

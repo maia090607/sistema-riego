@@ -4,14 +4,7 @@ using System.Net.Http.Json;
 
 namespace SmartDropUI.Services
 {
-    // ✅ Clase ApiResponse genérica
-    public class ApiResponse<T>
-    {
-        public bool success { get; set; }
-        public string message { get; set; } = "";
-        public T? data { get; set; }
-    }
-
+    
     public class AuthService
     {
         private readonly HttpClient _httpClient;

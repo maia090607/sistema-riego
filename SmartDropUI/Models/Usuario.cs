@@ -1,4 +1,6 @@
-﻿namespace SmartDropUI.Models
+﻿using System.Text.Json.Serialization;
+
+namespace SmartDropUI.Models
 {
     /// <summary>
     /// Clase Usuario para operaciones de autenticación y API
@@ -17,6 +19,8 @@
         public string Password { get; set; } = "";  // ✅ Alias para la API
         public string Rol { get; set; } = "";
         public string RutaImagen { get; set; } = "";
+
+        [JsonPropertyName("accedio")]
         public bool Accedio { get; set; }
     }
 }

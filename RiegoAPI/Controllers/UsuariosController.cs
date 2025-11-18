@@ -108,25 +108,40 @@ namespace API.Controllers
 
         // POST: api/usuarios/login
         [HttpPost("login")]
-        public ActionResult<UsuarioResponseDTO> Login([FromBody] LoginRequestDTO request)
+        public ActionResult Login([FromBody] LoginRequestDTO request)
         {
             if (string.IsNullOrWhiteSpace(request.NombreUsuario) ||
                 string.IsNullOrWhiteSpace(request.Password))
             {
-                return BadRequest("Usuario y contraseña son requeridos");
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Usuario y contraseña son requeridos"
+                });
             }
 
             var resultado = _serviciosUsuario.ValidarCredenciales(request.NombreUsuario, request.Password);
 
             if (resultado.Entidad == null)
-                return Unauthorized("Usuario o contraseña incorrectos");
+            {
+                return Ok(new
+                {
+                    success = false,
+                    message = "Usuario o contraseña incorrectos"
+                });
+            }
 
             resultado.Entidad.Accedio = true;
             _serviciosUsuario.Actualizar(resultado.Entidad);
 
             var responseDTO = UsuarioMapper.ToResponseDTO(resultado.Entidad);
 
-            return Ok(responseDTO);
+            return Ok(new
+            {
+                success = true,
+                message = "Login exitoso",
+                data = responseDTO
+            });
         }
 
         // POST: api/usuarios/logout/{id}
