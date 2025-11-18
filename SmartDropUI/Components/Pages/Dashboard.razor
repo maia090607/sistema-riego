@@ -11,11 +11,8 @@
 @rendermode InteractiveServer
 @implements IDisposable
 @inject HistorialRiegoService HistorialService
-@inject NavigationManager Navigation
-
 
 <PageTitle>Dashboard - SmartDrop</PageTitle>
-
 
 <style>
     body {
@@ -181,59 +178,36 @@
         font-size: 0.875rem;
     }
 
-    /* Control Panel Section */
-    .control-panel-section {
+    /* Cards Grid - 3 columnas */
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-card {
         background: white;
         border-radius: 1.5rem;
-        padding: 2.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        margin-bottom: 2rem;
-    }
-
-    .panel-title {
-        font-size: 1.75rem;
-        font-weight: bold;
-        color: #10b981;
-        text-align: center;
-        margin-bottom: 0.5rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .panel-subtitle {
-        text-align: center;
-        color: #6b7280;
-        font-size: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .control-cards-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.5rem;
-    }
-
-    .control-card {
-        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-        border-radius: 1rem;
-        padding: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         text-align: center;
         border-top: 4px solid #10b981;
         transition: all 0.3s;
     }
 
-        .control-card:hover {
+        .info-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.12);
         }
 
-    .control-card-icon {
-        font-size: 2.5rem;
-        margin-bottom: 0.75rem;
+    .card-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
     }
 
-    .control-card-title {
-        font-size: 0.7rem;
+    .card-title {
+        font-size: 0.85rem;
         font-weight: 700;
         color: #10b981;
         text-transform: uppercase;
@@ -241,10 +215,18 @@
         margin-bottom: 0.75rem;
     }
 
-    .control-card-value {
+    .card-label {
+        font-size: 0.75rem;
+        color: #6b7280;
+        font-style: italic;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-value {
         font-size: 2rem;
         font-weight: 700;
         color: #1f2937;
+        margin-bottom: 0.75rem;
     }
 
     .temp-value {
@@ -255,33 +237,14 @@
         color: #3b82f6;
     }
 
-    .forecast-value {
-        font-size: 1rem;
-        color: #f59e0b;
-    }
-
-    .wind-value {
-        color: #6366f1;
-    }
-
-    .control-card-badge {
+    .card-status-badge {
         display: inline-block;
-        padding: 0.5rem 1.25rem;
+        padding: 0.5rem 1rem;
         border-radius: 9999px;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-    }
-
-    .badge-time {
-        background: #d1fae5;
-        color: #065f46;
-    }
-
-    .badge-soil {
-        background: #fef3c7;
-        color: #92400e;
     }
 
     .badge-inactive {
@@ -299,24 +262,42 @@
         color: #1e40af;
     }
 
+    .badge-time {
+        background: #d1fae5;
+        color: #065f46;
+        font-size: 0.85rem;
+    }
+
+    .badge-forecast {
+        background: #fef3c7;
+        color: #92400e;
+        font-size: 1rem;
+    }
+
     @@media (max-width: 1024px) {
-        .sidebar {
-            transform: translateX(-100%);
-        }
+        .sidebar
 
-        .main-content {
-            margin-left: 0;
-        }
+    {
+        transform: translateX(-100%);
+    }
 
-        .control-cards-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
+    .main-content {
+        margin-left: 0;
+    }
+
+    .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
     }
 
     @@media (max-width: 640px) {
-        .control-cards-grid {
-            grid-template-columns: 1fr;
-        }
+        .cards-grid
+
+    {
+        grid-template-columns: 1fr;
+    }
+
     }
 </style>
 
@@ -369,43 +350,6 @@
         </div>
     </aside>
 
-    <h3>Dashboard</h3>
-    @if (usuarios == null)
-    {
-        <p>Cargando usuarios...</p>
-    }
-    else if (!usuarios.Any())
-    {
-        <p>No hay usuarios registrados.</p>
-    }
-    else
-    {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Email</th>
-                    <th>Rol</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var usuario in usuarios)
-                {
-                    <tr>
-                        <td>@usuario.IdUsuario</td>
-                        <td>@usuario.Nombre</td>
-                        <td>@usuario.Email</td>
-                        <td>@usuario.Rol</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-
-
-
-
     <!-- Main Content -->
     <main class="main-content">
         <div class="top-bar">
@@ -416,16 +360,13 @@
             <div class="mode-badge">Sistema Activo</div>
         </div>
 
-        <h1 class="page-title">SISTEMA DE RIEGO AUTOMÁTICO SMARTDROP</h1>
-        <p class="page-subtitle">Panel de Control y Monitoreo en Tiempo Real</p>
-
         <div class="cards-grid">
-
             <!-- Temperatura -->
             <div class="info-card">
                 <div class="card-icon">🌡️</div>
-                <h3 class="card-title">TEMPERATURA</h3>
-                <div class="card-value" style="color: #f97316;">
+                <div class="card-title">TEMPERATURA</div>
+                <div class="card-label">Temperatura</div>
+                <div class="card-value temp-value">
                     @temperaturaActual°C
                 </div>
             </div>
@@ -433,28 +374,32 @@
             <!-- Humedad del Aire -->
             <div class="info-card">
                 <div class="card-icon">💧</div>
-                <h3 class="card-title">HUMEDAD DEL AIRE</h3>
-                <div class="card-value" style="color: #3b82f6;">
+                <div class="card-title">HUMEDAD DEL AIRE</div>
+                <div class="card-label">Humedad</div>
+                <div class="card-value humidity-value">
                     @humedadAire%
                 </div>
             </div>
 
-            <!-- Tarjeta Bomba de Agua - ACTUALIZADA -->
+            <!-- Bomba de Agua -->
             <div class="info-card">
                 <div class="card-icon">💧</div>
-                <h3 class="card-title">BOMBA DE AGUA</h3>
-                <div class="card-value" style="color: @(bombaActiva ? "#10b981" : "#6b7280");">
+                <div class="card-title">BOMBA DE AGUA</div>
+                <div class="card-label">Estado</div>
+                <div class="card-value" style="color: @(bombaActiva ? "#10b981" : "#6b7280"); font-size: 1.5rem;">
                     @(bombaActiva ? "ACTIVA" : "INACTIVA")
                 </div>
                 <div class="card-status-badge @(bombaActiva ? "badge-active" : "badge-inactive")">
-                    @(bombaActiva ? "ENCENDIDA" : "APAGADA")
+                    @(bombaActiva ? "● Activa" : "○ Inactiva")
                 </div>
             </div>
 
+            <!-- Último Riego -->
             <div class="info-card">
                 <div class="card-icon">📅</div>
-                <h3 class="card-title">ÚLTIMO RIEGO</h3>
-                <div class="card-value" style="font-size: 1.2rem; color: #10b981;">
+                <div class="card-title">ÚLTIMO RIEGO</div>
+                <div class="card-label">Fecha</div>
+                <div class="card-status-badge badge-time">
                     @(ultimoRiego.HasValue
                                         ? ultimoRiego.Value.ToString("dd/MM/yyyy HH:mm")
                                         : "Sin registros")
@@ -464,8 +409,9 @@
             <!-- Pronóstico -->
             <div class="info-card">
                 <div class="card-icon">🌤️</div>
-                <h3 class="card-title">PRONÓSTICO</h3>
-                <div class="card-value" style="font-size: 1.5rem;">
+                <div class="card-title">PRONÓSTICO</div>
+                <div class="card-label">Pronóstico</div>
+                <div class="card-status-badge badge-forecast">
                     @pronostico
                 </div>
             </div>
@@ -473,8 +419,9 @@
             <!-- Viento -->
             <div class="info-card">
                 <div class="card-icon">💨</div>
-                <h3 class="card-title">VIENTO</h3>
-                <div class="card-value" style="color: #3b82f6;">
+                <div class="card-title">VIENTO</div>
+                <div class="card-label">Viento</div>
+                <div class="card-value" style="color: #6366f1;">
                     @viento
                 </div>
             </div>
@@ -482,15 +429,17 @@
             <!-- Estado del Programa -->
             <div class="info-card">
                 <div class="card-icon">💻</div>
-                <h3 class="card-title">ESTADO DEL PROGRAMA</h3>
-                <div class="card-value" style="color: #10b981;">ONLINE</div>
-                <div class="card-status-badge badge-online">ACTIVO</div>
+                <div class="card-title">ESTADO DEL PROGRAMA</div>
+                <div class="card-label">Estado</div>
+                <div class="card-value" style="color: #10b981; font-size: 1.5rem;">ONLINE</div>
+                <div class="card-status-badge badge-online">● Online</div>
             </div>
 
-            <!-- Tarjeta de Humedad del Suelo - ACTUALIZADA -->
+            <!-- Humedad del Suelo -->
             <div class="info-card">
                 <div class="card-icon">🌱</div>
-                <h3 class="card-title">HUMEDAD DEL SUELO</h3>
+                <div class="card-title">HUMEDAD DEL SUELO</div>
+                <div class="card-label">Humedad</div>
                 <div class="card-value" style="color: @ObtenerColorHumedad(humedadSuelo);">
                     @humedadSuelo%
                 </div>
@@ -499,7 +448,6 @@
                     @ObtenerEstadoHumedad(humedadSuelo)
                 </div>
             </div>
-
         </div>
     </main>
 </div>
@@ -513,21 +461,13 @@
     private string pronostico = "Cargando...";
     private string viento = "0 m/s";
     private System.Timers.Timer? actualizacionTimer;
-    private List<Usuario> usuarios = new();
 
     protected override async Task OnInitializedAsync()
     {
-        // Cargar usuarios
-        usuarios = await RiegoService.ObtenerUsuariosAsync();
-
-        // Suscribirse a eventos de Arduino
         ArduinoService.DatosRecibidos += OnDatosArduinoRecibidos;
-
-        // Cargar último riego desde BD
         await CargarUltimoRiegoAsync();
 
-        // ✅ Inicializar y configurar el timer
-        actualizacionTimer = new System.Timers.Timer(5000); // Actualizar cada 5 segundos
+        actualizacionTimer = new System.Timers.Timer(5000);
         actualizacionTimer.Elapsed += async (sender, e) => await ActualizarDatosAsync();
         actualizacionTimer.AutoReset = true;
         actualizacionTimer.Start();
@@ -535,63 +475,48 @@
         Console.WriteLine("✅ [DASHBOARD] Inicializado correctamente");
     }
 
-    // ✅ Cargar último riego desde BD
     private async Task CargarUltimoRiegoAsync()
     {
         try
         {
             var ultimoRiegoModel = await HistorialService.ObtenerUltimoRiegoAsync();
-
             if (ultimoRiegoModel != null)
             {
                 ultimoRiego = ultimoRiegoModel.Fecha;
-                Console.WriteLine($"✅ [DASHBOARD] Último riego: {ultimoRiego}");
-            }
-            else
-            {
-                Console.WriteLine("⚠️ [DASHBOARD] No hay registros de riego en BD");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ [DASHBOARD] Error al cargar último riego: {ex.Message}");
+            Console.WriteLine($"❌ [DASHBOARD] Error: {ex.Message}");
         }
     }
 
-    // ✅ Evento: datos desde Arduino
     private void OnDatosArduinoRecibidos(DatosArduinoModel datos)
     {
         humedadSuelo = datos.Humedad;
         bombaActiva = datos.BombaEncendida;
-
         InvokeAsync(StateHasChanged);
     }
 
-    // ✅ Actualización periódica
     private async Task ActualizarDatosAsync()
     {
         try
         {
             var estado = await ArduinoService.ObtenerEstadoAsync();
-
             if (estado != null)
             {
                 humedadSuelo = estado.Humedad;
                 bombaActiva = estado.BombaEncendida;
             }
-
-            // ✅ Actualizar último riego desde BD
             await CargarUltimoRiegoAsync();
-
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ [DASHBOARD] Error al actualizar: {ex.Message}");
+            Console.WriteLine($"❌ [DASHBOARD] Error: {ex.Message}");
         }
     }
 
-    // ✅ Colores humedad
     private string ObtenerColorHumedad(int h)
     {
         if (h < 30) return "#ef4444";
@@ -623,7 +548,6 @@
     public void Dispose()
     {
         ArduinoService.DatosRecibidos -= OnDatosArduinoRecibidos;
-
         actualizacionTimer?.Stop();
         actualizacionTimer?.Dispose();
     }

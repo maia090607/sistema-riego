@@ -1,4 +1,7 @@
 ﻿@page "/usuarios"
+@using SmartDropUI.Services
+@using SmartDropUI.Models
+@inject RiegoService RiegoService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
@@ -57,6 +60,133 @@
 
     .page-subtitle {
         font-size: 1rem;
+        color: #6b7280;
+    }
+
+    /* Tabla de Usuarios */
+    .usuarios-table-section {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+    }
+
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .table-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #10b981;
+    }
+
+    .btn-refresh {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+        .btn-refresh:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+    .table-container {
+        overflow-x: auto;
+        border-radius: 0.75rem;
+        border: 1px solid #e5e7eb;
+    }
+
+    .usuarios-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .usuarios-table thead {
+            background: #10b981;
+            color: white;
+        }
+
+        .usuarios-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.5px;
+        }
+
+        .usuarios-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+        }
+
+        .usuarios-table tbody tr {
+            transition: background 0.2s ease;
+        }
+
+            .usuarios-table tbody tr:hover {
+                background: #f0fdf4;
+            }
+
+    .badge-rol {
+        display: inline-block;
+        padding: 0.375rem 0.875rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+    }
+
+    .rol-admin {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .rol-operador {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .rol-invitado {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .rol-cuidador {
+        background: #f3e8ff;
+        color: #6b21a8;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: #f9fafb;
+        border-radius: 0.75rem;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #10b981;
+    }
+
+    .empty-text {
+        font-size: 1.1rem;
         color: #6b7280;
     }
 
@@ -200,12 +330,10 @@
         background: #10b981;
         color: white;
         box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        border: 2px solid #10b981;
     }
 
         .btn-edit:hover {
-            background: white;
-            color: #10b981;
+            background: #059669;
             transform: translateY(-2px);
         }
 
@@ -242,7 +370,7 @@
             transform: translateY(-2px);
         }
 
-    /* Sidebar derecha - Lista de usuarios */
+    /* Sidebar derecha - Lista */
     .users-list-section {
         background: white;
         border-radius: 1.5rem;
@@ -312,46 +440,6 @@
         color: #6b7280;
     }
 
-    .user-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
-
-    .btn-user-action {
-        background: none;
-        border: none;
-        color: #10b981;
-        cursor: pointer;
-        font-size: 0.85rem;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        transition: all 0.2s;
-    }
-
-        .btn-user-action:hover {
-            background: #f0fdf4;
-            color: #059669;
-        }
-
-    /* Scrollbar personalizado */
-    .users-list::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    .users-list::-webkit-scrollbar-track {
-        background: #f3f4f6;
-        border-radius: 4px;
-    }
-
-    .users-list::-webkit-scrollbar-thumb {
-        background: #10b981;
-        border-radius: 4px;
-    }
-
-        .users-list::-webkit-scrollbar-thumb:hover {
-            background: #059669;
-        }
-
     @@media (max-width: 1200px) {
         .content-grid
 
@@ -382,6 +470,75 @@
             <p class="page-subtitle">Administra y gestiona los usuarios del sistema SmartDrop</p>
         </div>
 
+        <!-- Tabla de Usuarios -->
+        <div class="usuarios-table-section">
+            <div class="table-header">
+                <h2 class="table-title">👥 Usuarios Registrados</h2>
+                <button class="btn-refresh" @onclick="CargarUsuarios">
+                    <span>🔄</span>
+                    Actualizar
+                </button>
+            </div>
+
+            @if (cargando)
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">⏳</div>
+                    <p class="empty-text">Cargando usuarios...</p>
+                </div>
+            }
+            else if (usuarios == null || !usuarios.Any())
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">👤</div>
+                    <p class="empty-text">No hay usuarios registrados</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-container">
+                    <table class="usuarios-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Usuario</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var usuario in usuarios)
+                            {
+                                <tr>
+                                    <td>@usuario.IdUsuario</td>
+                                    <td>@usuario.Nombre</td>
+                                    <td>@usuario.Email</td>
+                                    <td>@usuario.NombreUsuario</td>
+                                    <td>
+                                        <span class="badge-rol @ObtenerClaseRol(usuario.Rol)">
+                                            @usuario.Rol
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (usuario.Accedio)
+                                        {
+                                            <span style="color: #10b981;">● Activo</span>
+                                        }
+                                        else
+                                        {
+                                            <span style="color: #6b7280;">○ Inactivo</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
         <div class="content-grid">
             <!-- Perfil del usuario -->
             <div class="profile-section">
@@ -393,7 +550,7 @@
                     Subir Foto
                 </button>
                 <h3 class="profile-role-title">@usuarioSeleccionado.Rol</h3>
-                <p class="profile-role-subtitle">Administrador del Sistema</p>
+                <p class="profile-role-subtitle">Usuario del Sistema</p>
             </div>
 
             <!-- Información del usuario -->
@@ -439,13 +596,8 @@
                                 @bind="usuarioSeleccionado.Rol"
                                 disabled="@(!modoEdicion)">
                             <option value="Administrador">Administrador</option>
-                            <option value="Operador">Operador</option>
-                            <option value="Invitado">Invitado</option>
-                            <option value="Supervisor">Supervisor</option>
-                            <option value="Técnico">Técnico</option>
-                            <option value="Monitorista">Monitorista</option>
-                            <option value="Analista de Riego">Analista de Riego</option>
-                            <option value="Usuario General">Usuario General</option>
+                            <option value="Cuidador">Cuidador</option>
+                            <option value="Usuario">Usuario</option>
                         </select>
                     </div>
                 </div>
@@ -470,45 +622,11 @@
                 </div>
             </div>
 
-            <!-- MENÚ EN Usuarios.razor -->
-
-            <nav class="menu-section">
-                <div class="menu-title">Principal</div>
-                <div class="menu-item" @onclick='() => Navigation.NavigateTo("/dashboard")'>
-                    <span class="menu-icon">🎛️</span>
-                    Panel de Control
-                </div>
-
-                <div class="menu-title">Gestión</div>
-                <div class="menu-item" @onclick='() => Navigation.NavigateTo("/plantas")'>
-                    <span class="menu-icon">🌱</span>
-                    Plantas
-                </div>
-                <div class="menu-item" @onclick='() => Navigation.NavigateTo("/graficos")'>
-                    <span class="menu-icon">📊</span>
-                    Gráficos
-                </div>
-                <div class="menu-item active" @onclick='() => Navigation.NavigateTo("/usuarios")'>
-                    <span class="menu-icon">👥</span>
-                    Usuarios
-                </div>
-
-                <div class="menu-title">Sistema</div>
-                <div class="menu-item" @onclick='() => Navigation.NavigateTo("/riego")'>
-                    <span class="menu-icon">💧</span>
-                    Riego
-                </div>
-                <div class="menu-item" @onclick='() => Navigation.NavigateTo("/historial-riego")'>
-                    <span class="menu-icon">📋</span>
-                    Historial Riego
-                </div>
-            </nav>
-
             <!-- Lista de usuarios -->
             <div class="users-list-section">
-                <h3 class="list-title">Lista de Usuarios Registrados</h3>
+                <h3 class="list-title">Lista de Usuarios</h3>
                 <div class="users-list">
-                    @foreach (var usuario in usuarios)
+                    @foreach (var usuario in usuariosLista)
                     {
                         <div class="user-item @(usuario.Id == usuarioSeleccionado.Id ? "active" : "")"
                              @onclick="() => SeleccionarUsuario(usuario)">
@@ -516,11 +634,6 @@
                             <div class="user-info">
                                 <div class="user-name">@usuario.NombreCompleto</div>
                                 <div class="user-role">@usuario.Rol</div>
-                            </div>
-                            <div class="user-actions">
-                                <button class="btn-user-action" @onclick:stopPropagation="true" @onclick="() => VerUsuario(usuario)">
-                                    Ver / Editar
-                                </button>
                             </div>
                         </div>
                     }
@@ -531,27 +644,24 @@
 </div>
 
 @code {
+    private List<Usuario>? usuarios;
+    private bool cargando = false;
     private bool modoEdicion = false;
+
     private UsuarioGestionModel usuarioSeleccionado = new()
     {
         Id = 1,
         Identificacion = "USR001",
-        NombreUsuario = "admin_user",
-        NombreCompleto = "Administrador Principal",
+        NombreUsuario = "admin",
+        NombreCompleto = "Administrador",
         Correo = "admin@smartdrop.com",
         Rol = "Administrador"
     };
 
-    private List<UsuarioGestionModel> usuarios = new()
+    private List<UsuarioGestionModel> usuariosLista = new()
     {
-        new() { Id = 1, NombreCompleto = "Usuario 1", Rol = "Administrador", Identificacion = "USR001", NombreUsuario = "admin", Correo = "admin@smartdrop.com" },
-        new() { Id = 2, NombreCompleto = "Usuario 2", Rol = "Operador", Identificacion = "USR002", NombreUsuario = "operador1", Correo = "operador@smartdrop.com" },
-        new() { Id = 3, NombreCompleto = "Usuario 3", Rol = "Invitado", Identificacion = "USR003", NombreUsuario = "invitado1", Correo = "invitado@smartdrop.com" },
-        new() { Id = 4, NombreCompleto = "Usuario 4", Rol = "Supervisor", Identificacion = "USR004", NombreUsuario = "supervisor1", Correo = "supervisor@smartdrop.com" },
-        new() { Id = 5, NombreCompleto = "Usuario 5", Rol = "Técnico", Identificacion = "USR005", NombreUsuario = "tecnico1", Correo = "tecnico@smartdrop.com" },
-        new() { Id = 6, NombreCompleto = "Usuario 6", Rol = "Monitorista", Identificacion = "USR006", NombreUsuario = "monitor1", Correo = "monitor@smartdrop.com" },
-        new() { Id = 7, NombreCompleto = "Usuario 7", Rol = "Analista de Riego", Identificacion = "USR007", NombreUsuario = "analista1", Correo = "analista@smartdrop.com" },
-        new() { Id = 8, NombreCompleto = "Usuario 8", Rol = "Usuario General", Identificacion = "USR008", NombreUsuario = "usuario1", Correo = "usuario@smartdrop.com" }
+        new() { Id = 1, NombreCompleto = "Admin SmartDrop", Rol = "Administrador", Identificacion = "USR001", NombreUsuario = "admin", Correo = "admin@smartdrop.com" },
+        new() { Id = 2, NombreCompleto = "Juan Pérez", Rol = "Cuidador", Identificacion = "USR002", NombreUsuario = "juan", Correo = "juan@smartdrop.com" }
     };
 
     public class UsuarioGestionModel
@@ -562,6 +672,29 @@
         public string NombreCompleto { get; set; } = "";
         public string Correo { get; set; } = "";
         public string Rol { get; set; } = "";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarUsuarios();
+    }
+
+    private async Task CargarUsuarios()
+    {
+        cargando = true;
+        usuarios = await RiegoService.ObtenerUsuariosAsync();
+        cargando = false;
+    }
+
+    private string ObtenerClaseRol(string rol)
+    {
+        return rol.ToLower() switch
+        {
+            "administrador" => "rol-admin",
+            "cuidador" => "rol-cuidador",
+            "operador" => "rol-operador",
+            _ => "rol-invitado"
+        };
     }
 
     private void SeleccionarUsuario(UsuarioGestionModel usuario)
@@ -578,32 +711,26 @@
         modoEdicion = false;
     }
 
-    private void VerUsuario(UsuarioGestionModel usuario)
-    {
-        SeleccionarUsuario(usuario);
-    }
-
     private void HabilitarEdicion()
     {
         modoEdicion = true;
     }
 
-    private async Task GuardarCambios()
+    private void GuardarCambios()
     {
         if (modoEdicion)
         {
-            var usuarioEnLista = usuarios.FirstOrDefault(u => u.Id == usuarioSeleccionado.Id);
-            if (usuarioEnLista != null)
+            var usuario = usuariosLista.FirstOrDefault(u => u.Id == usuarioSeleccionado.Id);
+            if (usuario != null)
             {
-                usuarioEnLista.Identificacion = usuarioSeleccionado.Identificacion;
-                usuarioEnLista.NombreUsuario = usuarioSeleccionado.NombreUsuario;
-                usuarioEnLista.NombreCompleto = usuarioSeleccionado.NombreCompleto;
-                usuarioEnLista.Correo = usuarioSeleccionado.Correo;
-                usuarioEnLista.Rol = usuarioSeleccionado.Rol;
+                usuario.Identificacion = usuarioSeleccionado.Identificacion;
+                usuario.NombreUsuario = usuarioSeleccionado.NombreUsuario;
+                usuario.NombreCompleto = usuarioSeleccionado.NombreCompleto;
+                usuario.Correo = usuarioSeleccionado.Correo;
+                usuario.Rol = usuarioSeleccionado.Rol;
             }
             modoEdicion = false;
         }
-        await Task.CompletedTask;
     }
 
     private void CerrarSesion()
@@ -613,13 +740,13 @@
 
     private void EliminarUsuario()
     {
-        var usuario = usuarios.FirstOrDefault(u => u.Id == usuarioSeleccionado.Id);
+        var usuario = usuariosLista.FirstOrDefault(u => u.Id == usuarioSeleccionado.Id);
         if (usuario != null)
         {
-            usuarios.Remove(usuario);
-            if (usuarios.Any())
+            usuariosLista.Remove(usuario);
+            if (usuariosLista.Any())
             {
-                usuarioSeleccionado = usuarios.First();
+                usuarioSeleccionado = usuariosLista.First();
             }
         }
     }
