@@ -1,6 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using SmartDropUI.Services;
-using SmartDropUI.Components;  // ✅ AGREGAR ESTA LÍNEA
+using SmartDropUI.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,10 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// HttpClient para consumir RiegoAPI
+// ✅ CAMBIO: Usar el puerto correcto de RiegoAPI (7068)
 builder.Services.AddHttpClient<ApiService>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:5001");
+    client.BaseAddress = new Uri("https://localhost:7068"); // ✅ Puerto correcto
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
@@ -44,7 +44,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-// ✅ Ahora App está disponible gracias al using SmartDropUI.Components
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

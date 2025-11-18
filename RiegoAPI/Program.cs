@@ -1,51 +1,21 @@
 ﻿using BLL;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi;
 using RiegoAPI.Controllers;
 using RiegoAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ===========================
-// CONFIGURACIÓN DE SERVICIOS
+// SERVICIOS BÁSICOS
 // ===========================
 
 builder.Services.AddSingleton<IArduinoService, ArduinoService>();
 builder.Services.AddControllers();
 
-
-// LA CONFIGURACION DE SWAGGER ESTABA REPETIDA, TENIA DOS Y CADA UNA SU INICIALIZACION, QUITE LA PRIMERA QUE SE VEIA MAS BASICA
-// Agregar controladores
-builder.Services.AddControllers();
-
-// Configurar Swagger/OpenAPI para documentación
-// NO SE
+// ✅ Swagger básico
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "SmartDrop - Sistema de Riego Automático",
-        Version = "v1",
+builder.Services.AddSwaggerGen();
 
-        Description = @"
-![SmartDrop Logo](https://tusitio.com/img/smartdrop-logo.png)
-
-API RESTful para el sistema de riego automático con Arduino.
-
-**Contacto:** Equipo de Desarrollo",
-        Contact = new OpenApiContact
-        {
-            Name = "Equipo de Desarrollo",
-            Email = "contacto@smartdrop.com",
-            Url = new Uri("https://smartdrop.com")
-        }
-    });
-});
-
-// Configurar CORS para permitir llamadas desde cualquier origen
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -56,10 +26,9 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Configuración de HttpClient global
+// HttpClient
 builder.Services.AddHttpClient();
 
-// HttpClient específico para OpenWeather
 builder.Services.AddHttpClient("OpenWeather", client =>
 {
     client.BaseAddress = new Uri("https://api.openweathermap.org/data/2.5/");
@@ -67,7 +36,7 @@ builder.Services.AddHttpClient("OpenWeather", client =>
 });
 
 // ===================================
-// REGISTRAR SERVICIOS DE LA CAPA BLL
+// SERVICIOS DE LA CAPA BLL
 // ===================================
 
 builder.Services.AddScoped<ServiciosPlanta>();
@@ -78,7 +47,7 @@ builder.Services.AddScoped<ServicioClima>();
 builder.Services.AddScoped<ServiciosHumedad>();
 builder.Services.AddScoped<ServicioGraficas>();
 
-// Servicio Singleton para puerto serial
+// Puerto Serial
 builder.Services.AddSingleton<ServicioPuerto>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
@@ -87,91 +56,34 @@ builder.Services.AddSingleton<ServicioPuerto>(provider =>
     return new ServicioPuerto(puerto, baudRate);
 });
 
-// Habilitar archivos estáticos
-builder.Services.AddDirectoryBrowser();
-
-// Configurar CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowBlazor", policy =>
-    {
-        policy.WithOrigins("https://localhost:5001", "http://localhost:5000")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-
 var app = builder.Build();
 
-// Usar CORS
-app.UseCors("AllowBlazor");
-
 // ===================================
-// CONFIGURACIÓN DEL PIPELINE HTTP
+// PIPELINE HTTP
 // ===================================
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartDrop API v1");
-        c.DocumentTitle = "SmartDrop - API de Riego Automático";
-
-        c.InjectStylesheet("/swagger-ui/custom.css"); // Opcional
-        c.RoutePrefix = "swagger"; // Acceder en /swagger
-
-        c.RoutePrefix = "swagger"; // /swagger
-
-    });
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseCors("AllowAll");
-app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// Ruta base hacia Swagger
+// Redirigir raíz a Swagger
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
-// ===================================
-// MANEJO GLOBAL DE ERRORES
-// ===================================
-app.UseExceptionHandler("/error");
-
-app.Map("/error", (HttpContext context) =>
-{
-    return Results.Problem(
-        title: "Ha ocurrido un error en el servidor",
-        statusCode: StatusCodes.Status500InternalServerError
-    );
-});
-
-// ===================================
-
-// MANEJO DEL SWAGGER UI PERSONALIZADO  
-// ===================================
-
-
-
-
-// ===================================
-// ACTIVAR EL SWAGGER UI PERSONALIZADO  
-// ===================================
-
-
-
-Console.WriteLine("╔════════════════════════════════════════════════════════════╗");
-Console.WriteLine("║     🌱 API SISTEMA DE RIEGO AUTOMÁTICO - SMARTDROP        ║");
-Console.WriteLine("╚════════════════════════════════════════════════════════════╝");
-Console.WriteLine();
-Console.WriteLine($"🌐 API: https://localhost:5001");
-Console.WriteLine($"📚 Swagger: https://localhost:5001/swagger");
+Console.WriteLine("════════════════════════════════════════════════════");
+Console.WriteLine("  🌱 API SMARTDROP - Sistema de Riego Automático");
+Console.WriteLine("════════════════════════════════════════════════════");
+Console.WriteLine($"🌐 API: https://localhost:7068");
+Console.WriteLine($"📚 Swagger: https://localhost:7068/swagger");
 Console.WriteLine($"🔌 Puerto Serial: {app.Configuration.GetValue<string>("SerialPort:Puerto")}");
-Console.WriteLine();
-Console.WriteLine("Presiona Ctrl+C para detener el servidor...");
+Console.WriteLine("════════════════════════════════════════════════════");
 Console.WriteLine();
 
 app.Run();
