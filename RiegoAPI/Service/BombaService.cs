@@ -28,7 +28,7 @@ namespace SmartDropUI.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var resultado = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                    var resultado = await response.Content.ReadFromJsonAsync<ApiResponseDTO>();
 
                     return new ResultadoOperacion
                     {
@@ -64,7 +64,7 @@ namespace SmartDropUI.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var resultado = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                    var resultado = await response.Content.ReadFromJsonAsync<ApiResponseDTO>();
 
                     return new ResultadoOperacion
                     {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RiegoAPI.Models;
 using System.IO.Ports;
 
 namespace RiegoAPI.Controllers
@@ -189,17 +190,10 @@ namespace RiegoAPI.Controllers
         Task<bool> EncenderBombaAsync();
         Task<bool> ApagarBombaAsync();
         Task<bool> ObtenerEstadoBombaAsync();
-        Task<DatosSensores> ObtenerDatosSensoresAsync();
+        Task<DatosSensoresModel> ObtenerDatosSensoresAsync();
         bool EstaConectado();
         string ObtenerPuerto();
     }
 
-    // Modelo para los datos de sensores
-    public class DatosSensores
-    {
-        public double Temperatura { get; set; }
-        public double Humedad { get; set; }
-        public double HumedadSuelo { get; set; }
-        public DateTime FechaLectura { get; set; }
-    }
+ 
 }

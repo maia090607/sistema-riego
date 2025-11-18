@@ -1,4 +1,5 @@
 ﻿using RiegoAPI.Controllers;
+using RiegoAPI.Models;
 using System.IO.Ports;
 using System.Text;
 
@@ -144,7 +145,7 @@ namespace RiegoAPI.Services
             }
         }
 
-        public async Task<DatosSensores> ObtenerDatosSensoresAsync()
+        public async Task<DatosSensoresModel> ObtenerDatosSensoresAsync()
         {
             try
             {
@@ -166,16 +167,16 @@ namespace RiegoAPI.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener datos de sensores");
-                return new DatosSensores
+                return new DatosSensoresModel
                 {
                     FechaLectura = DateTime.Now
                 };
             }
         }
 
-        private DatosSensores ParsearDatosSensores(string respuesta)
+        private DatosSensoresModel ParsearDatosSensores(string respuesta)
         {
-            var datos = new DatosSensores { FechaLectura = DateTime.Now };
+            var datos = new DatosSensoresModel { FechaLectura = DateTime.Now };
 
             try
             {

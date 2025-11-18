@@ -8,4 +8,3 @@
         public DateTime FechaLectura { get; set; }
     }
 }
-}

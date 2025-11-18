@@ -154,20 +154,4 @@ namespace RiegoAPI.Controllers
                 dto, $"Estadísticas de los últimos {dias} días"));
         }
     }
-
-
-    // DTO de Estadísticas como Response
-    //ESTE DTO DEBERIA IR EN LA CARPETA DTO/RESPONSE
-    public class EstadisticasHistorialResponseDTO
-    {
-        public int TotalRegistros { get; set; }
-        public float HumedadPromedio { get; set; }
-        public float HumedadMinima { get; set; }
-        public float HumedadMaxima { get; set; }
-        public float TemperaturaPromedio { get; set; }
-        public float TemperaturaMinima { get; set; }
-        public float TemperaturaMaxima { get; set; }
-        public int PeriodoAnalizado { get; set; }
-    }
-
 }

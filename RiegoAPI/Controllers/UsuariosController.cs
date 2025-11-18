@@ -144,10 +144,4 @@ namespace API.Controllers
             return Ok(new { mensaje = "Sesión cerrada correctamente" });
         }
     }
-
-    public class LoginRequestDTO
-    {
-        public string NombreUsuario { get; set; }
-        public string Password { get; set; }
-    }
 }

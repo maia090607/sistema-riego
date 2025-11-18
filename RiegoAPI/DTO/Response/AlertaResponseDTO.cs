@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace RiegoAPI.DTOs.Response
-{// EXCELENTE ESTE Y TODOS LOS DTO DE RESPONSE
+{
     public class AlertaResponseDTO
     {
         public int IdAlerta { get; set; }
