@@ -636,18 +636,20 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Console.WriteLine("🚀 [GRÁFICOS] Iniciando componente...");
+
         // Suscribirse a eventos del Arduino
         ArduinoService.DatosRecibidos += OnDatosArduinoRecibidos;
 
         await CargarDatosIniciales();
 
-        // Timer para actualizar cada 2 segundos
-        actualizacionTimer = new System.Timers.Timer(2000);
+        // Timer para actualizar cada 1 segundo (más frecuente)
+        actualizacionTimer = new System.Timers.Timer(1000);
         actualizacionTimer.Elapsed += async (sender, e) => await ActualizarDatosAutomaticamente();
         actualizacionTimer.AutoReset = true;
         actualizacionTimer.Start();
 
-        Console.WriteLine("✅ [GRÁFICOS] Sistema de actualización automática iniciado");
+        Console.WriteLine("✅ [GRÁFICOS] Sistema de actualización automática iniciado - Intervalo: 1 segundo");
     }
 
     private void OnDatosArduinoRecibidos(DatosArduinoModel datos)
