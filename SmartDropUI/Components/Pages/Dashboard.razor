@@ -6,8 +6,11 @@
 @inject RiegoService RiegoService
 @inject ClimaService ClimaService
 @inject NavigationManager Navigation
+@inject ApiService ApiService
+@inject ILogger<Dashboard> Logger
 @rendermode InteractiveServer
 @implements IDisposable
+
 
 <PageTitle>Dashboard - SmartDrop</PageTitle>
 
@@ -363,6 +366,40 @@
         </div>
     </aside>
 
+    <h3>Dashboard</h3>
+    @if (usuarios == null)
+    {
+        <p>Cargando usuarios...</p>
+    }
+    else if (!usuarios.Any())
+    {
+        <p>No hay usuarios registrados</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var usuario in usuarios)
+                {
+                    <tr>
+                        <td>@usuario.IdUsuario</td>
+                        <td>@usuario.Nombre</td>
+                        <td>@usuario.Email</td>
+                        <td>@usuario.Rol</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
     <!-- Main Content -->
     <main class="main-content">
         <div class="top-bar">
@@ -450,17 +487,25 @@
     private string ultimoRiego = "08:30";
     private bool bombaActiva = false;
 
+    // Variables para usuarios desde la API
+    private List<Usuario>? usuarios;
+
     // ========================================
-    // INICIALIZACIÓN
+    // INICIALIZACIÓN (SOLO UNA VEZ)
     // ========================================
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine("🎯 [DASHBOARD] Iniciando Panel de Control...");
 
-        // Cargar datos del clima
+        // 1. Cargar datos del clima
+        Console.WriteLine("🌤️ [DASHBOARD] Cargando datos del clima...");
         await CargarDatosClimaAsync();
 
-        // Suscribirse a eventos del Arduino
+        // 2. Cargar usuarios desde la API
+        Logger.LogInformation("🎯 [DASHBOARD] Cargando usuarios desde API...");
+        usuarios = await ApiService.ObtenerUsuariosAsync();
+
+        // 3. Suscribirse a eventos del Arduino
         ArduinoService.DatosRecibidos += OnDatosArduinoRecibidos;
     }
 
@@ -471,7 +516,6 @@
     {
         try
         {
-            Console.WriteLine("🌤️ [DASHBOARD] Cargando datos del clima...");
             var datosClima = await ClimaService.ObtenerClimaActualAsync();
 
             if (datosClima != null)
@@ -508,7 +552,6 @@
     // ========================================
     private void OnDatosArduinoRecibidos(DatosArduinoModel datos)
     {
-        // Solo actualizamos bombaActiva, NO riegoManualActivo
         bombaActiva = datos.BombaEncendida;
         InvokeAsync(StateHasChanged);
     }

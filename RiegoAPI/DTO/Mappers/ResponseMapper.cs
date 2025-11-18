@@ -11,17 +11,17 @@ namespace RiegoAPI.DTO.Mappers
             {
                 return new ApiResponseDTO<T>
                 {
-                    IsSuccessful = false,
-                    Message = "Error: la respuesta del servidor es nula.",
-                    Data = data
+                    success = false,  // ✅ Cambio: IsSuccessful → success
+                    message = "Error: la respuesta del servidor es nula.",  // ✅ Cambio: Message → message
+                    data = data  // ✅ Cambio: Data → data
                 };
             }
 
             return new ApiResponseDTO<T>
             {
-                IsSuccessful = dalResponse.Estado,
-                Message = dalResponse.Mensaje ?? "Sin mensaje",
-                Data = data
+                success = dalResponse.Estado,  // ✅ Cambio
+                message = dalResponse.Mensaje ?? "Sin mensaje",  // ✅ Cambio
+                data = data  // ✅ Cambio
             };
         }
 
@@ -33,17 +33,17 @@ namespace RiegoAPI.DTO.Mappers
             {
                 return new ApiResponseDTO<List<TDto>>
                 {
-                    IsSuccessful = false,
-                    Message = "Error: la respuesta del servidor es nula.",
-                    Data = dtoList
+                    success = false,  // ✅ Cambio
+                    message = "Error: la respuesta del servidor es nula.",  // ✅ Cambio
+                    data = dtoList  // ✅ Cambio
                 };
             }
 
             return new ApiResponseDTO<List<TDto>>
             {
-                IsSuccessful = dalResponse.Estado,
-                Message = dalResponse.Mensaje ?? "Sin mensaje",
-                Data = dtoList
+                success = dalResponse.Estado,  // ✅ Cambio
+                message = dalResponse.Mensaje ?? "Sin mensaje",  // ✅ Cambio
+                data = dtoList  // ✅ Cambio
             };
         }
     }

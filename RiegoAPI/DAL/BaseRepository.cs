@@ -9,7 +9,7 @@ namespace DAL
 
         public BaseRepository()
         {
-            // 🔹 Conexión a Oracle XE con tus credenciales
+            // 🔹 Conexión a tu base de datos Oracle
             _connectionString = "User Id=app_riego;Password=Riego2025;" +
                               "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))" +
                               "(CONNECT_DATA=(SID=xe)));";
@@ -29,20 +29,12 @@ namespace DAL
                 using (var conn = CrearConexion())
                 {
                     conn.Open();
-                    Console.WriteLine("✅ Conexión a Oracle establecida correctamente");
-                    Console.WriteLine($"   Usuario: app_riego");
-                    Console.WriteLine($"   Base de datos: XE (localhost:1521)");
+                    Console.WriteLine("✅ [API] Conexión a Oracle establecida correctamente");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ ERROR AL CONECTAR CON ORACLE:");
-                Console.WriteLine($"   {ex.Message}");
-                Console.WriteLine();
-                Console.WriteLine("Verifica que:");
-                Console.WriteLine("  1. Oracle Database XE esté ejecutándose");
-                Console.WriteLine("  2. El usuario 'app_riego' exista con contraseña 'Riego2025'");
-                Console.WriteLine("  3. El listener esté activo en el puerto 1521");
+                Console.WriteLine($"❌ [API] Error de conexión Oracle: {ex.Message}");
             }
         }
 

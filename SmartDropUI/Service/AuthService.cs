@@ -1,5 +1,5 @@
-﻿using Blazored.LocalStorage;
-using SmartDropUI.Models;
+﻿using SmartDropUI.Models;
+using Blazored.LocalStorage;
 using System.Net.Http.Json;
 
 namespace SmartDropUI.Services
@@ -15,17 +15,25 @@ namespace SmartDropUI.Services
             _localStorage = localStorage;
         }
 
-        public async Task<bool> LoginAsync(LoginModel login)
+        public async Task<bool> LoginAsync(string nombreUsuario, string password)
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("api/auth/login", login);
+                var loginRequest = new { nombreUsuario, password };
+                var response = await _httpClient.PostAsJsonAsync("/api/usuarios/login", loginRequest);
+
                 if (response.IsSuccessStatusCode)
                 {
-                    var token = await response.Content.ReadAsStringAsync();
-                    await _localStorage.SetItemAsync("authToken", token);
-                    return true;
+                    // ✅ Cambiar UsuarioModel → Usuario
+                    var usuario = await response.Content.ReadFromJsonAsync<Usuario>();
+
+                    if (usuario != null)
+                    {
+                        await _localStorage.SetItemAsync("usuario", usuario);
+                        return true;
+                    }
                 }
+
                 return false;
             }
             catch
@@ -34,28 +42,28 @@ namespace SmartDropUI.Services
             }
         }
 
-        public async Task<bool> RegistrarAsync(UsuarioModel usuario)
+        public async Task<Usuario?> GetUsuarioActualAsync()
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("api/auth/registro", usuario);
-                return response.IsSuccessStatusCode;
+                // ✅ Cambiar UsuarioModel → Usuario
+                return await _localStorage.GetItemAsync<Usuario>("usuario");
             }
             catch
             {
-                return false;
+                return null;
             }
         }
 
         public async Task LogoutAsync()
         {
-            await _localStorage.RemoveItemAsync("authToken");
+            await _localStorage.RemoveItemAsync("usuario");
         }
 
         public async Task<bool> IsAuthenticatedAsync()
         {
-            var token = await _localStorage.GetItemAsync<string>("authToken");
-            return !string.IsNullOrEmpty(token);
+            var usuario = await GetUsuarioActualAsync();
+            return usuario != null;
         }
     }
 }

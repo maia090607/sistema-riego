@@ -3,7 +3,6 @@ using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 
 namespace DAL
 {
@@ -21,184 +20,174 @@ namespace DAL
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        cmd.Parameters.Add("p_id", OracleDbType.Int32).Value = usuario.IdUsuario;
+                        // Parámetros de entrada
+                        cmd.Parameters.Add("p_cedula", OracleDbType.Int32).Value = usuario.IdUsuario;
                         cmd.Parameters.Add("p_nombre", OracleDbType.Varchar2).Value = usuario.Nombre;
                         cmd.Parameters.Add("p_email", OracleDbType.Varchar2).Value = usuario.Email;
                         cmd.Parameters.Add("p_nombre_usuario", OracleDbType.Varchar2).Value = usuario.NombreUsuario;
-                        cmd.Parameters.Add("p_contraseña", OracleDbType.Varchar2).Value = usuario.Password;
+                        cmd.Parameters.Add("p_contrasena", OracleDbType.Varchar2).Value = usuario.Password;
                         cmd.Parameters.Add("p_rol", OracleDbType.Varchar2).Value = usuario.Rol;
                         cmd.Parameters.Add("p_ruta_imagen", OracleDbType.Varchar2).Value = usuario.RutaImagen ?? (object)DBNull.Value;
 
-                        // 🔹 Conversión correcta de bool → número
-                        cmd.Parameters.Add("p_accedio", OracleDbType.Int32).Value = usuario.Accedio ? 1 : 0;
+                        // Parámetros de salida
+                        var pEstado = cmd.Parameters.Add("p_estado", OracleDbType.Int32);
+                        pEstado.Direction = ParameterDirection.Output;
+
+                        var pMensaje = cmd.Parameters.Add("p_mensaje", OracleDbType.Varchar2, 200);
+                        pMensaje.Direction = ParameterDirection.Output;
 
                         cmd.ExecuteNonQuery();
 
-                        return new Response<Usuario>(true, "Usuario insertado correctamente", usuario, null);
+                        int estado = Convert.ToInt32(pEstado.Value.ToString());
+                        string mensaje = pMensaje.Value.ToString();
+
+                        return new Response<Usuario>(estado == 1, mensaje, usuario, null);
                     }
                 }
             }
-            catch (OracleException ex)
-            {
-                return new Response<Usuario>(false, $"Error en la base de datos:\n{ex.Message}", null, null);
-            }
             catch (Exception ex)
             {
-                return new Response<Usuario>(false, $"Error al insertar el usuario:\n{ex.Message}", null, null);
+                return new Response<Usuario>(false, $"Error: {ex.Message}", null, null);
             }
         }
-
 
         public Response<Usuario> Actualizar(Usuario entidad)
         {
             try
             {
-                if (entidad == null || entidad.IdUsuario <= 0)
-                    return new Response<Usuario>(false, "Datos inválidos para actualizar", null, null);
-
-                string sentencia = @"UPDATE USUARIO SET
-                                NOMBRE = :p_nombre,
-                                EMAIL = :p_email,
-                                NOMBRE_USUARIO = :p_usuario,
-                                CONTRASEÑA = :p_pass,
-                                ROL = :p_rol,
-                                RUTA_IMAGEN = :p_ruta,
-                                ACCEDIO = :p_accedio
-                             WHERE ID_USUARIO = :p_id";
-
-                using (var conexion = new OracleConnection(_connectionString))
-                using (var comando = new OracleCommand(sentencia, conexion))
+                using (var conn = CrearConexion())
                 {
-                    // Parámetros
-                    comando.Parameters.Add(new OracleParameter("p_nombre", entidad.Nombre));
-                    comando.Parameters.Add(new OracleParameter("p_email", entidad.Email));
-                    comando.Parameters.Add(new OracleParameter("p_usuario", entidad.NombreUsuario));
-                    comando.Parameters.Add(new OracleParameter("p_pass", entidad.Password));
-                    comando.Parameters.Add(new OracleParameter("p_rol", entidad.Rol));
-                    comando.Parameters.Add(new OracleParameter("p_ruta", entidad.RutaImagen ?? (object)DBNull.Value));
-                    comando.Parameters.Add(new OracleParameter("p_accedio", entidad.Accedio ? 1 : 0));
-                    comando.Parameters.Add(new OracleParameter("p_id", entidad.IdUsuario));
+                    conn.Open();
 
-                    conexion.Open();
-                    int filasAfectadas = comando.ExecuteNonQuery();
+                    using (OracleCommand cmd = new OracleCommand("pkg_usuario.actualizar_usuario", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
 
-                    if (filasAfectadas > 0)
-                        return new Response<Usuario>(true, "Usuario actualizado correctamente", entidad, null);
-                    else
-                        return new Response<Usuario>(false, "No se encontró el usuario para actualizar", null, null);
+                        cmd.Parameters.Add("p_cedula", OracleDbType.Int32).Value = entidad.IdUsuario;
+                        cmd.Parameters.Add("p_nombre", OracleDbType.Varchar2).Value = entidad.Nombre;
+                        cmd.Parameters.Add("p_email", OracleDbType.Varchar2).Value = entidad.Email;
+                        cmd.Parameters.Add("p_nombre_usuario", OracleDbType.Varchar2).Value = entidad.NombreUsuario;
+                        cmd.Parameters.Add("p_contrasena", OracleDbType.Varchar2).Value = entidad.Password;
+                        cmd.Parameters.Add("p_rol", OracleDbType.Varchar2).Value = entidad.Rol;
+                        cmd.Parameters.Add("p_ruta_imagen", OracleDbType.Varchar2).Value = entidad.RutaImagen ?? (object)DBNull.Value;
+
+                        var pEstado = cmd.Parameters.Add("p_estado", OracleDbType.Int32);
+                        pEstado.Direction = ParameterDirection.Output;
+
+                        var pMensaje = cmd.Parameters.Add("p_mensaje", OracleDbType.Varchar2, 200);
+                        pMensaje.Direction = ParameterDirection.Output;
+
+                        cmd.ExecuteNonQuery();
+
+                        int estado = Convert.ToInt32(pEstado.Value.ToString());
+                        string mensaje = pMensaje.Value.ToString();
+
+                        return new Response<Usuario>(estado == 1, mensaje, entidad, null);
+                    }
                 }
-            }
-            catch (OracleException ex)
-            {
-                return new Response<Usuario>(false, $"Error en la base de datos: {ex.Message}", null, null);
             }
             catch (Exception ex)
             {
-                return new Response<Usuario>(false, $"Error al actualizar el usuario: {ex.Message}", null, null);
+                return new Response<Usuario>(false, $"Error: {ex.Message}", null, null);
             }
         }
-
-
-
 
         public Response<Usuario> Eliminar(int id)
-    {
-        try
         {
-            if (id <= 0)
-                return new Response<Usuario>(false, "El ID debe ser mayor a cero", null, null);
-
-                string sentencia = "DELETE FROM USUARIO WHERE ID_USUARIO = :id";
-
-                using (var conexion = new OracleConnection(_connectionString))
-            using (var comando = new OracleCommand(sentencia, conexion))
+            try
             {
-                comando.Parameters.Add(new OracleParameter("id", id));
+                using (var conn = CrearConexion())
+                {
+                    conn.Open();
 
-                conexion.Open();
-                int filas = comando.ExecuteNonQuery();
+                    using (OracleCommand cmd = new OracleCommand("pkg_usuario.eliminar_usuario", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
 
-                if (filas > 0)
-                    return new Response<Usuario>(true, "Usuario eliminado correctamente", null, null);
-                else
-                    return new Response<Usuario>(false, "No se encontró el usuario con el ID especificado", null, null);
+                        cmd.Parameters.Add("p_cedula", OracleDbType.Int32).Value = id;
+
+                        var pEstado = cmd.Parameters.Add("p_estado", OracleDbType.Int32);
+                        pEstado.Direction = ParameterDirection.Output;
+
+                        var pMensaje = cmd.Parameters.Add("p_mensaje", OracleDbType.Varchar2, 200);
+                        pMensaje.Direction = ParameterDirection.Output;
+
+                        cmd.ExecuteNonQuery();
+
+                        int estado = Convert.ToInt32(pEstado.Value.ToString());
+                        string mensaje = pMensaje.Value.ToString();
+
+                        return new Response<Usuario>(estado == 1, mensaje, null, null);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Response<Usuario>(false, $"Error: {ex.Message}", null, null);
             }
         }
-        catch (OracleException ex)
-        {
-            return new Response<Usuario>(false, $"Error en la base de datos:\n{ex.Message}", null, null);
-        }
-        catch (Exception ex)
-        {
-            return new Response<Usuario>(false, $"Error al eliminar el usuario:\n{ex.Message}", null, null);
-        }
-    }
-
 
         public Response<Usuario> ObtenerPorId(int id)
         {
             try
             {
-                string sentencia = "SELECT * FROM USUARIO WHERE ID_USUARIO = :id";
-
-                using (var conexion = new OracleConnection(_connectionString))
-                using (var comando = new OracleCommand(sentencia, conexion))
+                using (var conn = CrearConexion())
                 {
-                    comando.Parameters.Add(new OracleParameter("id", id));
-                    conexion.Open();
+                    conn.Open();
 
-                    using (var reader = comando.ExecuteReader())
+                    using (OracleCommand cmd = new OracleCommand("pkg_usuario.buscar_por_id", conn))
                     {
-                        if (!reader.Read())
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.Add("p_cedula", OracleDbType.Int32).Value = id;
+
+                        var pCursor = cmd.Parameters.Add("p_cursor", OracleDbType.RefCursor);
+                        pCursor.Direction = ParameterDirection.Output;
+
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            return new Response<Usuario>(false, "No se encontró el usuario con el ID especificado", null, null);
+                            if (reader.Read())
+                            {
+                                var usuario = MapearUsuario(reader);
+                                return new Response<Usuario>(true, "Usuario encontrado", usuario, null);
+                            }
+                            else
+                            {
+                                return new Response<Usuario>(false, "Usuario no encontrado", null, null);
+                            }
                         }
-
-                        // Mapea el usuario directamente
-                        var usuario = new Usuario
-                        {
-                            IdUsuario = Convert.ToInt32(reader["ID_USUARIO"]),
-                            Nombre = reader["NOMBRE"].ToString(),
-                            Email = reader["EMAIL"].ToString(),
-                            NombreUsuario = reader["NOMBRE_USUARIO"].ToString(),
-                            Password = reader["CONTRASEÑA"].ToString(), // sin tilde
-                            Rol = reader["ROL"].ToString(),
-                            RutaImagen = reader["RUTA_IMAGEN"]?.ToString(), // puede ser null
-                            Accedio = Convert.ToInt32(reader["ACCEDIO"]) == 1
-                        };
-
-                        return new Response<Usuario>(true, "Usuario encontrado", usuario, null);
                     }
                 }
             }
-            catch (OracleException ex)
-            {
-                return new Response<Usuario>(false, $"Error en la base de datos:\n{ex.Message}", null, null);
-            }
             catch (Exception ex)
             {
-                return new Response<Usuario>(false, $"Error al buscar el usuario:\n{ex.Message}", null, null);
+                return new Response<Usuario>(false, $"Error: {ex.Message}", null, null);
             }
         }
-
 
         public Response<Usuario> ObtenerTodos()
         {
             try
             {
                 List<Usuario> lista = new List<Usuario>();
-                string sentencia = "SELECT * FROM USUARIO ORDER BY NOMBRE"; // ✅ Sin corchetes, todo en mayúsculas
 
-                using (var conexion = new OracleConnection(_connectionString))
-                using (var comando = new OracleCommand(sentencia, conexion))
+                using (var conn = CrearConexion())
                 {
-                    conexion.Open();
+                    conn.Open();
 
-                    using (var reader = comando.ExecuteReader())
+                    using (OracleCommand cmd = new OracleCommand("pkg_usuario.listar_usuarios", conn))
                     {
-                        while (reader.Read())
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        var pCursor = cmd.Parameters.Add("p_cursor", OracleDbType.RefCursor);
+                        pCursor.Direction = ParameterDirection.Output;
+
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            lista.Add(MapearUsuario(reader)); // Usa tu función corregida
+                            while (reader.Read())
+                            {
+                                lista.Add(MapearUsuario(reader));
+                            }
                         }
                     }
                 }
@@ -207,18 +196,11 @@ namespace DAL
                     ? $"Se encontraron {lista.Count} usuarios"
                     : "No hay usuarios registrados";
 
-                // ✅ Si no hay usuarios, Estado debe ser false (opcional según tu lógica)
-                bool estado = lista.Count > 0;
-
-                return new Response<Usuario>(estado, mensaje, null, lista);
-            }
-            catch (OracleException ex)
-            {
-                return new Response<Usuario>(false, $"Error en la base de datos:\n{ex.Message}", null, null);
+                return new Response<Usuario>(true, mensaje, null, lista);
             }
             catch (Exception ex)
             {
-                return new Response<Usuario>(false, $"Error al obtener los usuarios:\n{ex.Message}", null, null);
+                return new Response<Usuario>(false, $"Error: {ex.Message}", null, null);
             }
         }
 
@@ -226,114 +208,86 @@ namespace DAL
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(nombreUsuario))
-                    return new Response<Usuario>(false, "El nombre de usuario no puede estar vacío", null, null);
+                string query = "SELECT * FROM Usuario WHERE nombre_usuario = :usuario";
 
-                string sentencia = "SELECT * FROM Usuario WHERE nombre_usuario = :usuario";
-
-                using (var conexion = new OracleConnection(_connectionString))
-                using (var comando = new OracleCommand(sentencia, conexion))
+                using (var conn = CrearConexion())
+                using (var cmd = new OracleCommand(query, conn))
                 {
-                    comando.Parameters.Add(new OracleParameter("usuario", nombreUsuario));
+                    cmd.Parameters.Add("usuario", OracleDbType.Varchar2).Value = nombreUsuario;
 
-                    conexion.Open();
-                    using (var reader = comando.ExecuteReader())
+                    conn.Open();
+                    using (var reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            Usuario usuario = new Usuario
-                            {
-                                IdUsuario = Convert.ToInt32(reader["ID_USUARIO"]),
-                                Nombre = reader["NOMBRE"]?.ToString(),
-                                Email = reader["EMAIL"]?.ToString(),
-                                NombreUsuario = reader["NOMBRE_USUARIO"]?.ToString(),
-                                Password = reader["CONTRASEÑA"]?.ToString(),
-                                Rol = reader["ROL"]?.ToString(),
-                                RutaImagen = reader["RUTA_IMAGEN"]?.ToString(),
-                                Accedio = Convert.ToInt32(reader["ACCEDIO"]) == 1
-                            };
-
+                            var usuario = MapearUsuario(reader);
                             return new Response<Usuario>(true, "Usuario encontrado", usuario, null);
                         }
                         else
                         {
-                            return new Response<Usuario>(false, "No se encontró el usuario especificado", null, null);
+                            return new Response<Usuario>(false, "Usuario no encontrado", null, null);
                         }
                     }
                 }
             }
-            catch (OracleException ex)
-            {
-                return new Response<Usuario>(false, $"Error en la base de datos:\n{ex.Message}", null, null);
-            }
             catch (Exception ex)
             {
-                return new Response<Usuario>(false, $"Error al buscar el usuario:\n{ex.Message}", null, null);
+                return new Response<Usuario>(false, $"Error: {ex.Message}", null, null);
             }
-
         }
+
         public Response<Usuario> BuscarPorCredenciales(string nombreUsuario, string password)
         {
-            string query = "SELECT * FROM USUARIO WHERE NOMBRE_USUARIO = :nombreUsuario AND CONTRASEÑA = :password";
-
             try
             {
-                using (var conexion = CrearConexion())
-                using (var comando = new OracleCommand(query, conexion))
+                using (var conn = CrearConexion())
                 {
-                    comando.Parameters.Add(new OracleParameter("nombreUsuario", OracleDbType.Varchar2)).Value = nombreUsuario;
-                    comando.Parameters.Add(new OracleParameter("password", OracleDbType.Varchar2)).Value = password;
+                    conn.Open();
 
-                    conexion.Open();
-
-                    using (var reader = comando.ExecuteReader())
+                    using (OracleCommand cmd = new OracleCommand("pkg_usuario.buscar_por_credenciales", conn))
                     {
-                        if (reader.Read())
-                        {
-                            var usuario = new Usuario
-                            {
-                                IdUsuario = Convert.ToInt32(reader["ID_USUARIO"]),
-                                Nombre = reader["NOMBRE"].ToString(),
-                                Email = reader["EMAIL"]?.ToString(),
-                                NombreUsuario = reader["NOMBRE_USUARIO"].ToString(),
-                                Password = reader["CONTRASEÑA"].ToString(),
-                                Rol = reader["ROL"]?.ToString(),
-                                RutaImagen = reader["RUTA_IMAGEN"]?.ToString(),
-                                Accedio = Convert.ToInt32(reader["ACCEDIO"]) == 1
-                            };
+                        cmd.CommandType = CommandType.StoredProcedure;
 
-                            return new Response<Usuario>(true, "Usuario encontrado", usuario, null);
+                        cmd.Parameters.Add("p_usuario", OracleDbType.Varchar2).Value = nombreUsuario;
+                        cmd.Parameters.Add("p_contrasena", OracleDbType.Varchar2).Value = password;
+
+                        var pCursor = cmd.Parameters.Add("p_cursor", OracleDbType.RefCursor);
+                        pCursor.Direction = ParameterDirection.Output;
+
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                var usuario = MapearUsuario(reader);
+                                return new Response<Usuario>(true, "Credenciales válidas", usuario, null);
+                            }
+                            else
+                            {
+                                return new Response<Usuario>(false, "Credenciales inválidas", null, null);
+                            }
                         }
                     }
-
-                    return new Response<Usuario>(false, "Usuario o contraseña incorrectos", null, null);
                 }
-            }
-            catch (OracleException ex)
-            {
-                return new Response<Usuario>(false, $"Error en la base de datos:\n{ex.Message}", null, null);
             }
             catch (Exception ex)
             {
-                return new Response<Usuario>(false, $"Error inesperado:\n{ex.Message}", null, null);
+                return new Response<Usuario>(false, $"Error: {ex.Message}", null, null);
             }
         }
-
 
         private Usuario MapearUsuario(OracleDataReader reader)
         {
             return new Usuario
             {
-                IdUsuario = Convert.ToInt32(reader["ID_USUARIO"]),
+                IdUsuario = Convert.ToInt32(reader["CEDULA"]),        // ⬅️ CEDULA
                 Nombre = reader["NOMBRE"]?.ToString(),
                 Email = reader["EMAIL"]?.ToString(),
                 NombreUsuario = reader["NOMBRE_USUARIO"]?.ToString(),
-                Password = reader["CONTRASEÑA"]?.ToString(),
+                Password = reader["CONTRASENA"]?.ToString(),           // ⬅️ CONTRASENA
                 Rol = reader["ROL"]?.ToString(),
                 RutaImagen = reader["RUTA_IMAGEN"]?.ToString(),
-                Accedio = Convert.ToInt32(reader["ACCEDIO"]) == 1
+                Accedio = reader["ACCEDIO"] != DBNull.Value && Convert.ToInt32(reader["ACCEDIO"]) == 1
             };
         }
-
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using SmartDropUI.Services;
+using SmartDropUI.Components;  // ✅ AGREGAR ESTA LÍNEA
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,10 +8,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Configurar HttpClient para consumir la API
-builder.Services.AddScoped(sp => new HttpClient
+// HttpClient para consumir RiegoAPI
+builder.Services.AddHttpClient<ApiService>(client =>
 {
-    BaseAddress = new Uri("https://localhost:7001") // URL de tu RiegoAPI
+    client.BaseAddress = new Uri("https://localhost:5001");
+    client.Timeout = TimeSpan.FromSeconds(30);
 });
 
 // Registrar servicios
@@ -21,7 +23,6 @@ builder.Services.AddScoped<ClimaService>();
 // Registrar ArduinoService como singleton
 builder.Services.AddSingleton<ArduinoService>(sp =>
 {
-    // ⚠️ CAMBIA "COM3" POR TU PUERTO REAL (ej: COM4, COM5, etc.)
     var arduino = new ArduinoService("COM11", 9600);
     arduino.Conectar();
     return arduino;
@@ -43,7 +44,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-app.MapRazorComponents<SmartDropUI.Components.App>()
+// ✅ Ahora App está disponible gracias al using SmartDropUI.Components
+app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
