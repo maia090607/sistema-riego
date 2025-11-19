@@ -275,6 +275,8 @@ namespace DAL
             }
         }
 
+
+
         private Usuario MapearUsuario(OracleDataReader reader)
         {
             return new Usuario

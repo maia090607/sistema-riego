@@ -1,12 +1,13 @@
 ﻿@page "/registro"
 @using SmartDropUI.Services
 @using SmartDropUI.Models
-@using System.Net.Http.Json
-@inject HttpClient Http
+@inject AuthService AuthService
 @inject NavigationManager Navigation
+@inject ILogger<Registro> Logger
 @rendermode InteractiveServer
 
 <PageTitle>Registro - SmartDrop</PageTitle>
+
 
 <style>
     body {
@@ -225,6 +226,22 @@
         font-size: 0.9rem;
         text-align: center;
         margin-bottom: 1rem;
+        animation: slideIn 0.3s ease;
+    }
+
+    @@keyframes slideIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
     }
 
     .alert-error {
@@ -293,24 +310,45 @@
         font-size: 1.25rem;
     }
 
-    @@media (max-width: 768px) {
-        .color-dots {
-            display: none;
-        }
-
-        .registro-card {
-            padding: 2rem 1.5rem;
-        }
-
-        .registro-title {
-            font-size: 1.5rem;
-        }
-
-        .button-row {
-            flex-direction: column;
-        }
+    .loading-spinner {
+        display: inline-block;
+        width: 1.25rem;
+        height: 1.25rem;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
     }
 
+    @@keyframes spin {
+        to
+
+    {
+        transform: rotate(360deg);
+    }
+
+    }
+
+    @@media (max-width: 768px) {
+        .color-dots
+
+    {
+        display: none;
+    }
+
+    .registro-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .registro-title {
+        font-size: 1.5rem;
+    }
+
+    .button-row {
+        flex-direction: column;
+    }
+
+    }
 </style>
 
 <div class="registro-page">
@@ -340,7 +378,7 @@
                     <span class="label-icon icon-purple">🆔</span>
                     Identificación
                 </label>
-                <input type="text"
+                <input type="number"
                        @bind="usuario.Identificacion"
                        placeholder="Ingrese su identificación"
                        class="form-input" />
@@ -386,9 +424,8 @@
                 </label>
                 <select @bind="usuario.Rol" class="form-select">
                     <option value="">Seleccionar rol</option>
+                    <option value="Cuidador">Cuidador</option>
                     <option value="Administrador">Administrador</option>
-                    <option value="Usuario">Usuario</option>
-                    <option value="Operador">Operador</option>
                 </select>
             </div>
 
@@ -414,27 +451,35 @@
                 <input type="checkbox"
                        id="mostrarCheckbox"
                        @bind="mostrarPassword" />
-                <label for="mostrarCheckbox">Mostrar</label>
+                <label for="mostrarCheckbox">Mostrar contraseña</label>
             </div>
 
             @if (!string.IsNullOrEmpty(mensajeExito))
             {
                 <div class="alert alert-success">
-                    @mensajeExito
+                    ✅ @mensajeExito
                 </div>
             }
 
             @if (!string.IsNullOrEmpty(mensajeError))
             {
                 <div class="alert alert-error">
-                    @mensajeError
+                    ❌ @mensajeError
                 </div>
             }
 
             <div class="button-row">
                 <button class="btn btn-create" @onclick="HandleRegistro" disabled="@cargando">
-                    <span class="btn-icon">➕</span>
-                    @(cargando ? "Creando..." : "CREAR USUARIO")
+                    @if (cargando)
+                    {
+                        <span class="loading-spinner"></span>
+                        <span>Creando...</span>
+                    }
+                    else
+                    {
+                        <span class="btn-icon">➕</span>
+                        <span>CREAR USUARIO</span>
+                    }
                 </button>
                 <button class="btn btn-back" @onclick='() => Navigation.NavigateTo("/login")'>
                     <span class="btn-icon">⬅️</span>
@@ -448,7 +493,7 @@
 @code {
     private Usuario usuario = new Usuario();
     private bool mostrarPassword = false;
-    private bool cargando = false; 
+    private bool cargando = false;
     private string mensajeError = "";
     private string mensajeExito = "";
 
@@ -457,34 +502,40 @@
         mensajeError = string.Empty;
         mensajeExito = string.Empty;
 
-        // Validaciones
+        // Validaciones (mantener las mismas)
         if (usuario.Identificacion <= 0)
         {
-            mensajeError = "❌ Ingrese una identificación válida";
+            mensajeError = "Ingrese una identificación válida";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(usuario.NombreCompleto))
         {
-            mensajeError = "❌ Ingrese su nombre completo";
+            mensajeError = "Ingrese su nombre completo";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(usuario.Correo) || !usuario.Correo.Contains("@"))
         {
-            mensajeError = "❌ Ingrese un correo válido";
+            mensajeError = "Ingrese un correo válido";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(usuario.NombreUsuario))
         {
-            mensajeError = "❌ Ingrese un nombre de usuario";
+            mensajeError = "Ingrese un nombre de usuario";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(usuario.Rol))
+        {
+            mensajeError = "Seleccione un rol";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(usuario.Contrasena) || usuario.Contrasena.Length < 6)
         {
-            mensajeError = "❌ La contraseña debe tener al menos 6 caracteres";
+            mensajeError = "La contraseña debe tener al menos 6 caracteres";
             return;
         }
 
@@ -492,36 +543,41 @@
 
         try
         {
-            var usuarioAPI = new
+            // ✅ Mapear los campos correctamente
+            var usuarioRegistro = new Usuario
             {
-                idUsuario = usuario.Identificacion,
-                nombre = usuario.NombreCompleto,
-                email = usuario.Correo,
-                nombreUsuario = usuario.NombreUsuario,
-                password = usuario.Contrasena,
-                rol = "Cuidador",
-                rutaImagen = ""
+                IdUsuario = usuario.Identificacion,
+                Nombre = usuario.NombreCompleto,
+                Email = usuario.Correo,
+                NombreUsuario = usuario.NombreUsuario,
+                Password = usuario.Contrasena,
+                Rol = usuario.Rol
             };
 
-            var response = await Http.PostAsJsonAsync("/api/usuarios", usuarioAPI);
+            Logger.LogInformation($"📤 Registrando usuario: {usuarioRegistro.NombreUsuario}");
 
-            if (response.IsSuccessStatusCode)
+            // ✅ Usar AuthService
+            var (success, message) = await AuthService.RegistrarAsync(usuarioRegistro);
+
+            if (success)
             {
-                mensajeExito = "✅ Usuario registrado correctamente";
-                usuario = new Usuario();
+                mensajeExito = message;
+                Logger.LogInformation("✅ Usuario creado exitosamente");
 
+                usuario = new Usuario();
                 await Task.Delay(2000);
                 Navigation.NavigateTo("/login");
             }
             else
             {
-                var error = await response.Content.ReadAsStringAsync();
-                mensajeError = $"❌ Error: {error}";
+                mensajeError = message;
+                Logger.LogWarning($"❌ Error: {message}");
             }
         }
         catch (Exception ex)
         {
-            mensajeError = $"❌ Error: {ex.Message}";
+            mensajeError = $"Error inesperado: {ex.Message}";
+            Logger.LogError($"❌ Excepción: {ex.Message}");
         }
         finally
         {

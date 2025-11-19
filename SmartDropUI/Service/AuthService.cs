@@ -1,10 +1,11 @@
-﻿using SmartDropUI.Models;
-using Blazored.LocalStorage;
+﻿using Blazored.LocalStorage;
+using SmartDropUI.Components;
+using SmartDropUI.Models;
+using SmartDropUI.Services;
 using System.Net.Http.Json;
 
 namespace SmartDropUI.Services
 {
-    
     public class AuthService
     {
         private readonly HttpClient _httpClient;
@@ -56,7 +57,19 @@ namespace SmartDropUI.Services
             {
                 _logger.LogInformation($"📝 Registrando usuario: {usuario.NombreUsuario}");
 
-                var response = await _httpClient.PostAsJsonAsync("/api/usuarios", usuario);
+                // ✅ Crear objeto con los campos exactos que espera la API
+                var usuarioAPI = new
+                {
+                    idUsuario = usuario.IdUsuario,
+                    nombre = usuario.Nombre,
+                    email = usuario.Email,
+                    nombreUsuario = usuario.NombreUsuario,
+                    password = usuario.Password,
+                    rol = usuario.Rol,
+                    rutaImagen = ""
+                };
+
+                var response = await _httpClient.PostAsJsonAsync("/api/usuarios", usuarioAPI);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -66,6 +79,12 @@ namespace SmartDropUI.Services
 
                 var errorContent = await response.Content.ReadAsStringAsync();
                 _logger.LogWarning($"❌ Error al registrar: {errorContent}");
+
+                if (errorContent.Contains("ya existe") || errorContent.Contains("Conflict"))
+                {
+                    return (false, "El usuario o identificación ya existe");
+                }
+
                 return (false, "Error al registrar usuario");
             }
             catch (Exception ex)
@@ -74,20 +93,34 @@ namespace SmartDropUI.Services
                 return (false, "Error al conectar con el servidor");
             }
         }
-
         public async Task<Usuario?> GetUsuarioActualAsync()
         {
-            return await _localStorage.GetItemAsync<Usuario>("usuario");
+            try
+            {
+                return await _localStorage.GetItemAsync<Usuario>("usuario");
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public async Task LogoutAsync()
         {
-            var usuario = await GetUsuarioActualAsync();
-            if (usuario != null)
+            try
             {
-                await _httpClient.PostAsync($"/api/usuarios/logout/{usuario.IdUsuario}", null);
+                var usuario = await GetUsuarioActualAsync();
+                if (usuario != null)
+                {
+                    await _httpClient.PostAsync($"/api/usuarios/logout/{usuario.IdUsuario}", null);
+                }
+                await _localStorage.RemoveItemAsync("usuario");
+                _logger.LogInformation("🚪 Sesión cerrada");
             }
-            await _localStorage.RemoveItemAsync("usuario");
+            catch (Exception ex)
+            {
+                _logger.LogError($"❌ Error en logout: {ex.Message}");
+            }
         }
 
         public async Task<bool> IsAuthenticatedAsync()

@@ -3,6 +3,7 @@
 @using SmartDropUI.Models
 @inject RiegoService RiegoService
 @inject NavigationManager Navigation
+@inject ILogger<Usuarios> Logger
 @rendermode InteractiveServer
 
 <PageTitle>Gestión de Usuarios - SmartDrop</PageTitle>
@@ -456,6 +457,44 @@
     }
 
     }
+.btn-close-session {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-close-session::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-close-session:hover::before {
+        left: 100%;
+    }
+
+    .btn-close-session:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .session-icon {
+        font-size: 1.5rem;
+        animation: doorSwing 2s ease-in-out infinite;
+    }
+
+    @@keyframes doorSwing {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-15deg); }
+    }
 </style>
 
 <div class="usuarios-page">
@@ -511,7 +550,7 @@
                         <tbody>
                             @foreach (var usuario in usuarios)
                             {
-                                <tr>
+                                <tr @onclick="() => SeleccionarUsuarioDeLista(usuario)" style="cursor: pointer;">
                                     <td>@usuario.IdUsuario</td>
                                     <td>@usuario.Nombre</td>
                                     <td>@usuario.Email</td>
@@ -611,8 +650,8 @@
                         <span>💾</span>
                         Guardar Cambios
                     </button>
-                    <button class="btn-action btn-close" @onclick="CerrarSesion">
-                        <span>🚪</span>
+                    <button class="btn-action btn-close-session" @onclick="CerrarSesion">
+                        <span class="session-icon">🚪</span>
                         Cerrar Sesión
                     </button>
                     <button class="btn-action btn-delete" @onclick="EliminarUsuario">
@@ -626,16 +665,19 @@
             <div class="users-list-section">
                 <h3 class="list-title">Lista de Usuarios</h3>
                 <div class="users-list">
-                    @foreach (var usuario in usuariosLista)
+                    @if (usuarios != null && usuarios.Any())
                     {
-                        <div class="user-item @(usuario.Id == usuarioSeleccionado.Id ? "active" : "")"
-                             @onclick="() => SeleccionarUsuario(usuario)">
-                            <div class="user-avatar-small">👤</div>
-                            <div class="user-info">
-                                <div class="user-name">@usuario.NombreCompleto</div>
-                                <div class="user-role">@usuario.Rol</div>
+                        @foreach (var usuario in usuarios)
+                        {
+                            <div class="user-item @(usuario.IdUsuario == usuarioSeleccionado.Id ? "active" : "")"
+                                 @onclick="() => SeleccionarUsuarioDeLista(usuario)">
+                                <div class="user-avatar-small">👤</div>
+                                <div class="user-info">
+                                    <div class="user-name">@usuario.Nombre</div>
+                                    <div class="user-role">@usuario.Rol</div>
+                                </div>
                             </div>
-                        </div>
+                        }
                     }
                 </div>
             </div>
@@ -650,18 +692,12 @@
 
     private UsuarioGestionModel usuarioSeleccionado = new()
     {
-        Id = 1,
-        Identificacion = "USR001",
-        NombreUsuario = "admin",
-        NombreCompleto = "Administrador",
-        Correo = "admin@smartdrop.com",
-        Rol = "Administrador"
-    };
-
-    private List<UsuarioGestionModel> usuariosLista = new()
-    {
-        new() { Id = 1, NombreCompleto = "Admin SmartDrop", Rol = "Administrador", Identificacion = "USR001", NombreUsuario = "admin", Correo = "admin@smartdrop.com" },
-        new() { Id = 2, NombreCompleto = "Juan Pérez", Rol = "Cuidador", Identificacion = "USR002", NombreUsuario = "juan", Correo = "juan@smartdrop.com" }
+        Id = 0,
+        Identificacion = "",
+        NombreUsuario = "Seleccione un usuario",
+        NombreCompleto = "",
+        Correo = "",
+        Rol = "Usuario"
     };
 
     public class UsuarioGestionModel
@@ -682,8 +718,35 @@
     private async Task CargarUsuarios()
     {
         cargando = true;
-        usuarios = await RiegoService.ObtenerUsuariosAsync();
-        cargando = false;
+        try
+        {
+            Logger.LogInformation("🔄 Cargando usuarios...");
+            usuarios = await RiegoService.ObtenerUsuariosAsync();
+            Logger.LogInformation($"✅ {usuarios?.Count ?? 0} usuarios cargados");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError($"❌ Error al cargar usuarios: {ex.Message}");
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private void SeleccionarUsuarioDeLista(Usuario usuario)
+    {
+        usuarioSeleccionado = new UsuarioGestionModel
+        {
+            Id = usuario.IdUsuario,
+            Identificacion = usuario.IdUsuario.ToString(),
+            NombreUsuario = usuario.NombreUsuario,
+            NombreCompleto = usuario.Nombre,
+            Correo = usuario.Email,
+            Rol = usuario.Rol
+        };
+        modoEdicion = false;
+        StateHasChanged();
     }
 
     private string ObtenerClaseRol(string rol)
@@ -697,20 +760,6 @@
         };
     }
 
-    private void SeleccionarUsuario(UsuarioGestionModel usuario)
-    {
-        usuarioSeleccionado = new UsuarioGestionModel
-        {
-            Id = usuario.Id,
-            Identificacion = usuario.Identificacion,
-            NombreUsuario = usuario.NombreUsuario,
-            NombreCompleto = usuario.NombreCompleto,
-            Correo = usuario.Correo,
-            Rol = usuario.Rol
-        };
-        modoEdicion = false;
-    }
-
     private void HabilitarEdicion()
     {
         modoEdicion = true;
@@ -718,15 +767,13 @@
 
     private void GuardarCambios()
     {
-        if (modoEdicion)
+        if (modoEdicion && usuarios != null)
         {
-            var usuario = usuariosLista.FirstOrDefault(u => u.Id == usuarioSeleccionado.Id);
+            var usuario = usuarios.FirstOrDefault(u => u.IdUsuario == usuarioSeleccionado.Id);
             if (usuario != null)
             {
-                usuario.Identificacion = usuarioSeleccionado.Identificacion;
-                usuario.NombreUsuario = usuarioSeleccionado.NombreUsuario;
-                usuario.NombreCompleto = usuarioSeleccionado.NombreCompleto;
-                usuario.Correo = usuarioSeleccionado.Correo;
+                usuario.Nombre = usuarioSeleccionado.NombreCompleto;
+                usuario.Email = usuarioSeleccionado.Correo;
                 usuario.Rol = usuarioSeleccionado.Rol;
             }
             modoEdicion = false;
@@ -735,18 +782,26 @@
 
     private void CerrarSesion()
     {
-        Navigation.NavigateTo("/login");
+        Navigation.NavigateTo("/login", forceLoad: true);
     }
 
     private void EliminarUsuario()
     {
-        var usuario = usuariosLista.FirstOrDefault(u => u.Id == usuarioSeleccionado.Id);
-        if (usuario != null)
+        if (usuarios != null)
         {
-            usuariosLista.Remove(usuario);
-            if (usuariosLista.Any())
+            var usuario = usuarios.FirstOrDefault(u => u.IdUsuario == usuarioSeleccionado.Id);
+            if (usuario != null)
             {
-                usuarioSeleccionado = usuariosLista.First();
+                usuarios.Remove(usuario);
+                if (usuarios.Any())
+                {
+                    SeleccionarUsuarioDeLista(usuarios.First());
+                }
+                else
+                {
+                    usuarioSeleccionado = new UsuarioGestionModel();
+                }
+                StateHasChanged();
             }
         }
     }
