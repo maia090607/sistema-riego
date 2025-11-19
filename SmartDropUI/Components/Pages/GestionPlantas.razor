@@ -151,7 +151,7 @@
         font-size: 0.9rem;
     }
 
-    .form-input, .form-textarea {
+    .form-input, .form-textarea, .form-select {
         width: 100%;
         padding: 0.875rem 1rem;
         border: 2px solid #e5e7eb;
@@ -166,7 +166,7 @@
         resize: vertical;
     }
 
-        .form-input:focus, .form-textarea:focus {
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
             outline: none;
             border-color: #10b981;
             box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
@@ -194,6 +194,7 @@
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
+        white-space: nowrap;
     }
 
         .btn-search-id:hover {
@@ -217,6 +218,7 @@
         border-radius: 0.5rem;
         cursor: pointer;
         transition: all 0.3s ease;
+        position: relative;
     }
 
         .plant-item:hover {
@@ -224,17 +226,38 @@
             transform: translateX(4px);
         }
 
+        .plant-item.selected {
+            background: #d1fae5;
+            border-left-color: #059669;
+        }
+
     .plant-item-title {
         display: flex;
         align-items: center;
+        justify-content: space-between;
         gap: 0.5rem;
         font-weight: 600;
         color: #1f2937;
         margin-bottom: 0.5rem;
     }
 
+    .plant-name-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
     .plant-icon {
         font-size: 1.25rem;
+    }
+
+    .plant-id-badge {
+        background: #10b981;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
     }
 
     .plant-item-details {
@@ -288,6 +311,12 @@
             transform: translateY(-2px);
         }
 
+        .btn-delete:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+        }
+
     .btn-update {
         background: #3b82f6;
         color: white;
@@ -297,6 +326,12 @@
         .btn-update:hover {
             background: #2563eb;
             transform: translateY(-2px);
+        }
+
+        .btn-update:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
         }
 
     .btn-show {
@@ -422,6 +457,34 @@
         font-weight: 600;
     }
 
+    .alert {
+        padding: 1rem;
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.95rem;
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        border: 2px solid #10b981;
+        color: #065f46;
+    }
+
+    .alert-error {
+        background: #fee2e2;
+        border: 2px solid #ef4444;
+        color: #991b1b;
+    }
+
+    .alert-info {
+        background: #dbeafe;
+        border: 2px solid #3b82f6;
+        color: #1e40af;
+    }
+
     @@media (max-width: 1200px) {
         .content-container {
             grid-template-columns: 1fr;
@@ -456,6 +519,14 @@
     <div class="content-container">
         <div>
             <div class="form-section">
+                @if (!string.IsNullOrEmpty(mensajeAlerta))
+                {
+                    <div class="alert @tipoAlertaClass">
+                        <span>@iconoAlerta</span>
+                        @mensajeAlerta
+                    </div>
+                }
+
                 <h2 class="section-title">
                     <span class="section-icon">🌿</span>
                     Información de la Planta
@@ -463,7 +534,7 @@
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label class="form-label">Nombre</label>
+                        <label class="form-label">Nombre *</label>
                         <input type="text"
                                class="form-input"
                                placeholder="Rosa Roja Premium"
@@ -471,13 +542,25 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">ID</label>
+                        <label class="form-label">ID *</label>
                         <div class="id-group">
                             <input type="text"
                                    class="form-input id-input"
                                    placeholder="PLT001"
-                                   @bind="planta.Id" />
-                            <button class="btn-search-id">Buscar</button>
+                                   @bind="plantaIdBuscar"
+                                   disabled="@modoEdicion" />
+                            <button class="btn-search-id"
+                                    @onclick="BuscarPlantaPorId"
+                                    disabled="@modoEdicion">
+                                @if (modoEdicion)
+                                {
+                                    <span>🔒 Editando</span>
+                                }
+                                else
+                                {
+                                    <span>🔍 Buscar</span>
+                                }
+                            </button>
                         </div>
                     </div>
 
@@ -489,33 +572,39 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Humedad Óptima (%)</label>
+                        <label class="form-label">Humedad Óptima (%) *</label>
                         <input type="number"
                                class="form-input"
                                placeholder="70"
+                               min="0"
+                               max="100"
                                @bind="planta.HumedadOptima" />
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Temperatura Óptima (°C)</label>
+                        <label class="form-label">Temperatura Óptima (°C) *</label>
                         <input type="number"
                                class="form-input"
                                placeholder="20"
+                               min="-10"
+                               max="50"
                                @bind="planta.TemperaturaOptima" />
                     </div>
 
                     <div class="form-group full-width">
-                        <label class="form-label">Luz Óptima</label>
-                        <input type="text"
-                               class="form-input"
-                               placeholder="Luz Media"
-                               @bind="planta.LuzOptima" />
+                        <label class="form-label">Luz Óptima *</label>
+                        <select class="form-select" @bind="planta.LuzOptima">
+                            <option value="">Seleccionar nivel de luz</option>
+                            <option value="Baja">Baja</option>
+                            <option value="Media">Media</option>
+                            <option value="Alta">Alta</option>
+                        </select>
                     </div>
                 </div>
 
                 <h2 class="section-title">
                     <span class="section-icon">🌱</span>
-                    Lista de Plantas Registradas
+                    Lista de Plantas Registradas (@plantasRegistradas.Count)
                 </h2>
 
                 <div class="list-section">
@@ -523,15 +612,19 @@
                     {
                         @foreach (var p in plantasRegistradas)
                         {
-                            <div class="plant-item">
+                            <div class="plant-item @(plantaSeleccionada?.Id == p.Id ? "selected" : "")"
+                                 @onclick="() => SeleccionarPlanta(p)">
                                 <div class="plant-item-title">
-                                    <span class="plant-icon">🌹</span>
-                                    @p.Nombre
+                                    <div class="plant-name-wrapper">
+                                        <span class="plant-icon">🌹</span>
+                                        @p.Nombre
+                                    </div>
+                                    <span class="plant-id-badge">@p.Id</span>
                                 </div>
                                 <div class="plant-item-details">
-                                    <span>Humedad: @p.HumedadOptima%</span>
-                                    <span>Temp: @p.TemperaturaOptima°C</span>
-                                    <span>Luz: @p.LuzOptima</span>
+                                    <span>💧 Humedad: @p.HumedadOptima%</span>
+                                    <span>🌡️ Temp: @p.TemperaturaOptima°C</span>
+                                    <span>☀️ Luz: @p.LuzOptima</span>
                                 </div>
                             </div>
                         }
@@ -539,69 +632,49 @@
                     else
                     {
                         <div style="text-align: center; padding: 2rem; color: #6b7280;">
-                            No hay plantas registradas aún
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🌱</div>
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">No hay plantas registradas aún</div>
+                            <div style="font-size: 0.875rem;">Agrega tu primera planta usando el formulario</div>
                         </div>
                     }
                 </div>
 
                 <div class="action-buttons">
-                    <button class="btn btn-register" @onclick="RegistrarPlanta">
-                        <span>➕</span>
-                        Registrar Planta
-                    </button>
-                    <button class="btn btn-delete" @onclick="EliminarPlanta">
-                        <span>🗑️</span>
-                        Eliminar Planta
-                    </button>
-                    <button class="btn btn-update" @onclick="ActualizarInformacion">
-                        <span>✔️</span>
-                        Actualizar Información
+                    @if (modoEdicion)
+                    {
+                        <button class="btn btn-update" @onclick="ActualizarInformacion">
+                            <span>✔️</span>
+                            Actualizar Información
+                        </button>
+                        <button class="btn btn-delete" @onclick="CancelarEdicion">
+                            <span>✕</span>
+                            Cancelar Edición
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-register" @onclick="RegistrarPlanta">
+                            <span>➕</span>
+                            Registrar Planta
+                        </button>
+                        <button class="btn btn-delete"
+                                @onclick="EliminarPlanta"
+                                disabled="@(plantaSeleccionada == null)">
+                            <span>🗑️</span>
+                            Eliminar Planta
+                        </button>
+                    }
+                    <button class="btn btn-show" @onclick="LimpiarFormulario">
+                        <span>🔄</span>
+                        Limpiar Formulario
                     </button>
                     <button class="btn btn-show" @onclick="MostrarPlantas">
                         <span>👁️</span>
-                        Mostrar Plantas
+                        Ver Dashboard
                     </button>
                 </div>
             </div>
-        </div
-
-        <!-- REEMPLAZA SOLO LA SECCIÓN DEL MENÚ EN GestionPlantas.razor -->
-<!-- No tiene sidebar en el código proporcionado -->
-
-<!-- NOTA: GestionPlantas.razor no tiene sidebar en el código que proporcionaste. -->
-<!-- Si necesitas agregar uno, usa este menú: -->
-
-<nav class="menu-section">
-    <div class="menu-title">Principal</div>
-    <div class="menu-item" @onclick='() => Navigation.NavigateTo("/dashboard")'>
-        <span class="menu-icon">🎛️</span>
-        Panel de Control
-    </div>
-
-    <div class="menu-title">Gestión</div>
-    <div class="menu-item active" @onclick='() => Navigation.NavigateTo("/plantas")'>
-        <span class="menu-icon">🌱</span>
-        Plantas
-    </div>
-    <div class="menu-item" @onclick='() => Navigation.NavigateTo("/graficos")'>
-        <span class="menu-icon">📊</span>
-        Gráficos
-    </div>
-    <div class="menu-item" @onclick='() => Navigation.NavigateTo("/usuarios")'>
-        <span class="menu-icon">👥</span>
-        Usuarios
-    </div>
-
-    <div class="menu-title">Sistema</div>
-    <div class="menu-item" @onclick='() => Navigation.NavigateTo("/riego")'>
-        <span class="menu-icon">💧</span>
-        Riego
-    </div>
-    <div class="menu-item" @onclick='() => Navigation.NavigateTo("/historial-riego")'>
-        <span class="menu-icon">📋</span>
-        Historial Riego
-    </div>
-</nav>
+        </div>
 
         <div class="sidebar-section">
             <div class="image-upload-section">
@@ -612,7 +685,16 @@
                 <div class="upload-area">
                     <div class="upload-icon">🌿</div>
                     <div class="upload-title">Vista previa de la imagen</div>
-                    <div class="upload-subtitle">Rosa Roja Premium - Imagen seleccionada</div>
+                    <div class="upload-subtitle">
+                        @if (!string.IsNullOrEmpty(planta.Nombre))
+                        {
+                            <text>@planta.Nombre - Imagen seleccionada</text>
+                        }
+                        else
+                        {
+                            <text>Selecciona una imagen para tu planta</text>
+                        }
+                    </div>
                 </div>
                 <button class="btn btn-upload">
                     <span>📁</span>
@@ -647,63 +729,258 @@
 
 @code {
     private PlantaModel planta = new();
+    private PlantaModel? plantaSeleccionada = null;
+    private string plantaIdBuscar = "";
+    private bool modoEdicion = false;
+    private string mensajeAlerta = "";
+    private string tipoAlertaClass = "";
+    private string iconoAlerta = "";
+
     private List<PlantaModel> plantasRegistradas = new()
     {
         new PlantaModel
         {
+            Id = "PLT001",
             Nombre = "Rosa Roja Premium",
+            Descripcion = "Rosa ornamental de jardín con flores rojas intensas",
             HumedadOptima = 70,
             TemperaturaOptima = 20,
             LuzOptima = "Media"
         },
         new PlantaModel
         {
+            Id = "PLT002",
             Nombre = "Helecho Boston",
+            Descripcion = "Planta de interior resistente y purificadora de aire",
             HumedadOptima = 80,
             TemperaturaOptima = 18,
             LuzOptima = "Baja"
         },
         new PlantaModel
         {
+            Id = "PLT003",
             Nombre = "Cactus del Desierto",
+            Descripcion = "Suculenta resistente de bajo mantenimiento",
             HumedadOptima = 30,
             TemperaturaOptima = 25,
             LuzOptima = "Alta"
         }
     };
-   
+
+    private void MostrarAlerta(string mensaje, string tipo)
+    {
+        mensajeAlerta = mensaje;
+        tipoAlertaClass = tipo switch
+        {
+            "success" => "alert-success",
+            "error" => "alert-error",
+            _ => "alert-info"
+        };
+        iconoAlerta = tipo switch
+        {
+            "success" => "✅",
+            "error" => "❌",
+            _ => "ℹ️"
+        };
+    }
+
+    private void OcultarAlerta()
+    {
+        mensajeAlerta = "";
+    }
 
     private async Task RegistrarPlanta()
     {
-        if (!string.IsNullOrEmpty(planta.Nombre))
-        {
-            plantasRegistradas.Add(new PlantaModel
-            {
-                Id = planta.Id,
-                Nombre = planta.Nombre,
-                Descripcion = planta.Descripcion,
-                HumedadOptima = planta.HumedadOptima,
-                TemperaturaOptima = planta.TemperaturaOptima,
-                LuzOptima = planta.LuzOptima
-            });
+        OcultarAlerta();
 
-            planta = new PlantaModel();
-            await Task.CompletedTask;
+        // Validaciones
+        if (string.IsNullOrWhiteSpace(planta.Id))
+        {
+            MostrarAlerta("El ID de la planta es obligatorio", "error");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(planta.Nombre))
+        {
+            MostrarAlerta("El nombre de la planta es obligatorio", "error");
+            return;
+        }
+
+        if (planta.HumedadOptima <= 0 || planta.HumedadOptima > 100)
+        {
+            MostrarAlerta("La humedad óptima debe estar entre 1 y 100%", "error");
+            return;
+        }
+
+        if (planta.TemperaturaOptima < -10 || planta.TemperaturaOptima > 50)
+        {
+            MostrarAlerta("La temperatura óptima debe estar entre -10 y 50°C", "error");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(planta.LuzOptima))
+        {
+            MostrarAlerta("Debes seleccionar el nivel de luz óptima", "error");
+            return;
+        }
+
+        // Verificar si el ID ya existe
+        if (plantasRegistradas.Any(p => p.Id == planta.Id))
+        {
+            MostrarAlerta($"Ya existe una planta con el ID '{planta.Id}'", "error");
+            return;
+        }
+
+        // Agregar planta
+        plantasRegistradas.Add(new PlantaModel
+        {
+            Id = planta.Id,
+            Nombre = planta.Nombre,
+            Descripcion = planta.Descripcion,
+            HumedadOptima = planta.HumedadOptima,
+            TemperaturaOptima = planta.TemperaturaOptima,
+            LuzOptima = planta.LuzOptima
+        });
+
+        MostrarAlerta($"✅ Planta '{planta.Nombre}' registrada exitosamente", "success");
+        LimpiarFormulario();
+        await Task.CompletedTask;
+    }
+
+    private void BuscarPlantaPorId()
+    {
+        OcultarAlerta();
+
+        if (string.IsNullOrWhiteSpace(plantaIdBuscar))
+        {
+            MostrarAlerta("Ingresa un ID para buscar", "error");
+            return;
+        }
+
+        var plantaEncontrada = plantasRegistradas.FirstOrDefault(p =>
+            p.Id.Equals(plantaIdBuscar, StringComparison.OrdinalIgnoreCase));
+
+        if (plantaEncontrada != null)
+        {
+            SeleccionarPlanta(plantaEncontrada);
+            MostrarAlerta($"Planta '{plantaEncontrada.Nombre}' encontrada. Puedes editarla ahora.", "success");
+        }
+        else
+        {
+            MostrarAlerta($"No se encontró ninguna planta con el ID '{plantaIdBuscar}'", "error");
         }
     }
 
-    private void EliminarPlanta()
+    private void SeleccionarPlanta(PlantaModel plantaASeleccionar)
     {
-        // Lógica para eliminar planta
+        plantaSeleccionada = plantaASeleccionar;
+
+        // Cargar datos en el formulario para editar
+        planta = new PlantaModel
+        {
+            Id = plantaASeleccionar.Id,
+            Nombre = plantaASeleccionar.Nombre,
+            Descripcion = plantaASeleccionar.Descripcion,
+            HumedadOptima = plantaASeleccionar.HumedadOptima,
+            TemperaturaOptima = plantaASeleccionar.TemperaturaOptima,
+            LuzOptima = plantaASeleccionar.LuzOptima
+        };
+
+        plantaIdBuscar = plantaASeleccionar.Id;
+        modoEdicion = true;
+        OcultarAlerta();
     }
 
     private void ActualizarInformacion()
     {
-        // Lógica para actualizar información
+        OcultarAlerta();
+
+        if (plantaSeleccionada == null)
+        {
+            MostrarAlerta("No hay ninguna planta seleccionada para actualizar", "error");
+            return;
+        }
+
+        // Validaciones
+        if (string.IsNullOrWhiteSpace(planta.Nombre))
+        {
+            MostrarAlerta("El nombre de la planta es obligatorio", "error");
+            return;
+        }
+
+        if (planta.HumedadOptima <= 0 || planta.HumedadOptima > 100)
+        {
+            MostrarAlerta("La humedad óptima debe estar entre 1 y 100%", "error");
+            return;
+        }
+
+        if (planta.TemperaturaOptima < -10 || planta.TemperaturaOptima > 50)
+        {
+            MostrarAlerta("La temperatura óptima debe estar entre -10 y 50°C", "error");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(planta.LuzOptima))
+        {
+            MostrarAlerta("Debes seleccionar el nivel de luz óptima", "error");
+            return;
+        }
+
+        // Actualizar la planta
+        plantaSeleccionada.Nombre = planta.Nombre;
+        plantaSeleccionada.Descripcion = planta.Descripcion;
+        plantaSeleccionada.HumedadOptima = planta.HumedadOptima;
+        plantaSeleccionada.TemperaturaOptima = planta.TemperaturaOptima;
+        plantaSeleccionada.LuzOptima = planta.LuzOptima;
+
+        MostrarAlerta($"✅ Planta '{planta.Nombre}' actualizada exitosamente", "success");
+        CancelarEdicion();
+    }
+
+    private void EliminarPlanta()
+    {
+        OcultarAlerta();
+
+        if (plantaSeleccionada == null)
+        {
+            MostrarAlerta("Selecciona una planta de la lista para eliminar", "error");
+            return;
+        }
+
+        var nombrePlanta = plantaSeleccionada.Nombre;
+        plantasRegistradas.Remove(plantaSeleccionada);
+
+        MostrarAlerta($"🗑️ Planta '{nombrePlanta}' eliminada exitosamente", "success");
+        LimpiarFormulario();
+    }
+
+    private void LimpiarFormulario()
+    {
+        planta = new PlantaModel();
+        plantaSeleccionada = null;
+        plantaIdBuscar = "";
+        modoEdicion = false;
+        OcultarAlerta();
+    }
+
+    private void CancelarEdicion()
+    {
+        LimpiarFormulario();
+        MostrarAlerta("Edición cancelada", "info");
     }
 
     private void MostrarPlantas()
     {
         Navigation.NavigateTo("/plantas");
+    }
+
+    public class PlantaModel
+    {
+        public string Id { get; set; } = "";
+        public string Nombre { get; set; } = "";
+        public string Descripcion { get; set; } = "";
+        public int HumedadOptima { get; set; }
+        public int TemperaturaOptima { get; set; }
+        public string LuzOptima { get; set; } = "";
     }
 }

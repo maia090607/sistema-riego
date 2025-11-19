@@ -1,5 +1,9 @@
 ﻿@page "/plantas"
+@using SmartDropUI.Services
+@using SmartDropUI.Models
 @inject NavigationManager Navigation
+@inject ILogger<Plantas> Logger
+@inject HttpClient Http
 @rendermode InteractiveServer
 
 <PageTitle>Plantas - SmartDrop</PageTitle>
@@ -268,42 +272,93 @@
             box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
         }
 
-    @@media (max-width: 1024px) {
-        .content-grid {
-            grid-template-columns: 1fr;
-        }
+    .loading-spinner {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f4f6;
+        border-top-color: #10b981;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
 
-        .info-grid {
-            grid-template-columns: 1fr;
-        }
+    @@keyframes spin {
+        to
+
+    {
+        transform: rotate(360deg);
+    }
+
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 0.75rem;
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    .alert-error {
+        background: #fee2e2;
+        border: 2px solid #ef4444;
+        color: #991b1b;
+    }
+
+    @@media (max-width: 1024px) {
+        .content-grid
+
+    {
+        grid-template-columns: 1fr;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
     }
 </style>
 
 <div class="plantas-page">
     <div class="plantas-container">
-        @if (plantas.Any())
+        <button class="btn-back-menu" @onclick='() => Navigation.NavigateTo("/dashboard")'>
+            <span>⬅️</span>
+            Volver al Dashboard
+        </button>
+
+        @if (cargando)
+        {
+            <div class="search-section">
+                <h2 class="search-title">CARGANDO PLANTAS...</h2>
+                <div class="description-content">
+                    <div class="loading-spinner"></div>
+                    <div class="description-text">Cargando plantas registradas</div>
+                </div>
+            </div>
+        }
+        else if (plantas.Any())
         {
             <!-- Sección de búsqueda -->
             <div class="search-section">
                 <h2 class="search-title">BUSCA TU PLANTA</h2>
                 <label class="search-label">Seleccionar Planta</label>
-                <select class="search-select" @bind="plantaSeleccionada">
+                <select class="search-select" @bind="plantaSeleccionadaId">
                     <option value="">-- Selecciona una planta --</option>
                     @foreach (var planta in plantas)
                     {
-                        <option value="@planta.Id">@planta.Nombre</option>
+                        <option value="@planta.IdPlanta">@planta.NombrePlanta</option>
                     }
                 </select>
-                <button class="btn btn-search" @onclick="BuscarPlanta">
+                <button class="btn-search" @onclick="BuscarPlanta">
                     <span class="btn-icon">🔍</span>
                     BUSCAR PLANTA
                 </button>
-                <button class="btn btn-manage" @onclick="AbrirGestionPlantas">
+                <button class="btn-manage" @onclick="AbrirGestionPlantas">
                     <span class="btn-icon">🌿</span>
                     MANIPULAR PLANTAS
                 </button>
             </div>
-            
+
             <div class="content-grid">
                 <!-- Sección de información -->
                 <div class="info-section">
@@ -311,92 +366,68 @@
                         <div class="info-card">
                             <div class="info-card-title">Identificación</div>
                             <div class="info-card-label">Id</div>
-                            <div class="info-card-value">--</div>
+                            <div class="info-card-value">@plantaActual.IdPlanta</div>
                         </div>
 
                         <div class="info-card">
                             <div class="info-card-title">Temperatura</div>
-                            <div class="info-card-label">Temperatura</div>
-                            <div class="info-card-value">--</div>
+                            <div class="info-card-label">Temperatura Óptima</div>
+                            <div class="info-card-value">@plantaActual.NivelOptimoTemperatura°C</div>
                         </div>
 
                         <div class="info-card">
                             <div class="info-card-title">Nombre de la Planta</div>
                             <div class="info-card-label">Nombre</div>
-                            <div class="info-card-value">--</div>
+                            <div class="info-card-value">@plantaActual.NombrePlanta</div>
                         </div>
 
                         <div class="info-card">
                             <div class="info-card-title">Humedad</div>
-                            <div class="info-card-label">Humedad</div>
-                            <div class="info-card-value">--</div>
+                            <div class="info-card-label">Humedad Óptima</div>
+                            <div class="info-card-value">@plantaActual.NivelOptimoHumedad%</div>
                         </div>
 
                         <div class="info-card">
                             <div class="info-card-title">Luz Necesaria</div>
-                            <div class="info-card-label">Luz</div>
-                            <div class="info-card-value">--</div>
+                            <div class="info-card-label">Nivel de Luz</div>
+                            <div class="info-card-value">@plantaActual.NivelOptimoLuz</div>
                         </div>
 
                         <div class="info-card">
                             <div class="info-card-title">Riego</div>
                             <div class="info-card-label">Frecuencia</div>
-                            <div class="info-card-value">--</div>
+                            <div class="info-card-value">Automático</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- REEMPLAZA SOLO LA SECCIÓN DEL MENÚ EN Plantas.razor -->
-                <!-- No tiene sidebar, no requiere cambios -->
-                <!-- NOTA: Plantas.razor no tiene sidebar en el código proporcionado. -->
-                <!-- Si agregas un sidebar posteriormente, usa este menú: -->
-
-                <nav class="menu-section">
-                    <div class="menu-title">Principal</div>
-                    <div class="menu-item" @onclick='() => Navigation.NavigateTo("/dashboard")'>
-                        <span class="menu-icon">🎛️</span>
-                        Panel de Control
-                    </div>
-
-                    <div class="menu-title">Gestión</div>
-                    <div class="menu-item active" @onclick='() => Navigation.NavigateTo("/plantas")'>
-                        <span class="menu-icon">🌱</span>
-                        Plantas
-                    </div>
-                    <div class="menu-item" @onclick='() => Navigation.NavigateTo("/graficos")'>
-                        <span class="menu-icon">📊</span>
-                        Gráficos
-                    </div>
-                    <div class="menu-item" @onclick='() => Navigation.NavigateTo("/usuarios")'>
-                        <span class="menu-icon">👥</span>
-                        Usuarios
-                    </div>
-
-                    <div class="menu-title">Sistema</div>
-                    <div class="menu-item" @onclick='() => Navigation.NavigateTo("/riego")'>
-                        <span class="menu-icon">💧</span>
-                        Riego
-                    </div>
-                    <div class="menu-item" @onclick='() => Navigation.NavigateTo("/historial-riego")'>
-                        <span class="menu-icon">📋</span>
-                        Historial Riego
-                    </div>
-                </nav>
-
                 <!-- Sección de descripción -->
                 <div class="description-section">
                     <h3 class="description-title">Descripción</h3>
-                    <div class="description-content">
-                        <div class="description-icon">🌱</div>
-                        <div class="description-text">Selecciona una planta</div>
-                        <div class="description-hint">Elige una planta del menú para ver su información detallada</div>
-                    </div>
+                    @if (!string.IsNullOrEmpty(plantaActual.Descripcion))
+                    {
+                        <div class="description-content">
+                            <div class="description-icon">🌱</div>
+                            <div class="description-text">@plantaActual.NombrePlanta</div>
+                            <div class="description-hint">@plantaActual.Descripcion</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="description-content">
+                            <div class="description-icon">🌱</div>
+                            <div class="description-text">Selecciona una planta</div>
+                            <div class="description-hint">Elige una planta del menú para ver su información detallada</div>
+                        </div>
+                    }
                 </div>
             </div>
 
             <div class="additional-info">
                 <div class="additional-info-icon">🍃</div>
-                <div class="additional-info-text">Información adicional del sistema de riego</div>
+                <div class="additional-info-text">
+                    Total de plantas registradas: @plantas.Count
+                </div>
             </div>
         }
         else
@@ -417,41 +448,127 @@
                 </div>
             </div>
         }
+
+        @if (!string.IsNullOrEmpty(mensajeError))
+        {
+            <div class="alert alert-error">
+                ❌ @mensajeError
+            </div>
+        }
     </div>
 </div>
 
 @code {
     private List<PlantaModel> plantas = new();
-    private string plantaSeleccionada = "";
+    private int plantaSeleccionadaId = 0;
+    private bool cargando = true;
+    private string mensajeError = "";
+
+    private PlantaModel plantaActual = new()
+    {
+        IdPlanta = 0,
+        NombrePlanta = "--",
+        Descripcion = "",
+        NivelOptimoHumedad = 0,
+        NivelOptimoTemperatura = 0,
+        NivelOptimoLuz = 0
+    };
 
     public class PlantaModel
     {
-        public string Id { get; set; } = "";
-        public string Nombre { get; set; } = "";
+        public int IdPlanta { get; set; }
+        public string NombrePlanta { get; set; } = "";
         public string Descripcion { get; set; } = "";
-        public double TemperaturaOptima { get; set; }
-        public double HumedadOptima { get; set; }
-        public string LuzNecesaria { get; set; } = "";
-        public string FrecuenciaRiego { get; set; } = "";
+        public float NivelOptimoHumedad { get; set; }
+        public float NivelOptimoTemperatura { get; set; }
+        public float NivelOptimoLuz { get; set; }
     }
 
     protected override async Task OnInitializedAsync()
     {
-        // Aquí cargarías las plantas desde tu servicio
-        // Por ahora dejamos la lista vacía para mostrar el estado inicial
-        await Task.CompletedTask;
+        await CargarPlantasAsync();
+    }
+
+    private async Task CargarPlantasAsync()
+    {
+        cargando = true;
+        mensajeError = "";
+
+        try
+        {
+            Logger.LogInformation("🌱 Cargando plantas desde API...");
+
+            var response = await Http.GetAsync("https://localhost:7068/api/plantas");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<List<PlantaModel>>>();
+
+                if (apiResponse?.success == true && apiResponse.data != null)
+                {
+                    plantas = apiResponse.data;
+                    Logger.LogInformation($"✅ {plantas.Count} plantas cargadas correctamente");
+
+                    // Si hay plantas, seleccionar la primera por defecto
+                    if (plantas.Any())
+                    {
+                        plantaActual = plantas.First();
+                        plantaSeleccionadaId = plantaActual.IdPlanta;
+                    }
+                }
+                else
+                {
+                    mensajeError = "No se pudieron cargar las plantas";
+                    Logger.LogWarning("⚠️ Respuesta de API sin datos");
+                }
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                mensajeError = $"Error al cargar plantas: {response.StatusCode}";
+                Logger.LogError($"❌ Error HTTP {response.StatusCode}: {error}");
+            }
+        }
+        catch (Exception ex)
+        {
+            mensajeError = $"Error al conectar con el servidor: {ex.Message}";
+            Logger.LogError($"❌ Excepción al cargar plantas: {ex.Message}");
+        }
+        finally
+        {
+            cargando = false;
+        }
     }
 
     private void BuscarPlanta()
     {
-        if (!string.IsNullOrEmpty(plantaSeleccionada))
+        if (plantaSeleccionadaId > 0)
         {
-            // Lógica para buscar y mostrar información de la planta
+            var planta = plantas.FirstOrDefault(p => p.IdPlanta == plantaSeleccionadaId);
+
+            if (planta != null)
+            {
+                plantaActual = planta;
+                Logger.LogInformation($"🔍 Planta seleccionada: {planta.NombrePlanta}");
+                StateHasChanged();
+            }
+        }
+        else
+        {
+            mensajeError = "Selecciona una planta primero";
         }
     }
 
     private void AbrirGestionPlantas()
     {
         Navigation.NavigateTo("/gestion-plantas");
+    }
+
+    // Clase para deserializar la respuesta de la API
+    public class ApiResponse<T>
+    {
+        public bool success { get; set; }
+        public string message { get; set; } = "";
+        public T? data { get; set; }
     }
 }
