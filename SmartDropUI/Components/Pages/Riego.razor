@@ -658,72 +658,96 @@
     // ========================================
     // MÉTODO PRINCIPAL: INICIAR RIEGO MANUAL
     // ========================================
-    private async Task IniciarRiegoManual()
+    // ========================================
+// MÉTODO PRINCIPAL: INICIAR RIEGO MANUAL (CORREGIDO)
+// ========================================
+private async Task IniciarRiegoManual()
+{
+    Console.WriteLine("🚀 [RIEGO] ========== INICIANDO RIEGO MANUAL ==========");
+    esperandoRespuesta = true;
+    StateHasChanged();
+
+    try
     {
-        Console.WriteLine("🚀 [RIEGO] ========== INICIANDO RIEGO MANUAL ==========");
-        esperandoRespuesta = true;
-        StateHasChanged();
+        // ✅ PASO 1: Obtener temperatura ANTES de iniciar el riego
+        Console.WriteLine("🌡️ [RIEGO] Obteniendo temperatura actual...");
+        await ObtenerTemperaturaActualAsync();
 
-        try
+        if (!temperaturaObtenida)
         {
-            // ✅ Obtener temperatura ANTES de iniciar el riego
-            await ObtenerTemperaturaActualAsync();
-
-            // ✅ Actualizar datos del Arduino
-            await ActualizarEstadoAsync();
-
-            Console.WriteLine("📤 [RIEGO] Enviando comando MANUAL_ON al Arduino...");
-            bool exito = await ArduinoService.IniciarRiegoManualAsync();
-
-            Console.WriteLine($"📥 [RIEGO] Respuesta del Arduino: {(exito ? "ÉXITO ✅" : "FALLO ❌")}");
-
-            if (exito)
-            {
-                Console.WriteLine("✅ [RIEGO] Comando MANUAL_ON enviado exitosamente");
-
-                riegoManualActivo = true;
-                tiempoRiego = 0;
-
-                // ✅ REGISTRAR EL INICIO DEL RIEGO EN EL HISTORIAL
-                await RegistrarRiegoEnHistorial();
-
-                // Iniciar temporizador
-                timer = new Timer(1000);
-                timer.Elapsed += async (s, e) =>
-                {
-                    tiempoRiego++;
-
-                    // ✅ Actualizar temperatura cada 30 segundos
-                    if (tiempoRiego % 30 == 0)
-                    {
-                        await ObtenerTemperaturaActualAsync();
-                    }
-
-                    await InvokeAsync(StateHasChanged);
-                };
-                timer.Start();
-                Console.WriteLine("⏱️ [RIEGO] Temporizador de riego iniciado");
-
-                Console.WriteLine("✅ [RIEGO] Riego manual activo - Esperando que el usuario presione detener");
-            }
-            else
-            {
-                Console.WriteLine("❌ [RIEGO] Error al enviar comando MANUAL_ON");
-                riegoManualActivo = false;
-            }
+            Console.WriteLine("⚠️ [RIEGO] No se pudo obtener temperatura, usando valor por defecto");
+            temperaturaActual = 25.0f; // Valor por defecto
         }
-        catch (Exception ex)
+
+        // ✅ PASO 2: Actualizar datos del Arduino
+        Console.WriteLine("📊 [RIEGO] Obteniendo humedad del Arduino...");
+        await ActualizarEstadoAsync();
+
+        // ✅ PASO 3: Validar que tenemos datos válidos
+        if (humedadActual <= 0)
         {
-            Console.WriteLine($"❌ [RIEGO] Excepción al iniciar riego manual: {ex.Message}");
+            Console.WriteLine("⚠️ [RIEGO] Humedad inválida, esperando lectura del sensor...");
+            await Task.Delay(1000);
+            await ActualizarEstadoAsync();
+        }
+
+        Console.WriteLine($"📝 [RIEGO] Datos pre-riego: H={humedadActual}% T={temperaturaActual}°C");
+
+        // ✅ PASO 4: REGISTRAR EN BD ANTES de iniciar riego
+        Console.WriteLine("💾 [RIEGO] Guardando registro ANTES de activar bomba...");
+        await RegistrarRiegoEnHistorial();
+
+        // ✅ PASO 5: Enviar comando al Arduino
+        Console.WriteLine("📤 [RIEGO] Enviando comando MANUAL_ON al Arduino...");
+        bool exito = await ArduinoService.IniciarRiegoManualAsync();
+
+        Console.WriteLine($"📥 [RIEGO] Respuesta del Arduino: {(exito ? "ÉXITO ✅" : "FALLO ❌")}");
+
+        if (exito)
+        {
+            Console.WriteLine("✅ [RIEGO] Comando MANUAL_ON enviado exitosamente");
+
+            riegoManualActivo = true;
+            tiempoRiego = 0;
+
+            // Iniciar temporizador
+            timer = new Timer(1000);
+            timer.Elapsed += async (s, e) =>
+            {
+                tiempoRiego++;
+
+                // ✅ Actualizar temperatura cada 30 segundos
+                if (tiempoRiego % 30 == 0)
+                {
+                    await ObtenerTemperaturaActualAsync();
+                }
+
+                await InvokeAsync(StateHasChanged);
+            };
+            timer.Start();
+            Console.WriteLine("⏱️ [RIEGO] Temporizador de riego iniciado");
+
+            Console.WriteLine("✅ [RIEGO] Riego manual activo - Esperando que el usuario presione detener");
+        }
+        else
+        {
+            Console.WriteLine("❌ [RIEGO] Error al enviar comando MANUAL_ON");
             riegoManualActivo = false;
         }
-        finally
-        {
-            esperandoRespuesta = false;
-            StateHasChanged();
-            Console.WriteLine("🏁 [RIEGO] ========== FIN INICIAR RIEGO MANUAL ==========");
-        }
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ [RIEGO] Excepción al iniciar riego manual: {ex.Message}");
+        Console.WriteLine($"❌ [RIEGO] Stack Trace: {ex.StackTrace}");
+        riegoManualActivo = false;
+    }
+    finally
+    {
+        esperandoRespuesta = false;
+        StateHasChanged();
+        Console.WriteLine("🏁 [RIEGO] ========== FIN INICIAR RIEGO MANUAL ==========");
+    }
+}
 
     // ========================================
     // DETENER RIEGO MANUAL

@@ -1,5 +1,8 @@
-﻿using System.Net.Http.Json;
+﻿using SmartDropUI.Components.Pages;
 using SmartDropUI.Models;
+using System;
+using System.Net.Http.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SmartDropUI.Services
 {
@@ -44,12 +47,16 @@ namespace SmartDropUI.Services
             }
         }
 
-        // En HistorialRiegoService.cs (SmartDropUI)
         public async Task<bool> GuardarRiegoAsync(HistorialRiegoModel historial)
         {
             try
             {
-                _logger.LogInformation($"💾 [UI] Guardando: H={historial.Humedad}% T={historial.Temperatura}°C");
+                _logger.LogInformation("═══════════════════════════════════════");
+                _logger.LogInformation($"💾 [SERVICE] INICIANDO GUARDADO");
+                _logger.LogInformation($"📅 Fecha: {historial.Fecha}");
+                _logger.LogInformation($"💧 Humedad: {historial.Humedad}%");
+                _logger.LogInformation($"🌡️ Temperatura: {historial.Temperatura}°C");
+                _logger.LogInformation("═══════════════════════════════════════");
 
                 var requestData = new
                 {
@@ -58,22 +65,27 @@ namespace SmartDropUI.Services
                     temperatura = historial.Temperatura
                 };
 
+                _logger.LogInformation($"📦 Request Data: {System.Text.Json.JsonSerializer.Serialize(requestData)}");
+
                 var response = await _httpClient.PostAsJsonAsync("/api/historial", requestData);
+
+                _logger.LogInformation($"📡 Status Code: {response.StatusCode}");
 
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    _logger.LogInformation($"✅ [UI] Respuesta: {content}");
+                    _logger.LogInformation($"✅ Respuesta: {content}");
                     return true;
                 }
 
                 var errorContent = await response.Content.ReadAsStringAsync();
-                _logger.LogWarning($"⚠️ [UI] Error: {errorContent}");
+                _logger.LogWarning($"⚠️ Error: {errorContent}");
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"❌ [UI] Error: {ex.Message}");
+                _logger.LogError($"❌ Excepción: {ex.Message}");
+                _logger.LogError($"❌ Stack: {ex.StackTrace}");
                 return false;
             }
         }
