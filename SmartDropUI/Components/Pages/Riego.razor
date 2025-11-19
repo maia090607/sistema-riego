@@ -3,6 +3,8 @@
 @using SmartDropUI.Models
 @using System.Timers
 @inject ArduinoService ArduinoService
+@inject HistorialRiegoService HistorialService
+@inject ClimaService ClimaService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 @implements IDisposable
@@ -520,6 +522,8 @@
     private bool bombaActiva = false;
     private int tiempoRiego = 0;
     private Timer? timer;
+    private int humedadActual = 0;
+    private float temperaturaActual = 25.0f;
 
     // ========================================
     // INICIALIZACIÓN
@@ -538,9 +542,8 @@
     {
         Console.WriteLine($"📡 [RIEGO] Datos recibidos - Bomba: {datos.BombaEncendida}, Modo: {datos.ModoManual}");
 
-        // Solo actualizamos bombaActiva, NO riegoManualActivo aquí
-        // para evitar que el botón desaparezca antes de hacer clic
         bombaActiva = datos.BombaEncendida;
+        humedadActual = datos.Humedad; // ✅ Guardamos la humedad actual
 
         InvokeAsync(StateHasChanged);
     }
@@ -562,8 +565,8 @@
             if (estado != null)
             {
                 bombaActiva = estado.BombaEncendida;
+                humedadActual = estado.Humedad; // ✅ Guardamos la humedad
 
-                // Solo sincronizamos al inicio
                 if (!riegoManualActivo)
                 {
                     riegoManualActivo = estado.ModoManual;
@@ -571,10 +574,51 @@
 
                 await InvokeAsync(StateHasChanged);
             }
+
+            // ✅ Obtener temperatura actual
+            var clima = await ClimaService.ObtenerClimaActualAsync();
+            if (clima != null)
+            {
+                temperaturaActual = (float)clima.Temperatura;
+                Console.WriteLine($"🌡️ [RIEGO] Temperatura actual: {temperaturaActual}°C");
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"❌ [RIEGO] Error al actualizar estado: {ex.Message}");
+        }
+    }
+
+    // ========================================
+    // MÉTODO: REGISTRAR RIEGO EN HISTORIAL
+    // ========================================
+    private async Task RegistrarRiegoEnHistorial()
+    {
+        try
+        {
+            Console.WriteLine($"💾 [RIEGO] Registrando riego en historial - H:{humedadActual}% T:{temperaturaActual}°C");
+
+            var nuevoRiego = new HistorialRiegoModel
+            {
+                Fecha = DateTime.Now,
+                Humedad = humedadActual,
+                Temperatura = temperaturaActual // ✅ Guardamos la temperatura del momento
+            };
+
+            bool guardado = await HistorialService.GuardarRiegoAsync(nuevoRiego);
+
+            if (guardado)
+            {
+                Console.WriteLine("✅ [RIEGO] Riego registrado exitosamente en el historial");
+            }
+            else
+            {
+                Console.WriteLine("⚠️ [RIEGO] No se pudo guardar el riego en el historial");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [RIEGO] Error al registrar riego: {ex.Message}");
         }
     }
 
@@ -589,6 +633,9 @@
 
         try
         {
+            // ✅ Actualizar datos antes de iniciar
+            await ActualizarEstadoAsync();
+
             Console.WriteLine("📤 [RIEGO] Enviando comando MANUAL_ON al Arduino...");
             bool exito = await ArduinoService.IniciarRiegoManualAsync();
 
@@ -598,9 +645,11 @@
             {
                 Console.WriteLine("✅ [RIEGO] Comando MANUAL_ON enviado exitosamente");
 
-                // IMPORTANTE: Establecemos riegoManualActivo en TRUE
                 riegoManualActivo = true;
                 tiempoRiego = 0;
+
+                // ✅ REGISTRAR EL INICIO DEL RIEGO EN EL HISTORIAL
+                await RegistrarRiegoEnHistorial();
 
                 // Iniciar temporizador
                 timer = new Timer(1000);
@@ -617,13 +666,13 @@
             else
             {
                 Console.WriteLine("❌ [RIEGO] Error al enviar comando MANUAL_ON");
-                riegoManualActivo = false; // Aseguramos que vuelva a FALSE si falla
+                riegoManualActivo = false;
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"❌ [RIEGO] Excepción al iniciar riego manual: {ex.Message}");
-            riegoManualActivo = false; // Aseguramos que vuelva a FALSE si hay excepción
+            riegoManualActivo = false;
         }
         finally
         {
@@ -641,7 +690,7 @@
         Console.WriteLine("🛑 [RIEGO] ========== DETENIENDO RIEGO MANUAL ==========");
 
         esperandoRespuesta = true;
-        StateHasChanged(); // Muestra "DETENIENDO..." en el botón
+        StateHasChanged();
 
         try
         {
@@ -654,7 +703,6 @@
                 Console.WriteLine("⏱️ [RIEGO] Temporizador detenido");
             }
 
-            // Enviar comando al Arduino
             Console.WriteLine("📤 [RIEGO] Enviando comando MANUAL_OFF...");
             bool exito = await ArduinoService.DetenerRiegoManualAsync();
 
@@ -664,11 +712,9 @@
 
                 await Task.Delay(500);
 
-                // Enviar comando AUTO
                 bool exitoAuto = await ArduinoService.ActivarModoAutomaticoAsync();
                 Console.WriteLine($"📥 [RIEGO] Comando AUTO: {(exitoAuto ? "✅" : "❌")}");
 
-                // IMPORTANTE: Solo cambiamos riegoManualActivo a FALSE DESPUÉS de todo
                 riegoManualActivo = false;
                 tiempoRiego = 0;
                 bombaActiva = false;
@@ -678,13 +724,11 @@
             else
             {
                 Console.WriteLine("❌ [RIEGO] Error al enviar comando MANUAL_OFF");
-                // Mantenemos riegoManualActivo en TRUE si falla
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"❌ [RIEGO] Excepción: {ex.Message}");
-            // Mantenemos riegoManualActivo en TRUE si hay error
         }
         finally
         {

@@ -13,6 +13,7 @@
 <PageTitle>Gráficos - SmartDrop</PageTitle>
 
 <style>
+    /* ... (mantén todos los estilos CSS existentes) ... */
     body {
         margin: 0;
         padding: 0;
@@ -147,6 +148,23 @@
     .chart-svg {
         width: 100%;
         height: 100%;
+    }
+
+    .current-value {
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: #f0fdf4;
+        border-radius: 0.5rem;
+    }
+
+    .update-time {
+        text-align: center;
+        color: #6b7280;
+        font-size: 0.875rem;
+        margin-top: 1rem;
     }
 
     .historial-section {
@@ -346,23 +364,6 @@
         color: #10b981;
     }
 
-    .update-time {
-        text-align: center;
-        color: #6b7280;
-        font-size: 0.875rem;
-        margin-top: 1rem;
-    }
-
-    .current-value {
-        text-align: center;
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin-top: 1rem;
-        padding: 0.75rem;
-        background: #f0fdf4;
-        border-radius: 0.5rem;
-    }
-
     @@media (max-width: 1024px) {
         .charts-grid {
             grid-template-columns: 1fr;
@@ -389,7 +390,7 @@
             <div class="chart-card">
                 <div class="chart-header">
                     <h2 class="chart-title">Humedad del Suelo en Tiempo Real</h2>
-                    <p class="chart-subtitle">Actualización automática cada 2 segundos</p>
+                    <p class="chart-subtitle">Actualización automática desde el sensor Arduino</p>
                 </div>
                 <div class="chart-container">
                     @if (cargandoHumedad)
@@ -458,7 +459,7 @@
                     Valor Actual: @valorActualHumedad.ToString("F1")%
                 </div>
                 <div class="update-time">
-                    Última actualización: @ultimaActualizacion.ToString("HH:mm:ss")
+                    Última actualización: @ultimaActualizacionHumedad.ToString("HH:mm:ss")
                 </div>
             </div>
 
@@ -466,7 +467,7 @@
             <div class="chart-card">
                 <div class="chart-header">
                     <h2 class="chart-title">Temperatura del Ambiente en Tiempo Real</h2>
-                    <p class="chart-subtitle">Actualización automática cada 2 segundos</p>
+                    <p class="chart-subtitle">Actualización automática desde la API del clima</p>
                 </div>
                 <div class="chart-container">
                     @if (cargandoTemperatura)
@@ -489,7 +490,7 @@
                             <line x1="50" y1="200" x2="370" y2="200" class="chart-axis" />
                             <line x1="50" y1="30" x2="50" y2="200" class="chart-axis" />
 
-                            <!-- Etiquetas eje Y -->
+                            <!-- Etiquetas eje Y (rango 25-45°C) -->
                             <text x="20" y="35" class="chart-label">45</text>
                             <text x="20" y="77" class="chart-label">40</text>
                             <text x="20" y="120" class="chart-label">35</text>
@@ -535,7 +536,7 @@
                     Valor Actual: @valorActualTemperatura.ToString("F1")°C
                 </div>
                 <div class="update-time">
-                    Última actualización: @ultimaActualizacion.ToString("HH:mm:ss")
+                    Última actualización: @ultimaActualizacionTemperatura.ToString("HH:mm:ss")
                 </div>
             </div>
         </div>
@@ -625,84 +626,128 @@
     private bool cargandoHumedad = false;
     private bool cargandoTemperatura = false;
     private DateTime fechaBusqueda = DateTime.Now;
-    private DateTime ultimaActualizacion = DateTime.Now;
+    private DateTime ultimaActualizacionHumedad = DateTime.Now;
+    private DateTime ultimaActualizacionTemperatura = DateTime.Now;
     private List<HistorialRiegoModel> historialDatos = new();
 
-    // Valores actuales para las líneas horizontales
-    private double valorActualHumedad = 50;
-    private double valorActualTemperatura = 25;
+    // ✅ Valores actuales separados
+    private double valorActualHumedad = 50;      // Desde Arduino (base de datos)
+    private double valorActualTemperatura = 30;  // Desde API del clima
 
-    private System.Timers.Timer? actualizacionTimer;
+    private System.Timers.Timer? timerHumedad;
+    private System.Timers.Timer? timerTemperatura;
 
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine("🚀 [GRÁFICOS] Iniciando componente...");
 
-        // Suscribirse a eventos del Arduino
+        // ✅ Suscribirse a eventos del Arduino para humedad del suelo
         ArduinoService.DatosRecibidos += OnDatosArduinoRecibidos;
 
         await CargarDatosIniciales();
 
-        // Timer para actualizar cada 1 segundo (más frecuente)
-        actualizacionTimer = new System.Timers.Timer(1000);
-        actualizacionTimer.Elapsed += async (sender, e) => await ActualizarDatosAutomaticamente();
-        actualizacionTimer.AutoReset = true;
-        actualizacionTimer.Start();
+        // ✅ Timer para actualizar HUMEDAD cada 2 segundos (desde Arduino/BD)
+        timerHumedad = new System.Timers.Timer(2000);
+        timerHumedad.Elapsed += async (sender, e) => await ActualizarHumedadAsync();
+        timerHumedad.AutoReset = true;
+        timerHumedad.Start();
 
-        Console.WriteLine("✅ [GRÁFICOS] Sistema de actualización automática iniciado - Intervalo: 1 segundo");
+        // ✅ Timer para actualizar TEMPERATURA cada 10 segundos (desde API del clima)
+        timerTemperatura = new System.Timers.Timer(10000);
+        timerTemperatura.Elapsed += async (sender, e) => await ActualizarTemperaturaAsync();
+        timerTemperatura.AutoReset = true;
+        timerTemperatura.Start();
+
+        Console.WriteLine("✅ [GRÁFICOS] Timers iniciados - Humedad: 2s | Temperatura: 10s");
     }
 
+    // ✅ Evento: Datos recibidos del Arduino en tiempo real
     private void OnDatosArduinoRecibidos(DatosArduinoModel datos)
-    {
-        // Actualizar valor actual de humedad
-        valorActualHumedad = Math.Max(0, Math.Min(100, datos.Humedad));
-        ultimaActualizacion = DateTime.Now;
-        InvokeAsync(StateHasChanged);
-    }
-
-    private async Task ActualizarDatosAutomaticamente()
     {
         try
         {
-            // Obtener temperatura del clima
-            var clima = await ClimaService.ObtenerClimaActualAsync();
-            if (clima != null)
+            var nuevaHumedad = Math.Max(0, Math.Min(100, datos.Humedad));
+
+            if (Math.Abs(valorActualHumedad - nuevaHumedad) > 0.1)
             {
-                valorActualTemperatura = Math.Max(25, Math.Min(45, clima.Temperatura));
+                valorActualHumedad = nuevaHumedad;
+                ultimaActualizacionHumedad = DateTime.Now;
+                Console.WriteLine($"📊 [GRÁFICOS] Humedad actualizada desde Arduino: {valorActualHumedad:F1}%");
+                InvokeAsync(StateHasChanged);
             }
-
-            // Obtener estado del Arduino
-            var estado = await ArduinoService.ObtenerEstadoAsync();
-            if (estado != null)
-            {
-                valorActualHumedad = Math.Max(0, Math.Min(100, estado.Humedad));
-            }
-
-            // Actualizar historial
-            await CargarHistorialReciente();
-
-            ultimaActualizacion = DateTime.Now;
-            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ [GRÁFICOS] Error en actualización: {ex.Message}");
+            Console.WriteLine($"❌ [GRÁFICOS] Error al recibir datos del Arduino: {ex.Message}");
         }
     }
 
-    private double CalcularPosicionHumedad()
+    // ✅ Actualizar HUMEDAD desde Arduino/BD cada 2 segundos
+    private async Task ActualizarHumedadAsync()
     {
-        // Mapear 0-100% al rango 200-30px (invertido, porque el eje Y va de arriba a abajo)
-        // 0% = y:200, 100% = y:30
-        return 200 - (valorActualHumedad * 1.7);
+        try
+        {
+            var estado = await ArduinoService.ObtenerEstadoAsync();
+            if (estado != null)
+            {
+                var nuevaHumedad = Math.Max(0, Math.Min(100, estado.Humedad));
+
+                if (Math.Abs(valorActualHumedad - nuevaHumedad) > 0.1)
+                {
+                    valorActualHumedad = nuevaHumedad;
+                    ultimaActualizacionHumedad = DateTime.Now;
+                    Console.WriteLine($"💧 [GRÁFICOS] Humedad actualizada: {valorActualHumedad:F1}%");
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [GRÁFICOS] Error al actualizar humedad: {ex.Message}");
+        }
     }
 
+    // ✅ Actualizar TEMPERATURA desde API del clima cada 10 segundos
+    private async Task ActualizarTemperaturaAsync()
+    {
+        try
+        {
+            var clima = await ClimaService.ObtenerClimaActualAsync();
+            if (clima != null)
+            {
+                var nuevaTemp = Math.Max(25, Math.Min(45, clima.Temperatura));
+
+                if (Math.Abs(valorActualTemperatura - nuevaTemp) > 0.1)
+                {
+                    valorActualTemperatura = nuevaTemp;
+                    ultimaActualizacionTemperatura = DateTime.Now;
+                    Console.WriteLine($"🌡️ [GRÁFICOS] Temperatura actualizada: {valorActualTemperatura:F1}°C");
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [GRÁFICOS] Error al actualizar temperatura: {ex.Message}");
+        }
+    }
+
+    // ✅ Calcular posición en el eje Y para HUMEDAD (0-100%)
+    private double CalcularPosicionHumedad()
+    {
+        // Rango visual: y=30 (arriba) hasta y=200 (abajo)
+        // 100% → y=30, 0% → y=200
+        var porcentaje = Math.Max(0, Math.Min(100, valorActualHumedad)); // Asegurar rango 0-100
+        return 200 - (porcentaje * 170 / 100.0); // Escala correcta
+    }
+
+    // ✅ Calcular posición en el eje Y para TEMPERATURA (25-45°C)
     private double CalcularPosicionTemperatura()
     {
-        // Mapear 25-45°C al rango 200-30px
-        // 25°C = y:200, 45°C = y:30
-        var valorNormalizado = (valorActualTemperatura - 25) / 20.0; // Normalizar a 0-1
-        return 200 - (valorNormalizado * 170); // Escalar al rango visual
+        // Rango visual: y=30 (arriba, 45°C) hasta y=200 (abajo, 25°C)
+        var temperatura = Math.Max(25, Math.Min(45, valorActualTemperatura)); // Asegurar rango 25-45
+        var valorNormalizado = (temperatura - 25) / 20.0; // Normalizar a 0-1
+        return 200 - (valorNormalizado * 170); // Escala correcta
     }
 
     private async Task CargarDatosIniciales()
@@ -713,25 +758,32 @@
 
         try
         {
-            // Cargar historial completo
+            Console.WriteLine("📥 [GRÁFICOS] Cargando datos iniciales...");
+
+            // 1. Humedad desde Arduino
+            var estado = await ArduinoService.ObtenerEstadoAsync();
+            if (estado != null)
+            {
+                valorActualHumedad = Math.Max(0, Math.Min(100, estado.Humedad));
+                Console.WriteLine($"✅ Humedad inicial: {valorActualHumedad:F1}%");
+            }
+
+            // 2. Temperatura desde API del clima
+            var clima = await ClimaService.ObtenerClimaActualAsync();
+            if (clima != null)
+            {
+                valorActualTemperatura = Math.Max(25, Math.Min(45, clima.Temperatura));
+                Console.WriteLine($"✅ Temperatura inicial: {valorActualTemperatura:F1}°C");
+            }
+
+            // 3. Historial
             await CargarHistorialReciente();
 
-            // Inicializar valores actuales desde el historial
-            if (historialDatos.Any())
-            {
-                var ultimoRegistro = historialDatos.OrderByDescending(h => h.Fecha).FirstOrDefault();
-                if (ultimoRegistro != null)
-                {
-                    valorActualHumedad = ultimoRegistro.Humedad;
-                    valorActualTemperatura = ultimoRegistro.Temperatura;
-                }
-
-                Console.WriteLine($"✅ [GRÁFICOS] Datos iniciales cargados");
-            }
+            Console.WriteLine($"✅ [GRÁFICOS] Datos iniciales cargados");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ [GRÁFICOS] Error al cargar datos: {ex.Message}");
+            Console.WriteLine($"❌ [GRÁFICOS] Error: {ex.Message}");
         }
         finally
         {
@@ -746,7 +798,6 @@
         try
         {
             var historial = await HistorialService.ObtenerHistorialAsync();
-
             if (historial != null && historial.Any())
             {
                 historialDatos = historial.OrderByDescending(h => h.Fecha).Take(20).ToList();
@@ -819,8 +870,10 @@
     public void Dispose()
     {
         ArduinoService.DatosRecibidos -= OnDatosArduinoRecibidos;
-        actualizacionTimer?.Stop();
-        actualizacionTimer?.Dispose();
+        timerHumedad?.Stop();
+        timerHumedad?.Dispose();
+        timerTemperatura?.Stop();
+        timerTemperatura?.Dispose();
         Console.WriteLine("✅ [GRÁFICOS] Recursos liberados correctamente");
     }
 }
