@@ -606,6 +606,41 @@
             </div>
         }
     </div>
+
+    <table class="historial-table">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Horario</th>
+                <th>Humedad (%)</th>
+                <th>Temperatura (°C)</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var riego in historialRiegos)
+            {
+                <tr>
+                    <td>@riego.Fecha.ToString("dd/MM/yyyy")</td>
+                    <td>@riego.Fecha.ToString("HH:mm:ss")</td>
+                    <td>
+                        <span class="status-badge @ObtenerClaseHumedad(riego.Humedad)">
+                            @riego.Humedad.ToString("F1")%
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge @ObtenerClaseTemperatura(riego.Temperatura)">
+                            @riego.Temperatura.ToString("F1")°C
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge badge-success">Completado</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
 </div>
 
 @code {

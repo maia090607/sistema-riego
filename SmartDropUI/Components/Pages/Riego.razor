@@ -524,6 +524,7 @@
     private Timer? timer;
     private int humedadActual = 0;
     private float temperaturaActual = 25.0f;
+    private bool temperaturaObtenida = false;
 
     // ========================================
     // INICIALIZACIÓN
@@ -533,6 +534,34 @@
         Console.WriteLine("🎯 [RIEGO] Iniciando componente Riego...");
         ArduinoService.DatosRecibidos += OnDatosArduinoRecibidos;
         await ActualizarEstadoAsync();
+
+        // ✅ Obtener temperatura inicial
+        await ObtenerTemperaturaActualAsync();
+    }
+
+    // ========================================
+    // MÉTODO NUEVO: OBTENER TEMPERATURA
+    // ========================================
+    private async Task ObtenerTemperaturaActualAsync()
+    {
+        try
+        {
+            var clima = await ClimaService.ObtenerClimaActualAsync();
+            if (clima != null)
+            {
+                temperaturaActual = (float)clima.Temperatura;
+                temperaturaObtenida = true;
+                Console.WriteLine($"🌡️ [RIEGO] Temperatura obtenida: {temperaturaActual}°C");
+            }
+            else
+            {
+                Console.WriteLine("⚠️ [RIEGO] No se pudo obtener temperatura del clima");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [RIEGO] Error al obtener temperatura: {ex.Message}");
+        }
     }
 
     // ========================================
@@ -543,7 +572,7 @@
         Console.WriteLine($"📡 [RIEGO] Datos recibidos - Bomba: {datos.BombaEncendida}, Modo: {datos.ModoManual}");
 
         bombaActiva = datos.BombaEncendida;
-        humedadActual = datos.Humedad; // ✅ Guardamos la humedad actual
+        humedadActual = datos.Humedad;
 
         InvokeAsync(StateHasChanged);
     }
@@ -565,7 +594,7 @@
             if (estado != null)
             {
                 bombaActiva = estado.BombaEncendida;
-                humedadActual = estado.Humedad; // ✅ Guardamos la humedad
+                humedadActual = estado.Humedad;
 
                 if (!riegoManualActivo)
                 {
@@ -575,12 +604,10 @@
                 await InvokeAsync(StateHasChanged);
             }
 
-            // ✅ Obtener temperatura actual
-            var clima = await ClimaService.ObtenerClimaActualAsync();
-            if (clima != null)
+            // ✅ Actualizar temperatura periódicamente
+            if (!temperaturaObtenida)
             {
-                temperaturaActual = (float)clima.Temperatura;
-                Console.WriteLine($"🌡️ [RIEGO] Temperatura actual: {temperaturaActual}°C");
+                await ObtenerTemperaturaActualAsync();
             }
         }
         catch (Exception ex)
@@ -596,13 +623,19 @@
     {
         try
         {
-            Console.WriteLine($"💾 [RIEGO] Registrando riego en historial - H:{humedadActual}% T:{temperaturaActual}°C");
+            // ✅ Asegurar que tenemos temperatura actualizada
+            if (!temperaturaObtenida)
+            {
+                await ObtenerTemperaturaActualAsync();
+            }
+
+            Console.WriteLine($"💾 [RIEGO] Registrando riego - H:{humedadActual}% T:{temperaturaActual}°C");
 
             var nuevoRiego = new HistorialRiegoModel
             {
                 Fecha = DateTime.Now,
                 Humedad = humedadActual,
-                Temperatura = temperaturaActual // ✅ Guardamos la temperatura del momento
+                Temperatura = temperaturaActual
             };
 
             bool guardado = await HistorialService.GuardarRiegoAsync(nuevoRiego);
@@ -633,7 +666,10 @@
 
         try
         {
-            // ✅ Actualizar datos antes de iniciar
+            // ✅ Obtener temperatura ANTES de iniciar el riego
+            await ObtenerTemperaturaActualAsync();
+
+            // ✅ Actualizar datos del Arduino
             await ActualizarEstadoAsync();
 
             Console.WriteLine("📤 [RIEGO] Enviando comando MANUAL_ON al Arduino...");
@@ -653,10 +689,17 @@
 
                 // Iniciar temporizador
                 timer = new Timer(1000);
-                timer.Elapsed += (s, e) =>
+                timer.Elapsed += async (s, e) =>
                 {
                     tiempoRiego++;
-                    InvokeAsync(StateHasChanged);
+
+                    // ✅ Actualizar temperatura cada 30 segundos
+                    if (tiempoRiego % 30 == 0)
+                    {
+                        await ObtenerTemperaturaActualAsync();
+                    }
+
+                    await InvokeAsync(StateHasChanged);
                 };
                 timer.Start();
                 Console.WriteLine("⏱️ [RIEGO] Temporizador de riego iniciado");
@@ -718,6 +761,7 @@
                 riegoManualActivo = false;
                 tiempoRiego = 0;
                 bombaActiva = false;
+                temperaturaObtenida = false; // ✅ Reset para obtener nueva temperatura
 
                 Console.WriteLine("✅ [RIEGO] Sistema vuelto a modo automático");
             }
