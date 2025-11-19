@@ -2,6 +2,7 @@
 using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
+using System.Data;
 
 namespace DAL
 {
@@ -17,36 +18,55 @@ namespace DAL
                 {
                     connection.Open();
 
-                    // Obtener el siguiente valor de la secuencia
-                    using (var cmdSeq = new OracleCommand("SELECT SEQ_HISTORIAL_RIEGO.NEXTVAL FROM DUAL", connection))
-                    {
-                        historial.Id = Convert.ToInt32(cmdSeq.ExecuteScalar());
-                    }
-
-                    // Insertar el registro con el ID generado
+                    // ✅ Usar el procedimiento almacenado del paquete
                     string query = @"
-                INSERT INTO HISTORIAL_RIEGO (ID_HISTORIAL_RIEGO, FECHA_HORA, HUMEDAD, TEMPERATURA)
-                VALUES (:IdHistorialRiego, :FechaHora, :Humedad, :Temperatura)";
+                BEGIN 
+                    PKG_HISTORIAL_RIEGO.SP_INSERTAR_HISTORIAL(
+                        :p_fecha_hora,
+                        :p_humedad,
+                        :p_temperatura,
+                        :p_id_generado,
+                        :p_estado,
+                        :p_mensaje
+                    );
+                END;";
 
                     using (OracleCommand cmd = new OracleCommand(query, connection))
                     {
-                        cmd.Parameters.Add(":IdHistorialRiego", OracleDbType.Int32).Value = historial.Id;
-                        cmd.Parameters.Add(":FechaHora", OracleDbType.Date).Value = historial.Fecha;
-                        cmd.Parameters.Add(":Humedad", OracleDbType.Single).Value = historial.Humedad;
-                        cmd.Parameters.Add(":Temperatura", OracleDbType.Single).Value = historial.Temperatura;
+                        cmd.CommandType = CommandType.Text;
 
-                        int filas = cmd.ExecuteNonQuery();
+                        // Parámetros de entrada
+                        cmd.Parameters.Add(":p_fecha_hora", OracleDbType.Date).Value = historial.Fecha;
+                        cmd.Parameters.Add(":p_humedad", OracleDbType.Single).Value = historial.Humedad;
+                        cmd.Parameters.Add(":p_temperatura", OracleDbType.Single).Value = historial.Temperatura;
 
-                        if (filas > 0)
+                        // Parámetros de salida
+                        var paramId = cmd.Parameters.Add(":p_id_generado", OracleDbType.Int32);
+                        paramId.Direction = ParameterDirection.Output;
+
+                        var paramEstado = cmd.Parameters.Add(":p_estado", OracleDbType.Int32);
+                        paramEstado.Direction = ParameterDirection.Output;
+
+                        var paramMensaje = cmd.Parameters.Add(":p_mensaje", OracleDbType.Varchar2, 200);
+                        paramMensaje.Direction = ParameterDirection.Output;
+
+                        cmd.ExecuteNonQuery();
+
+                        // ✅ Obtener valores de salida
+                        historial.Id = Convert.ToInt32(paramId.Value.ToString());
+                        int estado = Convert.ToInt32(paramEstado.Value.ToString());
+                        string mensaje = paramMensaje.Value.ToString();
+
+                        if (estado == 1)
                         {
                             response.Estado = true;
-                            response.Mensaje = "Historial guardado correctamente.";
+                            response.Mensaje = mensaje;
                             response.Entidad = historial;
                         }
                         else
                         {
                             response.Estado = false;
-                            response.Mensaje = "No se insertó ningún registro.";
+                            response.Mensaje = mensaje;
                         }
                     }
                 }
@@ -54,12 +74,12 @@ namespace DAL
                 {
                     response.Estado = false;
                     response.Mensaje = "Error al guardar historial: " + ex.Message;
+                    Console.WriteLine($"❌ [HISTORIAL] Error detallado: {ex}");
                 }
             }
 
             return response;
         }
-
 
         public Response<Historial_Riego> BuscarPorId(int id)
         {

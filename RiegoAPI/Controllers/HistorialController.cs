@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-
 namespace RiegoAPI.Controllers
 {
     [ApiController]
@@ -16,12 +15,13 @@ namespace RiegoAPI.Controllers
     public class HistorialController : ControllerBase
     {
         private readonly ServicioHistorial _servicioHistorial;
+        // ✅ NO NECESITAS ILogger si no lo vas a usar
+        // private readonly ILogger<HistorialController> _logger;
 
         public HistorialController(ServicioHistorial servicioHistorial)
         {
             _servicioHistorial = servicioHistorial;
         }
-
 
         // GET: api/historial
         [HttpGet]
@@ -33,7 +33,6 @@ namespace RiegoAPI.Controllers
             return Ok(ApiResponseDTO<List<HistorialRiegoResponseDTO>>.Success(
                 dto, $"Se encontraron {dto.Count} registros"));
         }
-
 
         // GET: api/historial/{id}
         [HttpGet("{id}")]
@@ -52,7 +51,6 @@ namespace RiegoAPI.Controllers
             return Ok(ApiResponseDTO<HistorialRiegoResponseDTO>.Success(dto, "Historial encontrado"));
         }
 
-
         // GET: api/historial/por-fecha
         [HttpGet("por-fecha")]
         public IActionResult ObtenerPorFecha([FromQuery] DateTime fecha)
@@ -64,25 +62,6 @@ namespace RiegoAPI.Controllers
 
             return Ok(ApiResponseDTO<List<HistorialRiegoResponseDTO>>.Success(
                 dto, $"Se encontraron {dto.Count} registros para la fecha {fecha:dd/MM/yyyy}"));
-        }
-
-        // GET: api/historial/rango-fechas
-        [HttpGet("rango-fechas")]
-        public IActionResult ObtenerPorRangoFechas(
-            [FromQuery] DateTime fechaInicio,
-            [FromQuery] DateTime fechaFin)
-        {
-            var entidades = _servicioHistorial.MostrarTodos();
-
-            var filtrados = entidades
-                .Where(h => h.Fecha.Date >= fechaInicio.Date &&
-                            h.Fecha.Date <= fechaFin.Date)
-                .ToList();
-
-            var dto = HistorialRiegoMapper.ToResponseDTOList(filtrados);
-
-            return Ok(ApiResponseDTO<List<HistorialRiegoResponseDTO>>.Success(
-                dto, $"Se encontraron {dto.Count} registros entre {fechaInicio:dd/MM/yyyy} y {fechaFin:dd/MM/yyyy}"));
         }
 
         // POST: api/historial

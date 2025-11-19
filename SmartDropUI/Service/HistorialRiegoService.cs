@@ -44,12 +44,12 @@ namespace SmartDropUI.Services
             }
         }
 
-        // ✅ Guardar nuevo registro de riego
+        // En HistorialRiegoService.cs (SmartDropUI)
         public async Task<bool> GuardarRiegoAsync(HistorialRiegoModel historial)
         {
             try
             {
-                _logger.LogInformation("💾 Guardando registro de riego...");
+                _logger.LogInformation($"💾 [UI] Guardando: H={historial.Humedad}% T={historial.Temperatura}°C");
 
                 var requestData = new
                 {
@@ -62,17 +62,18 @@ namespace SmartDropUI.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    _logger.LogInformation("✅ Registro guardado correctamente");
+                    var content = await response.Content.ReadAsStringAsync();
+                    _logger.LogInformation($"✅ [UI] Respuesta: {content}");
                     return true;
                 }
 
                 var errorContent = await response.Content.ReadAsStringAsync();
-                _logger.LogWarning($"⚠️ No se pudo guardar el registro: {errorContent}");
+                _logger.LogWarning($"⚠️ [UI] Error: {errorContent}");
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"❌ Error al guardar: {ex.Message}");
+                _logger.LogError($"❌ [UI] Error: {ex.Message}");
                 return false;
             }
         }
