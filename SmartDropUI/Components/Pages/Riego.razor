@@ -11,6 +11,7 @@
 
 <PageTitle>Control de Riego - SmartDrop</PageTitle>
 
+
 <style>
     body {
         margin: 0;
@@ -372,6 +373,41 @@
             grid-template-columns: 1fr;
         }
     }
+
+    .btn-riego {
+        width: 100%;
+        padding: 18px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: 0.2s;
+    }
+
+    .btn-riego.iniciar {
+        background: #12c48b;
+    }
+
+    .btn-riego.detener {
+        background: #e53935;
+    }
+
+    .btn-riego:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+
+    .icon {
+        font-size: 18px;
+    }
+
 </style>
 
 <div class="riego-page">
@@ -460,63 +496,29 @@
         </div>
 
         <!-- Manual Control -->
-        <div class="manual-control-section">
-            <h3 class="control-title">💧 CONTROL DE RIEGO MANUAL</h3>
-
-            @if (!riegoManualActivo)
+        <div>
+            @if (riegoManualActivo)
             {
-                <!-- Botón de Iniciar Riego -->
-                <button class="btn-manual btn-iniciar"
-                        @onclick="IniciarRiegoManual"
+                <button class="btn-riego detener"
+                        @onclick="DetenerRiegoManual"
                         disabled="@esperandoRespuesta">
-                    <span>💧</span>
-                    @(esperandoRespuesta ? "INICIANDO..." : "INICIAR RIEGO MANUAL")
+                    🛑 DETENER RIEGO MANUAL
                 </button>
             }
             else
             {
-                <!-- Contador de tiempo de riego -->
-                <div class="tiempo-riego">
-                    <div class="tiempo-icon">⏱️</div>
-                    <div class="tiempo-text">Tiempo de riego activo:</div>
-                    <div class="tiempo-counter">@tiempoRiego segundos</div>
-                </div>
-
-                <!-- Botón de Detener Riego -->
-                <button class="btn-manual btn-detener"
-                        @onclick="DetenerRiegoManual"
+                <button class="btn-riego iniciar"
+                        @onclick="IniciarRiegoManual"
                         disabled="@esperandoRespuesta">
-                    <span>🛑</span>
-                    @(esperandoRespuesta ? "DETENIENDO..." : "DETENER RIEGO MANUAL")
+                    💧 INICIAR RIEGO MANUAL
                 </button>
             }
-
-            <div class="info-text">
-                <div class="info-title">
-                    <span>ℹ️</span>
-                    Información sobre el Riego Manual
-                </div>
-                <p class="info-description">
-                    El modo manual te permite controlar directamente el sistema de riego.
-                    Mientras esté activo, el sistema automático estará deshabilitado.
-                    @if (!riegoManualActivo)
-                    {
-                        <text>Presiona "Iniciar Riego Manual" para comenzar.</text>
-                    }
-                    else
-                    {
-                        <text>Presiona "Detener Riego Manual" cuando desees finalizar el riego.</text>
-                    }
-                </p>
-            </div>
         </div>
+
     </main>
 </div>
 
 @code {
-    // ========================================
-    // VARIABLES DE ESTADO
-    // ========================================
     private bool riegoManualActivo = false;
     private bool esperandoRespuesta = false;
     private bool bombaActiva = false;
@@ -525,21 +527,23 @@
     private int humedadActual = 0;
     private float temperaturaActual = 25.0f;
     private bool temperaturaObtenida = false;
+    private bool bombaAnteriorEncendida = false;
+    private Timer? actualizacionTimer;
 
-    // ========================================
-    // INICIALIZACIÓN
-    // ========================================
     protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine("🎯 [RIEGO] Iniciando componente Riego...");
+        Console.WriteLine("🎯 [RIEGO] Iniciando componente...");
         ArduinoService.DatosRecibidos += OnDatosArduinoRecibidos;
         await ActualizarEstadoAsync();
         await ObtenerTemperaturaActualAsync();
+
+        // ✅ Timer para actualizar estado cada 2 segundos
+        actualizacionTimer = new Timer(2000);
+        actualizacionTimer.Elapsed += async (s, e) => await ActualizarEstadoAsync();
+        actualizacionTimer.AutoReset = true;
+        actualizacionTimer.Start();
     }
 
-    // ========================================
-    // MÉTODO: OBTENER TEMPERATURA
-    // ========================================
     private async Task ObtenerTemperaturaActualAsync()
     {
         try
@@ -549,7 +553,7 @@
             {
                 temperaturaActual = (float)clima.Temperatura;
                 temperaturaObtenida = true;
-                Console.WriteLine($"🌡️ [RIEGO] Temperatura obtenida: {temperaturaActual}°C");
+                Console.WriteLine($"🌡️ [RIEGO] Temperatura: {temperaturaActual}°C");
             }
         }
         catch (Exception ex)
@@ -558,20 +562,24 @@
         }
     }
 
-    // ========================================
-    // EVENTO: DATOS RECIBIDOS DEL ARDUINO
-    // ========================================
     private void OnDatosArduinoRecibidos(DatosArduinoModel datos)
     {
-        Console.WriteLine($"📡 [RIEGO] Datos recibidos - Bomba: {datos.BombaEncendida}");
+        Console.WriteLine($"📡 [RIEGO] Datos Arduino - Bomba:{datos.BombaEncendida} Manual:{datos.ModoManual}");
+
+        bool bombaAntesEncendida = bombaActiva;
         bombaActiva = datos.BombaEncendida;
         humedadActual = datos.Humedad;
+
+        // ✅ DETECTAR RIEGO AUTOMÁTICO (bomba se encendió sin modo manual)
+        if (bombaActiva && !bombaAntesEncendida && !riegoManualActivo)
+        {
+            Console.WriteLine("🌊 [RIEGO] Riego AUTOMÁTICO detectado");
+            _ = RegistrarRiegoEnHistorialAsync();
+        }
+
         InvokeAsync(StateHasChanged);
     }
 
-    // ========================================
-    // ACTUALIZAR ESTADO DESDE ARDUINO
-    // ========================================
     private async Task ActualizarEstadoAsync()
     {
         if (!ArduinoService.EstaConectado)
@@ -585,12 +593,17 @@
             var estado = await ArduinoService.ObtenerEstadoAsync();
             if (estado != null)
             {
+                bool bombaAntesEncendida = bombaActiva;
                 bombaActiva = estado.BombaEncendida;
                 humedadActual = estado.Humedad;
-                if (!riegoManualActivo)
+
+                // ✅ DETECTAR RIEGO AUTOMÁTICO
+                if (bombaActiva && !bombaAntesEncendida && !riegoManualActivo)
                 {
-                    riegoManualActivo = estado.ModoManual;
+                    Console.WriteLine("🌊 [RIEGO] Riego AUTOMÁTICO detectado en actualización");
+                    await RegistrarRiegoEnHistorialAsync();
                 }
+
                 await InvokeAsync(StateHasChanged);
             }
 
@@ -605,10 +618,7 @@
         }
     }
 
-    // ========================================
-    // MÉTODO: REGISTRAR RIEGO EN HISTORIAL
-    // ========================================
-    private async Task RegistrarRiegoEnHistorial()
+    private async Task RegistrarRiegoEnHistorialAsync()
     {
         try
         {
@@ -639,59 +649,79 @@
         }
     }
 
-    // ========================================
-    // MÉTODO PRINCIPAL: INICIAR RIEGO MANUAL
-    // ========================================
     private async Task IniciarRiegoManual()
     {
-        Console.WriteLine("🚀 [RIEGO] ========== INICIANDO ==========");
+        Console.WriteLine("🚀 [RIEGO] ========== INICIANDO RIEGO MANUAL ==========");
         esperandoRespuesta = true;
-        StateHasChanged();
+        StateHasChanged(); // ✅ Actualizar UI inmediatamente
 
         try
         {
+            // ✅ Obtener temperatura ANTES de iniciar el riego
             await ObtenerTemperaturaActualAsync();
+
+            // ✅ Actualizar datos del Arduino
             await ActualizarEstadoAsync();
 
-            Console.WriteLine("📤 [RIEGO] Enviando MANUAL_ON...");
+            Console.WriteLine("📤 [RIEGO] Enviando comando MANUAL_ON al Arduino...");
             bool exito = await ArduinoService.IniciarRiegoManualAsync();
+
+            Console.WriteLine($"📥 [RIEGO] Respuesta del Arduino: {(exito ? "ÉXITO ✅" : "FALLO ❌")}");
 
             if (exito)
             {
-                Console.WriteLine("✅ [RIEGO] Comando enviado");
+                Console.WriteLine("✅ [RIEGO] Comando MANUAL_ON enviado exitosamente");
+
+                // ✅ CAMBIO CRÍTICO: Actualizar estado ANTES de registrar
                 riegoManualActivo = true;
                 tiempoRiego = 0;
+                bombaActiva = true; // ✅ Forzar estado de bomba
 
+                // ✅ FORZAR ACTUALIZACIÓN DE UI
+                await InvokeAsync(StateHasChanged);
+
+                // ✅ REGISTRAR EL INICIO DEL RIEGO EN EL HISTORIAL
+                await RegistrarRiegoEnHistorialAsync();
+
+                // Iniciar temporizador
                 timer = new Timer(1000);
                 timer.Elapsed += async (s, e) =>
                 {
                     tiempoRiego++;
+
+                    // ✅ Actualizar temperatura cada 30 segundos
                     if (tiempoRiego % 30 == 0)
+                    {
                         await ObtenerTemperaturaActualAsync();
+                    }
+
                     await InvokeAsync(StateHasChanged);
                 };
                 timer.Start();
+                Console.WriteLine("⏱️ [RIEGO] Temporizador de riego iniciado");
 
-                await RegistrarRiegoEnHistorial();
+                Console.WriteLine("✅ [RIEGO] Riego manual activo - Esperando que el usuario presione detener");
             }
             else
             {
-                Console.WriteLine("❌ [RIEGO] Error al enviar comando");
+                Console.WriteLine("❌ [RIEGO] Error al enviar comando MANUAL_ON");
+                riegoManualActivo = false;
+                bombaActiva = false;
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ [RIEGO] Excepción: {ex.Message}");
+            Console.WriteLine($"❌ [RIEGO] Excepción al iniciar riego manual: {ex.Message}");
+            riegoManualActivo = false;
+            bombaActiva = false;
         }
         finally
         {
             esperandoRespuesta = false;
-            StateHasChanged();
+            await InvokeAsync(StateHasChanged); // ✅ Asegurar actualización final
+            Console.WriteLine("🏁 [RIEGO] ========== FIN INICIAR RIEGO MANUAL ==========");
         }
     }
-    // ========================================
-    // DETENER RIEGO MANUAL
-    // ========================================
     private async Task DetenerRiegoManual()
     {
         Console.WriteLine("🛑 [RIEGO] ========== DETENIENDO ==========");
@@ -705,7 +735,6 @@
                 timer.Stop();
                 timer.Dispose();
                 timer = null;
-                Console.WriteLine("⏱️ [RIEGO] Temporizador detenido");
             }
 
             Console.WriteLine("📤 [RIEGO] Enviando MANUAL_OFF...");
@@ -734,14 +763,11 @@
         finally
         {
             esperandoRespuesta = false;
-            StateHasChanged();
+            await InvokeAsync(StateHasChanged);
             Console.WriteLine("🏁 [RIEGO] ========== FIN ==========");
         }
     }
 
-    // ========================================
-    // LIMPIEZA
-    // ========================================
     public void Dispose()
     {
         Console.WriteLine("🧹 [RIEGO] Limpiando recursos...");
@@ -749,6 +775,11 @@
         {
             timer.Stop();
             timer.Dispose();
+        }
+        if (actualizacionTimer != null)
+        {
+            actualizacionTimer.Stop();
+            actualizacionTimer.Dispose();
         }
         ArduinoService.DatosRecibidos -= OnDatosArduinoRecibidos;
         Console.WriteLine("✅ [RIEGO] Recursos liberados");

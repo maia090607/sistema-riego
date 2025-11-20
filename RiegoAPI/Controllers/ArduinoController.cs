@@ -16,6 +16,7 @@ namespace RiegoAPI.Controllers
             _logger = logger;
         }
 
+        // En ArduinoController.cs
         [HttpPost("manual-on")]
         public async Task<IActionResult> IniciarRiegoManual()
         {
@@ -29,15 +30,25 @@ namespace RiegoAPI.Controllers
                     return BadRequest(new { success = false, message = "Puerto no disponible" });
                 }
 
-                _servicioPuerto.EnviarComando("MANUAL_ON");
-                _logger.LogInformation("📤 [API] Comando MANUAL_ON enviado");
+                // ✅ Enviar comando y esperar confirmación
+                bool confirmado = _servicioPuerto.EnviarComandoConConfirmacion("MANUAL_ON", 3000);
 
-                await Task.Delay(500);
+                if (!confirmado)
+                {
+                    _logger.LogError("❌ [API] Arduino no confirmó el comando");
+                    return StatusCode(500, new
+                    {
+                        success = false,
+                        message = "Arduino no respondió al comando"
+                    });
+                }
+
+                _logger.LogInformation("✅ [API] Comando MANUAL_ON confirmado");
 
                 return Ok(new
                 {
                     success = true,
-                    message = "Riego manual iniciado",
+                    message = "Riego manual iniciado y confirmado",
                     timestamp = DateTime.Now
                 });
             }
@@ -47,7 +58,6 @@ namespace RiegoAPI.Controllers
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
-
         [HttpPost("manual-off")]
         public async Task<IActionResult> DetenerRiegoManual()
         {
@@ -61,15 +71,25 @@ namespace RiegoAPI.Controllers
                     return BadRequest(new { success = false, message = "Puerto no disponible" });
                 }
 
-                _servicioPuerto.EnviarComando("MANUAL_OFF");
-                _logger.LogInformation("📤 [API] Comando MANUAL_OFF enviado");
+                // ✅ Enviar comando y esperar confirmación
+                bool confirmado = _servicioPuerto.EnviarComandoConConfirmacion("MANUAL_OFF", 3000);
 
-                await Task.Delay(500);
+                if (!confirmado)
+                {
+                    _logger.LogError("❌ [API] Arduino no confirmó el comando");
+                    return StatusCode(500, new
+                    {
+                        success = false,
+                        message = "Arduino no respondió al comando"
+                    });
+                }
+
+                _logger.LogInformation("✅ [API] Comando MANUAL_OFF confirmado");
 
                 return Ok(new
                 {
                     success = true,
-                    message = "Riego manual detenido",
+                    message = "Riego manual detenido y confirmado",
                     timestamp = DateTime.Now
                 });
             }

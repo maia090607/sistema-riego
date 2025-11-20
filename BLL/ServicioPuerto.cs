@@ -1,6 +1,7 @@
 ﻿using ENTITY;
 using System;
 using System.IO.Ports;
+using System.Threading;
 
 namespace BLL
 {
@@ -38,7 +39,7 @@ namespace BLL
             try
             {
                 string data = _serialPort.ReadLine().Trim();
-                Console.WriteLine($"📡 [PUERTO] Datos crudos recibidos: '{data}'");
+                Console.WriteLine($"📡 [PUERTO] Datos recibidos: '{data}'");
 
                 if (data.Contains(","))
                 {
@@ -54,23 +55,10 @@ namespace BLL
 
                         Console.WriteLine($"✅ [PUERTO] H:{humedad}% B:{(_ultimaBombaActiva ? "ON" : "OFF")}");
 
-                        // 🔥 Notificar SIEMPRE si la bomba está activa
-                        if (_ultimaBombaActiva)
-                        {
-                            DatosRecibidos?.Invoke(data);
-                        }
-                        // 🔥 Notificar cuando pase de ON → OFF (cambio importante)
-                        else if (bombaAnteriorEncendida && !_ultimaBombaActiva)
-                        {
-                            DatosRecibidos?.Invoke(data);
-                        }
+                        // 🔥 NOTIFICAR SIEMPRE
+                        DatosRecibidos?.Invoke(data);
 
-                        // Actualizar estado anterior
                         bombaAnteriorEncendida = _ultimaBombaActiva;
-                    }
-                    else
-                    {
-                        Console.WriteLine($"⚠️ [PUERTO] No se pudo parsear: '{data}'");
                     }
                 }
             }
@@ -79,7 +67,6 @@ namespace BLL
                 Console.WriteLine($"❌ [PUERTO] Error: {ex.Message}");
             }
         }
-
         public (int Humedad, bool BombaActiva, DateTime FechaLectura) ObtenerUltimoEstado()
         {
             return (_ultimaHumedad, _ultimaBombaActiva, _ultimaLectura);
@@ -98,6 +85,47 @@ namespace BLL
             catch (Exception ex)
             {
                 Console.WriteLine($"❌ [PUERTO] Error: {ex.Message}");
+            }
+        }
+
+        public bool EnviarComandoConConfirmacion(string comando, int timeoutMs = 2000)
+        {
+            try
+            {
+                if (_serialPort == null || !_serialPort.IsOpen)
+                {
+                    Console.WriteLine("❌ [PUERTO] Puerto no disponible");
+                    return false;
+                }
+
+                Console.WriteLine($"📤 [PUERTO] Enviando: {comando}");
+                _serialPort.WriteLine(comando);
+
+                // ✅ Esperar confirmación del Arduino
+                var tiempoInicio = DateTime.Now;
+                while ((DateTime.Now - tiempoInicio).TotalMilliseconds < timeoutMs)
+                {
+                    if (_serialPort.BytesToRead > 0)
+                    {
+                        string respuesta = _serialPort.ReadLine().Trim();
+                        Console.WriteLine($"📥 [PUERTO] Respuesta: {respuesta}");
+
+                        if (respuesta.Contains($"OK:{comando}"))
+                        {
+                            Console.WriteLine($"✅ [PUERTO] Confirmación recibida");
+                            return true;
+                        }
+                    }
+                    Thread.Sleep(50);
+                }
+
+                Console.WriteLine($"⏱️ [PUERTO] Timeout esperando confirmación");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ [PUERTO] Error: {ex.Message}");
+                return false;
             }
         }
 
