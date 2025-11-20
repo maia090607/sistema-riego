@@ -495,14 +495,14 @@
             </div>
         </div>
 
-        <!-- Manual Control -->
-        <div>
+        <!-- CONTROLES MANUALES -->
+        <div style="margin-top: 2rem; text-align:center">
             @if (riegoManualActivo)
             {
                 <button class="btn-riego detener"
                         @onclick="DetenerRiegoManual"
                         disabled="@esperandoRespuesta">
-                    🛑 DETENER RIEGO MANUAL
+                    🛑 DETENER MODO MANUAL
                 </button>
             }
             else
@@ -522,12 +522,10 @@
     private bool riegoManualActivo = false;
     private bool esperandoRespuesta = false;
     private bool bombaActiva = false;
-    private int tiempoRiego = 0;
     private Timer? timer;
     private int humedadActual = 0;
     private float temperaturaActual = 25.0f;
     private bool temperaturaObtenida = false;
-    private bool bombaAnteriorEncendida = false;
     private Timer? actualizacionTimer;
 
     protected override async Task OnInitializedAsync()
@@ -597,7 +595,10 @@
                 bombaActiva = estado.BombaEncendida;
                 humedadActual = estado.Humedad;
 
-                // ✅ DETECTAR RIEGO AUTOMÁTICO
+                // 🔥 FIX CRÍTICO: actualizar modo manual desde Arduino
+                riegoManualActivo = estado.ModoManual;
+
+                // Detectar riego automático
                 if (bombaActiva && !bombaAntesEncendida && !riegoManualActivo)
                 {
                     Console.WriteLine("🌊 [RIEGO] Riego AUTOMÁTICO detectado en actualización");
@@ -607,10 +608,6 @@
                 await InvokeAsync(StateHasChanged);
             }
 
-            if (!temperaturaObtenida)
-            {
-                await ObtenerTemperaturaActualAsync();
-            }
         }
         catch (Exception ex)
         {
@@ -651,120 +648,99 @@
 
     private async Task IniciarRiegoManual()
     {
-        Console.WriteLine("🚀 [RIEGO] ========== INICIANDO RIEGO MANUAL ==========");
-        esperandoRespuesta = true;
-        StateHasChanged(); // ✅ Actualizar UI inmediatamente
+        Console.WriteLine("🚀 [RIEGO] Inicio modo manual");
 
-        try
-        {
-            // ✅ Obtener temperatura ANTES de iniciar el riego
-            await ObtenerTemperaturaActualAsync();
-
-            // ✅ Actualizar datos del Arduino
-            await ActualizarEstadoAsync();
-
-            Console.WriteLine("📤 [RIEGO] Enviando comando MANUAL_ON al Arduino...");
-            bool exito = await ArduinoService.IniciarRiegoManualAsync();
-
-            Console.WriteLine($"📥 [RIEGO] Respuesta del Arduino: {(exito ? "ÉXITO ✅" : "FALLO ❌")}");
-
-            if (exito)
-            {
-                Console.WriteLine("✅ [RIEGO] Comando MANUAL_ON enviado exitosamente");
-
-                // ✅ CAMBIO CRÍTICO: Actualizar estado ANTES de registrar
-                riegoManualActivo = true;
-                tiempoRiego = 0;
-                bombaActiva = true; // ✅ Forzar estado de bomba
-
-                // ✅ FORZAR ACTUALIZACIÓN DE UI
-                await InvokeAsync(StateHasChanged);
-
-                // ✅ REGISTRAR EL INICIO DEL RIEGO EN EL HISTORIAL
-                await RegistrarRiegoEnHistorialAsync();
-
-                // Iniciar temporizador
-                timer = new Timer(1000);
-                timer.Elapsed += async (s, e) =>
-                {
-                    tiempoRiego++;
-
-                    // ✅ Actualizar temperatura cada 30 segundos
-                    if (tiempoRiego % 30 == 0)
-                    {
-                        await ObtenerTemperaturaActualAsync();
-                    }
-
-                    await InvokeAsync(StateHasChanged);
-                };
-                timer.Start();
-                Console.WriteLine("⏱️ [RIEGO] Temporizador de riego iniciado");
-
-                Console.WriteLine("✅ [RIEGO] Riego manual activo - Esperando que el usuario presione detener");
-            }
-            else
-            {
-                Console.WriteLine("❌ [RIEGO] Error al enviar comando MANUAL_ON");
-                riegoManualActivo = false;
-                bombaActiva = false;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ [RIEGO] Excepción al iniciar riego manual: {ex.Message}");
-            riegoManualActivo = false;
-            bombaActiva = false;
-        }
-        finally
-        {
-            esperandoRespuesta = false;
-            await InvokeAsync(StateHasChanged); // ✅ Asegurar actualización final
-            Console.WriteLine("🏁 [RIEGO] ========== FIN INICIAR RIEGO MANUAL ==========");
-        }
-    }
-    private async Task DetenerRiegoManual()
-    {
-        Console.WriteLine("🛑 [RIEGO] ========== DETENIENDO ==========");
         esperandoRespuesta = true;
         StateHasChanged();
 
         try
         {
-            if (timer != null)
+            // Obtener temperatura
+            await ObtenerTemperaturaActualAsync();
+
+            // Forzar lectura de estado
+            await ActualizarEstadoAsync();
+
+            Console.WriteLine("📤 Enviando MANUAL_ON...");
+            bool exito = await ArduinoService.IniciarRiegoManualAsync();
+
+            if (!exito)
             {
-                timer.Stop();
-                timer.Dispose();
-                timer = null;
+                Console.WriteLine("❌ Arduino NO confirmó MANUAL_ON");
+                esperandoRespuesta = false;
+                return;
             }
 
-            Console.WriteLine("📤 [RIEGO] Enviando MANUAL_OFF...");
-            bool exito = await ArduinoService.DetenerRiegoManualAsync();
+            // 🔥 ACTIVAR MODO MANUAL EN LA UI
+            riegoManualActivo = true;
+            bombaActiva = true;
 
-            if (exito)
+            // Registrar historial
+            await RegistrarRiegoEnHistorialAsync();
+
+            // Activar temporizador de riego
+            timer = new Timer(1000);
+            timer.Elapsed += async (s, e) =>
             {
-                Console.WriteLine("✅ [RIEGO] MANUAL_OFF enviado");
-                await Task.Delay(500);
+                if (DateTime.Now.Second % 30 == 0)
+                    await ObtenerTemperaturaActualAsync();
 
-                bool exitoAuto = await ArduinoService.ActivarModoAutomaticoAsync();
-                Console.WriteLine($"📥 [RIEGO] AUTO: {(exitoAuto ? "✅" : "❌")}");
+                await InvokeAsync(StateHasChanged);
+            };
+            timer.Start();
 
-                riegoManualActivo = false;
-                tiempoRiego = 0;
-                bombaActiva = false;
-                temperaturaObtenida = false;
-
-                Console.WriteLine("✅ [RIEGO] Sistema vuelto a modo automático");
-            }
+            Console.WriteLine("✅ Modo manual activado");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ [RIEGO] Excepción: {ex.Message}");
+            Console.WriteLine($"❌ Error al iniciar manual: {ex.Message}");
         }
         finally
         {
             esperandoRespuesta = false;
             await InvokeAsync(StateHasChanged);
-            Console.WriteLine("🏁 [RIEGO] ========== FIN ==========");
+        }
+    }
+
+    
+    private async Task DetenerRiegoManual()
+    {
+        Console.WriteLine("🛑 [RIEGO] Deteniendo modo manual");
+
+        esperandoRespuesta = true;
+        StateHasChanged();
+
+        try
+        {
+            timer?.Stop();
+            timer?.Dispose();
+            timer = null;
+
+            Console.WriteLine("📤 Enviando MANUAL_OFF...");
+            bool exito = await ArduinoService.DetenerRiegoManualAsync();
+
+            if (!exito)
+            {
+                Console.WriteLine("❌ Arduino NO confirmó MANUAL_OFF");
+            }
+
+            // Cambiar estado local
+            riegoManualActivo = false;
+            bombaActiva = false;
+
+            // Forzar modo automático
+            await ArduinoService.ActivarModoAutomaticoAsync();
+
+            Console.WriteLine("🔄 Modo automático restaurado");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Error al detener: {ex.Message}");
+        }
+        finally
+        {
+            esperandoRespuesta = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 

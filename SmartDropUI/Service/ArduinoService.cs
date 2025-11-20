@@ -24,14 +24,31 @@ namespace SmartDropUI.Services
             {
                 var response = await _httpClient.PostAsync("/api/arduino/manual-on", null);
 
-                if (response.IsSuccessStatusCode)
+                if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogInformation("✅ [ARDUINO] Riego manual iniciado");
-                    return true;
+                    _logger.LogError($"❌ [ARDUINO] Error HTTP: {response.StatusCode}");
+                    return false;
                 }
 
-                _logger.LogError($"❌ [ARDUINO] Error: {response.StatusCode}");
-                return false;
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<string>>();
+
+                if (result == null)
+                {
+                    _logger.LogError("❌ [ARDUINO] Respuesta nula");
+                    return false;
+                }
+
+                _logger.LogInformation($"🔍 Respuesta API: {result.message}");
+
+                // 🔥 ACEPTAR VARIACIONES DE SALIDA DEL ARDUINO
+                if (!result.success)
+                    return false;
+
+                // 🔥 Permitir múltiples formatos válidos
+                string msg = result.message.ToUpper().Replace(" ", "");
+
+                return msg.Contains("OK") &&
+                       (msg.Contains("MANUAL_ON") || msg.Contains("MANUALON"));
             }
             catch (Exception ex)
             {
@@ -39,6 +56,8 @@ namespace SmartDropUI.Services
                 return false;
             }
         }
+
+
 
         public async Task<bool> DetenerRiegoManualAsync()
         {
@@ -48,14 +67,12 @@ namespace SmartDropUI.Services
             {
                 var response = await _httpClient.PostAsync("/api/arduino/manual-off", null);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    _logger.LogInformation("✅ [ARDUINO] Riego manual detenido");
-                    return true;
-                }
+                if (!response.IsSuccessStatusCode)
+                    return false;
 
-                _logger.LogError($"❌ [ARDUINO] Error: {response.StatusCode}");
-                return false;
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<string>>();
+
+                return result != null && result.success && result.message.Contains("OK:MANUAL_OFF");
             }
             catch (Exception ex)
             {
@@ -63,6 +80,7 @@ namespace SmartDropUI.Services
                 return false;
             }
         }
+
 
         public async Task<bool> ActivarModoAutomaticoAsync()
         {
@@ -72,13 +90,12 @@ namespace SmartDropUI.Services
             {
                 var response = await _httpClient.PostAsync("/api/arduino/auto", null);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    _logger.LogInformation("✅ [ARDUINO] Modo automático activado");
-                    return true;
-                }
+                if (!response.IsSuccessStatusCode)
+                    return false;
 
-                return false;
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<string>>();
+
+                return result != null && result.success && result.message.Contains("OK:AUTO");
             }
             catch (Exception ex)
             {
@@ -86,6 +103,7 @@ namespace SmartDropUI.Services
                 return false;
             }
         }
+
 
         public async Task<DatosArduinoModel?> ObtenerEstadoAsync()
         {

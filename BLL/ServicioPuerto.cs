@@ -14,10 +14,14 @@ namespace BLL
         // Últimos datos recibidos
         private int _ultimaHumedad = 0;
         private bool _ultimaBombaActiva = false;
+        private bool _ultimoModoManual = false;
         private DateTime _ultimaLectura = DateTime.MinValue;
 
-        // ✅ Necesaria para detectar transiciones de OFF → ON y ON → OFF
-        private bool bombaAnteriorEncendida = false;
+        // ✅ NUEVO: Variables para detectar cambios de estado
+        private bool _bombaAnteriorEncendida = false;
+
+        // ✅ NUEVO: Evento para notificar cambios de estado de riego
+        public event Action<RiegoAutomaticoEventArgs> RiegoAutomaticoDetectado;
 
         public ServicioPuerto(string puerto = "COM3", int baudios = 9600)
         {
@@ -45,20 +49,35 @@ namespace BLL
                 {
                     var partes = data.Split(',');
 
-                    if (partes.Length == 2 &&
+                    // Formato: humedad,bomba,modoManual
+                    if (partes.Length == 3 &&
                         int.TryParse(partes[0], out int humedad) &&
-                        int.TryParse(partes[1], out int estadoBomba))
+                        int.TryParse(partes[1], out int estadoBomba) &&
+                        int.TryParse(partes[2], out int modoManual))
                     {
                         _ultimaHumedad = humedad;
                         _ultimaBombaActiva = estadoBomba == 1;
+                        _ultimoModoManual = modoManual == 1;
                         _ultimaLectura = DateTime.Now;
 
-                        Console.WriteLine($"✅ [PUERTO] H:{humedad}% B:{(_ultimaBombaActiva ? "ON" : "OFF")}");
+                        Console.WriteLine($"✅ [PUERTO] H:{humedad}% B:{(_ultimaBombaActiva ? "ON" : "OFF")} M:{(_ultimoModoManual ? "MANUAL" : "AUTO")}");
 
-                        // 🔥 NOTIFICAR SIEMPRE
+                        // ✅ DETECTAR RIEGO AUTOMÁTICO
+                        // Si la bomba se encendió Y NO estamos en modo manual = RIEGO AUTOMÁTICO
+                        if (_ultimaBombaActiva && !_bombaAnteriorEncendida && !_ultimoModoManual)
+                        {
+                            Console.WriteLine("🌊 [PUERTO] ¡RIEGO AUTOMÁTICO DETECTADO!");
+
+                            // Disparar evento para que el controller lo capture
+                            RiegoAutomaticoDetectado?.Invoke(new RiegoAutomaticoEventArgs
+                            {
+                                Humedad = humedad,
+                                FechaHora = DateTime.Now
+                            });
+                        }
+
                         DatosRecibidos?.Invoke(data);
-
-                        bombaAnteriorEncendida = _ultimaBombaActiva;
+                        _bombaAnteriorEncendida = _ultimaBombaActiva;
                     }
                 }
             }
@@ -67,9 +86,11 @@ namespace BLL
                 Console.WriteLine($"❌ [PUERTO] Error: {ex.Message}");
             }
         }
-        public (int Humedad, bool BombaActiva, DateTime FechaLectura) ObtenerUltimoEstado()
+
+        // ✅ CORREGIDO: Ahora devuelve 4 valores (agregado ModoManual)
+        public (int Humedad, bool BombaActiva, bool ModoManual, DateTime FechaLectura) ObtenerUltimoEstado()
         {
-            return (_ultimaHumedad, _ultimaBombaActiva, _ultimaLectura);
+            return (_ultimaHumedad, _ultimaBombaActiva, _ultimoModoManual, _ultimaLectura);
         }
 
         public void EnviarComando(string comando)
@@ -101,8 +122,8 @@ namespace BLL
                 Console.WriteLine($"📤 [PUERTO] Enviando: {comando}");
                 _serialPort.WriteLine(comando);
 
-                // ✅ Esperar confirmación del Arduino
                 var tiempoInicio = DateTime.Now;
+
                 while ((DateTime.Now - tiempoInicio).TotalMilliseconds < timeoutMs)
                 {
                     if (_serialPort.BytesToRead > 0)
@@ -110,16 +131,17 @@ namespace BLL
                         string respuesta = _serialPort.ReadLine().Trim();
                         Console.WriteLine($"📥 [PUERTO] Respuesta: {respuesta}");
 
-                        if (respuesta.Contains($"OK:{comando}"))
+                        if (respuesta.Equals($"OK:{comando}", StringComparison.OrdinalIgnoreCase))
                         {
-                            Console.WriteLine($"✅ [PUERTO] Confirmación recibida");
+                            Console.WriteLine("✅ [PUERTO] Confirmación recibida");
                             return true;
                         }
                     }
+
                     Thread.Sleep(50);
                 }
 
-                Console.WriteLine($"⏱️ [PUERTO] Timeout esperando confirmación");
+                Console.WriteLine("⏱️ [PUERTO] Timeout esperando confirmación");
                 return false;
             }
             catch (Exception ex)
@@ -144,5 +166,12 @@ namespace BLL
                 Console.WriteLine($"❌ Error cerrando el puerto: {ex.Message}");
             }
         }
+    }
+
+    // ✅ NUEVO: Clase para el evento de riego automático
+    public class RiegoAutomaticoEventArgs : EventArgs
+    {
+        public int Humedad { get; set; }
+        public DateTime FechaHora { get; set; }
     }
 }

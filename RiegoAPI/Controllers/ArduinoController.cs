@@ -16,7 +16,6 @@ namespace RiegoAPI.Controllers
             _logger = logger;
         }
 
-        // En ArduinoController.cs
         [HttpPost("manual-on")]
         public async Task<IActionResult> IniciarRiegoManual()
         {
@@ -26,16 +25,15 @@ namespace RiegoAPI.Controllers
 
                 if (!_servicioPuerto.PuertoAbierto)
                 {
-                    _logger.LogError("❌ [API] Puerto no disponible");
+                    _logger.LogError("❌ Puerto no disponible");
                     return BadRequest(new { success = false, message = "Puerto no disponible" });
                 }
 
-                // ✅ Enviar comando y esperar confirmación
                 bool confirmado = _servicioPuerto.EnviarComandoConConfirmacion("MANUAL_ON", 3000);
 
                 if (!confirmado)
                 {
-                    _logger.LogError("❌ [API] Arduino no confirmó el comando");
+                    _logger.LogError("❌ Arduino no confirmó MANUAL_ON");
                     return StatusCode(500, new
                     {
                         success = false,
@@ -43,21 +41,22 @@ namespace RiegoAPI.Controllers
                     });
                 }
 
-                _logger.LogInformation("✅ [API] Comando MANUAL_ON confirmado");
+                _logger.LogInformation("✅ MANUAL_ON confirmado");
 
                 return Ok(new
                 {
                     success = true,
-                    message = "Riego manual iniciado y confirmado",
+                    message = "OK:MANUAL_ON",  // ✅ Formato esperado por la UI
                     timestamp = DateTime.Now
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"❌ [API] Error: {ex.Message}");
+                _logger.LogError($"❌ Error MANUAL_ON: {ex.Message}");
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
+
         [HttpPost("manual-off")]
         public async Task<IActionResult> DetenerRiegoManual()
         {
@@ -67,16 +66,15 @@ namespace RiegoAPI.Controllers
 
                 if (!_servicioPuerto.PuertoAbierto)
                 {
-                    _logger.LogError("❌ [API] Puerto no disponible");
+                    _logger.LogError("❌ Puerto no disponible");
                     return BadRequest(new { success = false, message = "Puerto no disponible" });
                 }
 
-                // ✅ Enviar comando y esperar confirmación
                 bool confirmado = _servicioPuerto.EnviarComandoConConfirmacion("MANUAL_OFF", 3000);
 
                 if (!confirmado)
                 {
-                    _logger.LogError("❌ [API] Arduino no confirmó el comando");
+                    _logger.LogError("❌ Arduino no confirmó MANUAL_OFF");
                     return StatusCode(500, new
                     {
                         success = false,
@@ -84,18 +82,18 @@ namespace RiegoAPI.Controllers
                     });
                 }
 
-                _logger.LogInformation("✅ [API] Comando MANUAL_OFF confirmado");
+                _logger.LogInformation("✅ MANUAL_OFF confirmado");
 
                 return Ok(new
                 {
                     success = true,
-                    message = "Riego manual detenido y confirmado",
+                    message = "OK:MANUAL_OFF",  // ✅ Formato esperado
                     timestamp = DateTime.Now
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"❌ [API] Error: {ex.Message}");
+                _logger.LogError($"❌ Error MANUAL_OFF: {ex.Message}");
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
@@ -109,30 +107,29 @@ namespace RiegoAPI.Controllers
 
                 if (!_servicioPuerto.PuertoAbierto)
                 {
-                    _logger.LogError("❌ [API] Puerto no disponible");
+                    _logger.LogError("❌ Puerto no disponible");
                     return BadRequest(new { success = false, message = "Puerto no disponible" });
                 }
 
                 _servicioPuerto.EnviarComando("AUTO");
-                _logger.LogInformation("📤 [API] Comando AUTO enviado");
+                _logger.LogInformation("📤 Comando AUTO enviado");
 
-                await Task.Delay(500);
+                await Task.Delay(300);
 
                 return Ok(new
                 {
                     success = true,
-                    message = "Modo automático activado",
+                    message = "OK:AUTO",  // ✅ Formato esperado
                     timestamp = DateTime.Now
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"❌ [API] Error: {ex.Message}");
+                _logger.LogError($"❌ Error AUTO: {ex.Message}");
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
 
-        // ✅ ENDPOINT ACTUALIZADO: Retorna datos reales del Arduino
         [HttpGet("estado")]
         public IActionResult ObtenerEstado()
         {
@@ -140,20 +137,17 @@ namespace RiegoAPI.Controllers
             {
                 if (!_servicioPuerto.PuertoAbierto)
                 {
-                    _logger.LogWarning("⚠️ [API] Puerto no disponible");
                     return BadRequest(new { success = false, message = "Puerto no disponible" });
                 }
 
-                // ✅ Obtener último estado capturado
-                var (humedad, bombaActiva, fechaLectura) = _servicioPuerto.ObtenerUltimoEstado();
-
-                _logger.LogInformation($"📊 [API] H:{humedad}% B:{bombaActiva} Fecha:{fechaLectura}");
+                // ✅ AHORA INCLUYE MODO MANUAL
+                var (humedad, bombaActiva, modoManual, fechaLectura) = _servicioPuerto.ObtenerUltimoEstado();
 
                 var estado = new
                 {
                     Humedad = humedad,
                     BombaEncendida = bombaActiva,
-                    ModoManual = false,
+                    ModoManual = modoManual,  // ✅ AÑADIDO
                     FechaLectura = fechaLectura
                 };
 
@@ -161,7 +155,7 @@ namespace RiegoAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"❌ [API] Error: {ex.Message}");
+                _logger.LogError($"❌ Error ESTADO: {ex.Message}");
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
@@ -171,19 +165,19 @@ namespace RiegoAPI.Controllers
         {
             try
             {
-                var conectado = _servicioPuerto.PuertoAbierto;
+                bool conectado = _servicioPuerto.PuertoAbierto;
 
                 return Ok(new
                 {
                     success = true,
-                    conectado = conectado,
+                    conectado,
                     mensaje = conectado ? "Arduino conectado" : "Arduino desconectado",
                     timestamp = DateTime.Now
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"❌ Error: {ex.Message}");
+                _logger.LogError($"❌ Error CONEXIÓN: {ex.Message}");
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
