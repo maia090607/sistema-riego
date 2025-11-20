@@ -462,6 +462,7 @@
         await CargarUltimoRiegoAsync();
         await ActualizarDatosClimaAsync();
 
+        // ✅ Timer cada 5 segundos
         actualizacionTimer = new System.Timers.Timer(5000);
         actualizacionTimer.Elapsed += async (sender, e) => await ActualizarDatosAsync();
         actualizacionTimer.AutoReset = true;
@@ -497,12 +498,22 @@
     {
         try
         {
+            Console.WriteLine("🔄 [DASHBOARD] Actualizando datos...");
+
             var estado = await ArduinoService.ObtenerEstadoAsync();
+
             if (estado != null)
             {
                 humedadSuelo = estado.Humedad;
                 bombaActiva = estado.BombaEncendida;
+
+                Console.WriteLine($"✅ [DASHBOARD] H:{humedadSuelo}% B:{bombaActiva}");
             }
+            else
+            {
+                Console.WriteLine("⚠️ [DASHBOARD] Estado es null");
+            }
+
             await CargarUltimoRiegoAsync();
             await ActualizarDatosClimaAsync();
             await InvokeAsync(StateHasChanged);
@@ -512,7 +523,6 @@
             Console.WriteLine($"❌ [DASHBOARD] Error: {ex.Message}");
         }
     }
-
     private async Task ActualizarDatosClimaAsync()
     {
         try

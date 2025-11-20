@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BLL;
-using RiegoAPI.DTOs.Response;
 
 namespace RiegoAPI.Controllers
 {
@@ -30,11 +29,9 @@ namespace RiegoAPI.Controllers
                     return BadRequest(new { success = false, message = "Puerto no disponible" });
                 }
 
-                // ✅ ENVIAR COMANDO AL ARDUINO
                 _servicioPuerto.EnviarComando("MANUAL_ON");
                 _logger.LogInformation("📤 [API] Comando MANUAL_ON enviado");
 
-                // Esperar respuesta del Arduino
                 await Task.Delay(500);
 
                 return Ok(new
@@ -64,7 +61,6 @@ namespace RiegoAPI.Controllers
                     return BadRequest(new { success = false, message = "Puerto no disponible" });
                 }
 
-                // ✅ ENVIAR COMANDO AL ARDUINO
                 _servicioPuerto.EnviarComando("MANUAL_OFF");
                 _logger.LogInformation("📤 [API] Comando MANUAL_OFF enviado");
 
@@ -97,7 +93,6 @@ namespace RiegoAPI.Controllers
                     return BadRequest(new { success = false, message = "Puerto no disponible" });
                 }
 
-                // ✅ ENVIAR COMANDO AL ARDUINO
                 _servicioPuerto.EnviarComando("AUTO");
                 _logger.LogInformation("📤 [API] Comando AUTO enviado");
 
@@ -117,27 +112,29 @@ namespace RiegoAPI.Controllers
             }
         }
 
+        // ✅ ENDPOINT ACTUALIZADO: Retorna datos reales del Arduino
         [HttpGet("estado")]
-        public async Task<IActionResult> ObtenerEstado()
+        public IActionResult ObtenerEstado()
         {
             try
             {
                 if (!_servicioPuerto.PuertoAbierto)
                 {
+                    _logger.LogWarning("⚠️ [API] Puerto no disponible");
                     return BadRequest(new { success = false, message = "Puerto no disponible" });
                 }
 
-                // Solicitar estado al Arduino
-                _servicioPuerto.EnviarComando("GET_STATUS");
-                await Task.Delay(300);
+                // ✅ Obtener último estado capturado
+                var (humedad, bombaActiva, fechaLectura) = _servicioPuerto.ObtenerUltimoEstado();
 
-                // Por ahora retornamos estado simulado
-                // En producción, deberías leer la respuesta del Arduino
+                _logger.LogInformation($"📊 [API] H:{humedad}% B:{bombaActiva} Fecha:{fechaLectura}");
+
                 var estado = new
                 {
-                    Humedad = 0,
-                    BombaEncendida = false,
-                    ModoManual = false
+                    Humedad = humedad,
+                    BombaEncendida = bombaActiva,
+                    ModoManual = false,
+                    FechaLectura = fechaLectura
                 };
 
                 return Ok(new { success = true, data = estado });

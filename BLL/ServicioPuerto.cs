@@ -10,6 +10,11 @@ namespace BLL
         public event Action<string> DatosRecibidos;
         public bool PuertoAbierto => _serialPort?.IsOpen ?? false;
 
+        // ✅ Almacenar último dato recibido
+        private int _ultimaHumedad = 0;
+        private bool _ultimaBombaActiva = false;
+        private DateTime _ultimaLectura = DateTime.MinValue;
+
         public ServicioPuerto(string puerto = "COM3", int baudios = 9600)
         {
             try
@@ -30,15 +35,43 @@ namespace BLL
             try
             {
                 string data = _serialPort.ReadLine().Trim();
+
+                Console.WriteLine($"📡 [PUERTO] Datos crudos recibidos: '{data}'");
+
                 if (data.Contains(","))
                 {
-                    DatosRecibidos?.Invoke(data);
+                    var partes = data.Split(',');
+
+                    if (partes.Length == 2 &&
+                        int.TryParse(partes[0], out int humedad) &&
+                        int.TryParse(partes[1], out int estadoBomba))
+                    {
+                        // ✅ Guardar último dato INMEDIATAMENTE
+                        _ultimaHumedad = humedad;
+                        _ultimaBombaActiva = estadoBomba == 1;
+                        _ultimaLectura = DateTime.Now;
+
+                        Console.WriteLine($"✅ [PUERTO] H:{humedad}% B:{(estadoBomba == 1 ? "ON" : "OFF")}");
+
+                        // ✅ Invocar evento solo DESPUÉS de guardar
+                        DatosRecibidos?.Invoke(data);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"⚠️ [PUERTO] No se pudo parsear: '{data}'");
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error leyendo datos: {ex.Message}");
+                Console.WriteLine($"❌ [PUERTO] Error: {ex.Message}");
             }
+        }
+
+        // ✅ Nuevo método para obtener último estado
+        public (int Humedad, bool BombaActiva, DateTime FechaLectura) ObtenerUltimoEstado()
+        {
+            return (_ultimaHumedad, _ultimaBombaActiva, _ultimaLectura);
         }
 
         public void EnviarComando(string comando)
