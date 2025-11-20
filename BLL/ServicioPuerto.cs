@@ -55,6 +55,8 @@ namespace BLL
                         int.TryParse(partes[1], out int estadoBomba) &&
                         int.TryParse(partes[2], out int modoManual))
                     {
+                        bool bombaAntesEncendida = _ultimaBombaActiva;
+
                         _ultimaHumedad = humedad;
                         _ultimaBombaActiva = estadoBomba == 1;
                         _ultimoModoManual = modoManual == 1;
@@ -63,12 +65,12 @@ namespace BLL
                         Console.WriteLine($"✅ [PUERTO] H:{humedad}% B:{(_ultimaBombaActiva ? "ON" : "OFF")} M:{(_ultimoModoManual ? "MANUAL" : "AUTO")}");
 
                         // ✅ DETECTAR RIEGO AUTOMÁTICO
-                        // Si la bomba se encendió Y NO estamos en modo manual = RIEGO AUTOMÁTICO
-                        if (_ultimaBombaActiva && !_bombaAnteriorEncendida && !_ultimoModoManual)
+                        // La bomba se encendió Y NO estamos en modo manual
+                        if (_ultimaBombaActiva && !bombaAntesEncendida && !_ultimoModoManual)
                         {
                             Console.WriteLine("🌊 [PUERTO] ¡RIEGO AUTOMÁTICO DETECTADO!");
 
-                            // Disparar evento para que el controller lo capture
+                            // Disparar evento
                             RiegoAutomaticoDetectado?.Invoke(new RiegoAutomaticoEventArgs
                             {
                                 Humedad = humedad,

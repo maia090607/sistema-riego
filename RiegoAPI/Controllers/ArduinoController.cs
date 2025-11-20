@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using BLL;
+﻿using BLL;
+using ENTITY;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RiegoAPI.Controllers
 {
@@ -7,15 +8,20 @@ namespace RiegoAPI.Controllers
     [Route("api/[controller]")]
     public class ArduinoController : ControllerBase
     {
+
         private readonly ServicioPuerto _servicioPuerto;
         private readonly ILogger<ArduinoController> _logger;
+        private readonly IHttpClientFactory _httpClientFactory; // ✅ AÑADIR
 
-        public ArduinoController(ServicioPuerto servicioPuerto, ILogger<ArduinoController> logger)
+        public ArduinoController(
+            ServicioPuerto servicioPuerto,
+            ILogger<ArduinoController> logger,
+            IHttpClientFactory httpClientFactory) // ✅ AÑADIR
         {
             _servicioPuerto = servicioPuerto;
             _logger = logger;
+            _httpClientFactory = httpClientFactory; // ✅ AÑADIR
         }
-
         [HttpPost("manual-on")]
         public async Task<IActionResult> IniciarRiegoManual()
         {
@@ -43,10 +49,13 @@ namespace RiegoAPI.Controllers
 
                 _logger.LogInformation("✅ MANUAL_ON confirmado");
 
+                // ✅ REGISTRAR RIEGO MANUAL EN HISTORIAL
+                await RegistrarRiegoManualAsync();
+
                 return Ok(new
                 {
                     success = true,
-                    message = "OK:MANUAL_ON",  // ✅ Formato esperado por la UI
+                    message = "OK:MANUAL_ON",
                     timestamp = DateTime.Now
                 });
             }
@@ -54,6 +63,59 @@ namespace RiegoAPI.Controllers
             {
                 _logger.LogError($"❌ Error MANUAL_ON: {ex.Message}");
                 return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        // ✅ NUEVO MÉTODO: Registrar riego manual
+        private async Task RegistrarRiegoManualAsync()
+        {
+            try
+            {
+                var (humedad, bombaActiva, modoManual, fechaLectura) = _servicioPuerto.ObtenerUltimoEstado();
+
+                // Obtener temperatura del clima
+                float temperatura = await ObtenerTemperaturaActualAsync();
+
+                var historial = new Historial_Riego
+                {
+                    Fecha = DateTime.Now,
+                    Humedad = humedad,
+                    Temperatura = temperatura
+                };
+
+                var servicioHistorial = new ServicioHistorial();
+                servicioHistorial.Guardar(historial);
+
+                _logger.LogInformation($"💾 [API] Riego manual registrado - H:{humedad}% T:{temperatura}°C");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"❌ [API] Error al registrar riego manual: {ex.Message}");
+            }
+        }
+
+        // ✅ NUEVO MÉTODO: Obtener temperatura del clima
+        private async Task<float> ObtenerTemperaturaActualAsync()
+        {
+            try
+            {
+                using var client = new HttpClient();
+                string apiKey = "91c59362a4519b067f3be52b6fe361f3";
+                string url = $"https://api.openweathermap.org/data/2.5/weather?q=Valledupar&appid={apiKey}&units=metric";
+
+                var response = await client.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var weatherInfo = System.Text.Json.JsonSerializer.Deserialize<ENTITY.WeatherInfo>(content);
+                    return (float)weatherInfo.main.temp;
+                }
+
+                return 25.0f; // Valor por defecto
+            }
+            catch
+            {
+                return 25.0f; // Valor por defecto en caso de error
             }
         }
 
