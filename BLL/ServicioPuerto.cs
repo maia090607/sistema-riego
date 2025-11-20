@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ENTITY;
+using System;
 using System.IO.Ports;
 
 namespace BLL
@@ -6,13 +7,10 @@ namespace BLL
     public class ServicioPuerto
     {
         private SerialPort _serialPort;
-
-        // Evento para notificar cuando llegan datos
         public event Action<string> DatosRecibidos;
-
         public bool PuertoAbierto => _serialPort?.IsOpen ?? false;
 
-        public ServicioPuerto(string puerto = "COM11", int baudios = 9600)
+        public ServicioPuerto(string puerto = "COM3", int baudios = 9600)
         {
             try
             {
@@ -32,13 +30,7 @@ namespace BLL
             try
             {
                 string data = _serialPort.ReadLine().Trim();
-
-                // 🔹 Si el dato viene como "57,1" (humedad,bomba)
                 if (data.Contains(","))
-                {
-                    DatosRecibidos?.Invoke(data); // Ejemplo: "57,1"
-                }
-                else
                 {
                     DatosRecibidos?.Invoke(data);
                 }
