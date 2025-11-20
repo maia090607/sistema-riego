@@ -10,7 +10,14 @@ builder.Services.AddRazorComponents()
 // ✅ Leer URL de configuración
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:5001";
 
-// ✅ HttpClient tipado para cada servicio
+// ✅ HttpClient tipado para ArduinoService
+builder.Services.AddHttpClient<ArduinoService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
+// ✅ HttpClient tipado para otros servicios
 builder.Services.AddHttpClient<ApiService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
@@ -37,13 +44,8 @@ builder.Services.AddHttpClient<RiegoService>(client =>
 
 builder.Services.AddScoped<ClimaService>();
 
-builder.Services.AddSingleton<ArduinoService>(sp =>
-{
-    var historialService = sp.GetRequiredService<HistorialRiegoService>();
-    var arduino = new ArduinoService("COM11", 9600, historialService);
-    arduino.Conectar();
-    return arduino;
-});
+// ✅ ELIMINADO: No registrar ArduinoService como Singleton
+// El HttpClient tipado ya lo registra como Scoped automáticamente
 
 builder.Services.AddBlazoredLocalStorage();
 
