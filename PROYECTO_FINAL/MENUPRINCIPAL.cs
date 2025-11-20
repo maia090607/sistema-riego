@@ -70,13 +70,11 @@ namespace PROYECTO_RIEGO_AUTOMATICO
             _ = ObtenerDatosClimaAsync();
 
         }
-        private async         Task
-MostrarDatosAsync(string mensaje)
+        private async Task MostrarDatosAsync(string mensaje)
         {
             if (string.IsNullOrWhiteSpace(mensaje))
                 return;
 
-            // Si el mensaje viene como "57,1" (humedad, estado bomba)
             if (mensaje.Contains(","))
             {
                 string[] partes = mensaje.Split(',');
@@ -87,14 +85,13 @@ MostrarDatosAsync(string mensaje)
                     humedad_real = humedad;
                     bool bombaEncendida = estadoBomba == 1;
 
-                    // Mostrar en interfaz de forma segura
                     Invoke(new Action(() =>
                     {
                         lblHumedad.Text = humedad.ToString("F2", CultureInfo.InvariantCulture);
                         lbEstadodeBomba.Text = bombaEncendida ? "ENCENDIDA" : "APAGADA";
                         lbEstadodeBomba.BackColor = bombaEncendida ? ColorTranslator.FromHtml("#21864B") : ColorTranslator.FromHtml("#8B0000");
 
-                        // Solo guardar historial si la bomba acaba de encenderse
+                        // ✅ **CAMBIO CRÍTICO**: Registrar cada nueva activación
                         if (bombaEncendida && !bombaAnteriorEncendida)
                         {
                             Historial_Riego historial = new Historial_Riego
@@ -103,21 +100,22 @@ MostrarDatosAsync(string mensaje)
                                 Humedad = humedad,
                                 Fecha = DateTime.Now
                             };
+
                             try
                             {
                                 servicioHistorial.Guardar(historial);
                                 lbUltimoRegado.Text = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+                                Console.WriteLine($"✅ [HISTORIAL] Riego automático registrado - H:{humedad}%, T:{temperatura_actual}°C");
                             }
-                            catch
+                            catch (Exception ex)
                             {
-                                // Manejo silencioso o log si la BD falla
+                                Console.WriteLine($"❌ [HISTORIAL] Error: {ex.Message}");
                             }
                         }
 
                         bombaAnteriorEncendida = bombaEncendida;
                     }));
 
-                    // Guardar humedad en base de datos (defensivo)
                     try
                     {
                         var hum = new humedad
@@ -127,10 +125,7 @@ MostrarDatosAsync(string mensaje)
                         };
                         serviciosHumedad.insertar(hum);
                     }
-                    catch
-                    {
-                        // opcional logging
-                    }
+                    catch { }
                 }
                 else
                 {
@@ -138,7 +133,6 @@ MostrarDatosAsync(string mensaje)
                 }
             }
 
-            // retraso breve para no saturar el hilo si vienen muchos mensajes
             await Task.Delay(TimeSpan.FromSeconds(1));
         }
         private void EnviarComandoSeguro(string comando)

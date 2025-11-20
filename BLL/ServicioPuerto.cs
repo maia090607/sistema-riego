@@ -10,10 +10,13 @@ namespace BLL
         public event Action<string> DatosRecibidos;
         public bool PuertoAbierto => _serialPort?.IsOpen ?? false;
 
-        // ✅ Almacenar último dato recibido
+        // Últimos datos recibidos
         private int _ultimaHumedad = 0;
         private bool _ultimaBombaActiva = false;
         private DateTime _ultimaLectura = DateTime.MinValue;
+
+        // ✅ Necesaria para detectar transiciones de OFF → ON y ON → OFF
+        private bool bombaAnteriorEncendida = false;
 
         public ServicioPuerto(string puerto = "COM3", int baudios = 9600)
         {
@@ -35,7 +38,6 @@ namespace BLL
             try
             {
                 string data = _serialPort.ReadLine().Trim();
-
                 Console.WriteLine($"📡 [PUERTO] Datos crudos recibidos: '{data}'");
 
                 if (data.Contains(","))
@@ -46,15 +48,25 @@ namespace BLL
                         int.TryParse(partes[0], out int humedad) &&
                         int.TryParse(partes[1], out int estadoBomba))
                     {
-                        // ✅ Guardar último dato INMEDIATAMENTE
                         _ultimaHumedad = humedad;
                         _ultimaBombaActiva = estadoBomba == 1;
                         _ultimaLectura = DateTime.Now;
 
-                        Console.WriteLine($"✅ [PUERTO] H:{humedad}% B:{(estadoBomba == 1 ? "ON" : "OFF")}");
+                        Console.WriteLine($"✅ [PUERTO] H:{humedad}% B:{(_ultimaBombaActiva ? "ON" : "OFF")}");
 
-                        // ✅ Invocar evento solo DESPUÉS de guardar
-                        DatosRecibidos?.Invoke(data);
+                        // 🔥 Notificar SIEMPRE si la bomba está activa
+                        if (_ultimaBombaActiva)
+                        {
+                            DatosRecibidos?.Invoke(data);
+                        }
+                        // 🔥 Notificar cuando pase de ON → OFF (cambio importante)
+                        else if (bombaAnteriorEncendida && !_ultimaBombaActiva)
+                        {
+                            DatosRecibidos?.Invoke(data);
+                        }
+
+                        // Actualizar estado anterior
+                        bombaAnteriorEncendida = _ultimaBombaActiva;
                     }
                     else
                     {
@@ -68,7 +80,6 @@ namespace BLL
             }
         }
 
-        // ✅ Nuevo método para obtener último estado
         public (int Humedad, bool BombaActiva, DateTime FechaLectura) ObtenerUltimoEstado()
         {
             return (_ultimaHumedad, _ultimaBombaActiva, _ultimaLectura);

@@ -51,8 +51,8 @@ namespace PROYECTO_RIEGO_AUTOMATICO
         }
         private async void MostrarDatos(string mensaje)
         {
-            // Espera asincrónica sin bloquear la UI
-            // 🔹 Si el mensaje viene como "57,1" (humedad, estado bomba)
+            await Task.Delay(TimeSpan.FromSeconds(1));
+
             if (mensaje.Contains(","))
             {
                 string[] partes = mensaje.Split(',');
@@ -70,17 +70,32 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                         lbEstadodeBomba.Text = bombaEncendida ? "ENCENDIDA" : "APAGADA";
                         lbEstadodeBomba.BackColor = bombaEncendida ? ColorTranslator.FromHtml("#21864B") : ColorTranslator.FromHtml("#8B0000");
 
-                        // Solo guardar historial si la bomba acaba de encenderse
+                        // ✅ **CAMBIO CRÍTICO**: Registrar cada vez que la bomba se ENCIENDA
+                        // Sin importar si ya estaba encendida antes
                         if (bombaEncendida && !bombaAnteriorEncendida)
                         {
+                            // ✅ Nueva activación de riego
                             Historial_Riego historial = new Historial_Riego
                             {
                                 Temperatura = temperatura_actual,
                                 Humedad = humedad,
                                 Fecha = DateTime.Now
                             };
-                            servicioHistorial.Guardar(historial);
-                            lbUltimoRegado.Text = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+
+                            try
+                            {
+                                servicioHistorial.Guardar(historial);
+                                lbUltimoRegado.Text = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+                                Console.WriteLine($"✅ [HISTORIAL] Riego automático registrado - H:{humedad}%, T:{temperatura_actual}°C");
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"❌ [HISTORIAL] Error al guardar: {ex.Message}");
+                            }
+                        }
+                        else if (!bombaEncendida && bombaAnteriorEncendida)
+                        {
+                            Console.WriteLine($"🛑 [HISTORIAL] Riego automático finalizado");
                         }
 
                         // Actualizar estado anterior
@@ -100,7 +115,6 @@ namespace PROYECTO_RIEGO_AUTOMATICO
                     MessageBox.Show("⚠️ Formato inválido: " + mensaje);
                 }
             }
-            await Task.Delay(TimeSpan.FromSeconds(1));
         }
         private void EnviarComandoSeguro(string comando)
         {
