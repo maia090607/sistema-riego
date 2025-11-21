@@ -7,6 +7,7 @@
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
+@inject ClimaService _climaService  // ✅ CAMBIO DE NOMBRE: _climaService
 @rendermode InteractiveServer
 @implements IDisposable
 
@@ -115,19 +116,15 @@
     private int tiempoRiego = 0;
     private System.Timers.Timer? timer;
     private System.Timers.Timer? pollingTimer;
-    private int _idPlantaValido = 0; // Variable para guardar un ID real
+    private int _idPlantaValido = 0;
 
     protected override async Task OnInitializedAsync()
     {
-        // 1. Obtener un ID de planta válido al iniciar
         await CargarIdPlantaValido();
-
-        // 2. Polling para actualizar estado visual
         pollingTimer = new System.Timers.Timer(2000);
         pollingTimer.Elapsed += async (s, e) => await ConsultarEstadoServidor();
         pollingTimer.AutoReset = true;
         pollingTimer.Start();
-
         await ConsultarEstadoServidor();
     }
 
@@ -142,18 +139,10 @@
                 if (plantas != null && plantas.Any())
                 {
                     _idPlantaValido = plantas.First().IdPlanta;
-                    Console.WriteLine($"✅ Planta vinculada para historial: ID {_idPlantaValido}");
-                }
-                else
-                {
-                    Console.WriteLine("⚠️ ADVERTENCIA: El usuario no tiene plantas registradas. El historial fallará.");
                 }
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ Error cargando plantas: {ex.Message}");
-        }
+        catch { }
     }
 
     private async Task ConsultarEstadoServidor()
@@ -166,7 +155,6 @@
                 await InvokeAsync(() =>
                 {
                     bombaActiva = datos.BombaEncendida;
-
                     if (datos.ModoManual && !riegoManualActivo)
                     {
                         riegoManualActivo = true;
@@ -193,42 +181,54 @@
         }
 
         esperandoRespuesta = true;
-
-        // 1. Intentar enviar comando
         bool exitoArduino = await ArduinoService.IniciarRiegoManualAsync();
-
-        // ✅ CAMBIO CRÍTICO:
-        // Asumimos que si el usuario le dio clic, quiere registrar el riego.
-        // Guardamos el historial INDEPENDIENTEMENTE de la respuesta del Arduino
-        // para evitar que un fallo de comunicación bloquee el registro en base de datos.
 
         riegoManualActivo = true;
         bombaActiva = true;
         IniciarTimerVisual();
 
+        // Obtener datos clima
+        float temp = 25.0f;
+        float humAire = 50.0f;
+        float viento = 0.0f;
         try
         {
+            // ✅ AQUÍ USAMOS _climaService (la variable, no la clase)
+            var clima = await _climaService.ObtenerClimaActualAsync();
+            if (clima != null)
+            {
+                temp = (float)clima.Temperatura;
+                humAire = (float)clima.Humedad;
+                viento = (float)clima.VelocidadViento;
+            }
+        }
+        catch { }
+
+        try
+        {
+            // 1. Historial
             var nuevoRiego = new HistorialRiegoModel
             {
                 Fecha = DateTime.Now,
                 Humedad = 50,
-                Temperatura = 25,
+                Temperatura = temp,
                 IdPlanta = _idPlantaValido
             };
-
             bool guardado = await HistorialService.GuardarRiegoAsync(nuevoRiego);
+
+            // 2. Temperatura
+            await ApiService.GuardarTemperaturaAsync(temp, temp, "Riego Manual", _idPlantaValido);
+
+            // 3. Clima
+            await ApiService.GuardarRegistroClimaticoAsync(0, humAire, temp, viento, _idPlantaValido);
 
             if (guardado)
             {
-                if (!exitoArduino)
-                {
-                    // Guardó en BD pero Arduino no respondió (caso común de timeout)
-                    await JS.InvokeVoidAsync("alert", "✅ Riego registrado, pero el Arduino tardó en confirmar. Verifica que la bomba encendió.");
-                }
+                if (!exitoArduino) await JS.InvokeVoidAsync("alert", "✅ Registrado, pero Arduino tardó en confirmar.");
             }
             else
             {
-                await JS.InvokeVoidAsync("alert", "❌ Error al guardar en base de datos.");
+                await JS.InvokeVoidAsync("alert", "❌ Error al guardar en BD.");
             }
         }
         catch (Exception ex)

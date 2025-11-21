@@ -91,17 +91,18 @@
         }
     }
 
+    // En SmartDropUI/Components/Layout/MainLayout.razor
+
     private async Task RegistrarRiegoGlobal(int humedadSuelo)
     {
         try
         {
-            // Asegurar plantas
+            // 1. Obtener ID de planta (lógica existente...)
             if (misPlantas == null || !misPlantas.Any()) await CargarPlantasCache();
-
             int idPlanta = (misPlantas != null && misPlantas.Any()) ? misPlantas.First().IdPlanta : 0;
             if (idPlanta == 0) return;
 
-            // Obtener Clima
+            // 2. Obtener datos del clima actual
             float temp = 25.0f;
             float humAire = 50.0f;
             float viento = 0.0f;
@@ -117,7 +118,7 @@
             }
             catch { }
 
-            // 1. Guardar Historial
+            // 3. Guardar en HISTORIAL_RIEGO (Ya lo haces)
             var historial = new HistorialRiegoModel
             {
                 Fecha = DateTime.Now,
@@ -127,17 +128,20 @@
             };
             await HistorialService.GuardarRiegoAsync(historial);
 
-            // 2. Guardar Tablas Auxiliares
-            await ApiService.GuardarTemperaturaAsync(temp, temp, "Riego Automático Global", idPlanta);
+            // 4. ✅ NUEVO: Guardar en TEMPERATURA
+            await ApiService.GuardarTemperaturaAsync(temp, temp, "Registro automático al regar", idPlanta);
+
+            // 5. ✅ NUEVO: Guardar en REGISTRO_CLIMATICO
             await ApiService.GuardarRegistroClimaticoAsync(humedadSuelo, humAire, temp, viento, idPlanta);
 
-            Console.WriteLine("✅ [BD] Registro guardado correctamente.");
+            Console.WriteLine("✅ [GLOBAL] Riego y datos ambientales registrados correctamente.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ [GLOBAL] Error: {ex.Message}");
+            Console.WriteLine($"❌ [GLOBAL] Error al registrar datos completos: {ex.Message}");
         }
     }
+    
 
     public void Dispose()
     {

@@ -15,7 +15,7 @@ namespace SmartDropUI.Services
             _logger = logger;
         }
 
-        // Método existente de Usuarios...
+        // ✅ Obtener Usuarios
         public async Task<List<Usuario>?> ObtenerUsuariosAsync()
         {
             try
@@ -31,40 +31,30 @@ namespace SmartDropUI.Services
             }
         }
 
-        // ✅ NUEVO MÉTODO: Obtener Plantas
+        // ✅ Obtener Plantas
         public async Task<List<PlantaModel>?> ObtenerPlantasAsync()
         {
             try
             {
-                _logger.LogInformation("🌱 [API] Obteniendo plantas...");
-                // Usamos la ruta relativa, el BaseAddress ya está configurado en Program.cs (puerto 5001)
                 var response = await _httpClient.GetAsync("/api/plantas");
-
                 if (response.IsSuccessStatusCode)
                 {
                     var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<List<PlantaModel>>>();
-                    if (apiResponse != null && apiResponse.success)
-                    {
-                        return apiResponse.data;
-                    }
+                    return apiResponse?.data ?? new List<PlantaModel>();
                 }
-
-                _logger.LogError($"❌ [API] Error al obtener plantas: {response.StatusCode}");
                 return new List<PlantaModel>();
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError($"❌ [API] Error conexión plantas: {ex.Message}");
                 return new List<PlantaModel>();
             }
         }
 
-        // Cambia este método para aceptar el ID
+        // ✅ Obtener Plantas por Usuario
         public async Task<List<PlantaModel>?> ObtenerPlantasPorUsuarioAsync(int idUsuario)
         {
             try
             {
-                // ✅ Llamamos al nuevo endpoint filtrado
                 var response = await _httpClient.GetAsync($"/api/plantas/usuario/{idUsuario}");
                 if (response.IsSuccessStatusCode)
                 {
@@ -73,36 +63,28 @@ namespace SmartDropUI.Services
                 }
                 return new List<PlantaModel>();
             }
-            catch { return new List<PlantaModel>(); }
+            catch
+            {
+                return new List<PlantaModel>();
+            }
         }
 
-        // ✅ NUEVO MÉTODO: Registrar Planta
+        // ✅ Registrar Planta
         public async Task<bool> RegistrarPlantaAsync(PlantaModel planta)
         {
             try
             {
-                _logger.LogInformation($"🌱 [API] Registrando planta: {planta.NombrePlanta}");
-
-                // La URL es relativa, el HttpClient ya sabe que va a localhost:5001
                 var response = await _httpClient.PostAsJsonAsync("/api/plantas", planta);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    return true;
-                }
-
-                var error = await response.Content.ReadAsStringAsync();
-                _logger.LogError($"❌ [API] Error al guardar planta: {response.StatusCode} - {error}");
-                return false;
+                return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"❌ [API] Error de conexión: {ex.Message}");
+                _logger.LogError($"❌ [API] Error: {ex.Message}");
                 return false;
             }
         }
 
-
+        // ✅ Guardar Temperatura (SOLO UNA DEFINICIÓN)
         public async Task<bool> GuardarTemperaturaAsync(float tempAmbiente, float tempSuelo, string observacion, int idPlanta)
         {
             try
@@ -112,26 +94,19 @@ namespace SmartDropUI.Services
                     TempAmbiente = tempAmbiente,
                     TempSuelo = tempSuelo,
                     Observacion = observacion,
-                    IdPlanta = idPlanta // ✅ Enviamos el ID de la planta
+                    IdPlanta = idPlanta
                 };
-
                 var response = await _httpClient.PostAsJsonAsync("/api/temperatura", datos);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    var error = await response.Content.ReadAsStringAsync();
-                    _logger.LogError($"❌ Error API Temperatura: {error}");
-                }
-
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"❌ Excepción guardando temperatura: {ex.Message}");
+                _logger.LogError($"❌ Error guardando temperatura: {ex.Message}");
                 return false;
             }
         }
 
+        // ✅ Guardar Registro Climático (SOLO UNA DEFINICIÓN)
         public async Task<bool> GuardarRegistroClimaticoAsync(float humSuelo, float humAmbiente, float tempAmbiente, float viento, int idPlanta)
         {
             try
@@ -142,37 +117,33 @@ namespace SmartDropUI.Services
                     HumedadAmbiente = humAmbiente,
                     TemperaturaAmbiente = tempAmbiente,
                     Viento = viento,
-                    IdPlanta = idPlanta // ✅ Enviamos la planta
+                    IdPlanta = idPlanta
                 };
-
                 var response = await _httpClient.PostAsJsonAsync("/api/clima", datos);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error guardando registro climático: {ex.Message}");
+                _logger.LogError($"❌ Error guardando clima: {ex.Message}");
                 return false;
             }
         }
 
+        // ✅ Guardar Humedad
         public async Task<bool> GuardarHumedadPorcentajeAsync(float valorHumedad)
         {
             try
             {
-                // Enviamos solo el valor float como cuerpo del mensaje
                 var response = await _httpClient.PostAsJsonAsync("/api/humedad", valorHumedad);
                 return response.IsSuccessStatusCode;
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError($"❌ Error guardando humedad porcentaje: {ex.Message}");
                 return false;
             }
         }
-
     }
 
-    // Clase auxiliar para mapear la respuesta de la API
     public class ApiResponse<T>
     {
         public bool success { get; set; }
