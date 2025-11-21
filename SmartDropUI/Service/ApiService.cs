@@ -155,6 +155,21 @@ namespace SmartDropUI.Services
             }
         }
 
+        public async Task<bool> GuardarHumedadPorcentajeAsync(float valorHumedad)
+        {
+            try
+            {
+                // Enviamos solo el valor float como cuerpo del mensaje
+                var response = await _httpClient.PostAsJsonAsync("/api/humedad", valorHumedad);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"❌ Error guardando humedad porcentaje: {ex.Message}");
+                return false;
+            }
+        }
+
     }
 
     // Clase auxiliar para mapear la respuesta de la API

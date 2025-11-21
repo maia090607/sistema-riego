@@ -15,8 +15,6 @@ namespace RiegoAPI.Controllers
     public class HistorialController : ControllerBase
     {
         private readonly ServicioHistorial _servicioHistorial;
-        // ✅ NO NECESITAS ILogger si no lo vas a usar
-        // private readonly ILogger<HistorialController> _logger;
 
         public HistorialController(ServicioHistorial servicioHistorial)
         {
@@ -64,26 +62,28 @@ namespace RiegoAPI.Controllers
                 dto, $"Se encontraron {dto.Count} registros para la fecha {fecha:dd/MM/yyyy}"));
         }
 
-        // RiegoAPI -> Controllers -> HistorialController.cs
-
+        // POST: api/historial
         [HttpPost]
         public IActionResult Guardar([FromBody] HistorialRiegoRequestDTO dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ApiResponseDTO<object>.Error("Datos inválidos"));
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponseDTO<object>.Error("Datos inválidos"));
 
             try
             {
-                // Mapear DTO a Entidad
                 var entidad = HistorialRiegoMapper.ToEntity(dto);
 
-                // ✅ AHORA ESTO FUNCIONARÁ: 'resultado' será de tipo Response<Historial_Riego>
+                // ✅ Llamada corregida: 'resultado' es de tipo Response<Historial_Riego>
                 var resultado = _servicioHistorial.Guardar(entidad);
 
-                // Como ya no es un string, tiene las propiedades .Estado y .Mensaje
                 if (resultado.Estado)
                 {
                     var respuesta = HistorialRiegoMapper.ToResponseDTO(entidad);
-                    return Ok(ApiResponseDTO<HistorialRiegoResponseDTO>.Success(respuesta, resultado.Mensaje));
+
+                    return CreatedAtAction(nameof(ObtenerPorId),
+                        new { id = respuesta.Id },
+                        ApiResponseDTO<HistorialRiegoResponseDTO>.Success(
+                            respuesta, resultado.Mensaje));
                 }
                 else
                 {
@@ -95,6 +95,7 @@ namespace RiegoAPI.Controllers
                 return StatusCode(500, ApiResponseDTO<object>.Error($"Error interno: {ex.Message}"));
             }
         }
+
         // GET: api/historial/ultimo
         [HttpGet("ultimo")]
         public IActionResult ObtenerUltimo()

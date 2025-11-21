@@ -345,15 +345,29 @@
     {
         if (!procesando)
         {
-            // Detectar encendido de bomba (OFF -> ON)
+            // 1. Detección de Riego (Tu lógica actual)
             if (!bombaActiva && datos.BombaEncendida)
             {
-                Console.WriteLine("🌊 Riego Detectado. Guardando en BD...");
-                // Llamada al método que guarda en las 3 tablas
+                Console.WriteLine("🌊 Riego Detectado. Guardando historial...");
                 _ = RegistrarHistorialYTemperatura(datos.Humedad);
             }
+
+            // 2. ✅ NUEVO: Guardar SIEMPRE en la tabla humedad_porcentaje
+            // Esto llena la tabla para que tengas datos constantes
+            _ = GuardarHumedadConstante(datos.Humedad);
+
             ActualizarVariablesLocales(datos.Humedad, datos.BombaEncendida, datos.ModoManual);
         }
+    }
+
+    // Método auxiliar para no bloquear el hilo principal
+    private async Task GuardarHumedadConstante(int humedad)
+    {
+        try
+        {
+            await ApiService.GuardarHumedadPorcentajeAsync((float)humedad);
+        }
+        catch { /* Ignorar errores de conexión leves */ }
     }
 
     private async Task ActualizarEstado()

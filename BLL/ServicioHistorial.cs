@@ -24,15 +24,13 @@ namespace BLL
             return new ReadOnlyCollection<Historial_Riego>(lista);
         }
 
-        // ✅ CORREGIDO: Ahora devuelve Response<T> en lugar de string
+        // ✅ CORREGIDO: Ahora devuelve el objeto Response completo en lugar de solo un string
         public Response<Historial_Riego> Guardar(Historial_Riego entidad)
         {
             if (entidad == null)
-            {
-                return new Response<Historial_Riego>(false, "El registro es nulo", null, null);
-            }
+                return new Response<Historial_Riego>(false, "El registro que se intentó guardar es nulo", null, null);
 
-            // Retornamos el objeto respuesta completo (Estado, Mensaje, Entidad)
+            // Retornamos directamente la respuesta del repositorio (que tiene .Estado, .Mensaje, etc.)
             return _historialRepository.Insertar(entidad);
         }
 

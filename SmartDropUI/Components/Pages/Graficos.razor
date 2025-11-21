@@ -2,961 +2,461 @@
 @using SmartDropUI.Services
 @using SmartDropUI.Models
 @using System.Timers
-@inject NavigationManager Navigation
-@inject HistorialRiegoService HistorialService
 @inject ArduinoService ArduinoService
 @inject ClimaService ClimaService
-@inject HttpClient Http
+@inject HistorialRiegoService HistorialService
+@inject NavigationManager Navigation
 @rendermode InteractiveServer
 @implements IDisposable
 
-<PageTitle>Gráficos - SmartDrop</PageTitle>
+<PageTitle>Gráficos en Tiempo Real</PageTitle>
 
 <style>
-   
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    .graficos-page {
-        min-height: 100vh;
-        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 50%, #cffafe 100%);
-        padding: 2rem;
-    }
-
+    /* Estilos Generales */
     .graficos-container {
-        max-width: 1600px;
+        padding: 2rem;
+        max-width: 1400px;
         margin: 0 auto;
+        font-family: 'Segoe UI', sans-serif;
     }
 
-    .btn-back-menu {
+    .btn-back {
         background: #10b981;
         color: white;
         border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.75rem;
-        font-weight: 600;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 700;
         cursor: pointer;
+        margin-bottom: 2rem;
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        transition: all 0.3s ease;
+        gap: 8px;
+        transition: 0.2s;
     }
 
-        .btn-back-menu:hover {
+        .btn-back:hover {
             background: #059669;
             transform: translateY(-2px);
         }
 
-    .page-title {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #10b981;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
+    /* Grid de Gráficas */
     .charts-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr 1fr;
         gap: 2rem;
-        margin-bottom: 2rem;
+        margin-bottom: 3rem;
     }
 
     .chart-card {
         background: white;
-        border-radius: 1.5rem;
+        border-radius: 20px;
         padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
-
-    .chart-header {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         text-align: center;
-        margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 
     .chart-title {
-        font-size: 1.25rem;
-        font-weight: bold;
         color: #10b981;
-        margin-bottom: 0.5rem;
+        font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
     }
 
     .chart-subtitle {
-        font-size: 0.9rem;
         color: #6b7280;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
         font-style: italic;
     }
 
-    .chart-container {
-        background: #f9fafb;
-        border-radius: 1rem;
-        padding: 2rem;
-        min-height: 300px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    /* Caja del SVG */
+    .chart-box {
+        background: #f8fafc;
+        border-radius: 15px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        position: relative;
+        height: 250px;
+        margin-bottom: 1rem;
     }
 
-    .chart-svg {
-        width: 100%;
-        height: 100%;
-    }
-
-    .line-chart-humedad {
+    /* Líneas y Puntos */
+    .line-humedad {
+        fill: none;
         stroke: #10b981;
         stroke-width: 3;
-        fill: none;
-        transition: d 0.5s ease;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        filter: drop-shadow(0 4px 6px rgba(16, 185, 129, 0.2));
     }
 
-    .line-chart-temp {
+    .line-temp {
+        fill: none;
         stroke: #ef4444;
         stroke-width: 3;
-        fill: none;
-        transition: d 0.5s ease;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        filter: drop-shadow(0 4px 6px rgba(239, 68, 68, 0.2));
     }
 
-    .chart-axis {
-        stroke: #d1d5db;
+    .dot {
+        fill: white;
         stroke-width: 2;
+        r: 4;
+        transition: all 0.3s;
     }
 
-    .chart-label {
-        fill: #6b7280;
-        font-size: 11px;
-        font-weight: 500;
+    .dot-hum {
+        stroke: #10b981;
     }
 
-    .chart-grid {
-        stroke: #e5e7eb;
-        stroke-width: 1;
-        stroke-dasharray: 3,3;
+    .dot-temp {
+        stroke: #ef4444;
     }
 
-    .loading-spinner {
-        display: inline-block;
-        width: 40px;
-        height: 40px;
-        border: 4px solid #f3f4f6;
-        border-top-color: #10b981;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
+    .grid-line {
+        stroke: #e2e8f0;
+        stroke-dasharray: 4;
     }
 
-    @@keyframes spin {
-        to {
-            transform: rotate(360deg);
-        }
+    .axis-text {
+        font-size: 10px;
+        fill: #94a3b8;
+        font-family: monospace;
     }
 
-    .current-value {
-        text-align: center;
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin-top: 1rem;
-        padding: 0.75rem;
+    /* Displays de Valor */
+    .value-display {
+        font-size: 1.8rem;
+        font-weight: 900;
+        padding: 1rem;
+        border-radius: 15px;
         background: #f0fdf4;
-        border-radius: 0.5rem;
+        color: #10b981;
+        border: 1px solid #bbf7d0;
     }
 
-    .update-time {
-        text-align: center;
-        color: #6b7280;
-        font-size: 0.875rem;
+    .value-temp {
+        background: #fef2f2;
+        color: #ef4444;
+        border-color: #fecaca;
+    }
+
+    /* Datos Extra Clima */
+    .weather-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
         margin-top: 1rem;
     }
 
-    .historial-section {
-        background: white;
-        border-radius: 1.5rem;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        margin-bottom: 2rem;
-    }
-
-    .historial-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .historial-title {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #10b981;
-        margin-bottom: 0.5rem;
-    }
-
-    .historial-subtitle {
+    .weather-badge {
+        background: #f1f5f9;
+        padding: 0.5rem;
+        border-radius: 10px;
         font-size: 0.9rem;
-        color: #6b7280;
+        color: #475569;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
     }
 
-    .historial-table {
+    /* Tabla Historial */
+    .history-section {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+
+    .section-header {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #334155;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .custom-table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 1.5rem;
     }
 
-        .historial-table thead {
-            background: #10b981;
-            color: white;
-        }
-
-        .historial-table th {
-            padding: 1rem;
+        .custom-table th {
             text-align: left;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.875rem;
-            letter-spacing: 0.5px;
-        }
-
-        .historial-table td {
             padding: 1rem;
-            border-bottom: 1px solid #e5e7eb;
-            color: #374151;
+            background: #f8fafc;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid #e2e8f0;
         }
 
-        .historial-table tbody tr:hover {
-            background: #f0fdf4;
+        .custom-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            font-weight: 500;
         }
 
-    .badge {
+        .custom-table tr:last-child td {
+            border-bottom: none;
+        }
+
+    .status-dot {
+        height: 10px;
+        width: 10px;
+        border-radius: 50%;
         display: inline-block;
-        padding: 0.375rem 0.875rem;
-        border-radius: 9999px;
-        font-weight: 600;
-        font-size: 0.875rem;
+        margin-right: 5px;
     }
 
-    .badge-success {
-        background: #d1fae5;
-        color: #065f46;
-    }
-
-    .badge-warning {
-        background: #fef3c7;
-        color: #92400e;
-    }
-
-    .badge-danger {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .controls-section {
-        background: white;
-        border-radius: 1.5rem;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
-
-    .controls-title {
-        font-size: 1.25rem;
-        font-weight: bold;
-        color: #10b981;
-        text-align: center;
-        margin-bottom: 1.5rem;
-        text-transform: uppercase;
-    }
-
-    .controls-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-    }
-
-    .btn-control {
-        width: 100%;
-        padding: 1rem;
-        border: none;
-        border-radius: 0.75rem;
-        font-weight: 600;
-        font-size: 0.95rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-        color: white;
-    }
-
-    .btn-reload {
-        background: #10b981;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    }
-
-        .btn-reload:hover {
-            background: #059669;
-            transform: translateY(-2px);
-        }
-
-    .btn-manual {
-        background: #10b981;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    }
-
-        .btn-manual:hover {
-            background: #059669;
-            transform: translateY(-2px);
-        }
-
-    .search-section {
-        background: white;
-        border-radius: 1rem;
-        padding: 1.5rem;
-        margin-top: 1.5rem;
-        grid-column: 1 / -1;
-    }
-
-    .search-title {
-        font-size: 1rem;
-        font-weight: bold;
-        color: #10b981;
-        text-align: center;
-        margin-bottom: 1rem;
-        text-transform: uppercase;
-    }
-
-    .date-input {
-        width: 100%;
-        padding: 0.875rem 1rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 0.75rem;
-        font-size: 0.95rem;
-        margin-bottom: 1rem;
-        color: #374151;
-    }
-
-        .date-input:focus {
-            outline: none;
-            border-color: #10b981;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-        }
-
-    .btn-search {
-        background: #3b82f6;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    }
-
-        .btn-search:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-        }
-
-    .loading-container {
-        background: #f0fdf4;
-        border-radius: 1rem;
-        padding: 3rem;
-        text-align: center;
-        min-height: 200px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .loading-text {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #10b981;
-    }
-
-    @@media (max-width: 1024px) {
+    @@media (max-width: 1000px) {
         .charts-grid {
             grid-template-columns: 1fr;
         }
-
-        .controls-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-
-
-    /* Actualiza el estilo de las líneas del gráfico */
-    .line-chart-humedad {
-        stroke: #10b981;
-        stroke-width: 3;
-        fill: none;
-        filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3));
-    }
-
-    .line-chart-temp {
-        stroke: #ef4444;
-        stroke-width: 3;
-        fill: none;
-        filter: drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3));
-    }
-
-    .data-point {
-        fill: white;
-        stroke-width: 2;
-        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
-    }
-
-    .data-point-humedad {
-        stroke: #10b981;
-    }
-
-    .data-point-temp {
-        stroke: #ef4444;
-    }
-
-    .current-value {
-        animation: pulse 2s ease-in-out infinite;
-    }
-
-    @@keyframes pulse {
-        0%, 100%
-
-    {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.05);
-    }
-
     }
 </style>
 
-<div class="graficos-page">
-    <div class="graficos-container">
-        <button class="btn-back-menu" @onclick="VolverDashboard">
-            <span>⬅️</span>
-            Volver al Dashboard
-        </button>
+<div class="graficos-container">
+    <button class="btn-back" @onclick='() => Navigation.NavigateTo("/dashboard")'><span>⬅</span> Volver</button>
 
-        <h1 class="page-title">Análisis y Estadísticas del Sistema</h1>
+    <h1 style="text-align:center; color:#10b981; font-weight:900; margin-bottom:3rem;">ANÁLISIS EN TIEMPO REAL</h1>
 
-        <!-- Gráficas -->
-        <div class="charts-grid">
-            <!-- Gráfica de Humedad del Suelo -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h2 class="chart-title">Humedad del Suelo en Tiempo Real</h2>
-                    <p class="chart-subtitle">Monitoreo continuo del nivel de humedad</p>
+    <div class="charts-grid">
+
+        <div class="chart-card">
+            <div>
+                <div class="chart-title">Humedad del Suelo</div>
+                <div class="chart-subtitle">Sensor Arduino en Vivo</div>
+                <div class="chart-box">
+                    <svg width="100%" height="100%" viewBox="0 0 500 250" preserveAspectRatio="none">
+                        @for (int i = 0; i <= 5; i++)
+                        {
+                            <line x1="40" y1="@(i * 40 + 25)" x2="490" y2="@(i * 40 + 25)" class="grid-line" />
+                            <g><text x="5" y="@(i * 40 + 30)" class="axis-text">@(100 - i * 20)%</text></g>
+                        }
+                        <path d="@pathHumedad" class="line-humedad" />
+                        @foreach (var p in puntosHumedad)
+                        {
+                            <circle cx="@p.X" cy="@p.Y" class="dot dot-hum" />
+                        }
+                    </svg>
                 </div>
-                <div class="chart-container">
-                    @if (cargandoHumedad)
-                    {
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-                            <div class="loading-spinner"></div>
-                            <span style="color: #10b981; font-weight: 600;">Cargando datos...</span>
-                        </div>
-                    }
-                    else
-                    {
-                        <svg viewBox="0 0 400 220" class="chart-svg">
-                            <!-- Líneas de cuadrícula -->
-                            @for (int i = 0; i <= 4; i++)
-                            {
-                                var y = 30 + (i * 42.5);
-                                <line x1="50" y1="@y" x2="370" y2="@y" class="chart-grid" />
-                            }
+            </div>
+            <div class="value-display">@ultimaHumedad.ToString("0.0") %</div>
+        </div>
 
-                            <!-- Ejes -->
-                            <line x1="50" y1="200" x2="370" y2="200" class="chart-axis" />
-                            <line x1="50" y1="30" x2="50" y2="200" class="chart-axis" />
-
-                            <!-- Etiquetas Y -->
-                            <text x="20" y="35" class="chart-label">100</text>
-                            <text x="25" y="77" class="chart-label">75</text>
-                            <text x="25" y="120" class="chart-label">50</text>
-                            <text x="25" y="162" class="chart-label">25</text>
-                            <text x="30" y="205" class="chart-label">0</text>
-
-                            <!-- Línea de humedad -->
-                            <path d="@pathHumedad" class="line-chart-humedad" />
-
-                            <!-- Puntos de datos -->
-                            @for (int i = 0; i < puntosHumedad.Count; i++)
-                            {
-                                var punto = puntosHumedad[i];
-                                <circle cx="@punto.X" cy="@punto.Y" r="4"
-                                        class="data-point data-point-humedad" />
-                            }
-                        </svg>
-                    }
-                </div>
-                <div class="current-value" style="color: #10b981;">
-                    Valor Actual: @valorActualHumedad.ToString("F1")%
-                </div>
-                <div class="update-time">
-                    Última actualización: @ultimaActualizacionHumedad.ToString("HH:mm:ss")
+        <div class="chart-card">
+            <div>
+                <div class="chart-title" style="color:#ef4444;">Clima Ambiental</div>
+                <div class="chart-subtitle">Datos API OpenWeatherMap</div>
+                <div class="chart-box">
+                    <svg width="100%" height="100%" viewBox="0 0 500 250" preserveAspectRatio="none">
+                        @for (int i = 0; i <= 5; i++)
+                        {
+                            <line x1="40" y1="@(i * 40 + 25)" x2="490" y2="@(i * 40 + 25)" class="grid-line" />
+                            <g><text x="5" y="@(i * 40 + 30)" class="axis-text">@(50 - i * 10)°C</text></g>
+                        }
+                        <path d="@pathTemperatura" class="line-temp" />
+                        @foreach (var p in puntosTemperatura)
+                        {
+                            <circle cx="@p.X" cy="@p.Y" class="dot dot-temp" />
+                        }
+                    </svg>
                 </div>
             </div>
 
-            <!-- Gráfica de Temperatura -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h2 class="chart-title">Temperatura del Ambiente en Tiempo Real</h2>
-                    <p class="chart-subtitle">Monitoreo continuo de la temperatura</p>
-                </div>
-                <div class="chart-container">
-                    @if (cargandoTemperatura)
-                    {
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-                            <div class="loading-spinner"></div>
-                            <span style="color: #ef4444; font-weight: 600;">Cargando datos...</span>
-                        </div>
-                    }
-                    else
-                    {
-                        <svg viewBox="0 0 400 220" class="chart-svg">
-                            <!-- Líneas de cuadrícula -->
-                            @for (int i = 0; i <= 4; i++)
-                            {
-                                var y = 30 + (i * 42.5);
-                                <line x1="50" y1="@y" x2="370" y2="@y" class="chart-grid" />
-                            }
-
-                            <!-- Ejes -->
-                            <line x1="50" y1="200" x2="370" y2="200" class="chart-axis" />
-                            <line x1="50" y1="30" x2="50" y2="200" class="chart-axis" />
-
-                            <!-- Etiquetas Y -->
-                            <text x="20" y="35" class="chart-label">40</text>
-                            <text x="20" y="77" class="chart-label">35</text>
-                            <text x="20" y="120" class="chart-label">30</text>
-                            <text x="20" y="162" class="chart-label">25</text>
-                            <text x="20" y="205" class="chart-label">20</text>
-
-                            <!-- Línea de temperatura -->
-                            <path d="@pathTemperatura" class="line-chart-temp" />
-
-                            <!-- Puntos de datos -->
-                            @for (int i = 0; i < puntosTemperatura.Count; i++)
-                            {
-                                var punto = puntosTemperatura[i];
-                                <circle cx="@punto.X" cy="@punto.Y" r="4"
-                                        class="data-point data-point-temp" />
-                            }
-                        </svg>
-                    }
-                </div>
-                <div class="current-value" style="color: #ef4444;">
-                    Valor Actual: @valorActualTemperatura.ToString("F1")°C
-                </div>
-                <div class="update-time">
-                    Última actualización: @ultimaActualizacionTemperatura.ToString("HH:mm:ss")
+            <div>
+                <div class="value-display value-temp">@ultimaTemperatura.ToString("0.0") °C</div>
+                <div class="weather-details">
+                    <div class="weather-badge">💧 Hum: @humedadAire%</div>
+                    <div class="weather-badge">💨 Viento: @viento km/h</div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Historial de Riego -->
-        <div class="historial-section">
-            <div class="historial-header">
-                <h3 class="historial-title">Historial de Riego</h3>
-                <p class="historial-subtitle">Registros históricos del sistema con temperatura ambiente</p>
-            </div>
-            @if (cargando)
-            {
-                <div class="loading-container">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">Cargando datos históricos...</div>
-                </div>
-            }
-            else if (historialDatos.Any())
-            {
-                <table class="historial-table">
-                    <thead>
-                        <tr>
-                            <th>Fecha y Hora</th>
-                            <th>Humedad del Suelo (%)</th>
-                            <th>Temperatura Ambiente (°C)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var dato in historialDatos.Take(10))
+    <div class="history-section">
+        <div class="section-header">
+            <span>📋</span> Últimos Registros Guardados
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Fecha y Hora</th>
+                        <th>Humedad Suelo</th>
+                        <th>Temperatura</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (historialReciente.Any())
+                    {
+                        @foreach (var item in historialReciente)
                         {
                             <tr>
-                                <td>@dato.Fecha.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                <td>@item.Fecha.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                <td style="color:#10b981; font-weight:bold;">@item.Humedad %</td>
+                                <td style="color:#ef4444; font-weight:bold;">@item.Temperatura °C</td>
                                 <td>
-                                    <span class="badge @ObtenerClaseHumedad(dato.Humedad)">
-                                        @dato.Humedad.ToString("F1")%
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge @ObtenerClaseTemperatura(dato.Temperatura)">
-                                        @dato.Temperatura.ToString("F1")°C
-                                    </span>
+                                    @if (item.Humedad < 30)
+                                    {
+                                        <span style="color:#ef4444;"><span class="status-dot" style="background:#ef4444;"></span>Seco</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="color:#10b981;"><span class="status-dot" style="background:#10b981;"></span>Óptimo</span>
+                                    }
                                 </td>
                             </tr>
                         }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <div class="loading-container">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
-                    <div class="loading-text">No hay datos históricos disponibles</div>
-                </div>
-            }
-        </div>
-
-        <!-- Controles del Sistema -->
-        <div class="controls-section">
-            <h3 class="controls-title">Controles del Sistema</h3>
-            <div class="controls-grid">
-                <button class="btn-control btn-reload" @onclick="RecargarHistorial">
-                    <span>🔄</span> RECARGAR HISTORIAL
-                </button>
-                <button class="btn-control btn-manual" @onclick="IrARiego">
-                    <span>💧</span> INICIAR RIEGO MANUAL
-                </button>
-            </div>
-            <div class="search-section">
-                <h4 class="search-title">Buscar por Fecha</h4>
-                <input type="date" class="date-input" @bind="fechaBusqueda" />
-                <button class="btn-control btn-search" @onclick="BuscarPorFecha">
-                    <span>🔍</span> BUSCAR
-                </button>
-            </div>
+                    }
+                    else
+                    {
+                        <tr><td colspan="4" style="text-align:center; color:#94a3b8;">Cargando historial...</td></tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
 @code {
-    private bool cargando = false;
-    private bool cargandoHumedad = false;
-    private bool cargandoTemperatura = false;
-    private DateTime fechaBusqueda = DateTime.Now;
-    private DateTime ultimaActualizacionHumedad = DateTime.Now;
-    private DateTime ultimaActualizacionTemperatura = DateTime.Now;
-    private List<HistorialRiegoModel> historialDatos = new();
-    private double valorActualHumedad = 50;
-    private double valorActualTemperatura = 30;
+    // Configuración Gráfica
+    private const int MAX_PUNTOS = 20;
+    private Timer? _timer;
 
-    // Listas para almacenar los puntos de la gráfica
+    // Colas de Datos
+    private Queue<double> colaHumedad = new();
+    private Queue<double> colaTemp = new();
+
+    // SVG Paths
+    private string pathHumedad = "";
+    private string pathTemperatura = "";
     private List<(double X, double Y)> puntosHumedad = new();
     private List<(double X, double Y)> puntosTemperatura = new();
 
-    private Queue<double> historialHumedad = new Queue<double>();
-    private Queue<double> historialTemperatura = new Queue<double>();
-    private const int MAX_PUNTOS = 20; // Aumentado para mejor visualización
+    // Valores actuales
+    private double ultimaHumedad = 0;
+    private double ultimaTemperatura = 0;
 
-    private System.Timers.Timer? timerHumedad;
-    private System.Timers.Timer? timerTemperatura;
-    private string pathHumedad = "";
-    private string pathTemperatura = "";
+    // ✅ NUEVO: Datos extra
+    private double humedadAire = 0;
+    private double viento = 0;
+    private List<HistorialRiegoModel> historialReciente = new();
 
     protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine("🚀 [GRÁFICOS] Iniciando componente...");
-        ArduinoService.DatosRecibidos += OnDatosArduinoRecibidos;
-        await CargarDatosIniciales();
+        // Inicializar colas en 0
+        for (int i = 0; i < MAX_PUNTOS; i++) { colaHumedad.Enqueue(0); colaTemp.Enqueue(0); }
 
-        // Timer para humedad (cada 2 segundos)
-        timerHumedad = new System.Timers.Timer(2000);
-        timerHumedad.Elapsed += async (sender, e) => await ActualizarHumedadAsync();
-        timerHumedad.AutoReset = true;
-        timerHumedad.Start();
+        // Cargar historial inicial
+        await CargarHistorial();
 
-        // Timer para temperatura (cada 10 segundos)
-        timerTemperatura = new System.Timers.Timer(10000);
-        timerTemperatura.Elapsed += async (sender, e) => await ActualizarTemperaturaAsync();
-        timerTemperatura.AutoReset = true;
-        timerTemperatura.Start();
-
-        Console.WriteLine("✅ [GRÁFICOS] Timers iniciados");
+        // Timer
+        _timer = new Timer(2000); // Actualizar cada 2 seg
+        _timer.Elapsed += async (s, e) => await ActualizarDatos();
+        _timer.AutoReset = true;
+        _timer.Start();
     }
 
-    private void OnDatosArduinoRecibidos(DatosArduinoModel datos)
+    private async Task CargarHistorial()
     {
         try
         {
-            var nuevaHumedad = Math.Max(0, Math.Min(100, datos.Humedad));
-            if (Math.Abs(valorActualHumedad - nuevaHumedad) > 0.1)
-            {
-                valorActualHumedad = nuevaHumedad;
-                AgregarPuntoHumedad(valorActualHumedad);
-                ultimaActualizacionHumedad = DateTime.Now;
-                Console.WriteLine($"📊 [GRÁFICOS] Humedad actualizada: {valorActualHumedad:F1}%");
-                InvokeAsync(StateHasChanged);
-            }
+            var todos = await HistorialService.ObtenerHistorialAsync();
+            // Tomar los últimos 5 registros
+            historialReciente = todos.OrderByDescending(h => h.Fecha).Take(5).ToList();
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ [GRÁFICOS] Error: {ex.Message}");
-        }
+        catch { }
     }
 
-    private async Task ActualizarHumedadAsync()
+    private async Task ActualizarDatos()
     {
+        // 1. Arduino
         try
         {
             var estado = await ArduinoService.ObtenerEstadoAsync();
-            if (estado != null)
-            {
-                var nuevaHumedad = Math.Max(0, Math.Min(100, estado.Humedad));
-                if (Math.Abs(valorActualHumedad - nuevaHumedad) > 0.1)
-                {
-                    valorActualHumedad = nuevaHumedad;
-                    AgregarPuntoHumedad(valorActualHumedad);
-                    ultimaActualizacionHumedad = DateTime.Now;
-                    await InvokeAsync(StateHasChanged);
-                }
-            }
+            ultimaHumedad = estado != null ? estado.Humedad : 0;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ [GRÁFICOS] Error humedad: {ex.Message}");
-        }
-    }
+        catch { ultimaHumedad = 0; }
 
-    private async Task ActualizarTemperaturaAsync()
-    {
+        // 2. Clima Completo
         try
         {
             var clima = await ClimaService.ObtenerClimaActualAsync();
             if (clima != null)
             {
-                var nuevaTemp = Math.Max(20, Math.Min(40, clima.Temperatura));
-                if (Math.Abs(valorActualTemperatura - nuevaTemp) > 0.1)
-                {
-                    valorActualTemperatura = nuevaTemp;
-                    AgregarPuntoTemperatura(valorActualTemperatura);
-                    ultimaActualizacionTemperatura = DateTime.Now;
-                    await InvokeAsync(StateHasChanged);
-                }
+                ultimaTemperatura = clima.Temperatura;
+                humedadAire = clima.Humedad;
+                viento = clima.VelocidadViento;
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ [GRÁFICOS] Error temperatura: {ex.Message}");
-        }
+        catch { }
+
+        // 3. Actualizar Colas
+        colaHumedad.Enqueue(ultimaHumedad);
+        if (colaHumedad.Count > MAX_PUNTOS) colaHumedad.Dequeue();
+
+        colaTemp.Enqueue(ultimaTemperatura);
+        if (colaTemp.Count > MAX_PUNTOS) colaTemp.Dequeue();
+
+        // 4. Recalcular y Refrescar Historial ocasionalmente
+        CalcularGraficas();
+        // Solo recargar historial si la cola avanzó (simple optimización visual)
+        if (DateTime.Now.Second % 10 == 0) await CargarHistorial();
+
+        await InvokeAsync(StateHasChanged);
     }
 
-    private void AgregarPuntoHumedad(double valor)
+    private void CalcularGraficas()
     {
-        historialHumedad.Enqueue(valor);
-        if (historialHumedad.Count > MAX_PUNTOS)
-            historialHumedad.Dequeue();
-        GenerarCurvaHumedad();
-    }
+        double ancho = 450, alto = 200, margenX = 40, margenY = 25;
+        double pasoX = ancho / (MAX_PUNTOS - 1);
 
-    private void AgregarPuntoTemperatura(double valor)
-    {
-        historialTemperatura.Enqueue(valor);
-        if (historialTemperatura.Count > MAX_PUNTOS)
-            historialTemperatura.Dequeue();
-        GenerarCurvaTemperatura();
-    }
-
-    private void GenerarCurvaHumedad()
-    {
-        if (historialHumedad.Count < 2)
-        {
-            pathHumedad = "";
-            puntosHumedad.Clear();
-            return;
-        }
-
-        var puntos = historialHumedad.ToList();
-        var path = new System.Text.StringBuilder();
+        // Humedad
+        var listaHum = colaHumedad.ToList();
+        var sbHum = new System.Text.StringBuilder();
         puntosHumedad.Clear();
-
-        double anchoTotal = 320;
-        double espaciado = anchoTotal / (MAX_PUNTOS - 1);
-
-        for (int i = 0; i < puntos.Count; i++)
+        for (int i = 0; i < listaHum.Count; i++)
         {
-            double x = 50 + (i * espaciado);
-            double y = 200 - (puntos[i] * 170 / 100.0);
-
+            double x = margenX + (i * pasoX);
+            double y = (margenY + alto) - (listaHum[i] * (alto / 100.0));
             puntosHumedad.Add((x, y));
-
-            if (i == 0)
-            {
-                path.Append($"M {x:F2} {y:F2}");
-            }
-            else
-            {
-                path.Append($" L {x:F2} {y:F2}");
-            }
+            sbHum.Append(i == 0 ? $"M {x.ToString(System.Globalization.CultureInfo.InvariantCulture)} {y.ToString(System.Globalization.CultureInfo.InvariantCulture)}" : $" L {x.ToString(System.Globalization.CultureInfo.InvariantCulture)} {y.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
         }
+        pathHumedad = sbHum.ToString();
 
-        pathHumedad = path.ToString();
-    }
-
-    private void GenerarCurvaTemperatura()
-    {
-        if (historialTemperatura.Count < 2)
-        {
-            pathTemperatura = "";
-            puntosTemperatura.Clear();
-            return;
-        }
-
-        var puntos = historialTemperatura.ToList();
-        var path = new System.Text.StringBuilder();
+        // Temperatura
+        var listaTemp = colaTemp.ToList();
+        var sbTemp = new System.Text.StringBuilder();
         puntosTemperatura.Clear();
-
-        double anchoTotal = 320;
-        double espaciado = anchoTotal / (MAX_PUNTOS - 1);
-
-        for (int i = 0; i < puntos.Count; i++)
+        for (int i = 0; i < listaTemp.Count; i++)
         {
-            double x = 50 + (i * espaciado);
-            double valorNormalizado = (puntos[i] - 20) / 20.0;
-            double y = 200 - (valorNormalizado * 170);
-
+            double x = margenX + (i * pasoX);
+            double val = Math.Max(0, Math.Min(50, listaTemp[i]));
+            double y = (margenY + alto) - (val * (alto / 50.0));
             puntosTemperatura.Add((x, y));
-
-            if (i == 0)
-            {
-                path.Append($"M {x:F2} {y:F2}");
-            }
-            else
-            {
-                path.Append($" L {x:F2} {y:F2}");
-            }
+            sbTemp.Append(i == 0 ? $"M {x.ToString(System.Globalization.CultureInfo.InvariantCulture)} {y.ToString(System.Globalization.CultureInfo.InvariantCulture)}" : $" L {x.ToString(System.Globalization.CultureInfo.InvariantCulture)} {y.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
         }
-
-        pathTemperatura = path.ToString();
-    }
-
-    private async Task CargarDatosIniciales()
-    {
-        cargando = true;
-        cargandoHumedad = true;
-        cargandoTemperatura = true;
-
-        try
-        {
-            Console.WriteLine("📥 [GRÁFICOS] Cargando datos iniciales...");
-
-            // Obtener humedad del Arduino
-            var estado = await ArduinoService.ObtenerEstadoAsync();
-            if (estado != null)
-            {
-                valorActualHumedad = Math.Max(0, Math.Min(100, estado.Humedad));
-                for (int i = 0; i < 10; i++)
-                {
-                    AgregarPuntoHumedad(valorActualHumedad + (Random.Shared.NextDouble() - 0.5) * 5);
-                }
-                Console.WriteLine($"✅ Humedad inicial: {valorActualHumedad:F1}%");
-            }
-
-            // Obtener temperatura del clima
-            var clima = await ClimaService.ObtenerClimaActualAsync();
-            if (clima != null)
-            {
-                valorActualTemperatura = Math.Max(20, Math.Min(40, clima.Temperatura));
-                for (int i = 0; i < 10; i++)
-                {
-                    AgregarPuntoTemperatura(valorActualTemperatura + (Random.Shared.NextDouble() - 0.5) * 2);
-                }
-                Console.WriteLine($"✅ Temperatura inicial: {valorActualTemperatura:F1}°C");
-            }
-
-            await CargarHistorialReciente();
-            Console.WriteLine($"✅ [GRÁFICOS] Datos iniciales cargados");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ [GRÁFICOS] Error: {ex.Message}");
-        }
-        finally
-        {
-            cargando = false;
-            cargandoHumedad = false;
-            cargandoTemperatura = false;
-        }
-    }
-
-    private async Task CargarHistorialReciente()
-    {
-        try
-        {
-            var historial = await HistorialService.ObtenerHistorialAsync();
-            if (historial != null && historial.Any())
-            {
-                historialDatos = historial.OrderByDescending(h => h.Fecha).Take(20).ToList();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ [GRÁFICOS] Error al cargar historial: {ex.Message}");
-        }
-    }
-
-    private void VolverDashboard()
-    {
-        Navigation.NavigateTo("/dashboard");
-    }
-
-    private void IrARiego()
-    {
-        Navigation.NavigateTo("/riego");
-    }
-
-    private async Task RecargarHistorial()
-    {
-        await CargarDatosIniciales();
-    }
-
-    private async Task BuscarPorFecha()
-    {
-        cargando = true;
-        try
-        {
-            var resultados = await HistorialService.ObtenerPorFechaAsync(fechaBusqueda);
-            if (resultados != null && resultados.Any())
-            {
-                historialDatos = resultados;
-                Console.WriteLine($"✅ [GRÁFICOS] {resultados.Count} registros encontrados para {fechaBusqueda:dd/MM/yyyy}");
-            }
-            else
-            {
-                Console.WriteLine($"⚠️ [GRÁFICOS] No hay registros para {fechaBusqueda:dd/MM/yyyy}");
-                historialDatos = new List<HistorialRiegoModel>();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ [GRÁFICOS] Error en búsqueda: {ex.Message}");
-        }
-        finally
-        {
-            cargando = false;
-        }
-    }
-
-    private string ObtenerClaseHumedad(float humedad)
-    {
-        if (humedad < 30) return "badge-danger";
-        if (humedad < 60) return "badge-warning";
-        return "badge-success";
-    }
-
-    private string ObtenerClaseTemperatura(float temperatura)
-    {
-        if (temperatura < 15 || temperatura > 35) return "badge-danger";
-        if (temperatura < 18 || temperatura > 30) return "badge-warning";
-        return "badge-success";
+        pathTemperatura = sbTemp.ToString();
     }
 
     public void Dispose()
     {
-        ArduinoService.DatosRecibidos -= OnDatosArduinoRecibidos;
-        timerHumedad?.Stop();
-        timerHumedad?.Dispose();
-        timerTemperatura?.Stop();
-        timerTemperatura?.Dispose();
-        Console.WriteLine("✅ [GRÁFICOS] Recursos liberados correctamente");
+        _timer?.Stop();
+        _timer?.Dispose();
     }
 }
-
-
