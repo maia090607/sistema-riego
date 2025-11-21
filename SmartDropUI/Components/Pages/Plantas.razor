@@ -1,18 +1,19 @@
 ﻿@page "/plantas"
 @using SmartDropUI.Services
 @using SmartDropUI.Models
+@inject ApiService ApiService
 @inject NavigationManager Navigation
 @inject ILogger<Plantas> Logger
-@inject HttpClient Http
 @rendermode InteractiveServer
 
 <PageTitle>Plantas - SmartDrop</PageTitle>
 
 <style>
+    /* Estilos existentes... */
     body {
         margin: 0;
         padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-family: 'Segoe UI', Roboto, sans-serif;
     }
 
     .plantas-page {
@@ -42,107 +43,71 @@
             transform: translateY(-2px);
         }
 
-    .plantas-container {
+    .content-grid {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 2rem;
         max-width: 1400px;
         margin: 0 auto;
     }
 
-    .search-section {
+    /* Lista de plantas (Sidebar izquierda) */
+    .plant-list-section {
         background: white;
         border-radius: 1.5rem;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        margin-bottom: 2rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        height: fit-content;
     }
 
-    .search-title {
-        font-size: 1.75rem;
+    .list-title {
+        font-size: 1.2rem;
         font-weight: bold;
         color: #10b981;
-        text-align: center;
-        margin-bottom: 1.5rem;
-        font-style: italic;
-    }
-
-    .search-label {
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 0.5rem;
-        display: block;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-    }
-
-    .search-select {
-        width: 100%;
-        padding: 0.875rem 1rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 0.75rem;
-        font-size: 1rem;
         margin-bottom: 1rem;
-        background: white;
+        text-align: center;
+    }
+
+    .plant-item {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-left: 4px solid transparent;
+    }
+
+        .plant-item:hover {
+            background: #f0fdf4;
+        }
+
+        .plant-item.active {
+            background: #d1fae5;
+            border-left-color: #10b981;
+        }
+
+    .plant-name {
+        font-weight: 600;
         color: #374151;
     }
 
-        .search-select:focus {
-            outline: none;
-            border-color: #10b981;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-        }
-
-    .btn {
-        width: 100%;
-        padding: 1rem;
-        border: none;
-        border-radius: 0.75rem;
-        font-weight: 600;
-        font-size: 1rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-        margin-bottom: 0.75rem;
-    }
-
-    .btn-search {
-        background: #3b82f6;
-        color: white;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    }
-
-        .btn-search:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-        }
-
-    .btn-manage {
-        background: #3b82f6;
-        color: white;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    }
-
-        .btn-manage:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-        }
-
-    .btn-icon {
-        font-size: 1.25rem;
-    }
-
-    .content-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-    }
-
-    .info-section {
+    /* Detalle de planta (Derecha) */
+    .plant-detail-section {
         background: white;
         border-radius: 1.5rem;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 2.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .detail-header {
+        border-bottom: 2px solid #f3f4f6;
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #10b981;
     }
 
     .info-grid {
@@ -153,386 +118,149 @@
 
     .info-card {
         background: #f9fafb;
-        border-radius: 1rem;
-        padding: 1.5rem;
-        border: 2px solid #e5e7eb;
+        padding: 1rem;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
     }
 
-    .info-card-title {
-        font-size: 0.75rem;
-        font-weight: bold;
-        color: #10b981;
-        text-transform: uppercase;
-        margin-bottom: 0.5rem;
-        letter-spacing: 0.5px;
-    }
-
-    .info-card-label {
-        font-size: 0.85rem;
+    .info-label {
+        font-size: 0.8rem;
         color: #6b7280;
-        font-style: italic;
-        margin-bottom: 0.25rem;
+        font-weight: 700;
+        text-transform: uppercase;
     }
 
-    .info-card-value {
-        font-size: 1.5rem;
-        font-weight: bold;
+    .info-value {
+        font-size: 1.2rem;
+        font-weight: 600;
         color: #1f2937;
     }
 
-    .description-section {
-        background: white;
-        border-radius: 1.5rem;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
-
-    .description-title {
-        font-size: 1.25rem;
-        font-weight: bold;
-        color: #10b981;
-        text-transform: uppercase;
-        margin-bottom: 1rem;
-    }
-
-    .description-content {
-        background: #f0fdf4;
-        border-radius: 1rem;
-        padding: 2rem;
+    .loading-container {
         text-align: center;
-        min-height: 200px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .description-icon {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        color: #10b981;
-    }
-
-    .description-text {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #10b981;
-        margin-bottom: 0.5rem;
-    }
-
-    .description-hint {
-        font-size: 0.9rem;
-        color: #6b7280;
-    }
-
-    .additional-info {
-        background: #f0fdf4;
-        border-radius: 1rem;
-        padding: 1.5rem;
-        text-align: center;
-        margin-top: 2rem;
-    }
-
-    .additional-info-icon {
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
-        color: #10b981;
-    }
-
-    .additional-info-text {
-        font-size: 1rem;
-        font-weight: 600;
+        padding: 4rem;
         color: #10b981;
     }
 
     .empty-state {
         text-align: center;
         padding: 3rem;
+        color: #6b7280;
     }
 
-    .btn-add-plant {
+    .btn-manage {
         background: #3b82f6;
         color: white;
-        padding: 1.25rem 2.5rem;
+        border: none;
+        padding: 1rem;
+        width: 100%;
         border-radius: 0.75rem;
         font-weight: 600;
-        font-size: 1.1rem;
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-        .btn-add-plant:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
-        }
-
-    .loading-spinner {
-        display: inline-block;
-        width: 40px;
-        height: 40px;
-        border: 4px solid #f3f4f6;
-        border-top-color: #10b981;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin: 0 auto 1rem;
-    }
-
-    @@keyframes spin {
-        to
-
-    {
-        transform: rotate(360deg);
-    }
-
-    }
-
-    .alert {
-        padding: 1rem;
-        border-radius: 0.75rem;
         margin-top: 1rem;
-        text-align: center;
-    }
-
-    .alert-error {
-        background: #fee2e2;
-        border: 2px solid #ef4444;
-        color: #991b1b;
-    }
-
-    @@media (max-width: 1024px) {
-        .content-grid
-
-    {
-        grid-template-columns: 1fr;
-    }
-
-    .info-grid {
-        grid-template-columns: 1fr;
-    }
-
+        cursor: pointer;
     }
 </style>
 
 <div class="plantas-page">
-    <div class="plantas-container">
-        <button class="btn-back-menu" @onclick='() => Navigation.NavigateTo("/dashboard")'>
-            <span>⬅️</span>
-            Volver al Dashboard
-        </button>
+    <button class="btn-back-menu" @onclick="VolverAlDashboard">
+        <span>⬅️</span> Volver al Dashboard
+    </button>
 
-        @if (cargando)
-        {
-            <div class="search-section">
-                <h2 class="search-title">CARGANDO PLANTAS...</h2>
-                <div class="description-content">
-                    <div class="loading-spinner"></div>
-                    <div class="description-text">Cargando plantas registradas</div>
-                </div>
-            </div>
-        }
-        else if (plantas.Any())
-        {
-            <!-- Sección de búsqueda -->
-            <div class="search-section">
-                <h2 class="search-title">BUSCA TU PLANTA</h2>
-                <label class="search-label">Seleccionar Planta</label>
-                <select class="search-select" @bind="plantaSeleccionadaId">
-                    <option value="">-- Selecciona una planta --</option>
+    @if (cargando)
+    {
+        <div class="loading-container">
+            <h2>🔄 Cargando plantas...</h2>
+        </div>
+    }
+    else if (plantas != null && plantas.Any())
+    {
+        <div class="content-grid">
+            <div class="plant-list-section">
+                <h3 class="list-title">🌱 Mis Plantas ({plantas.Count})</h3>
+                <div style="max-height: 600px; overflow-y: auto;">
                     @foreach (var planta in plantas)
                     {
-                        <option value="@planta.IdPlanta">@planta.NombrePlanta</option>
+                        <div class="plant-item @(planta.IdPlanta == plantaActual.IdPlanta ? "active" : "")"
+                             @onclick="() => SeleccionarPlanta(planta)">
+                            <div class="plant-name">@planta.NombrePlanta</div>
+                            <small style="color: #6b7280;">ID: @planta.IdPlanta</small>
+                        </div>
                     }
-                </select>
-                <button class="btn-search" @onclick="BuscarPlanta">
-                    <span class="btn-icon">🔍</span>
-                    BUSCAR PLANTA
-                </button>
-                <button class="btn-manage" @onclick="AbrirGestionPlantas">
-                    <span class="btn-icon">🌿</span>
-                    MANIPULAR PLANTAS
-                </button>
+                </div>
+                <button class="btn-manage" @onclick="IrAGestion">⚙️ Gestionar Plantas</button>
             </div>
 
-            <div class="content-grid">
-                <!-- Sección de información -->
-                <div class="info-section">
-                    <div class="info-grid">
-                        <div class="info-card">
-                            <div class="info-card-title">Identificación</div>
-                            <div class="info-card-label">Id</div>
-                            <div class="info-card-value">@plantaActual.IdPlanta</div>
-                        </div>
+            <div class="plant-detail-section">
+                <div class="detail-header">
+                    <h1 class="detail-title">@plantaActual.NombrePlanta</h1>
+                    <p style="color: #6b7280;">@plantaActual.Descripcion</p>
+                </div>
 
-                        <div class="info-card">
-                            <div class="info-card-title">Temperatura</div>
-                            <div class="info-card-label">Temperatura Óptima</div>
-                            <div class="info-card-value">@plantaActual.NivelOptimoTemperatura°C</div>
-                        </div>
-
-                        <div class="info-card">
-                            <div class="info-card-title">Nombre de la Planta</div>
-                            <div class="info-card-label">Nombre</div>
-                            <div class="info-card-value">@plantaActual.NombrePlanta</div>
-                        </div>
-
-                        <div class="info-card">
-                            <div class="info-card-title">Humedad</div>
-                            <div class="info-card-label">Humedad Óptima</div>
-                            <div class="info-card-value">@plantaActual.NivelOptimoHumedad%</div>
-                        </div>
-
-                        <div class="info-card">
-                            <div class="info-card-title">Luz Necesaria</div>
-                            <div class="info-card-label">Nivel de Luz</div>
-                            <div class="info-card-value">@plantaActual.NivelOptimoLuz</div>
-                        </div>
-
-                        <div class="info-card">
-                            <div class="info-card-title">Riego</div>
-                            <div class="info-card-label">Frecuencia</div>
-                            <div class="info-card-value">Automático</div>
-                        </div>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-label">Humedad Óptima</div>
+                        <div class="info-value" style="color: #3b82f6;">@plantaActual.NivelOptimoHumedad %</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Temperatura Óptima</div>
+                        <div class="info-value" style="color: #f97316;">@plantaActual.NivelOptimoTemperatura °C</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Luz Necesaria</div>
+                        <div class="info-value" style="color: #eab308;">@plantaActual.NivelOptimoLuz</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">ID Sistema</div>
+                        <div class="info-value">@plantaActual.IdPlanta</div>
                     </div>
                 </div>
 
-                <!-- Sección de descripción -->
-                <div class="description-section">
-                    <h3 class="description-title">Descripción</h3>
-                    @if (!string.IsNullOrEmpty(plantaActual.Descripcion))
-                    {
-                        <div class="description-content">
-                            <div class="description-icon">🌱</div>
-                            <div class="description-text">@plantaActual.NombrePlanta</div>
-                            <div class="description-hint">@plantaActual.Descripcion</div>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="description-content">
-                            <div class="description-icon">🌱</div>
-                            <div class="description-text">Selecciona una planta</div>
-                            <div class="description-hint">Elige una planta del menú para ver su información detallada</div>
-                        </div>
-                    }
-                </div>
-            </div>
-
-            <div class="additional-info">
-                <div class="additional-info-icon">🍃</div>
-                <div class="additional-info-text">
-                    Total de plantas registradas: @plantas.Count
-                </div>
-            </div>
-        }
-        else
-        {
-            <!-- Estado vacío - sin plantas -->
-            <div class="search-section">
-                <h2 class="search-title">BUSCA TU PLANTA</h2>
-                <div class="description-content empty-state">
-                    <div class="description-icon">🌱</div>
-                    <div class="description-text">No hay plantas registradas</div>
-                    <div class="description-hint" style="margin-bottom: 2rem;">
-                        Comienza agregando tu primera planta al sistema
+                @if (!string.IsNullOrEmpty(plantaActual.RutaImagen))
+                {
+                    <div style="margin-top: 2rem; text-align: center;">
+                        <img src="@plantaActual.RutaImagen" style="max-width: 100%; border-radius: 15px; max-height: 300px;" />
                     </div>
-                    <button class="btn-add-plant" @onclick="AbrirGestionPlantas">
-                        <span>➕</span>
-                        Agregar Planta
-                    </button>
-                </div>
+                }
             </div>
-        }
-
-        @if (!string.IsNullOrEmpty(mensajeError))
-        {
-            <div class="alert alert-error">
-                ❌ @mensajeError
-            </div>
-        }
-    </div>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <h1>🥀 No hay plantas registradas</h1>
+            <p>Parece que aún no has agregado ninguna planta al sistema.</p>
+            <button class="btn-manage" style="max-width: 200px;" @onclick="IrAGestion">Agregar Planta</button>
+        </div>
+    }
 </div>
 
 @code {
     private List<PlantaModel> plantas = new();
-    private int plantaSeleccionadaId = 0;
+    private PlantaModel plantaActual = new();
     private bool cargando = true;
-    private string mensajeError = "";
-
-    private PlantaModel plantaActual = new()
-    {
-        IdPlanta = 0,
-        NombrePlanta = "--",
-        Descripcion = "",
-        NivelOptimoHumedad = 0,
-        NivelOptimoTemperatura = 0,
-        NivelOptimoLuz = 0
-    };
-
-    public class PlantaModel
-    {
-        public int IdPlanta { get; set; }
-        public string NombrePlanta { get; set; } = "";
-        public string Descripcion { get; set; } = "";
-        public float NivelOptimoHumedad { get; set; }
-        public float NivelOptimoTemperatura { get; set; }
-        public float NivelOptimoLuz { get; set; }
-    }
 
     protected override async Task OnInitializedAsync()
     {
-        await CargarPlantasAsync();
+        await CargarPlantas();
     }
 
-    private async Task CargarPlantasAsync()
+    private async Task CargarPlantas()
     {
         cargando = true;
-        mensajeError = "";
-
         try
         {
-            Logger.LogInformation("🌱 Cargando plantas desde API...");
+            // Usamos el ApiService que ya está configurado con el puerto correcto (5001)
+            var resultado = await ApiService.ObtenerPlantasAsync();
 
-            var response = await Http.GetAsync("https://localhost:7068/api/plantas");
-
-            if (response.IsSuccessStatusCode)
+            if (resultado != null && resultado.Any())
             {
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<List<PlantaModel>>>();
-
-                if (apiResponse?.success == true && apiResponse.data != null)
-                {
-                    plantas = apiResponse.data;
-                    Logger.LogInformation($"✅ {plantas.Count} plantas cargadas correctamente");
-
-                    // Si hay plantas, seleccionar la primera por defecto
-                    if (plantas.Any())
-                    {
-                        plantaActual = plantas.First();
-                        plantaSeleccionadaId = plantaActual.IdPlanta;
-                    }
-                }
-                else
-                {
-                    mensajeError = "No se pudieron cargar las plantas";
-                    Logger.LogWarning("⚠️ Respuesta de API sin datos");
-                }
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                mensajeError = $"Error al cargar plantas: {response.StatusCode}";
-                Logger.LogError($"❌ Error HTTP {response.StatusCode}: {error}");
+                plantas = resultado;
+                plantaActual = plantas.First(); // Seleccionar la primera por defecto
             }
         }
         catch (Exception ex)
         {
-            mensajeError = $"Error al conectar con el servidor: {ex.Message}";
-            Logger.LogError($"❌ Excepción al cargar plantas: {ex.Message}");
+            Logger.LogError($"Error cargando plantas: {ex.Message}");
         }
         finally
         {
@@ -540,35 +268,18 @@
         }
     }
 
-    private void BuscarPlanta()
+    private void SeleccionarPlanta(PlantaModel planta)
     {
-        if (plantaSeleccionadaId > 0)
-        {
-            var planta = plantas.FirstOrDefault(p => p.IdPlanta == plantaSeleccionadaId);
-
-            if (planta != null)
-            {
-                plantaActual = planta;
-                Logger.LogInformation($"🔍 Planta seleccionada: {planta.NombrePlanta}");
-                StateHasChanged();
-            }
-        }
-        else
-        {
-            mensajeError = "Selecciona una planta primero";
-        }
+        plantaActual = planta;
     }
 
-    private void AbrirGestionPlantas()
+    private void VolverAlDashboard()
+    {
+        Navigation.NavigateTo("/dashboard");
+    }
+
+    private void IrAGestion()
     {
         Navigation.NavigateTo("/gestion-plantas");
-    }
-
-    // Clase para deserializar la respuesta de la API
-    public class ApiResponse<T>
-    {
-        public bool success { get; set; }
-        public string message { get; set; } = "";
-        public T? data { get; set; }
     }
 }

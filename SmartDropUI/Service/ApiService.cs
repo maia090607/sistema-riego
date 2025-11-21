@@ -15,26 +15,14 @@ namespace SmartDropUI.Services
             _logger = logger;
         }
 
-        // ✅ Obtener usuarios (usando UsuarioModel que es el mismo que Usuario)
+        // Método existente de Usuarios...
         public async Task<List<Usuario>?> ObtenerUsuariosAsync()
         {
             try
             {
-                _logger.LogInformation("🌐 [API] Obteniendo usuarios...");
-
                 var response = await _httpClient.GetAsync("/api/usuarios");
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    _logger.LogError($"❌ [API] Error HTTP {response.StatusCode}");
-                    return null;
-                }
-
-                // ✅ La API devuelve directamente la lista
-                var usuarios = await response.Content.ReadFromJsonAsync<List<Usuario>>();
-
-                _logger.LogInformation($"✅ [API] {usuarios?.Count ?? 0} usuarios obtenidos");
-                return usuarios;
+                if (!response.IsSuccessStatusCode) return null;
+                return await response.Content.ReadFromJsonAsync<List<Usuario>>();
             }
             catch (Exception ex)
             {
@@ -42,5 +30,72 @@ namespace SmartDropUI.Services
                 return null;
             }
         }
+
+        // ✅ NUEVO MÉTODO: Obtener Plantas
+        public async Task<List<PlantaModel>?> ObtenerPlantasAsync()
+        {
+            try
+            {
+                _logger.LogInformation("🌱 [API] Obteniendo plantas...");
+                // Usamos la ruta relativa, el BaseAddress ya está configurado en Program.cs (puerto 5001)
+                var response = await _httpClient.GetAsync("/api/plantas");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<List<PlantaModel>>>();
+                    if (apiResponse != null && apiResponse.success)
+                    {
+                        return apiResponse.data;
+                    }
+                }
+
+                _logger.LogError($"❌ [API] Error al obtener plantas: {response.StatusCode}");
+                return new List<PlantaModel>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"❌ [API] Error conexión plantas: {ex.Message}");
+                return new List<PlantaModel>();
+            }
+        }
+
+        // ✅ NUEVO MÉTODO: Registrar Planta
+        public async Task<bool> RegistrarPlantaAsync(PlantaModel planta)
+        {
+            try
+            {
+                _logger.LogInformation($"🌱 [API] Registrando planta: {planta.NombrePlanta}");
+
+                // La URL es relativa, el HttpClient ya sabe que va a localhost:5001
+                var response = await _httpClient.PostAsJsonAsync("/api/plantas", planta);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+
+                var error = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"❌ [API] Error al guardar planta: {response.StatusCode} - {error}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"❌ [API] Error de conexión: {ex.Message}");
+                return false;
+            }
+        }
+
+
+
+    }
+
+
+
+    // Clase auxiliar para mapear la respuesta de la API
+    public class ApiResponse<T>
+    {
+        public bool success { get; set; }
+        public string message { get; set; } = "";
+        public T? data { get; set; }
     }
 }
