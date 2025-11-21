@@ -11,5 +11,6 @@ namespace BLL
         public Response<Cultivo> BuscarPorId(int id) => cultivoDAL.ObtenerPorId(id);
         public Response<Cultivo> Actualizar(Cultivo c) => cultivoDAL.Actualizar(c);
         public Response<Cultivo> Eliminar(int id) => cultivoDAL.Eliminar(id);
+        public Response<Cultivo> ObtenerPorUsuario(int idUsuario) => cultivoDAL.ObtenerPorUsuario(idUsuario);
     }
 }

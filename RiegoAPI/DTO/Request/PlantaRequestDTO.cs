@@ -12,5 +12,6 @@ namespace RiegoAPI.DTO.Request
         public float NivelOptimoHumedad { get; set; }
         public float NivelOptimoTemperatura { get; set; }
         public float NivelOptimoLuz { get; set; }
+        public int IdUsuario { get; set; }
     }
 }

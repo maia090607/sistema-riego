@@ -2,6 +2,7 @@
 @using SmartDropUI.Services
 @using SmartDropUI.Models
 @inject ApiService ApiService
+@inject AuthService AuthService
 @inject NavigationManager Navigation
 @inject ILogger<Plantas> Logger
 @rendermode InteractiveServer
@@ -9,7 +10,7 @@
 <PageTitle>Plantas - SmartDrop</PageTitle>
 
 <style>
-    /* Estilos existentes... */
+    /* Estilos generales */
     body {
         margin: 0;
         padding: 0;
@@ -228,7 +229,7 @@
     {
         <div class="empty-state">
             <h1>🥀 No hay plantas registradas</h1>
-            <p>Parece que aún no has agregado ninguna planta al sistema.</p>
+            <p>No tienes plantas asignadas a tu usuario.</p>
             <button class="btn-manage" style="max-width: 200px;" @onclick="IrAGestion">Agregar Planta</button>
         </div>
     }
@@ -244,18 +245,25 @@
         await CargarPlantas();
     }
 
+    // ✅ ÚNICO MÉTODO DE CARGA (CORREGIDO)
     private async Task CargarPlantas()
     {
         cargando = true;
         try
         {
-            // Usamos el ApiService que ya está configurado con el puerto correcto (5001)
-            var resultado = await ApiService.ObtenerPlantasAsync();
+            // 1. Obtener usuario actual
+            var usuario = await AuthService.GetUsuarioActualAsync();
 
-            if (resultado != null && resultado.Any())
+            if (usuario != null)
             {
-                plantas = resultado;
-                plantaActual = plantas.First(); // Seleccionar la primera por defecto
+                // 2. Pedir solo SUS plantas a la API
+                var resultado = await ApiService.ObtenerPlantasPorUsuarioAsync(usuario.IdUsuario);
+
+                if (resultado != null && resultado.Any())
+                {
+                    plantas = resultado;
+                    plantaActual = plantas.First();
+                }
             }
         }
         catch (Exception ex)

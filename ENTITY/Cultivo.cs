@@ -10,6 +10,7 @@ namespace ENTITY
         public float nivel_optimo_humedad { get; set; }
         public float nivel_optimo_temperatura { get; set; }
         public float nivel_optimo_luz { get; set; } //No se sabe si tendremos este sensor, asi que lo pongo como opcional este atributo
+        public int IdUsuario { get; set; }
 
         public override string ToString()
         {

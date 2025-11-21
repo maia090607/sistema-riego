@@ -59,6 +59,23 @@ namespace SmartDropUI.Services
             }
         }
 
+        // Cambia este método para aceptar el ID
+        public async Task<List<PlantaModel>?> ObtenerPlantasPorUsuarioAsync(int idUsuario)
+        {
+            try
+            {
+                // ✅ Llamamos al nuevo endpoint filtrado
+                var response = await _httpClient.GetAsync($"/api/plantas/usuario/{idUsuario}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<PlantaModel>>>();
+                    return result?.data ?? new List<PlantaModel>();
+                }
+                return new List<PlantaModel>();
+            }
+            catch { return new List<PlantaModel>(); }
+        }
+
         // ✅ NUEVO MÉTODO: Registrar Planta
         public async Task<bool> RegistrarPlantaAsync(PlantaModel planta)
         {

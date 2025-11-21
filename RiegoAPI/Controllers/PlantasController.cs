@@ -155,5 +155,18 @@ namespace RiegoAPI.Controllers
                 "Imagen subida correctamente"
             ));
         }
+
+        [HttpGet("usuario/{idUsuario}")]
+        public IActionResult ObtenerPorUsuario(int idUsuario)
+        {
+            var resultado = _serviciosPlanta.ObtenerPorUsuario(idUsuario);
+            var plantasDto = PlantaMapper.ToResponseDTOList(resultado.Lista);
+
+            return Ok(ApiResponseDTO<List<PlantaResponseDTO>>.Success(
+                plantasDto,
+                $"Se encontraron {plantasDto.Count} plantas para el usuario {idUsuario}"
+            ));
+        }
+
     }
 }

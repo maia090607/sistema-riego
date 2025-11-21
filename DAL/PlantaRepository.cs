@@ -15,11 +15,12 @@ namespace DAL
                 using (var conn = new OracleConnection(_connectionString))
                 {
                     conn.Open();
-
-                            string sentencia = @"INSERT INTO Cultivo
-                            (id_planta, nombre_planta, descripcion, ruta_imagen,
-                             nivel_optimo_humedad, nivel_optimo_temperatura, nivel_optimo_luz)
-                            VALUES (:id, :nombre, :descripcionParam, :ruta, :humedad, :temp, :luz)";
+                    // ✅ Se agregó ID_USUARIO al INSERT
+                    string sentencia = @"INSERT INTO Cultivo
+                        (id_planta, nombre_planta, descripcion, ruta_imagen,
+                            nivel_optimo_humedad, nivel_optimo_temperatura, nivel_optimo_luz, ID_USUARIO)
+                        VALUES (:id, :nombre, :descripcionParam, :ruta, 
+                        :humedad, :temp, :luz, :idUsu)";
 
                     using (var cmd = new OracleCommand(sentencia, conn))
                     {
@@ -31,11 +32,17 @@ namespace DAL
                         cmd.Parameters.Add("temp", OracleDbType.Single).Value = planta.nivel_optimo_temperatura;
                         cmd.Parameters.Add("luz", OracleDbType.Single).Value = planta.nivel_optimo_luz;
 
+                        // ✅ Parámetro del usuario (si es 0, enviamos DBNull para evitar error, aunque debería tener valor)
+                        if (planta.IdUsuario > 0)
+                            cmd.Parameters.Add("idUsu", OracleDbType.Int32).Value = planta.IdUsuario;
+                        else
+                            cmd.Parameters.Add("idUsu", OracleDbType.Int32).Value = DBNull.Value;
+
                         int filas = cmd.ExecuteNonQuery();
 
                         return new Response<Cultivo>(
                             filas > 0,
-                            filas > 0 ? "Planta insertada correctamente" : "No se pudo insertar la planta",
+                            filas > 0 ? "Planta registrada correctamente" : "No se pudo insertar",
                             planta,
                             null
                         );
@@ -44,11 +51,11 @@ namespace DAL
             }
             catch (OracleException ex)
             {
-                return new Response<Cultivo>(false, $"Error de base de datos:\n{ex.Message}", null, null);
+                return new Response<Cultivo>(false, $"Error BD: {ex.Message}", null, null);
             }
             catch (Exception ex)
             {
-                return new Response<Cultivo>(false, $"Error al insertar planta:\n{ex.Message}", null, null);
+                return new Response<Cultivo>(false, $"Error General: {ex.Message}", null, null);
             }
         }
 
@@ -218,6 +225,29 @@ namespace DAL
             {
                 return new Response<Cultivo>(false, $"Error al obtener plantas:\n{ex.Message}", null, null);
             }
+        }
+
+        public Response<Cultivo> ObtenerPorUsuario(int idUsuario)
+        {
+            try
+            {
+                List<Cultivo> lista = new List<Cultivo>();
+                // ✅ Filtramos por usuario
+                string sentencia = "SELECT * FROM Cultivo WHERE ID_USUARIO = :idUsu ORDER BY nombre_planta";
+
+                using (var conn = new OracleConnection(_connectionString))
+                using (var cmd = new OracleCommand(sentencia, conn))
+                {
+                    cmd.Parameters.Add("idUsu", OracleDbType.Int32).Value = idUsuario;
+                    conn.Open();
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read()) lista.Add(MapearPlanta(reader));
+                    }
+                    return new Response<Cultivo>(true, $"Encontradas {lista.Count}", null, lista);
+                }
+            }
+            catch (Exception ex) { return new Response<Cultivo>(false, ex.Message, null, null); }
         }
 
         private Cultivo MapearPlanta(OracleDataReader reader)
