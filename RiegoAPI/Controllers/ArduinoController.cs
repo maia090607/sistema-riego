@@ -17,18 +17,19 @@ namespace RiegoAPI.Controllers
         [HttpGet("estado")]
         public IActionResult ObtenerEstado()
         {
-            // Obtenemos los 3 datos clave desde el ServicioPuerto
-            var (humedad, bomba, manual, fecha) = _servicioPuerto.ObtenerUltimoEstado();
+            // ✅ CORRECCIÓN: Ya no usamos deconstrucción con paréntesis (var (a,b) = ...)
+            // Ahora obtenemos el objeto completo.
+            var estado = _servicioPuerto.ObtenerUltimoEstado();
 
             return Ok(new
             {
                 success = true,
                 data = new
                 {
-                    Humedad = humedad,
-                    BombaEncendida = bomba,
-                    ModoManual = manual, // ✅ Enviamos esto al Frontend
-                    FechaLectura = fecha
+                    Humedad = estado.Humedad,
+                    BombaEncendida = estado.BombaEncendida,
+                    ModoManual = estado.ModoManual,
+                    FechaLectura = estado.FechaHora
                 }
             });
         }
@@ -36,23 +37,22 @@ namespace RiegoAPI.Controllers
         [HttpPost("manual-on")]
         public IActionResult IniciarManual()
         {
-            if (!_servicioPuerto.PuertoAbierto)
-                return BadRequest(new { success = false, message = "Puerto cerrado" });
-
             bool ok = _servicioPuerto.EnviarComandoConConfirmacion("MANUAL_ON");
-            return ok ? Ok(new { success = true, message = "OK:MANUAL_ON" })
-                      : StatusCode(500, new { success = false, message = "Sin respuesta del Arduino" });
+            return Ok(new { success = ok, message = ok ? "OK:MANUAL_ON" : "Error al enviar" });
         }
 
         [HttpPost("manual-off")]
         public IActionResult DetenerManual()
         {
-            if (!_servicioPuerto.PuertoAbierto)
-                return BadRequest(new { success = false, message = "Puerto cerrado" });
-
             bool ok = _servicioPuerto.EnviarComandoConConfirmacion("MANUAL_OFF");
-            return ok ? Ok(new { success = true, message = "OK:MANUAL_OFF" })
-                      : StatusCode(500, new { success = false, message = "Sin respuesta del Arduino" });
+            return Ok(new { success = ok, message = ok ? "OK:MANUAL_OFF" : "Error al enviar" });
+        }
+
+        [HttpPost("auto")]
+        public IActionResult ActivarAuto()
+        {
+            bool ok = _servicioPuerto.EnviarComandoConConfirmacion("AUTO");
+            return Ok(new { success = ok, message = ok ? "OK:AUTO" : "Error al enviar" });
         }
     }
 }

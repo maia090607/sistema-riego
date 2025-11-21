@@ -1,304 +1,289 @@
 ﻿@page "/riego"
 @using SmartDropUI.Services
 @using SmartDropUI.Models
-@using System.Timers
 @inject ArduinoService ArduinoService
-@inject ApiService _apiService
-@inject AuthService AuthService
 @inject HistorialRiegoService HistorialService
-@inject ClimaService _climaService 
+@inject ApiService ApiService
+@inject AuthService AuthService
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 @rendermode InteractiveServer
 @implements IDisposable
 
-<PageTitle>Control de Riego</PageTitle>
+<PageTitle>Control de Riego - SmartDrop</PageTitle>
 
-<style>
-    /* Estilos generales */
-    .riego-container { padding: 2rem; max-width: 1200px; margin: 0 auto; font-family: 'Segoe UI', sans-serif; }
-    
-    .btn-back {
-        background-color: #6b7280; color: white; border: none; padding: 0.75rem 1.5rem;
-        border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex;
-        align-items: center; gap: 8px; margin-bottom: 1.5rem; transition: 0.2s;
-    }
-    .btn-back:hover { background-color: #4b5563; transform: translateX(-3px); }
-
-    .header-title {
-        color: #10b981; font-weight: 900; font-size: 1.8rem; display: flex; align-items: center;
-        gap: 12px; margin-bottom: 2rem; background: white; padding: 1.5rem;
-        border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    }
-
-    /* Plant Info */
-    .plant-info {
-        margin-bottom: 2rem; padding: 1rem; background: #f0fdf4; border-radius: 10px;
-        text-align: center; border: 1px solid #bbf7d0; color: #15803d; font-weight: 600;
-    }
-
-    /* Cards */
-    .cards-row { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
-    .status-card {
-        background: white; border-radius: 20px; padding: 2.5rem; text-align: center;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.04); border-left: 6px solid;
-    }
-    .card-icon { font-size: 3.5rem; margin-bottom: 1rem; display: block; }
-    .card-label { color: #6b7280; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; }
-    .card-value { font-size: 2rem; font-weight: 800; color: #374151; }
-
-    /* Panel Manual */
-    .manual-panel { background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); overflow: hidden; margin-top: 1rem; }
-    .panel-header { padding: 1.5rem; text-align: center; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-weight: 700; }
-    .panel-body { padding: 3rem 4rem; text-align: center; }
-    .info-text { color: #6b7280; margin-bottom: 2rem; }
-
-    .btn-riego {
-        width: 100%; padding: 1.2rem; border-radius: 10px; border: none; font-weight: 800;
-        font-size: 1.1rem; color: white; cursor: pointer; display: flex; align-items: center;
-        justify-content: center; gap: 12px; text-transform: uppercase; transition: 0.2s;
-    }
-    .btn-iniciar { background-color: #10b981; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25); }
-    .btn-detener { background-color: #ef4444; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25); }
-    .btn-riego:disabled { opacity: 0.7; cursor: wait; }
-
-    .border-green { border-left-color: #10b981; }
-    .border-blue { border-left-color: #3b82f6; }
-    .text-blue { color: #3b82f6; }
-    .icon-active { color: #10b981; }
-    .icon-inactive { color: #ef4444; }
-</style>
-
-<div class="riego-container">
-    <button class="btn-back" @onclick="VolverAtras"><span>⬅</span> Atrás</button>
-
-    <div class="header-title"><span>💧</span> CONTROL DE RIEGO</div>
-
-    <div class="plant-info">
-        🌿 Planta Activa: <strong>@nombrePlantaActiva</strong> (ID: @idPlantaActiva)
+<div class="container p-4" style="max-width: 1000px;">
+    <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded shadow-sm">
+        <div class="d-flex align-items-center gap-3">
+            <h2 class="fw-bold text-success m-0">🌊 CONTROL DE RIEGO</h2>
+            <span class="badge @(riegoManualActivo ? "bg-warning text-dark" : "bg-success") rounded-pill px-3">
+                @(riegoManualActivo ? "MODO MANUAL" : "MODO AUTOMÁTICO")
+            </span>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm" @onclick='() => Navigation.NavigateTo("/dashboard")'>
+            ⬅ Volver
+        </button>
     </div>
 
-    <div class="cards-row">
-        <div class="status-card border-green">
-            <span class="card-icon">
-                @if(bombaActiva) { <span class="icon-active">🌊</span> } else { <span class="icon-inactive">⛔</span> }
-            </span>
-            <div class="card-label">ESTADO BOMBA</div>
-            <div class="card-value" style="color: @(bombaActiva ? "#10b981" : "#6b7280")">
-                @(bombaActiva ? "ENCENDIDA" : "APAGADA")
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm border-0 text-center p-3"
+                 style="border-top: 5px solid @(bombaActiva ? "#198754" : "#dc3545") !important;">
+                <div class="display-4 mb-2">@(bombaActiva ? "💧" : "🛑")</div>
+                <h5 class="text-muted">ESTADO BOMBA</h5>
+                <h2 class="fw-bold @(bombaActiva ? "text-success" : "text-danger")">
+                    @(bombaActiva ? "ENCENDIDA" : "APAGADA")
+                </h2>
             </div>
         </div>
-
-        <div class="status-card border-blue">
-            <span class="card-icon">🌱</span>
-            <div class="card-label">HUMEDAD SUELO</div>
-            <div class="card-value text-blue">@humedadActual %</div>
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm border-0 text-center p-3"
+                 style="border-top: 5px solid #0dcaf0 !important;">
+                <div class="display-4 mb-2">📡</div>
+                <h5 class="text-muted">CONEXIÓN</h5>
+                <h2 class="fw-bold text-info">
+                    @(ArduinoService.EstaConectado ? "ONLINE" : "OFFLINE")
+                </h2>
+            </div>
         </div>
     </div>
 
-    <div class="manual-panel">
-        <div class="panel-header">Panel de Control Manual</div>
-        <div class="panel-body">
-            @if (riegoManualActivo)
+    <div class="card shadow border-0 rounded-4">
+        <div class="card-body p-5 text-center">
+            <h4 class="fw-bold text-secondary mb-4">🛠️ Operación Manual</h4>
+
+            @if (!riegoManualActivo)
             {
-                <p class="info-text">El sistema está en modo manual. La bomba permanecerá encendida.</p>
-                <button class="btn-riego btn-detener" @onclick="DetenerRiegoManual" disabled="@procesando">
-                    @if (procesando) { <span>⏳ DETENIENDO...</span> } else { <span>🛑 DETENER RIEGO MANUAL</span> }
+                <button class="btn btn-success w-100 py-3 fw-bold fs-4 shadow transition-btn"
+                        @onclick="IniciarRiegoManual"
+                        disabled="@esperandoRespuesta">
+                    @if (esperandoRespuesta)
+                    {
+                        <span>⏳ Procesando...</span>
+                    }
+                    else
+                    {
+                        <span>▶ INICIAR RIEGO MANUAL</span>
+                    }
                 </button>
+                <div class="alert alert-info mt-4 mb-0">
+                    <small>ℹ️ Al activar el modo manual, el sistema automático se pausará temporalmente.</small>
+                </div>
             }
             else
             {
-                <p class="info-text">Presione para activar la bomba y desactivar el control automático.</p>
-                <button class="btn-riego btn-iniciar" @onclick="IniciarRiegoManual" disabled="@procesando">
-                    @if (procesando) { <span>⏳ INICIANDO...</span> } else { <span>💧 INICIAR RIEGO MANUAL</span> }
+                <div class="p-3 mb-4 bg-light rounded border border-warning">
+                    <h5 class="text-muted mb-1">Tiempo de riego activo</h5>
+                    <h1 class="fw-bold text-warning display-5">@tiempoRiego s</h1>
+                </div>
+
+                <button class="btn btn-danger w-100 py-3 fw-bold fs-4 shadow transition-btn"
+                        @onclick="DetenerRiegoManual"
+                        disabled="@esperandoRespuesta">
+                    @if (esperandoRespuesta)
+                    {
+                        <span>⏳ Deteniendo...</span>
+                    }
+                    else
+                    {
+                        <span>⏹ DETENER RIEGO MANUAL</span>
+                    }
                 </button>
             }
         </div>
     </div>
 </div>
 
+<style>
+    .transition-btn {
+        transition: all 0.3s ease;
+    }
+
+        .transition-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .transition-btn:active {
+            transform: scale(0.98);
+        }
+</style>
+
 @code {
     private bool riegoManualActivo = false;
+    private bool esperandoRespuesta = false;
     private bool bombaActiva = false;
-    private int humedadActual = 0;
-    private bool procesando = false;
-    private Timer? _timer;
-    
-    private string nombrePlantaActiva = "Cargando...";
-    private int idPlantaActiva = 0;
-
-    // ✅ VARIABLE DE CONTROL PARA EVITAR DUPLICADOS
-    private DateTime _ultimoRegistro = DateTime.MinValue;
+    private int tiempoRiego = 0;
+    private System.Timers.Timer? timer;
+    private System.Timers.Timer? pollingTimer;
+    private int _idPlantaValido = 0; // Variable para guardar un ID real
 
     protected override async Task OnInitializedAsync()
     {
-        ArduinoService.DatosRecibidos += OnDatosArduinoRecibidos;
-        await CargarInfoPlanta();
-        await ActualizarEstado();
-        _timer = new Timer(1000);
-        _timer.Elapsed += async (s, e) => await ActualizarEstado();
-        _timer.AutoReset = true;
-        _timer.Start();
+        // 1. Obtener un ID de planta válido al iniciar
+        await CargarIdPlantaValido();
+
+        // 2. Polling para actualizar estado visual
+        pollingTimer = new System.Timers.Timer(2000);
+        pollingTimer.Elapsed += async (s, e) => await ConsultarEstadoServidor();
+        pollingTimer.AutoReset = true;
+        pollingTimer.Start();
+
+        await ConsultarEstadoServidor();
     }
 
-    private async Task CargarInfoPlanta()
+    private async Task CargarIdPlantaValido()
     {
-        try {
-            var usuario = await AuthService.GetUsuarioActualAsync();
-            if (usuario != null) {
-                var plantas = await _apiService.ObtenerPlantasPorUsuarioAsync(usuario.IdUsuario);
-                if (plantas != null && plantas.Any()) {
-                    var p = plantas.First();
-                    nombrePlantaActiva = p.NombrePlanta;
-                    idPlantaActiva = p.IdPlanta;
-                } else {
-                    nombrePlantaActiva = "Sin Planta Asignada";
-                }
-            }
-        } catch {}
-    }
-
-    private void VolverAtras() => Navigation.NavigateTo("/dashboard");
-
-    private void OnDatosArduinoRecibidos(DatosArduinoModel datos)
-    {
-        // Lógica de detección automática
-        if (!procesando && !bombaActiva && datos.BombaEncendida)
-        {
-            // Solo guardamos si pasaron más de 60 segundos desde el último guardado
-            if ((DateTime.Now - _ultimoRegistro).TotalSeconds > 60)
-            {
-                Console.WriteLine("🌊 Riego Detectado (Auto). Guardando...");
-                _ = RegistrarHistorialYTemperatura(datos.Humedad);
-            }
-        }
-
-        if (!procesando)
-        {
-            ActualizarVariablesLocales(datos.Humedad, datos.BombaEncendida, datos.ModoManual);
-        }
-    }
-
-    private async Task ActualizarEstado()
-    {
-        if (procesando) return;
         try
         {
-            var estado = await ArduinoService.ObtenerEstadoAsync();
-            if (estado != null)
+            var usuario = await AuthService.GetUsuarioActualAsync();
+            if (usuario != null)
             {
-                await InvokeAsync(() => 
+                var plantas = await ApiService.ObtenerPlantasPorUsuarioAsync(usuario.IdUsuario);
+                if (plantas != null && plantas.Any())
                 {
-                    // Doble chequeo por polling con protección anti-spam
-                    if (!bombaActiva && estado.BombaEncendida)
+                    _idPlantaValido = plantas.First().IdPlanta;
+                    Console.WriteLine($"✅ Planta vinculada para historial: ID {_idPlantaValido}");
+                }
+                else
+                {
+                    Console.WriteLine("⚠️ ADVERTENCIA: El usuario no tiene plantas registradas. El historial fallará.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Error cargando plantas: {ex.Message}");
+        }
+    }
+
+    private async Task ConsultarEstadoServidor()
+    {
+        try
+        {
+            var datos = await ArduinoService.ObtenerEstadoAsync();
+            if (datos != null)
+            {
+                await InvokeAsync(() =>
+                {
+                    bombaActiva = datos.BombaEncendida;
+
+                    if (datos.ModoManual && !riegoManualActivo)
                     {
-                        if ((DateTime.Now - _ultimoRegistro).TotalSeconds > 60)
-                        {
-                            Console.WriteLine("🌊 Riego Detectado (Polling). Guardando...");
-                            _ = RegistrarHistorialYTemperatura(estado.Humedad);
-                        }
+                        riegoManualActivo = true;
+                        IniciarTimerVisual();
                     }
-                    ActualizarVariablesLocales(estado.Humedad, estado.BombaEncendida, estado.ModoManual);
+                    else if (!datos.ModoManual && riegoManualActivo)
+                    {
+                        riegoManualActivo = false;
+                        DetenerTimerVisual();
+                    }
+                    StateHasChanged();
                 });
             }
         }
         catch { }
     }
 
-    private void ActualizarVariablesLocales(int humedad, bool bomba, bool manual)
-    {
-        bool cambio = false;
-        if (humedadActual != humedad) { humedadActual = humedad; cambio = true; }
-        if (bombaActiva != bomba) { bombaActiva = bomba; cambio = true; }
-        if (riegoManualActivo != manual) { riegoManualActivo = manual; cambio = true; }
-        if (cambio) StateHasChanged();
-    }
-
-    // ✅ Riego Manual: Guarda explícitamente al dar clic
     private async Task IniciarRiegoManual()
     {
-        procesando = true;
-        StateHasChanged();
+        if (_idPlantaValido == 0)
+        {
+            await JS.InvokeVoidAsync("alert", "⚠️ Error: No tienes plantas registradas. Crea una planta primero.");
+            return;
+        }
+
+        esperandoRespuesta = true;
+
+        // 1. Intentar enviar comando
+        bool exitoArduino = await ArduinoService.IniciarRiegoManualAsync();
+
+        // ✅ CAMBIO CRÍTICO:
+        // Asumimos que si el usuario le dio clic, quiere registrar el riego.
+        // Guardamos el historial INDEPENDIENTEMENTE de la respuesta del Arduino
+        // para evitar que un fallo de comunicación bloquee el registro en base de datos.
+
+        riegoManualActivo = true;
+        bombaActiva = true;
+        IniciarTimerVisual();
+
         try
         {
-            bool exito = await ArduinoService.IniciarRiegoManualAsync();
-            if (exito) 
+            var nuevoRiego = new HistorialRiegoModel
             {
-                riegoManualActivo = true;
-                
-                // Verificar anti-spam también aquí por si acaso
-                if ((DateTime.Now - _ultimoRegistro).TotalSeconds > 60)
+                Fecha = DateTime.Now,
+                Humedad = 50,
+                Temperatura = 25,
+                IdPlanta = _idPlantaValido
+            };
+
+            bool guardado = await HistorialService.GuardarRiegoAsync(nuevoRiego);
+
+            if (guardado)
+            {
+                if (!exitoArduino)
                 {
-                    Console.WriteLine("🌊 Riego Manual Iniciado. Guardando...");
-                    await RegistrarHistorialYTemperatura(humedadActual);
+                    // Guardó en BD pero Arduino no respondió (caso común de timeout)
+                    await JS.InvokeVoidAsync("alert", "✅ Riego registrado, pero el Arduino tardó en confirmar. Verifica que la bomba encendió.");
                 }
             }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "❌ Error al guardar en base de datos.");
+            }
         }
-        finally { procesando = false; StateHasChanged(); }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"❌ Error crítico: {ex.Message}");
+        }
+
+        esperandoRespuesta = false;
     }
 
     private async Task DetenerRiegoManual()
     {
-        procesando = true;
-        StateHasChanged();
-        try
+        esperandoRespuesta = true;
+        bool exito = await ArduinoService.DetenerRiegoManualAsync();
+
+        if (exito)
         {
-            bool exito = await ArduinoService.DetenerRiegoManualAsync();
-            if (exito)
-            {
-                riegoManualActivo = false;
-                bombaActiva = false;
-            }
+            await ArduinoService.ActivarModoAutomaticoAsync();
+            riegoManualActivo = false;
+            bombaActiva = false;
+            DetenerTimerVisual();
         }
-        finally { procesando = false; StateHasChanged(); }
+        esperandoRespuesta = false;
     }
 
-    // ✅ MÉTODO CENTRAL DE GUARDADO
-    private async Task RegistrarHistorialYTemperatura(int humedadDelMomento)
+    private void IniciarTimerVisual()
     {
-        // Bloquear inmediatamente para evitar duplicados
-        _ultimoRegistro = DateTime.Now;
-
-        int idPlantaAGuardar = idPlantaActiva > 0 ? idPlantaActiva : 0;
-        float temperaturaCapturada = 25.0f;
-
-        try
+        if (timer == null)
         {
-            // 1. Obtener Clima
-            try {
-               var clima = await _climaService.ObtenerClimaActualAsync();
-               if (clima != null) temperaturaCapturada = (float)clima.Temperatura;
-            } catch { }
-
-            // 2. Guardar Historial
-            var historial = new HistorialRiegoModel {
-                Fecha = DateTime.Now,
-                Humedad = humedadDelMomento,
-                Temperatura = temperaturaCapturada,
-                IdPlanta = idPlantaAGuardar
+            tiempoRiego = 0;
+            timer = new System.Timers.Timer(1000);
+            timer.Elapsed += (s, e) =>
+            {
+                tiempoRiego++;
+                InvokeAsync(StateHasChanged);
             };
-            await HistorialService.GuardarRiegoAsync(historial);
-
-            // 3. Guardar Temperatura (Tabla aparte)
-            await _apiService.GuardarTemperaturaAsync(
-                temperaturaCapturada,
-                temperaturaCapturada,
-                $"Riego H:{humedadDelMomento}%",
-                idPlantaAGuardar
-            );
-
-            Console.WriteLine("✅ Riego registrado exitosamente en BD");
+            timer.Start();
         }
-        catch (Exception ex)
+    }
+
+    private void DetenerTimerVisual()
+    {
+        if (timer != null)
         {
-            Console.WriteLine($"❌ Error guardando datos: {ex.Message}");
-            // Si falló, reseteamos el tiempo para permitir reintentar
-            _ultimoRegistro = DateTime.MinValue; 
+            timer.Stop();
+            timer.Dispose();
+            timer = null;
         }
+        tiempoRiego = 0;
     }
 
     public void Dispose()
     {
-        if (_timer != null) { _timer.Stop(); _timer.Dispose(); }
-        ArduinoService.DatosRecibidos -= OnDatosArduinoRecibidos;
+        DetenerTimerVisual();
+        pollingTimer?.Stop();
+        pollingTimer?.Dispose();
     }
 }

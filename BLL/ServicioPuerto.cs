@@ -1,105 +1,169 @@
 ﻿using System;
 using System.IO.Ports;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace BLL
 {
+    // Clase para transportar los datos
+    public class DatosArduinoModel
+    {
+        public int Humedad { get; set; }
+        public bool BombaEncendida { get; set; }
+        public bool ModoManual { get; set; }
+        public DateTime FechaHora { get; set; } = DateTime.Now;
+    }
+
     public class ServicioPuerto
     {
         private SerialPort _serialPort;
-        public event Action<string> DatosRecibidos;
-        public bool PuertoAbierto => _serialPort?.IsOpen ?? false;
+        // Variable para guardar el último estado conocido
+        private DatosArduinoModel _ultimoEstado = new DatosArduinoModel();
 
-        // Variables de estado
-        private int _ultimaHumedad = 0;
-        private bool _ultimaBombaActiva = false;
-        private bool _ultimoModoManual = false; // ✅ Vital para el botón
-        private DateTime _ultimaLectura = DateTime.MinValue;
+        // Evento para notificar a quien escuche (opcional si usas polling)
+        public event Action<DatosArduinoModel> DatosRecibidos;
+
+        public bool PuertoAbierto => _serialPort?.IsOpen ?? false;
 
         public ServicioPuerto(string puerto = "COM3", int baudios = 9600)
         {
             try
             {
-                _serialPort = new SerialPort(puerto, baudios);
-                _serialPort.DataReceived += SerialDataReceived;
+                _serialPort = new SerialPort(puerto, baudios)
+                {
+                    ReadTimeout = 1000,
+                    WriteTimeout = 1000,
+                    DtrEnable = true,
+                    RtsEnable = true
+                };
                 _serialPort.Open();
+
+                // Hilo de lectura en segundo plano
+                Thread readThread = new Thread(LeerPuertoSerial);
+                readThread.IsBackground = true;
+                readThread.Start();
+
                 Console.WriteLine($"✅ Puerto {puerto} abierto correctamente.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error al abrir puerto: {ex.Message}");
+                Console.WriteLine($"❌ Error al abrir el puerto: {ex.Message}");
             }
         }
 
-        private void SerialDataReceived(object sender, SerialDataReceivedEventArgs e)
+        // Método para obtener el estado actual (usado por ArduinoController)
+        public DatosArduinoModel ObtenerUltimoEstado()
+        {
+            return _ultimoEstado;
+        }
+
+        private void LeerPuertoSerial()
+        {
+            while (_serialPort != null && _serialPort.IsOpen)
+            {
+                try
+                {
+                    string data = _serialPort.ReadLine().Trim();
+                    if (!string.IsNullOrEmpty(data) && data.Contains(","))
+                    {
+                        // Procesar datos: humedad,bomba,manual (ej: "45,0,1")
+                        var partes = data.Split(',');
+                        if (partes.Length >= 2 &&
+                            int.TryParse(partes[0], out int humedad) &&
+                            int.TryParse(partes[1], out int bomba))
+                        {
+                            bool manual = partes.Length > 2 && partes[2] == "1";
+
+                            // Actualizamos la variable local
+                            _ultimoEstado = new DatosArduinoModel
+                            {
+                                Humedad = humedad,
+                                BombaEncendida = bomba == 1,
+                                ModoManual = manual,
+                                FechaHora = DateTime.Now
+                            };
+
+                            // Notificamos eventos
+                            DatosRecibidos?.Invoke(_ultimoEstado);
+                        }
+                    }
+                }
+                catch { }
+            }
+        }
+
+        // ✅ MÉTODO RECUPERADO: Envío simple (sin esperar confirmación)
+        // Esto soluciona el error en RiegoController
+        public void EnviarComando(string comando)
         {
             try
             {
-                // Leemos lo que manda el Arduino (Ej: "45,1,1")
-                string data = _serialPort.ReadLine().Trim();
-
-                // Validamos formato: Humedad, Bomba, Manual
-                if (data.Contains(","))
+                if (PuertoAbierto)
                 {
-                    var partes = data.Split(',');
-                    if (partes.Length == 3 &&
-                        int.TryParse(partes[0], out int humedad) &&
-                        int.TryParse(partes[1], out int estadoBomba) &&
-                        int.TryParse(partes[2], out int modoManual))
-                    {
-                        _ultimaHumedad = humedad;
-                        _ultimaBombaActiva = (estadoBomba == 1);
-                        _ultimoModoManual = (modoManual == 1); // ✅ 1 = Manual Activado
-                        _ultimaLectura = DateTime.Now;
-
-                        // Notificar a quien esté escuchando (opcional)
-                        DatosRecibidos?.Invoke(data);
-                    }
+                    _serialPort.DiscardInBuffer();
+                    _serialPort.WriteLine(comando);
+                    Console.WriteLine($"📤 Comando enviado: {comando}");
                 }
             }
-            catch { /* Ignorar errores de lectura parcial */ }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error enviando comando: {ex.Message}");
+            }
         }
 
-        // Método para que el Controller pida los datos limpios
-        public (int Humedad, bool BombaActiva, bool ModoManual, DateTime FechaLectura) ObtenerUltimoEstado()
-        {
-            return (_ultimaHumedad, _ultimaBombaActiva, _ultimoModoManual, _ultimaLectura);
-        }
-
-        public void EnviarComando(string comando)
-        {
-            if (PuertoAbierto) _serialPort.WriteLine(comando);
-        }
-
-        public bool EnviarComandoConConfirmacion(string comando, int timeoutMs = 2000)
+        public bool EnviarComandoConConfirmacion(string comando, int timeoutMs = 3000) // Aumentado a 3 seg
         {
             try
             {
                 if (!PuertoAbierto) return false;
 
-                // Limpiar buffer antes de enviar
+                // 1. Limpiar buffers
                 _serialPort.DiscardInBuffer();
+                _serialPort.DiscardOutBuffer();
+
+                // 2. Enviar comando
+                Console.WriteLine($"📤 Enviando: {comando}");
                 _serialPort.WriteLine(comando);
 
-                var limite = DateTime.Now.AddMilliseconds(timeoutMs);
-                while (DateTime.Now < limite)
+                // 3. Esperar respuesta
+                var inicio = DateTime.Now;
+                while ((DateTime.Now - inicio).TotalMilliseconds < timeoutMs)
                 {
-                    if (_serialPort.BytesToRead > 0)
+                    try
                     {
-                        string resp = _serialPort.ReadLine().Trim();
-                        // El Arduino responde "OK:COMANDO"
-                        if (resp.Contains("OK") && resp.Contains(comando)) return true;
+                        if (_serialPort.BytesToRead > 0)
+                        {
+                            string respuesta = _serialPort.ReadExisting(); // Leemos TODO lo que haya
+                            Console.WriteLine($"📥 Recibido RAW: {respuesta}");
+
+                            // Buscamos "OK" en cualquier parte del texto recibido
+                            if (respuesta.IndexOf("OK", StringComparison.OrdinalIgnoreCase) >= 0)
+                            {
+                                return true; // ¡ÉXITO!
+                            }
+                        }
                     }
-                    Thread.Sleep(10);
+                    catch { }
+                    Thread.Sleep(50); // Pequeña pausa
                 }
+                return false;
             }
-            catch { }
-            return false;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error enviando comando: {ex.Message}");
+                return false;
+            }
         }
+
+        // Métodos asíncronos de ayuda
+        public async Task<bool> IniciarRiegoManualAsync() => await Task.Run(() => EnviarComandoConConfirmacion("MANUAL_ON"));
+        public async Task<bool> DetenerRiegoManualAsync() => await Task.Run(() => EnviarComandoConConfirmacion("MANUAL_OFF"));
+        public async Task<bool> ActivarModoAutomaticoAsync() => await Task.Run(() => EnviarComandoConConfirmacion("AUTO"));
 
         public void CerrarPuerto()
         {
-            if (PuertoAbierto) _serialPort.Close();
+            if (_serialPort != null && _serialPort.IsOpen)
+                _serialPort.Close();
         }
     }
 }
