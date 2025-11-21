@@ -12,7 +12,6 @@
 <PageTitle>Gráficos en Tiempo Real</PageTitle>
 
 <style>
-    /* Estilos Generales */
     .graficos-container {
         padding: 2rem;
         max-width: 1400px;
@@ -40,7 +39,6 @@
             transform: translateY(-2px);
         }
 
-    /* Grid de Gráficas */
     .charts-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -73,7 +71,6 @@
         font-style: italic;
     }
 
-    /* Caja del SVG */
     .chart-box {
         background: #f8fafc;
         border-radius: 15px;
@@ -84,7 +81,6 @@
         margin-bottom: 1rem;
     }
 
-    /* Líneas y Puntos */
     .line-humedad {
         fill: none;
         stroke: #10b981;
@@ -129,7 +125,6 @@
         font-family: monospace;
     }
 
-    /* Displays de Valor */
     .value-display {
         font-size: 1.8rem;
         font-weight: 900;
@@ -146,7 +141,6 @@
         border-color: #fecaca;
     }
 
-    /* Datos Extra Clima */
     .weather-details {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -167,7 +161,6 @@
         gap: 5px;
     }
 
-    /* Tabla Historial */
     .history-section {
         background: white;
         border-radius: 20px;
@@ -175,6 +168,7 @@
         box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     }
 
+    /* Header con Botón */
     .section-header {
         font-size: 1.2rem;
         font-weight: 800;
@@ -182,8 +176,27 @@
         margin-bottom: 1.5rem;
         display: flex;
         align-items: center;
-        gap: 10px;
+        justify-content: space-between;
     }
+
+    .btn-refresh-table {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        .btn-refresh-table:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
 
     .custom-table {
         width: 100%;
@@ -208,10 +221,6 @@
             font-weight: 500;
         }
 
-        .custom-table tr:last-child td {
-            border-bottom: none;
-        }
-
     .status-dot {
         height: 10px;
         width: 10px;
@@ -233,7 +242,6 @@
     <h1 style="text-align:center; color:#10b981; font-weight:900; margin-bottom:3rem;">ANÁLISIS EN TIEMPO REAL</h1>
 
     <div class="charts-grid">
-
         <div class="chart-card">
             <div>
                 <div class="chart-title">Humedad del Suelo</div>
@@ -275,7 +283,6 @@
                     </svg>
                 </div>
             </div>
-
             <div>
                 <div class="value-display value-temp">@ultimaTemperatura.ToString("0.0") °C</div>
                 <div class="weather-details">
@@ -288,7 +295,12 @@
 
     <div class="history-section">
         <div class="section-header">
-            <span>📋</span> Últimos Registros Guardados
+            <div>
+                <span>📋</span> Últimos 5 Riegos Registrados
+            </div>
+            <button class="btn-refresh-table" @onclick="CargarHistorial">
+                <span>🔄</span> Actualizar Tabla
+            </button>
         </div>
 
         <div style="overflow-x:auto;">
@@ -313,11 +325,12 @@
                                 <td>
                                     @if (item.Humedad < 30)
                                     {
-                                        <span style="color:#ef4444;"><span class="status-dot" style="background:#ef4444;"></span>Seco</span>
+                                        <span style="color:#ef4444;">Seco</span>
                                     }
                                     else
                                     {
-                                        <span style="color:#10b981;"><span class="status-dot" style="background:#10b981;"></span>Óptimo</span>
+
+                                        <span style="color:#10b981;">Óptimo</span>
                                     }
                                 </td>
                             </tr>
@@ -325,7 +338,7 @@
                     }
                     else
                     {
-                        <tr><td colspan="4" style="text-align:center; color:#94a3b8;">Cargando historial...</td></tr>
+                        <tr><td colspan="4" style="text-align:center; color:#94a3b8;">No hay datos recientes...</td></tr>
                     }
                 </tbody>
             </table>
@@ -334,58 +347,44 @@
 </div>
 
 @code {
-    // Configuración Gráfica
     private const int MAX_PUNTOS = 20;
     private Timer? _timer;
-
-    // Colas de Datos
     private Queue<double> colaHumedad = new();
     private Queue<double> colaTemp = new();
-
-    // SVG Paths
     private string pathHumedad = "";
     private string pathTemperatura = "";
     private List<(double X, double Y)> puntosHumedad = new();
     private List<(double X, double Y)> puntosTemperatura = new();
-
-    // Valores actuales
     private double ultimaHumedad = 0;
     private double ultimaTemperatura = 0;
-
-    // ✅ NUEVO: Datos extra
     private double humedadAire = 0;
     private double viento = 0;
     private List<HistorialRiegoModel> historialReciente = new();
 
     protected override async Task OnInitializedAsync()
     {
-        // Inicializar colas en 0
         for (int i = 0; i < MAX_PUNTOS; i++) { colaHumedad.Enqueue(0); colaTemp.Enqueue(0); }
-
-        // Cargar historial inicial
         await CargarHistorial();
-
-        // Timer
-        _timer = new Timer(2000); // Actualizar cada 2 seg
+        _timer = new Timer(2000);
         _timer.Elapsed += async (s, e) => await ActualizarDatos();
         _timer.AutoReset = true;
         _timer.Start();
     }
 
+    // ✅ Método que llama el botón
     private async Task CargarHistorial()
     {
         try
         {
             var todos = await HistorialService.ObtenerHistorialAsync();
-            // Tomar los últimos 5 registros
             historialReciente = todos.OrderByDescending(h => h.Fecha).Take(5).ToList();
+            await InvokeAsync(StateHasChanged);
         }
         catch { }
     }
 
     private async Task ActualizarDatos()
     {
-        // 1. Arduino
         try
         {
             var estado = await ArduinoService.ObtenerEstadoAsync();
@@ -393,7 +392,6 @@
         }
         catch { ultimaHumedad = 0; }
 
-        // 2. Clima Completo
         try
         {
             var clima = await ClimaService.ObtenerClimaActualAsync();
@@ -406,18 +404,13 @@
         }
         catch { }
 
-        // 3. Actualizar Colas
         colaHumedad.Enqueue(ultimaHumedad);
         if (colaHumedad.Count > MAX_PUNTOS) colaHumedad.Dequeue();
 
         colaTemp.Enqueue(ultimaTemperatura);
         if (colaTemp.Count > MAX_PUNTOS) colaTemp.Dequeue();
 
-        // 4. Recalcular y Refrescar Historial ocasionalmente
         CalcularGraficas();
-        // Solo recargar historial si la cola avanzó (simple optimización visual)
-        if (DateTime.Now.Second % 10 == 0) await CargarHistorial();
-
         await InvokeAsync(StateHasChanged);
     }
 
