@@ -19,55 +19,75 @@
     private bool bombaFueEncendida = false;
     private List<PlantaModel> misPlantas = new();
 
+    // ✅ VARIABLES ANTI-DUPLICADOS
+    private DateTime _ultimoGuardado = DateTime.MinValue;
+    private bool _estaGuardando = false; // Semáforo para evitar colisiones
+
     protected override async Task OnInitializedAsync()
     {
-        // Iniciar Timer Global de Monitoreo (cada 2 seg)
         _timerGlobal = new Timer(2000);
         _timerGlobal.Elapsed += async (s, e) => await MonitorearRiego();
         _timerGlobal.AutoReset = true;
         _timerGlobal.Start();
 
-        // Intentar cargar plantas al inicio
         await CargarPlantasCache();
     }
 
     private async Task CargarPlantasCache()
     {
-        try {
+        try
+        {
             var usuario = await AuthService.GetUsuarioActualAsync();
-            if (usuario != null) {
+            if (usuario != null)
+            {
                 var resultado = await ApiService.ObtenerPlantasPorUsuarioAsync(usuario.IdUsuario);
                 if (resultado != null) misPlantas = resultado;
             }
-        } catch { }
+        }
+        catch { }
     }
 
     private async Task MonitorearRiego()
     {
         try
         {
-            // 1. Consultar estado al Arduino
             var estado = await ArduinoService.ObtenerEstadoAsync();
-            
+
             if (estado != null)
             {
-                // 2. DETECCIÓN DE FLANCO DE SUBIDA (OFF -> ON)
-                // Si la bomba estaba apagada y ahora está encendida, es un NUEVO RIEGO
+                // DETECCIÓN: Si la bomba se enciende (OFF -> ON)
                 if (!bombaFueEncendida && estado.BombaEncendida)
                 {
-                    Console.WriteLine("🌊 [GLOBAL] Riego Detectado. Intentando guardar...");
-                    
-                    // Ejecutamos el guardado esperando a que termine para asegurar que no se pierda
-                    await RegistrarRiegoGlobal(estado.Humedad);
+                    // ✅ LÓGICA ROBUSTA ANTI-DUPLICADOS
+                    // 1. Verificamos si ya estamos guardando algo (_estaGuardando)
+                    // 2. Verificamos si pasaron al menos 60 segundos desde el último guardado
+                    double segundosDesdeUltimo = (DateTime.Now - _ultimoGuardado).TotalSeconds;
+
+                    if (!_estaGuardando && segundosDesdeUltimo > 60)
+                    {
+                        _estaGuardando = true; // 🔒 BLOQUEAMOS INMEDIATAMENTE
+
+                        Console.WriteLine("🌍 [GLOBAL] Riego Detectado. Iniciando proceso de guardado único...");
+
+                        // Ejecutamos el guardado
+                        await RegistrarRiegoGlobal(estado.Humedad);
+
+                        _ultimoGuardado = DateTime.Now; // Actualizamos la hora
+                        _estaGuardando = false; // 🔓 DESBLOQUEAMOS
+                    }
+                    else
+                    {
+                        // Console.WriteLine("⏳ Riego ignorado (Ya se está guardando o fue muy reciente).");
+                    }
                 }
 
-                // Actualizar el estado local para la siguiente comparación
+                // Actualizar estado anterior
                 bombaFueEncendida = estado.BombaEncendida;
             }
         }
-        catch (Exception ex) 
-        { 
-            Console.WriteLine($"[GLOBAL] Error monitoreo: {ex.Message}"); 
+        catch
+        {
+            _estaGuardando = false; // Liberar en caso de error
         }
     }
 
@@ -75,63 +95,47 @@
     {
         try
         {
-            // ✅ CORRECCIÓN: Si la lista de plantas está vacía, intentamos cargarla AHORA MISMO
-            if (misPlantas == null || !misPlantas.Any())
-            {
-                Console.WriteLine("⚠️ No hay plantas en caché. Intentando recargar...");
-                await CargarPlantasCache();
-            }
+            // Asegurar plantas
+            if (misPlantas == null || !misPlantas.Any()) await CargarPlantasCache();
 
-            // Determinar ID Planta
-            int idPlanta = 0;
-            if (misPlantas != null && misPlantas.Any())
-            {
-                idPlanta = misPlantas.First().IdPlanta;
-            }
-            else
-            {
-                // Si aún así no hay plantas, usamos un ID genérico o logueamos el error
-                // (Asegúrate de tener una planta en la BD o el registro fallará por FK)
-                Console.WriteLine("❌ ERROR CRÍTICO: No se encontró ninguna planta asociada al usuario. No se puede guardar el historial.");
-                // Intentamos guardar con 0 si tu BD lo permite, si no, retornamos
-                // return; 
-            }
+            int idPlanta = (misPlantas != null && misPlantas.Any()) ? misPlantas.First().IdPlanta : 0;
+            if (idPlanta == 0) return;
 
             // Obtener Clima
             float temp = 25.0f;
             float humAire = 50.0f;
             float viento = 0.0f;
-            try {
+            try
+            {
                 var clima = await ClimaService.ObtenerClimaActualAsync();
-                if (clima != null) { 
-                    temp = (float)clima.Temperatura; 
+                if (clima != null)
+                {
+                    temp = (float)clima.Temperatura;
                     humAire = (float)clima.Humedad;
                     viento = (float)clima.VelocidadViento;
                 }
-            } catch {}
+            }
+            catch { }
 
-            // ✅ 1. Guardar en Historial_Riego
-            var historial = new HistorialRiegoModel {
+            // 1. Guardar Historial
+            var historial = new HistorialRiegoModel
+            {
                 Fecha = DateTime.Now,
                 Humedad = humedadSuelo,
                 Temperatura = temp,
-                IdPlanta = idPlanta // Usamos el ID recuperado
+                IdPlanta = idPlanta
             };
-            
-            var exitoHistorial = await HistorialService.GuardarRiegoAsync(historial);
-            if(exitoHistorial) Console.WriteLine("✅ [BD] Historial Guardado");
-            else Console.WriteLine("❌ [BD] Falló guardado de Historial");
+            await HistorialService.GuardarRiegoAsync(historial);
 
-            // ✅ 2. Guardar en Temperatura
+            // 2. Guardar Tablas Auxiliares
             await ApiService.GuardarTemperaturaAsync(temp, temp, "Riego Automático Global", idPlanta);
-
-            // ✅ 3. Guardar en Registro Climático
             await ApiService.GuardarRegistroClimaticoAsync(humedadSuelo, humAire, temp, viento, idPlanta);
 
+            Console.WriteLine("✅ [BD] Registro guardado correctamente.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ [GLOBAL] Excepción al guardar: {ex.Message}");
+            Console.WriteLine($"❌ [GLOBAL] Error: {ex.Message}");
         }
     }
 
