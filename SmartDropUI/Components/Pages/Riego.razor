@@ -58,6 +58,26 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.03);
     }
 
+    /* Selector de Planta */
+    .plant-selector {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: #f0fdf4;
+        border-radius: 10px;
+        text-align: center;
+        border: 1px solid #bbf7d0;
+    }
+
+    .form-select {
+        padding: 0.8rem;
+        border-radius: 8px;
+        border: 2px solid #10b981;
+        width: 100%;
+        max-width: 400px;
+        font-size: 1rem;
+        outline: none;
+    }
+
     /* Tarjetas */
     .cards-row {
         display: grid;
@@ -139,6 +159,10 @@
         transition: 0.2s;
     }
 
+        .btn-riego:hover {
+            transform: translateY(-2px);
+        }
+
     .btn-iniciar {
         background-color: #10b981;
         box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
@@ -174,36 +198,6 @@
     .icon-inactive {
         color: #ef4444;
     }
-
-    .plant-selector {
-        margin-bottom: 2rem;
-        padding: 1rem;
-        background: #f0fdf4;
-        border-radius: 10px;
-        text-align: center;
-        border: 1px solid #bbf7d0;
-    }
-
-    .form-select {
-        padding: 0.8rem;
-        border-radius: 8px;
-        border: 2px solid #10b981;
-        width: 100%;
-        max-width: 400px;
-        font-size: 1rem;
-        outline: none;
-    }
-
-    /* Error Box */
-    .error-box {
-        background: #fee2e2;
-        color: #991b1b;
-        padding: 1rem;
-        border-radius: 10px;
-        text-align: center;
-        margin-bottom: 1rem;
-        border: 1px solid #fecaca;
-    }
 </style>
 
 <div class="riego-container">
@@ -211,27 +205,23 @@
 
     <div class="header-title"><span>💧</span> CONTROL DE RIEGO</div>
 
-    @if (!string.IsNullOrEmpty(mensajeError))
-    {
-        <div class="error-box">
-            ⚠️ <strong>Error al cargar:</strong> @mensajeError
-        </div>
-    }
-
     <div class="plant-selector">
         <label style="font-weight:700; color:#10b981; margin-right:10px; display:block; margin-bottom:10px;">
             🌿 SELECCIONA LA PLANTA A REGAR:
         </label>
         <select class="form-select" @bind="plantaSeleccionadaId">
             <option value="0">-- Seleccione una planta --</option>
-            @if (misPlantas != null)
+            @foreach (var planta in misPlantas)
             {
-                @foreach (var planta in misPlantas)
-                {
-                    <option value="@planta.IdPlanta">@planta.NombrePlanta</option>
-                }
+                <option value="@planta.IdPlanta">@planta.NombrePlanta</option>
             }
         </select>
+        @if (plantaSeleccionadaId == 0)
+        {
+            <div style="color:#ef4444; font-size:0.9rem; margin-top:10px; font-weight:600;">
+                ⚠️ Debes seleccionar una planta para activar el riego.
+            </div>
+        }
     </div>
 
     <div class="cards-row">
@@ -298,39 +288,33 @@
 </div>
 
 @code {
+    // VARIABLES DE ESTADO
     private bool riegoManualActivo = false;
     private bool bombaActiva = false;
     private int humedadActual = 0;
     private bool procesando = false;
-    private string mensajeError = ""; // Para depurar pantalla blanca
     private Timer? _timer;
 
+    // VARIABLES DE PLANTAS
     private List<PlantaModel> misPlantas = new();
     private int plantaSeleccionadaId = 0;
 
+    // INICIALIZACIÓN
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            // Verificar si los servicios están inyectados (evitar null reference)
-            if (ArduinoService == null) throw new Exception("El servicio ArduinoService no se pudo cargar.");
-            if (AuthService == null) throw new Exception("El servicio AuthService no se pudo cargar.");
+        ArduinoService.DatosRecibidos += OnDatosArduinoRecibidos;
 
-            ArduinoService.DatosRecibidos += OnDatosArduinoRecibidos;
+        // 1. Cargar plantas del usuario
+        await CargarMisPlantas();
 
-            await CargarMisPlantas();
-            await ActualizarEstado();
+        // 2. Estado inicial
+        await ActualizarEstado();
 
-            _timer = new Timer(1000);
-            _timer.Elapsed += async (s, e) => await ActualizarEstado();
-            _timer.AutoReset = true;
-            _timer.Start();
-        }
-        catch (Exception ex)
-        {
-            mensajeError = ex.Message; // Mostrar error en pantalla en vez de pantalla blanca
-            Console.WriteLine($"ERROR CRÍTICO EN RIEGO: {ex}");
-        }
+        // 3. Iniciar Timer
+        _timer = new Timer(1000);
+        _timer.Elapsed += async (s, e) => await ActualizarEstado();
+        _timer.AutoReset = true;
+        _timer.Start();
     }
 
     private async Task CargarMisPlantas()
@@ -356,12 +340,16 @@
 
     private void VolverAtras() => Navigation.NavigateTo("/dashboard");
 
+    // LÓGICA DE DATOS ARDUINO
     private void OnDatosArduinoRecibidos(DatosArduinoModel datos)
     {
         if (!procesando)
         {
+            // Detectar encendido de bomba (OFF -> ON)
             if (!bombaActiva && datos.BombaEncendida)
             {
+                Console.WriteLine("🌊 Riego Detectado. Guardando en BD...");
+                // Llamada al método que guarda en las 3 tablas
                 _ = RegistrarHistorialYTemperatura(datos.Humedad);
             }
             ActualizarVariablesLocales(datos.Humedad, datos.BombaEncendida, datos.ModoManual);
@@ -398,6 +386,7 @@
         if (cambio) StateHasChanged();
     }
 
+    // ACCIONES MANUALES
     private async Task IniciarRiegoManual()
     {
         if (plantaSeleccionadaId == 0) return;
@@ -427,49 +416,68 @@
         }
         finally { procesando = false; StateHasChanged(); }
     }
-    // ...
+
+    // ✅ MÉTODO UNIFICADO DE GUARDADO EN 3 TABLAS
     private async Task RegistrarHistorialYTemperatura(int humedadDelMomento)
     {
-        // Obtener ID de planta seleccionada o la primera disponible
+        // Determinar ID de la planta
         int idPlantaAGuardar = plantaSeleccionadaId;
         if (idPlantaAGuardar == 0 && misPlantas.Any()) idPlantaAGuardar = misPlantas.First().IdPlanta;
 
-        float temperaturaCapturada = 25.0f;
-        try
-        {
-            var clima = await _climaService.ObtenerClimaActualAsync();
-            if (clima != null) temperaturaCapturada = (float)clima.Temperatura;
-        }
-        catch { }
+        // Variables climáticas por defecto
+        float tempAmbiente = 25.0f;
+        float humAmbiente = 50.0f;
+        float viento = 0.0f;
 
         try
         {
-            // 1. Guardar en Historial de Riego CON EL ID
+            // 1. Obtener datos reales del API de clima (OpenWeather)
+            try
+            {
+                var clima = await _climaService.ObtenerClimaActualAsync();
+                if (clima != null)
+                {
+                    tempAmbiente = (float)clima.Temperatura;
+                    humAmbiente = (float)clima.Humedad;
+                    viento = (float)clima.VelocidadViento;
+                }
+            }
+            catch { }
+
+            // 2. Guardar en HISTORIAL_RIEGO
             var historial = new HistorialRiegoModel
             {
                 Fecha = DateTime.Now,
                 Humedad = humedadDelMomento,
-                Temperatura = temperaturaCapturada,
-                IdPlanta = idPlantaAGuardar // ✅ AQUÍ ASIGNAMOS EL ID
+                Temperatura = tempAmbiente,
+                IdPlanta = idPlantaAGuardar
             };
             await HistorialService.GuardarRiegoAsync(historial);
 
-            // 2. Guardar en Tabla Temperatura
+            // 3. Guardar en TEMPERATURA
             await ApiService.GuardarTemperaturaAsync(
-                temperaturaCapturada,
-                temperaturaCapturada,
-                $"Riego H:{humedadDelMomento}%",
+                tempAmbiente,
+                tempAmbiente, // Asumimos misma temp suelo si no hay sensor
+                $"Riego registrado H:{humedadDelMomento}%",
                 idPlantaAGuardar
             );
 
-            Console.WriteLine($"✅ Riego guardado para planta ID: {idPlantaAGuardar}");
+            // 4. Guardar en REGISTRO_CLIMATICO
+            await ApiService.GuardarRegistroClimaticoAsync(
+                humedadDelMomento, // Humedad Suelo
+                humAmbiente,       // Humedad Aire
+                tempAmbiente,      // Temperatura Aire
+                viento,            // Viento
+                idPlantaAGuardar   // ID Planta
+            );
+
+            Console.WriteLine($"✅ Riego, Clima y Temperatura registrados para Planta ID: {idPlantaAGuardar}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Error guardando: {ex.Message}");
+            Console.WriteLine($"❌ Error guardando datos: {ex.Message}");
         }
     }
-    // ...
 
     public void Dispose()
     {

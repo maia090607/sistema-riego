@@ -15,62 +15,50 @@ namespace DAL
                 try
                 {
                     conn.Open();
-
-                    // ✅ Usar el procedimiento almacenado
                     string query = @"
-                BEGIN 
-                    PKG_REGISTRO_CLIMATICO.SP_INSERTAR_REGISTRO(
-                        :p_humedad_suelo,
-                        :p_humedad_ambiente,
-                        :p_temperatura_amb,
-                        :p_viento,
-                        :p_id_generado,
-                        :p_estado,
-                        :p_mensaje
-                    );
-                END;";
+            BEGIN 
+                PKG_REGISTRO_CLIMATICO.SP_INSERTAR_REGISTRO(
+                    :p_humedad_suelo,
+                    :p_humedad_ambiente,
+                    :p_temperatura_amb,
+                    :p_viento,
+                    :p_id_planta, -- ✅ Nuevo parámetro
+                    :p_id_generado,
+                    :p_estado,
+                    :p_mensaje
+                );
+            END;";
 
                     using (var cmd = new OracleCommand(query, conn))
                     {
-                        cmd.CommandType = CommandType.Text;
-
-                        // Parámetros de entrada
                         cmd.Parameters.Add(":p_humedad_suelo", OracleDbType.Double).Value = registro.Humedad_Suelo;
                         cmd.Parameters.Add(":p_humedad_ambiente", OracleDbType.Double).Value = registro.Humedad_Ambiente;
                         cmd.Parameters.Add(":p_temperatura_amb", OracleDbType.Double).Value = registro.Temperatura_Ambiente;
                         cmd.Parameters.Add(":p_viento", OracleDbType.Double).Value = registro.Viento;
 
-                        // Parámetros de salida
-                        var paramId = cmd.Parameters.Add(":p_id_generado", OracleDbType.Int32);
-                        paramId.Direction = ParameterDirection.Output;
+                        // ✅ Enviar ID Planta
+                        if (registro.IdPlanta > 0)
+                            cmd.Parameters.Add(":p_id_planta", OracleDbType.Int32).Value = registro.IdPlanta;
+                        else
+                            cmd.Parameters.Add(":p_id_planta", OracleDbType.Int32).Value = DBNull.Value;
 
-                        var paramEstado = cmd.Parameters.Add(":p_estado", OracleDbType.Int32);
-                        paramEstado.Direction = ParameterDirection.Output;
-
-                        var paramMensaje = cmd.Parameters.Add(":p_mensaje", OracleDbType.Varchar2, 200);
-                        paramMensaje.Direction = ParameterDirection.Output;
+                        // Salidas
+                        var paramId = cmd.Parameters.Add(":p_id_generado", OracleDbType.Int32); paramId.Direction = ParameterDirection.Output;
+                        var paramEstado = cmd.Parameters.Add(":p_estado", OracleDbType.Int32); paramEstado.Direction = ParameterDirection.Output;
+                        var paramMensaje = cmd.Parameters.Add(":p_mensaje", OracleDbType.Varchar2, 200); paramMensaje.Direction = ParameterDirection.Output;
 
                         cmd.ExecuteNonQuery();
 
-                        // ✅ Obtener valores de salida
                         registro.IdRegistro = Convert.ToInt32(paramId.Value.ToString());
                         int estado = Convert.ToInt32(paramEstado.Value.ToString());
                         string mensaje = paramMensaje.Value.ToString();
 
-                        if (estado == 1)
-                        {
-                            return new Response<RegistroClimatico>(true, mensaje, registro, null);
-                        }
-                        else
-                        {
-                            return new Response<RegistroClimatico>(false, mensaje, null, null);
-                        }
+                        return new Response<RegistroClimatico>(estado == 1, mensaje, registro, null);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"❌ [CLIMA] Error: {ex}");
-                    return new Response<RegistroClimatico>(false, $"Error general: {ex.Message}", null, null);
+                    return new Response<RegistroClimatico>(false, $"Error: {ex.Message}", null, null);
                 }
             }
         }

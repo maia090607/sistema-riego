@@ -8,17 +8,16 @@ namespace RiegoAPI.DTO.Mappers
 {
     public class ClimaMapper
     {
-        /// Convierte de RegistroClimaticoRequestDTO a RegistroClimatico (Entity)
         public static RegistroClimatico ToEntity(RegistroClimaticoRequestDTO dto)
         {
             if (dto == null) return null;
-
             return new RegistroClimatico
             {
                 Humedad_Suelo = dto.HumedadSuelo,
                 Humedad_Ambiente = dto.HumedadAmbiente,
                 Temperatura_Ambiente = dto.TemperaturaAmbiente,
                 Viento = dto.Viento,
+                IdPlanta = dto.IdPlanta, // ✅ Mapear ID
                 Fecha = DateTime.Now
             };
         }

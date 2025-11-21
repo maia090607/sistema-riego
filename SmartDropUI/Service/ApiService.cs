@@ -132,12 +132,30 @@ namespace SmartDropUI.Services
             }
         }
 
+        public async Task<bool> GuardarRegistroClimaticoAsync(float humSuelo, float humAmbiente, float tempAmbiente, float viento, int idPlanta)
+        {
+            try
+            {
+                var datos = new
+                {
+                    HumedadSuelo = humSuelo,
+                    HumedadAmbiente = humAmbiente,
+                    TemperaturaAmbiente = tempAmbiente,
+                    Viento = viento,
+                    IdPlanta = idPlanta // ✅ Enviamos la planta
+                };
 
-
+                var response = await _httpClient.PostAsJsonAsync("/api/clima", datos);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error guardando registro climático: {ex.Message}");
+                return false;
+            }
+        }
 
     }
-
-
 
     // Clase auxiliar para mapear la respuesta de la API
     public class ApiResponse<T>

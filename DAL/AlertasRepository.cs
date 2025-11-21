@@ -2,207 +2,225 @@
 using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
+using System.Data;
 
 namespace DAL
 {
     public class AlertasRepository : BaseRepository
     {
-
-        // ✅ Insertar nueva alerta
+        // ================================================================
+        // MÉTODO AGREGAR (USANDO STORED PROCEDURE)
+        // ================================================================
         public Response<Alertas> Agregar(Alertas entidad)
         {
-            using (var connection = new OracleConnection(_connectionString))
-            {
-                string query = @"
-                    INSERT INTO HISTORIAL_ALERTAS
-                    (ID_ALERTA, FECHA_HORA, TIPO_ALERTA, DESCRIPCION, NIVEL_CRITICO, ESTADO)
-                    VALUES (:Id, :FechaHora, :TipoAlerta, :Descripcion, :NivelCritico, :Estado)";
+            Response<Alertas> response = new Response<Alertas>();
 
-                using (var cmd = new OracleCommand(query, connection))
+            using (var connection = CrearConexion())
+            {
+                try
                 {
-                    cmd.Parameters.Add(":Id", OracleDbType.Int32).Value = entidad.IdAlerta;
-                    cmd.Parameters.Add(":FechaHora", OracleDbType.Date).Value = entidad.FechaHora;
-                    cmd.Parameters.Add(":TipoAlerta", OracleDbType.Varchar2).Value = entidad.TipoAlerta;
-                    cmd.Parameters.Add(":Descripcion", OracleDbType.Varchar2).Value = entidad.Descripcion ?? (object)DBNull.Value;
-                    cmd.Parameters.Add(":NivelCritico", OracleDbType.Varchar2).Value = entidad.NivelCritico ?? (object)DBNull.Value;
-                    cmd.Parameters.Add(":Estado", OracleDbType.Int32).Value = entidad.Estado ? 1 : 0;
+                    connection.Open();
+                    string query = @"
+                    BEGIN 
+                        PKG_HISTORIAL_ALERTAS.SP_INSERTAR_ALERTA(
+                            :p_fecha_hora,
+                            :p_tipo_alerta,
+                            :p_descripcion,
+                            :p_nivel_critico,
+                            :p_estado,
+                            :p_id_generado,
+                            :p_resultado,
+                            :p_mensaje
+                        );
+                    END;";
 
-                    try
+                    using (var cmd = new OracleCommand(query, connection))
                     {
-                        connection.Open();
-                        int filas = cmd.ExecuteNonQuery();
-                        return filas > 0
-                            ? new Response<Alertas>(true, "Alerta registrada correctamente.", entidad, null)
-                            : new Response<Alertas>(false, "No se insertó ningún registro.", null, null);
-                    }
-                    catch (Exception ex)
-                    {
-                        return new Response<Alertas>(false, "Error al guardar alerta: " + ex.Message, null, null);
-                    }
-                }
-            }
-        }
-        public Response<Alertas> Actualizar(Alertas entidad)
-        {
-            string query = @"
-                UPDATE HISTORIAL_ALERTAS
-                SET FECHA_HORA = :FechaHora,
-                    TIPO_ALERTA = :TipoAlerta,
-                    DESCRIPCION = :Descripcion,
-                    NIVEL_CRITICO = :NivelCritico,
-                    ESTADO = :Estado
-                WHERE ID_ALERTA = :Id";
+                        cmd.CommandType = CommandType.Text;
 
-            try
-            {
-                using (var conexion = CrearConexion())
-                using (var comando = new OracleCommand(query, conexion))
-                {
-                    comando.Parameters.Add(":FechaHora", OracleDbType.Date).Value = entidad.FechaHora;
-                    comando.Parameters.Add(":TipoAlerta", OracleDbType.Varchar2).Value = entidad.TipoAlerta;
-                    comando.Parameters.Add(":Descripcion", OracleDbType.Varchar2).Value = entidad.Descripcion ?? (object)DBNull.Value;
-                    comando.Parameters.Add(":NivelCritico", OracleDbType.Varchar2).Value = entidad.NivelCritico ?? (object)DBNull.Value;
-                    comando.Parameters.Add(":Estado", OracleDbType.Int32).Value = entidad.Estado ? 1 : 0;
-                    comando.Parameters.Add(":Id", OracleDbType.Int32).Value = entidad.IdAlerta;
+                        // Parámetros de entrada
+                        cmd.Parameters.Add(":p_fecha_hora", OracleDbType.Date).Value = entidad.FechaHora;
+                        cmd.Parameters.Add(":p_tipo_alerta", OracleDbType.Varchar2).Value = entidad.TipoAlerta;
+                        cmd.Parameters.Add(":p_descripcion", OracleDbType.Varchar2).Value = entidad.Descripcion ?? "";
+                        cmd.Parameters.Add(":p_nivel_critico", OracleDbType.Varchar2).Value = entidad.NivelCritico ?? "Bajo";
+                        cmd.Parameters.Add(":p_estado", OracleDbType.Int32).Value = entidad.Estado ? 1 : 0;
 
-                    conexion.Open();
-                    int filasAfectadas = comando.ExecuteNonQuery();
+                        // Parámetros de Salida
+                        var paramId = cmd.Parameters.Add(":p_id_generado", OracleDbType.Int32);
+                        paramId.Direction = ParameterDirection.Output;
 
-                    if (filasAfectadas > 0)
-                    {
-                        return new Response<Alertas>(true, "Alerta actualizada correctamente.", entidad, null);
-                    }
-                    else
-                    {
-                        return new Response<Alertas>(false, "No se encontró ninguna alerta con el ID especificado.", null, null);
-                    }
-                }
-            }
-            catch (OracleException ex)
-            {
-                return new Response<Alertas>(false, $"Error en Oracle: {ex.Message}", null, null);
-            }
-            catch (Exception ex)
-            {
-                return new Response<Alertas>(false, $"Error general: {ex.Message}", null, null);
-            }
-        }
+                        var paramResultado = cmd.Parameters.Add(":p_resultado", OracleDbType.Int32);
+                        paramResultado.Direction = ParameterDirection.Output;
 
-        // ✅ Eliminar alerta
-        public Response<Alertas> Eliminar(int id)
-        {
-            string query = "DELETE FROM HISTORIAL_ALERTAS WHERE ID_ALERTA = :id";
+                        var paramMensaje = cmd.Parameters.Add(":p_mensaje", OracleDbType.Varchar2, 200);
+                        paramMensaje.Direction = ParameterDirection.Output;
 
-            try
-            {
-                using (var conexion = CrearConexion())
-                using (var comando = new OracleCommand(query, conexion))
-                {
-                    comando.Parameters.Add(new OracleParameter(":id", id));
-                    conexion.Open();
+                        cmd.ExecuteNonQuery();
 
-                    int filasAfectadas = comando.ExecuteNonQuery();
+                        // Leer resultados
+                        // Validar si los valores de salida no son nulos
+                        int resultado = paramResultado.Value != DBNull.Value ? Convert.ToInt32(paramResultado.Value.ToString()) : 0;
+                        string mensaje = paramMensaje.Value != DBNull.Value ? paramMensaje.Value.ToString() : "Error desconocido";
 
-                    return filasAfectadas > 0
-                        ? new Response<Alertas>(true, "Alerta eliminada correctamente.", null, null)
-                        : new Response<Alertas>(false, "No se encontró ninguna alerta con el ID especificado.", null, null);
-                }
-            }
-            catch (OracleException ex)
-            {
-                return new Response<Alertas>(false, $"Error en Oracle: {ex.Message}", null, null);
-            }
-            catch (Exception ex)
-            {
-                return new Response<Alertas>(false, $"Error general: {ex.Message}", null, null);
-            }
-        }
-
-        // ✅ Obtener por ID (usando Mapear)
-        public Response<Alertas> ObtenerPorId(int id)
-        {
-            string query = @"
-                SELECT ID_ALERTA, FECHA_HORA, TIPO_ALERTA, DESCRIPCION, NIVEL_CRITICO, ESTADO 
-                FROM HISTORIAL_ALERTAS 
-                WHERE ID_ALERTA = :id";
-
-            try
-            {
-                using (var conexion = CrearConexion())
-                using (var comando = new OracleCommand(query, conexion))
-                {
-                    comando.Parameters.Add(new OracleParameter("id", id));
-                    conexion.Open();
-
-                    using (var reader = comando.ExecuteReader())
-                    {
-                        if (reader.Read())
-                            return new Response<Alertas>(true, "Alerta encontrada correctamente.", Mapear(reader), null);
+                        if (resultado == 1)
+                        {
+                            if (paramId.Value != DBNull.Value)
+                            {
+                                entidad.IdAlerta = Convert.ToInt32(paramId.Value.ToString());
+                            }
+                            return new Response<Alertas>(true, mensaje, entidad, null);
+                        }
                         else
-                            return new Response<Alertas>(false, "No se encontró la alerta con el ID especificado.", null, null);
+                        {
+                            return new Response<Alertas>(false, mensaje, null, null);
+                        }
                     }
                 }
-            }
-            catch (OracleException ex)
-            {
-                return new Response<Alertas>(false, $"Error Oracle: {ex.Message}", null, null);
-            }
-            catch (Exception ex)
-            {
-                return new Response<Alertas>(false, $"Error general: {ex.Message}", null, null);
+                catch (Exception ex)
+                {
+                    return new Response<Alertas>(false, "Error DAL: " + ex.Message, null, null);
+                }
             }
         }
 
-        // ✅ Mostrar todas (usando Mapear)
+        // ================================================================
+        // MÉTODO MOSTRAR TODOS
+        // ================================================================
         public Response<Alertas> MostrarTodos()
         {
             try
             {
                 List<Alertas> lista = new List<Alertas>();
-                string query = @"
-            SELECT ID_ALERTA, FECHA_HORA, TIPO_ALERTA, DESCRIPCION, NIVEL_CRITICO, ESTADO
-            FROM HISTORIAL_ALERTAS
-            ORDER BY FECHA_HORA DESC";
+                string query = "SELECT * FROM Historial_Alertas ORDER BY fecha_hora DESC";
 
-                using (var conexion = CrearConexion())
-                using (var cmd = new OracleCommand(query, conexion))
+                using (var connection = CrearConexion())
+                using (var cmd = new OracleCommand(query, connection))
                 {
-                    conexion.Open();
+                    connection.Open();
                     using (var reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
+                        {
                             lista.Add(Mapear(reader));
+                        }
                     }
-
-                    string mensaje = lista.Count > 0
-                        ? $"✅ Se encontraron {lista.Count} alertas registradas."
-                        : "⚠️ No hay alertas registradas.";
-
-                    return new Response<Alertas>(true, mensaje, null, lista);
                 }
-            }
-            catch (OracleException ex)
-            {
-                return new Response<Alertas>(false, $"Error de base de datos:\n{ex.Message}", null, null);
+                return new Response<Alertas>(true, $"Se encontraron {lista.Count} alertas.", null, lista);
             }
             catch (Exception ex)
             {
-                return new Response<Alertas>(false, $"Error al obtener alertas:\n{ex.Message}", null, null);
+                return new Response<Alertas>(false, "Error al listar: " + ex.Message, null, null);
             }
         }
 
+        // ================================================================
+        // MÉTODO ACTUALIZAR
+        // ================================================================
+        public Response<Alertas> Actualizar(Alertas entidad)
+        {
+            try
+            {
+                using (var connection = CrearConexion())
+                {
+                    connection.Open();
+                    string query = @"UPDATE Historial_Alertas 
+                                     SET fecha_hora = :fecha, 
+                                         tipo_alerta = :tipo, 
+                                         descripcion = :descrip, 
+                                         nivel_critico = :nivel, 
+                                         estado = :est 
+                                     WHERE id_alerta = :id";
+
+                    using (var cmd = new OracleCommand(query, connection))
+                    {
+                        cmd.Parameters.Add(":fecha", OracleDbType.Date).Value = entidad.FechaHora;
+                        cmd.Parameters.Add(":tipo", OracleDbType.Varchar2).Value = entidad.TipoAlerta;
+                        cmd.Parameters.Add(":descrip", OracleDbType.Varchar2).Value = entidad.Descripcion ?? "";
+                        cmd.Parameters.Add(":nivel", OracleDbType.Varchar2).Value = entidad.NivelCritico ?? "Bajo";
+                        cmd.Parameters.Add(":est", OracleDbType.Int32).Value = entidad.Estado ? 1 : 0;
+                        cmd.Parameters.Add(":id", OracleDbType.Int32).Value = entidad.IdAlerta;
+
+                        int filas = cmd.ExecuteNonQuery();
+                        return new Response<Alertas>(filas > 0, filas > 0 ? "Actualizado" : "No encontrado", entidad, null);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Response<Alertas>(false, "Error al actualizar: " + ex.Message, null, null);
+            }
+        }
+
+        // ================================================================
+        // MÉTODO ELIMINAR
+        // ================================================================
+        public Response<Alertas> Eliminar(int id)
+        {
+            try
+            {
+                using (var connection = CrearConexion())
+                {
+                    connection.Open();
+                    string query = "DELETE FROM Historial_Alertas WHERE id_alerta = :id";
+                    using (var cmd = new OracleCommand(query, connection))
+                    {
+                        cmd.Parameters.Add(":id", OracleDbType.Int32).Value = id;
+                        int filas = cmd.ExecuteNonQuery();
+                        return new Response<Alertas>(filas > 0, filas > 0 ? "Eliminado" : "No encontrado", null, null);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Response<Alertas>(false, "Error al eliminar: " + ex.Message, null, null);
+            }
+        }
+
+        // ================================================================
+        // MÉTODO OBTENER POR ID
+        // ================================================================
+        public Response<Alertas> ObtenerPorId(int id)
+        {
+            try
+            {
+                using (var connection = CrearConexion())
+                {
+                    connection.Open();
+                    string query = "SELECT * FROM Historial_Alertas WHERE id_alerta = :id";
+                    using (var cmd = new OracleCommand(query, connection))
+                    {
+                        cmd.Parameters.Add(":id", OracleDbType.Int32).Value = id;
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return new Response<Alertas>(true, "Encontrado", Mapear(reader), null);
+                            }
+                            return new Response<Alertas>(false, "No encontrado", null, null);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Response<Alertas>(false, "Error al buscar: " + ex.Message, null, null);
+            }
+        }
+
+        // ================================================================
+        // MÉTODO AUXILIAR DE MAPEO
+        // ================================================================
         private Alertas Mapear(OracleDataReader reader)
         {
             return new Alertas
             {
-                IdAlerta = reader["ID_ALERTA"] != DBNull.Value ? Convert.ToInt32(reader["ID_ALERTA"]) : 0,
-                FechaHora = reader["FECHA_HORA"] != DBNull.Value ? Convert.ToDateTime(reader["FECHA_HORA"]) : DateTime.MinValue,
-                TipoAlerta = reader["TIPO_ALERTA"]?.ToString(),
-                Descripcion = reader["DESCRIPCION"]?.ToString(),
-                NivelCritico = reader["NIVEL_CRITICO"]?.ToString(),
-                Estado = reader["ESTADO"] != DBNull.Value ? Convert.ToInt32(reader["ESTADO"]) == 1 : false
+                IdAlerta = Convert.ToInt32(reader["ID_ALERTA"]),
+                FechaHora = Convert.ToDateTime(reader["FECHA_HORA"]),
+                TipoAlerta = reader["TIPO_ALERTA"].ToString(),
+                Descripcion = reader["DESCRIPCION"] != DBNull.Value ? reader["DESCRIPCION"].ToString() : "",
+                NivelCritico = reader["NIVEL_CRITICO"] != DBNull.Value ? reader["NIVEL_CRITICO"].ToString() : "",
+                Estado = Convert.ToInt32(reader["ESTADO"]) == 1
             };
         }
-
     }
 }

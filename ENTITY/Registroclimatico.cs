@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Entity
 {
@@ -14,6 +10,6 @@ namespace Entity
         public float Humedad_Ambiente { get; set; }
         public float Temperatura_Ambiente { get; set; }
         public float Viento { get; set; }
+        public int IdPlanta { get; set; } // ✅ Nuevo Campo
     }
 }
-
