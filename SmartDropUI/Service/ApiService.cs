@@ -103,6 +103,29 @@ namespace SmartDropUI.Services
         }
 
 
+        public async Task<bool> GuardarTemperaturaAsync(float tempAmbiente, float tempSuelo, string observacion)
+        {
+            try
+            {
+                var datos = new
+                {
+                    TempAmbiente = tempAmbiente,
+                    TempSuelo = tempSuelo,
+                    Observacion = observacion
+                };
+
+                var response = await _httpClient.PostAsJsonAsync("/api/temperatura", datos);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error guardando temperatura: {ex.Message}");
+                return false;
+            }
+        }
+
+
+
 
     }
 

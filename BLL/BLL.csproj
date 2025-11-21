@@ -91,6 +91,7 @@
     <Compile Include="ServiciosHumedad.cs" />
     <Compile Include="ServiciosPlanta.cs" />
     <Compile Include="ServiciosUsuario.cs" />
+    <Compile Include="ServicioTemperatura.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DAL\DAL.csproj">

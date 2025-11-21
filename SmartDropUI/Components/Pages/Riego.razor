@@ -4,6 +4,7 @@
 @using System.Timers
 @inject ArduinoService ArduinoService
 @inject HistorialRiegoService HistorialService
+@inject ApiService ApiService  // <--- INYECTAMOS APISERVICE
 @inject ClimaService _climaService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
@@ -12,170 +13,160 @@
 <PageTitle>Control de Riego</PageTitle>
 
 <style>
-    /* Estilos generales */
-    .riego-container {
-        padding: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
-        font-family: 'Segoe UI', sans-serif;
+/* Estilos generales */
+.riego-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.btn-back {
+    background-color: #6b7280;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+    transition: 0.2s;
+}
+
+    .btn-back:hover {
+        background-color: #4b5563;
+        transform: translateX(-3px);
     }
 
-    /* Botón Atrás */
-    .btn-back {
-        background-color: #6b7280;
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 700;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 1.5rem;
-        transition: 0.2s;
-    }
+.header-title {
+    color: #10b981;
+    font-weight: 900;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2rem;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
 
-        .btn-back:hover {
-            background-color: #4b5563;
-            transform: translateX(-3px);
-        }
+.cards-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
 
-    /* Título */
-    .header-title {
-        color: #10b981;
-        font-weight: 900;
-        font-size: 1.8rem;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 2rem;
-        background: white;
-        padding: 1.5rem;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    }
+.status-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    border-left: 6px solid;
+}
 
-    /* Tarjetas */
-    .cards-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }
+.card-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    display: block;
+}
 
-    .status-card {
-        background: white;
-        border-radius: 20px;
-        padding: 2.5rem;
-        text-align: center;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-        border-left: 6px solid;
-    }
+.card-label {
+    color: #6b7280;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
 
-    .card-icon {
-        font-size: 3.5rem;
-        margin-bottom: 1rem;
-        display: block;
-    }
+.card-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #374151;
+}
 
-    .card-label {
-        color: #6b7280;
-        font-weight: 700;
-        text-transform: uppercase;
-        margin-bottom: 0.5rem;
-    }
+.manual-panel {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    overflow: hidden;
+    margin-top: 1rem;
+}
 
-    .card-value {
-        font-size: 2rem;
-        font-weight: 800;
-        color: #374151;
-    }
+.panel-header {
+    padding: 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid #f3f4f6;
+    color: #6b7280;
+    font-weight: 700;
+}
 
-    /* Panel Manual */
-    .manual-panel {
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-        overflow: hidden;
-        margin-top: 1rem;
-    }
+.panel-body {
+    padding: 3rem 4rem;
+    text-align: center;
+}
 
-    .panel-header {
-        padding: 1.5rem;
-        text-align: center;
-        border-bottom: 1px solid #f3f4f6;
-        color: #6b7280;
-        font-weight: 700;
-    }
+.info-text {
+    color: #6b7280;
+    margin-bottom: 2rem;
+}
 
-    .panel-body {
-        padding: 3rem 4rem;
-        text-align: center;
-    }
+.btn-riego {
+    width: 100%;
+    padding: 1.2rem;
+    border-radius: 10px;
+    border: none;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-transform: uppercase;
+    transition: 0.2s;
+}
 
-    .info-text {
-        color: #6b7280;
-        margin-bottom: 2rem;
-    }
+.btn-iniciar {
+    background-color: #10b981;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+}
 
-    /* Botones */
-    .btn-riego {
-        width: 100%;
-        padding: 1.2rem;
-        border-radius: 10px;
-        border: none;
-        font-weight: 800;
-        font-size: 1.1rem;
-        color: white;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        text-transform: uppercase;
-        transition: 0.2s;
-    }
+.btn-detener {
+    background-color: #ef4444;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
+}
 
-        .btn-riego:hover {
-            transform: translateY(-2px);
-        }
+.btn-riego:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
 
-    .btn-iniciar {
-        background-color: #10b981;
-        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
-    }
+.border-green {
+    border-left-color: #10b981;
+}
 
-    .btn-detener {
-        background-color: #ef4444;
-        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
-    }
+.border-blue {
+    border-left-color: #3b82f6;
+}
 
-    .btn-riego:disabled {
-        opacity: 0.7;
-        cursor: wait;
-    }
+.text-blue {
+    color: #3b82f6;
+}
 
-    /* Colores */
-    .border-green {
-        border-left-color: #10b981;
-    }
+.icon-active {
+    color: #10b981;
+}
 
-    .border-blue {
-        border-left-color: #3b82f6;
-    }
-
-    .text-blue {
-        color: #3b82f6;
-    }
-
-    .icon-active {
-        color: #10b981;
-    }
-
-    .icon-inactive {
-        color: #ef4444;
-    }
+.icon-inactive {
+    color: #ef4444;
+}
 </style>
 
 <div class="riego-container">
@@ -214,33 +205,33 @@
         <div class="panel-body">
             @if (riegoManualActivo)
             {
-                <p class="info-text">El sistema está en modo manual. La bomba permanecerá encendida.</p>
-                <button class="btn-riego btn-detener" @onclick="DetenerRiegoManual" disabled="@procesando">
-                    @if (procesando)
-                    {
-                        <span>⏳ DETENIENDO...</span>
-                    }
-                    else
-                    {
+                    <p class="info-text">El sistema está en modo manual. La bomba permanecerá encendida.</p>
+                    <button class="btn-riego btn-detener" @onclick="DetenerRiegoManual" disabled="@procesando">
+                        @if (procesando)
+                        {
+                            <span>⏳ DETENIENDO...</span>
+                        }
+                        else
+                        {
 
-                        <span>🛑 DETENER RIEGO MANUAL</span>
-                    }
-                </button>
+                            <span>🛑 DETENER RIEGO MANUAL</span>
+                        }
+                    </button>
             }
             else
             {
-                <p class="info-text">Presione para activar la bomba y desactivar el control automático.</p>
-                <button class="btn-riego btn-iniciar" @onclick="IniciarRiegoManual" disabled="@procesando">
-                    @if (procesando)
-                    {
-                        <span>⏳ INICIANDO...</span>
-                    }
-                    else
-                    {
+                    <p class="info-text">Presione para activar la bomba y desactivar el control automático.</p>
+                    <button class="btn-riego btn-iniciar" @onclick="IniciarRiegoManual" disabled="@procesando">
+                        @if (procesando)
+                        {
+                            <span>⏳ INICIANDO...</span>
+                        }
+                        else
+                        {
 
-                        <span>💧 INICIAR RIEGO MANUAL</span>
-                    }
-                </button>
+                            <span>💧 INICIAR RIEGO MANUAL</span>
+                        }
+                    </button>
             }
         </div>
     </div>
@@ -265,17 +256,15 @@
 
     private void VolverAtras() => Navigation.NavigateTo("/dashboard");
 
-    // 🔥 LÓGICA CENTRAL: Detectar cuando la bomba se enciende para guardar en BD
     private void OnDatosArduinoRecibidos(DatosArduinoModel datos)
     {
         if (!procesando)
         {
-            // Si antes estaba apagada y ahora está encendida... ¡ES UN RIEGO!
+            // Si la bomba se enciende, guardamos historial y temperatura
             if (!bombaActiva && datos.BombaEncendida)
             {
-                Console.WriteLine("🌊 Riego Detectado (Auto/Manual). Guardando en Oracle...");
-                // Ejecutamos el guardado en segundo plano
-                _ = RegistrarHistorialEnBaseDeDatos(datos.Humedad);
+                Console.WriteLine("🌊 Riego Detectado. Guardando en Oracle...");
+                _ = RegistrarHistorialYTemperatura(datos.Humedad);
             }
             ActualizarVariablesLocales(datos.Humedad, datos.BombaEncendida, datos.ModoManual);
         }
@@ -291,10 +280,9 @@
             {
                 await InvokeAsync(() =>
                 {
-                    // Doble verificación por si el evento falló
                     if (!bombaActiva && estado.BombaEncendida)
                     {
-                        _ = RegistrarHistorialEnBaseDeDatos(estado.Humedad);
+                        _ = RegistrarHistorialYTemperatura(estado.Humedad);
                     }
                     ActualizarVariablesLocales(estado.Humedad, estado.BombaEncendida, estado.ModoManual);
                 });
@@ -319,12 +307,7 @@
         try
         {
             bool exito = await ArduinoService.IniciarRiegoManualAsync();
-            if (exito)
-            {
-                riegoManualActivo = true; // Cambio visual inmediato
-                // No guardamos aquí explícitamente para evitar duplicados.
-                // La función OnDatosArduinoRecibidos detectará que la bomba prendió y guardará.
-            }
+            if (exito) riegoManualActivo = true;
         }
         finally { procesando = false; StateHasChanged(); }
     }
@@ -345,36 +328,46 @@
         finally { procesando = false; StateHasChanged(); }
     }
 
-    // Método para guardar en la BD Oracle a través de la API
-    private async Task RegistrarHistorialEnBaseDeDatos(int humedadDelMomento)
+    // ✅ MÉTODO NUEVO QUE GUARDA EN AMBAS TABLAS
+    private async Task RegistrarHistorialYTemperatura(int humedadDelMomento)
     {
+        float temperaturaCapturada = 25.0f;
+
         try
         {
-            float tempActual = 25;
+            // 1. Obtener temperatura de la API del clima
             try
             {
-                // Usamos _climaService para evitar el error estático
                 var clima = await _climaService.ObtenerClimaActualAsync();
-                if (clima != null) tempActual = (float)clima.Temperatura;
+                if (clima != null)
+                {
+                    temperaturaCapturada = (float)clima.Temperatura;
+                }
             }
             catch { }
 
-            var nuevoRiego = new HistorialRiegoModel
+            // 2. Guardar en Historial_Riego
+            var historial = new HistorialRiegoModel
             {
                 Fecha = DateTime.Now,
                 Humedad = humedadDelMomento,
-                Temperatura = tempActual
+                Temperatura = temperaturaCapturada
             };
+            await HistorialService.GuardarRiegoAsync(historial);
 
-            // Llamada al servicio que conecta con la API -> Oracle
-            bool guardado = await HistorialService.GuardarRiegoAsync(nuevoRiego);
+            // 3. Guardar en Tabla TEMPERATURA (Nuevo Requerimiento)
+            // Se usa "TempSuelo" igual que ambiente si no hay sensor físico
+            await ApiService.GuardarTemperaturaAsync(
+                temperaturaCapturada,
+                temperaturaCapturada,
+                $"Riego registrado H:{humedadDelMomento}%"
+            );
 
-            if (guardado) Console.WriteLine("✅ REGISTRO GUARDADO EN ORACLE");
-            else Console.WriteLine("⚠️ La API no pudo guardar el registro");
+            Console.WriteLine("✅ Datos guardados en Historial y Temperatura.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Error critico al guardar historial: {ex.Message}");
+            Console.WriteLine($"❌ Error guardando datos: {ex.Message}");
         }
     }
 

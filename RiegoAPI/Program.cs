@@ -11,6 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<IArduinoService, ArduinoService>();
 builder.Services.AddControllers();
 
+// TEMPERATURA
+builder.Services.AddScoped<ServicioTemperatura>();
+
 // ✅ Swagger básico
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

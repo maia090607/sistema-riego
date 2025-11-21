@@ -89,6 +89,7 @@
     <Compile Include="Registroclimatico.cs" />
     <Compile Include="Response.cs" />
     <Compile Include="Sensor.cs" />
+    <Compile Include="Temperatura.cs" />
     <Compile Include="Usuario.cs" />
     <Compile Include="Usuario_Telefono.cs" />
     <Compile Include="WeatherInfo.cs" />

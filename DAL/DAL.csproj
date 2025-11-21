@@ -90,6 +90,7 @@
     <Compile Include="IRepository.cs" />
     <Compile Include="PlantaRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TemperaturaRepository.cs" />
     <Compile Include="UsuarioRepository.cs" />
   </ItemGroup>
   <ItemGroup>
