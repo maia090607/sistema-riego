@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace RiegoAPI.DTOs.Response
+﻿namespace RiegoAPI.DTOs.Response
 {
     public class PlantaResponseDTO
     {
@@ -12,5 +9,6 @@ namespace RiegoAPI.DTOs.Response
         public float NivelOptimoHumedad { get; set; }
         public float NivelOptimoTemperatura { get; set; }
         public float NivelOptimoLuz { get; set; }
+        public int IdUsuario { get; set; } 
     }
 }

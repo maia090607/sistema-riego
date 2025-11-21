@@ -59,6 +59,9 @@
         padding: 1.5rem;
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         height: fit-content;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
     }
 
     .list-title {
@@ -75,6 +78,7 @@
         cursor: pointer;
         transition: all 0.2s;
         border-left: 4px solid transparent;
+        position: relative;
     }
 
         .plant-item:hover {
@@ -89,6 +93,18 @@
     .plant-name {
         font-weight: 600;
         color: #374151;
+    }
+
+    /* Badge de Propietario para Admin */
+    .owner-badge {
+        font-size: 0.75rem;
+        background-color: #e0e7ff;
+        color: #4338ca;
+        padding: 2px 8px;
+        border-radius: 10px;
+        display: inline-block;
+        margin-top: 4px;
+        font-weight: 600;
     }
 
     /* Detalle de planta (Derecha) */
@@ -177,14 +193,27 @@
     {
         <div class="content-grid">
             <div class="plant-list-section">
-                <h3 class="list-title">🌱 Mis Plantas ({plantas.Count})</h3>
-                <div style="max-height: 600px; overflow-y: auto;">
+                <h3 class="list-title">
+                    @(esAdministrador ? "🌍 Todas las Plantas" : "🌱 Mis Plantas")
+                    (@plantas.Count)
+                </h3>
+
+                <div style="overflow-y: auto; flex:1;">
                     @foreach (var planta in plantas)
                     {
                         <div class="plant-item @(planta.IdPlanta == plantaActual.IdPlanta ? "active" : "")"
                              @onclick="() => SeleccionarPlanta(planta)">
+
                             <div class="plant-name">@planta.NombrePlanta</div>
-                            <small style="color: #6b7280;">ID: @planta.IdPlanta</small>
+
+                            @if (esAdministrador)
+                            {
+                                <div class="owner-badge">👤 @planta.NombrePropietario</div>
+                            }
+                            else
+                            {
+                                <small style="color: #6b7280;">ID: @planta.IdPlanta</small>
+                            }
                         </div>
                     }
                 </div>
@@ -195,6 +224,13 @@
                 <div class="detail-header">
                     <h1 class="detail-title">@plantaActual.NombrePlanta</h1>
                     <p style="color: #6b7280;">@plantaActual.Descripcion</p>
+
+                    @if (esAdministrador)
+                    {
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #4338ca;">
+                            <strong>Propietario:</strong> @plantaActual.NombrePropietario (ID: @plantaActual.IdUsuario)
+                        </div>
+                    }
                 </div>
 
                 <div class="info-grid">
@@ -229,7 +265,7 @@
     {
         <div class="empty-state">
             <h1>🥀 No hay plantas registradas</h1>
-            <p>No tienes plantas asignadas a tu usuario.</p>
+            <p>@(esAdministrador ? "No existen plantas en el sistema." : "No tienes plantas asignadas.")</p>
             <button class="btn-manage" style="max-width: 200px;" @onclick="IrAGestion">Agregar Planta</button>
         </div>
     }
@@ -239,29 +275,58 @@
     private List<PlantaModel> plantas = new();
     private PlantaModel plantaActual = new();
     private bool cargando = true;
+    private bool esAdministrador = false;
 
     protected override async Task OnInitializedAsync()
     {
         await CargarPlantas();
     }
 
-    // ✅ ÚNICO MÉTODO DE CARGA (CORREGIDO)
     private async Task CargarPlantas()
     {
         cargando = true;
         try
         {
             // 1. Obtener usuario actual
-            var usuario = await AuthService.GetUsuarioActualAsync();
+            var usuarioLogueado = await AuthService.GetUsuarioActualAsync();
 
-            if (usuario != null)
+            if (usuarioLogueado != null)
             {
-                // 2. Pedir solo SUS plantas a la API
-                var resultado = await ApiService.ObtenerPlantasPorUsuarioAsync(usuario.IdUsuario);
+                esAdministrador = usuarioLogueado.Rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
 
-                if (resultado != null && resultado.Any())
+                if (esAdministrador)
                 {
-                    plantas = resultado;
+                    // === LÓGICA DE ADMINISTRADOR ===
+                    // A) Obtener TODAS las plantas (Endpoint: /api/plantas)
+                    // Nota: Asegúrate de que ApiService.ObtenerPlantasAsync() llame a /api/plantas
+                    var todasLasPlantas = await ApiService.ObtenerPlantasAsync();
+
+                    // B) Obtener TODOS los usuarios para cruzar nombres
+                    var todosLosUsuarios = await ApiService.ObtenerUsuariosAsync();
+
+                    if (todasLasPlantas != null && todasLasPlantas.Any())
+                    {
+                        plantas = todasLasPlantas;
+
+                        // C) Asignar nombre del propietario a cada planta
+                        foreach (var p in plantas)
+                        {
+                            var owner = todosLosUsuarios?.FirstOrDefault(u => u.IdUsuario == p.IdUsuario);
+                            p.NombrePropietario = owner != null ? owner.Nombre : "Desconocido";
+                        }
+                    }
+                }
+                else
+                {
+                    // === LÓGICA DE USUARIO/CUIDADOR ===
+                    // Solo sus plantas
+                    var misPlantas = await ApiService.ObtenerPlantasPorUsuarioAsync(usuarioLogueado.IdUsuario);
+                    if (misPlantas != null) plantas = misPlantas;
+                }
+
+                // Seleccionar primera por defecto
+                if (plantas.Any())
+                {
                     plantaActual = plantas.First();
                 }
             }
@@ -281,13 +346,6 @@
         plantaActual = planta;
     }
 
-    private void VolverAlDashboard()
-    {
-        Navigation.NavigateTo("/dashboard");
-    }
-
-    private void IrAGestion()
-    {
-        Navigation.NavigateTo("/gestion-plantas");
-    }
+    private void VolverAlDashboard() => Navigation.NavigateTo("/dashboard");
+    private void IrAGestion() => Navigation.NavigateTo("/gestion-plantas");
 }

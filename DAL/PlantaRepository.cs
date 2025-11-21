@@ -260,7 +260,8 @@ namespace DAL
                 RutaImagen = reader["RUTA_IMAGEN"]?.ToString(),
                 nivel_optimo_humedad = reader["NIVEL_OPTIMO_HUMEDAD"] != DBNull.Value ? Convert.ToSingle(reader["NIVEL_OPTIMO_HUMEDAD"]) : 0,
                 nivel_optimo_temperatura = reader["NIVEL_OPTIMO_TEMPERATURA"] != DBNull.Value ? Convert.ToSingle(reader["NIVEL_OPTIMO_TEMPERATURA"]) : 0,
-                nivel_optimo_luz = reader["NIVEL_OPTIMO_LUZ"] != DBNull.Value ? Convert.ToSingle(reader["NIVEL_OPTIMO_LUZ"]) : 0
+                nivel_optimo_luz = reader["NIVEL_OPTIMO_LUZ"] != DBNull.Value ? Convert.ToSingle(reader["NIVEL_OPTIMO_LUZ"]) : 0,
+                IdUsuario = reader["ID_USUARIO"] != DBNull.Value ? Convert.ToInt32(reader["ID_USUARIO"]) : 0 
             };
         }
 

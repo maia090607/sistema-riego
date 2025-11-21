@@ -31,7 +31,6 @@ namespace RiegoAPI.DTO.Mappers
         public static PlantaResponseDTO ToResponseDTO(Cultivo entity)
         {
             if (entity == null) return null;
-
             return new PlantaResponseDTO
             {
                 IdPlanta = entity.IdPlanta,
@@ -40,7 +39,8 @@ namespace RiegoAPI.DTO.Mappers
                 RutaImagen = entity.RutaImagen,
                 NivelOptimoHumedad = entity.nivel_optimo_humedad,
                 NivelOptimoTemperatura = entity.nivel_optimo_temperatura,
-                NivelOptimoLuz = entity.nivel_optimo_luz
+                NivelOptimoLuz = entity.nivel_optimo_luz,
+                IdUsuario = entity.IdUsuario 
             };
         }
 
