@@ -9,5 +9,6 @@ namespace ENTITY
         public float TempAmbiente { get; set; }
         public float TempSuelo { get; set; }
         public string Observacion { get; set; }
+        public int IdPlanta { get; set; } // ✅ Nuevo
     }
 }

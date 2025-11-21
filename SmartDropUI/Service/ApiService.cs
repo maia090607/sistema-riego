@@ -103,7 +103,7 @@ namespace SmartDropUI.Services
         }
 
 
-        public async Task<bool> GuardarTemperaturaAsync(float tempAmbiente, float tempSuelo, string observacion)
+        public async Task<bool> GuardarTemperaturaAsync(float tempAmbiente, float tempSuelo, string observacion, int idPlanta)
         {
             try
             {
@@ -111,15 +111,23 @@ namespace SmartDropUI.Services
                 {
                     TempAmbiente = tempAmbiente,
                     TempSuelo = tempSuelo,
-                    Observacion = observacion
+                    Observacion = observacion,
+                    IdPlanta = idPlanta // ✅ Enviamos el ID de la planta
                 };
 
                 var response = await _httpClient.PostAsJsonAsync("/api/temperatura", datos);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    _logger.LogError($"❌ Error API Temperatura: {error}");
+                }
+
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error guardando temperatura: {ex.Message}");
+                _logger.LogError($"❌ Excepción guardando temperatura: {ex.Message}");
                 return false;
             }
         }
