@@ -18,29 +18,40 @@ namespace DAL
                 {
                     connection.Open();
 
-                    // ✅ Usar el procedimiento almacenado del paquete
+                    // Definición de la consulta llamando al procedimiento almacenado
                     string query = @"
-                BEGIN 
-                    PKG_HISTORIAL_RIEGO.SP_INSERTAR_HISTORIAL(
-                        :p_fecha_hora,
-                        :p_humedad,
-                        :p_temperatura,
-                        :p_id_generado,
-                        :p_estado,
-                        :p_mensaje
-                    );
-                END;";
+            BEGIN 
+                PKG_HISTORIAL_RIEGO.SP_INSERTAR_HISTORIAL(
+                    :p_fecha_hora,
+                    :p_humedad,
+                    :p_temperatura,
+                    :p_id_planta,   -- ✅ Nuevo parámetro agregado
+                    :p_id_generado,
+                    :p_estado,
+                    :p_mensaje
+                );
+            END;";
 
                     using (OracleCommand cmd = new OracleCommand(query, connection))
                     {
                         cmd.CommandType = CommandType.Text;
 
-                        // Parámetros de entrada
+                        // --- PARÁMETROS DE ENTRADA ---
                         cmd.Parameters.Add(":p_fecha_hora", OracleDbType.Date).Value = historial.Fecha;
                         cmd.Parameters.Add(":p_humedad", OracleDbType.Single).Value = historial.Humedad;
                         cmd.Parameters.Add(":p_temperatura", OracleDbType.Single).Value = historial.Temperatura;
 
-                        // Parámetros de salida
+                        // ✅ Enviar ID de planta (o DBNull si es 0/inválido)
+                        if (historial.IdPlanta > 0)
+                        {
+                            cmd.Parameters.Add(":p_id_planta", OracleDbType.Int32).Value = historial.IdPlanta;
+                        }
+                        else
+                        {
+                            cmd.Parameters.Add(":p_id_planta", OracleDbType.Int32).Value = DBNull.Value;
+                        }
+
+                        // --- PARÁMETROS DE SALIDA ---
                         var paramId = cmd.Parameters.Add(":p_id_generado", OracleDbType.Int32);
                         paramId.Direction = ParameterDirection.Output;
 
@@ -50,13 +61,20 @@ namespace DAL
                         var paramMensaje = cmd.Parameters.Add(":p_mensaje", OracleDbType.Varchar2, 200);
                         paramMensaje.Direction = ParameterDirection.Output;
 
+                        // --- EJECUCIÓN ---
                         cmd.ExecuteNonQuery();
 
-                        // ✅ Obtener valores de salida
-                        historial.Id = Convert.ToInt32(paramId.Value.ToString());
+                        // Recuperar valores de salida
+                        // Validar si el ID generado no es nulo antes de convertir
+                        if (paramId.Value != DBNull.Value)
+                        {
+                            historial.Id = Convert.ToInt32(paramId.Value.ToString());
+                        }
+
                         int estado = Convert.ToInt32(paramEstado.Value.ToString());
                         string mensaje = paramMensaje.Value.ToString();
 
+                        // Configurar respuesta
                         if (estado == 1)
                         {
                             response.Estado = true;
@@ -73,8 +91,7 @@ namespace DAL
                 catch (Exception ex)
                 {
                     response.Estado = false;
-                    response.Mensaje = "Error al guardar historial: " + ex.Message;
-                    Console.WriteLine($"❌ [HISTORIAL] Error detallado: {ex}");
+                    response.Mensaje = "Error en HistorialRepository: " + ex.Message;
                 }
             }
 

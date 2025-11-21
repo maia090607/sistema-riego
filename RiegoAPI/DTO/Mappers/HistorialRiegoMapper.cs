@@ -14,12 +14,12 @@ namespace RiegoAPI.DTO.Mappers
         public static Historial_Riego ToEntity(HistorialRiegoRequestDTO dto)
         {
             if (dto == null) return null;
-
             return new Historial_Riego
             {
                 Fecha = dto.Fecha,
                 Humedad = dto.Humedad,
-                Temperatura = dto.Temperatura
+                Temperatura = dto.Temperatura,
+                IdPlanta = dto.IdPlanta // ✅ Mapeamos el ID
             };
         }
         /// Convierte de Historial_Riego (Entity) a HistorialRiegoResponseDTO

@@ -51,45 +51,23 @@ namespace SmartDropUI.Services
         {
             try
             {
-                _logger.LogInformation("═══════════════════════════════════════");
-                _logger.LogInformation($"💾 [SERVICE] INICIANDO GUARDADO");
-                _logger.LogInformation($"📅 Fecha: {historial.Fecha}");
-                _logger.LogInformation($"💧 Humedad: {historial.Humedad}%");
-                _logger.LogInformation($"🌡️ Temperatura: {historial.Temperatura}°C");
-                _logger.LogInformation("═══════════════════════════════════════");
-
                 var requestData = new
                 {
                     fecha = historial.Fecha,
                     humedad = historial.Humedad,
-                    temperatura = historial.Temperatura
+                    temperatura = historial.Temperatura,
+                    idPlanta = historial.IdPlanta // ✅ Enviamos el ID a la API
                 };
 
-                _logger.LogInformation($"📦 Request Data: {System.Text.Json.JsonSerializer.Serialize(requestData)}");
-
                 var response = await _httpClient.PostAsJsonAsync("/api/historial", requestData);
-
-                _logger.LogInformation($"📡 Status Code: {response.StatusCode}");
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    _logger.LogInformation($"✅ Respuesta: {content}");
-                    return true;
-                }
-
-                var errorContent = await response.Content.ReadAsStringAsync();
-                _logger.LogWarning($"⚠️ Error: {errorContent}");
-                return false;
+                return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"❌ Excepción: {ex.Message}");
-                _logger.LogError($"❌ Stack: {ex.StackTrace}");
+                _logger.LogError($"Error guardando historial: {ex.Message}");
                 return false;
             }
         }
-
         // ✅ Obtener historial por fecha
         public async Task<List<HistorialRiegoModel>> ObtenerPorFechaAsync(DateTime fecha)
         {
