@@ -10,91 +10,94 @@
 <PageTitle>Gestión de Plantas - SmartDrop</PageTitle>
 
 <style>
-    /* Estilos generales */
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: 'Segoe UI', Roboto, sans-serif;
-    }
-
+    /* --- TEMA OSCURO --- */
     .gestion-page {
         min-height: 100vh;
-        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 50%, #cffafe 100%);
+        background-color: #05070a;
         padding: 2rem;
+        font-family: 'Outfit', sans-serif;
+        color: white;
+        position: relative;
+        overflow-x: hidden;
     }
 
+    /* Luces de fondo */
+    .glow-blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        opacity: 0.3;
+        z-index: 0;
+        animation: floatColor 10s infinite ease-in-out;
+    }
+    .glow-1 { width: 500px; height: 500px; background: #00E676; top: -100px; left: -100px; }
+    .glow-2 { width: 600px; height: 600px; background: #2979FF; bottom: -100px; right: -100px; }
+
+    /* Encabezado */
     .header-bar {
-        background: #10b981;
-        padding: 1rem 2rem;
         display: flex;
-        align-items: center;
         justify-content: space-between;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        border-radius: 15px;
+        align-items: center;
         margin-bottom: 2rem;
+        position: relative;
+        z-index: 10;
     }
 
     .header-title {
-        font-size: 1.2rem;
-        font-weight: 700;
+        font-size: 2rem;
+        font-weight: 900;
         color: white;
-        display: flex;
-        align-items: center;
-        gap: 10px;
     }
 
     .btn-back {
-        background: white;
-        color: #10b981;
-        border: none;
+        background: rgba(255, 255, 255, 0.05);
+        color: #9ca3af;
+        border: 1px solid rgba(255, 255, 255, 0.1);
         padding: 0.6rem 1.2rem;
-        border-radius: 8px;
-        font-weight: 700;
+        border-radius: 50px;
+        font-weight: 600;
         cursor: pointer;
-        transition: 0.2s;
+        transition: 0.3s;
+    }
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-color: white;
     }
 
-        .btn-back:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-    .main-title {
-        text-align: center;
-        font-size: 2rem;
-        font-weight: 800;
-        color: #10b981;
-        margin-bottom: 2rem;
-        text-transform: uppercase;
-    }
-
-    /* Layout Principal */
+    /* Layout Grid */
     .content-container {
         display: grid;
         grid-template-columns: 1fr 350px;
         gap: 2rem;
         max-width: 1200px;
         margin: 0 auto;
+        position: relative;
+        z-index: 10;
     }
 
-    /* Formulario */
+    /* Tarjeta Formulario */
     .form-section {
-        background: white;
-        border-radius: 20px;
+        background: #111827; /* Dark Gray */
+        border-radius: 24px;
         padding: 2.5rem;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
     }
 
     .section-title {
         font-size: 1.2rem;
         font-weight: 700;
-        color: #374151;
+        color: white;
         margin-bottom: 1.5rem;
         display: flex;
         align-items: center;
         gap: 10px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 1rem;
     }
 
+    /* Inputs Modernos (Dark) */
     .form-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -107,34 +110,33 @@
         gap: 0.5rem;
     }
 
-    .full-width {
-        grid-column: 1 / -1;
-    }
+    .full-width { grid-column: 1 / -1; }
 
     .form-label {
+        font-size: 0.85rem;
+        color: #9ca3af;
         font-weight: 600;
-        color: #4b5563;
-        font-size: 0.9rem;
+        margin-left: 10px;
     }
 
     .form-input, .form-select, .form-textarea {
-        padding: 0.8rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 10px;
-        font-size: 1rem;
-        transition: 0.2s;
+        background: #1f2937; /* Input bg oscuro */
+        border: 1px solid #374151;
+        color: white;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        outline: none;
+        transition: 0.3s;
     }
 
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            border-color: #10b981;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-        }
-
-    .form-textarea {
-        min-height: 100px;
-        resize: vertical;
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        border-color: #00E676;
+        background: #111827;
+        box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.1);
     }
+
+    .form-textarea { min-height: 100px; resize: vertical; }
 
     /* Botones de Acción */
     .action-buttons {
@@ -147,43 +149,50 @@
     .btn {
         padding: 1rem;
         border: none;
-        border-radius: 10px;
-        font-weight: 700;
+        border-radius: 50px;
+        font-weight: 800;
         cursor: pointer;
-        transition: 0.2s;
-        color: white;
+        transition: 0.3s;
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 8px;
+        text-transform: uppercase;
+        font-size: 0.9rem;
     }
 
     .btn-register {
-        background: #10b981;
+        background: linear-gradient(90deg, #00E676 0%, #00C853 100%);
+        color: #003d1c;
         grid-column: 1 / -1;
-        font-size: 1.1rem;
+        box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
     }
-
-        .btn-register:hover {
-            background: #059669;
-            transform: translateY(-2px);
-        }
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 230, 118, 0.5);
+        filter: brightness(1.1);
+    }
 
     .btn-clear {
-        background: #6b7280;
+        background: transparent;
+        border: 1px solid #4b5563;
+        color: #9ca3af;
     }
-
-        .btn-clear:hover {
-            background: #4b5563;
-        }
+    .btn-clear:hover {
+        border-color: white;
+        color: white;
+        background: rgba(255,255,255,0.05);
+    }
 
     .btn-dashboard {
-        background: #3b82f6;
+        background: rgba(41, 121, 255, 0.1);
+        color: #2979FF;
+        border: 1px solid rgba(41, 121, 255, 0.3);
     }
-
-        .btn-dashboard:hover {
-            background: #2563eb;
-        }
+    .btn-dashboard:hover {
+        background: rgba(41, 121, 255, 0.2);
+        color: white;
+    }
 
     /* Sidebar Derecha */
     .sidebar-section {
@@ -193,73 +202,52 @@
     }
 
     .info-card {
-        background: white;
-        border-radius: 20px;
+        background: #111827;
+        border-radius: 24px;
         padding: 2rem;
         text-align: center;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        border: 1px solid rgba(255,255,255,0.05);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .upload-box {
+        border: 2px dashed #374151;
+        background: #1f2937;
+        border-radius: 16px;
+        padding: 2rem;
+        color: #9ca3af;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .upload-box:hover {
+        border-color: #00E676;
+        color: white;
+        background: rgba(0, 230, 118, 0.05);
     }
 
     /* Alertas */
-    .alert {
-        padding: 1rem;
-        border-radius: 10px;
-        margin-bottom: 1.5rem;
-        font-weight: 600;
-        text-align: center;
-    }
-
-    .alert-error {
-        background: #fee2e2;
-        color: #991b1b;
-        border: 1px solid #fecaca;
-    }
-
-    .alert-success {
-        background: #d1fae5;
-        color: #065f46;
-        border: 1px solid #a7f3d0;
-    }
-
-    /* Upload Imagen */
-    .upload-box {
-        border: 2px dashed #10b981;
-        background: #f0fdf4;
-        border-radius: 15px;
-        padding: 2rem;
-        text-align: center;
-        cursor: pointer;
-        transition: 0.2s;
-    }
-
-        .upload-box:hover {
-            background: #dcfce7;
-        }
+    .alert { padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; font-weight: 600; text-align: center; }
+    .alert-error { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .alert-success { background: rgba(16, 185, 129, 0.1); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
 
     @@media (max-width: 768px) {
-        .content-container {
-            grid-template-columns: 1fr;
-        }
-
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
+        .content-container { grid-template-columns: 1fr; }
+        .form-grid { grid-template-columns: 1fr; }
     }
 </style>
 
 <div class="gestion-page">
+    <div class="glow-blob glow-1"></div>
+    <div class="glow-blob glow-2"></div>
+
     <div class="header-bar">
-        <div class="header-title">
-            <span>🌿</span> GESTIÓN DE PLANTAS
-        </div>
+        <div class="header-title">Agregar Nueva Planta</div>
         <button class="btn-back" @onclick="IrAPlantas">Volver a la lista</button>
     </div>
 
-    <h1 class="main-title">AGREGAR NUEVA PLANTA</h1>
-
     <div class="content-container">
+        <!-- FORMULARIO PRINCIPAL -->
         <div class="form-section">
-
             @if (!string.IsNullOrEmpty(mensajeAlerta))
             {
                 <div class="alert @tipoAlertaClass">@mensajeAlerta</div>
@@ -312,8 +300,7 @@
                     }
                     else
                     {
-
-                        <span>💾 REGISTRAR PLANTA</span>
+                        <span>💾 GUARDAR PLANTA</span>
                     }
                 </button>
 
@@ -327,25 +314,26 @@
             </div>
         </div>
 
+        <!-- SIDEBAR DERECHA (IMAGEN Y CONSEJOS) -->
         <div class="sidebar-section">
             <div class="info-card">
-                <h3 style="color:#10b981; margin-bottom:1rem;">Imagen de Referencia</h3>
+                <h3 style="color:white; margin-bottom:1rem;">Imagen de Referencia</h3>
                 <div class="upload-box">
                     <span style="font-size:2rem;">📷</span>
-                    <p style="font-size:0.9rem; color:#6b7280; margin-top:0.5rem;">(Opcional)</p>
+                    <p style="font-size:0.9rem; margin-top:0.5rem;">Pegar URL abajo</p>
                 </div>
-                <input type="text" class="form-input" style="margin-top:1rem;" placeholder="Pegar URL si deseas..." @bind="planta.RutaImagen" />
+                <input type="text" class="form-input" style="margin-top:1rem;" placeholder="https://..." @bind="planta.RutaImagen" />
 
                 @if (!string.IsNullOrEmpty(planta.RutaImagen))
                 {
-                    <img src="@planta.RutaImagen" style="width:100%; height:150px; object-fit:cover; border-radius:10px; margin-top:1rem;" />
+                    <img src="@planta.RutaImagen" style="width:100%; height:150px; object-fit:cover; border-radius:10px; margin-top:1rem; border: 2px solid rgba(255,255,255,0.1);" />
                 }
             </div>
 
             <div class="info-card">
                 <span style="font-size:2.5rem; display:block; margin-bottom:10px;">💡</span>
-                <h3 style="font-size:1.1rem; font-weight:700; color:#374151;">Consejo SmartDrop</h3>
-                <p style="color:#6b7280; font-size:0.9rem; margin-top:0.5rem;">
+                <h3 style="font-size:1.1rem; font-weight:700; color:white;">Consejo SmartDrop</h3>
+                <p style="color:#9ca3af; font-size:0.9rem; margin-top:0.5rem;">
                     Configura correctamente los niveles óptimos para que el sistema cuide tus plantas automáticamente.
                 </p>
             </div>
@@ -370,47 +358,19 @@
 
     private async Task RegistrarPlanta()
     {
-        // Validaciones
-        if (planta.IdPlanta <= 0)
-        {
-            MostrarMensaje("El ID debe ser mayor a 0.", "error");
-            return;
-        }
-        if (string.IsNullOrWhiteSpace(planta.NombrePlanta))
-        {
-            MostrarMensaje("El nombre de la planta es obligatorio.", "error");
-            return;
-        }
-        if (planta.NivelOptimoHumedad < 0 || planta.NivelOptimoHumedad > 100)
-        {
-            MostrarMensaje("La humedad debe estar entre 0% y 100%.", "error");
-            return;
-        }
-        if (planta.NivelOptimoLuz <= 0)
-        {
-            MostrarMensaje("Por favor selecciona un nivel de luz.", "error");
-            return;
-        }
+        if (planta.IdPlanta <= 0) { MostrarMensaje("El ID debe ser mayor a 0.", "error"); return; }
+        if (string.IsNullOrWhiteSpace(planta.NombrePlanta)) { MostrarMensaje("El nombre es obligatorio.", "error"); return; }
+        if (planta.NivelOptimoHumedad < 0 || planta.NivelOptimoHumedad > 100) { MostrarMensaje("Humedad inválida.", "error"); return; }
 
         cargando = true;
         mensajeAlerta = "";
 
         try
         {
-            // 1. OBTENER EL USUARIO LOGUEADO (IMPORTANTE)
             var usuario = await AuthService.GetUsuarioActualAsync();
+            if (usuario == null) { MostrarMensaje("⚠️ No hay sesión activa.", "error"); cargando = false; return; }
 
-            if (usuario == null)
-            {
-                MostrarMensaje("⚠️ No hay sesión activa. Por favor inicia sesión.", "error");
-                cargando = false;
-                return;
-            }
-
-            // 2. ASIGNAR EL ID DEL USUARIO A LA PLANTA
             planta.IdUsuario = usuario.IdUsuario;
-
-            // 3. ENVIAR A LA API
             bool exito = await ApiService.RegistrarPlantaAsync(planta);
 
             if (exito)
@@ -421,18 +381,15 @@
             }
             else
             {
-                MostrarMensaje("❌ Error al guardar. El ID podría estar duplicado.", "error");
+                MostrarMensaje("❌ Error al guardar. ID duplicado?", "error");
             }
         }
         catch (Exception ex)
         {
-            Logger.LogError($"Excepción al guardar: {ex.Message}");
-            MostrarMensaje("❌ Error de conexión con el servidor.", "error");
+            Logger.LogError($"Error: {ex.Message}");
+            MostrarMensaje("❌ Error de conexión.", "error");
         }
-        finally
-        {
-            cargando = false;
-        }
+        finally { cargando = false; }
     }
 
     private void MostrarMensaje(string mensaje, string tipo)

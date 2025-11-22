@@ -10,54 +10,86 @@
 <PageTitle>Plantas - SmartDrop</PageTitle>
 
 <style>
-    /* Estilos generales */
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: 'Segoe UI', Roboto, sans-serif;
-    }
-
+    /* --- FONDO Y AMBIENTE --- */
     .plantas-page {
         min-height: 100vh;
-        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 50%, #cffafe 100%);
+        background-color: #05070a; /* Fondo oscuro */
+        position: relative;
+        overflow: hidden;
         padding: 2rem;
+        font-family: 'Outfit', sans-serif;
+        color: white;
     }
 
+    /* Efectos de luz de fondo */
+    .glow-blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        opacity: 0.3;
+        z-index: 0;
+        animation: floatColor 10s infinite ease-in-out;
+    }
+
+    .glow-1 {
+        width: 500px;
+        height: 500px;
+        background: #00E676;
+        top: -150px;
+        left: -150px;
+    }
+
+    .glow-2 {
+        width: 600px;
+        height: 600px;
+        background: #2979FF;
+        bottom: -150px;
+        right: -150px;
+    }
+
+    /* Botón Volver */
     .btn-back-menu {
-        background: #10b981;
-        color: white;
-        border: none;
+        background: rgba(255, 255, 255, 0.05);
+        color: #9ca3af;
+        border: 1px solid rgba(255, 255, 255, 0.1);
         padding: 0.75rem 1.5rem;
-        border-radius: 0.75rem;
+        border-radius: 50px;
         font-weight: 600;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        margin-bottom: 2rem;
         transition: all 0.3s ease;
+        position: relative;
+        z-index: 10;
     }
 
         .btn-back-menu:hover {
-            background: #059669;
-            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: white;
+            transform: translateX(-5px);
         }
 
+    /* Layout Principal */
     .content-grid {
         display: grid;
         grid-template-columns: 350px 1fr;
         gap: 2rem;
         max-width: 1400px;
         margin: 0 auto;
+        position: relative;
+        z-index: 10;
     }
 
-    /* Lista de plantas (Sidebar izquierda) */
+    /* --- LISTA DE PLANTAS (Sidebar Izquierda) --- */
     .plant-list-section {
-        background: white;
-        border-radius: 1.5rem;
+        background: #111827;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 24px;
         padding: 1.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         height: fit-content;
         max-height: 80vh;
         display: flex;
@@ -66,65 +98,103 @@
 
     .list-title {
         font-size: 1.2rem;
-        font-weight: bold;
-        color: #10b981;
-        margin-bottom: 1rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 1.5rem;
         text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 1rem;
     }
 
     .plant-item {
         padding: 1rem;
-        border-bottom: 1px solid #e5e7eb;
+        border-radius: 15px;
         cursor: pointer;
         transition: all 0.2s;
-        border-left: 4px solid transparent;
-        position: relative;
+        margin-bottom: 0.5rem;
+        background: transparent;
+        border: 1px solid transparent;
     }
 
         .plant-item:hover {
-            background: #f0fdf4;
+            background: rgba(255, 255, 255, 0.03);
         }
 
         .plant-item.active {
-            background: #d1fae5;
-            border-left-color: #10b981;
+            background: rgba(0, 230, 118, 0.1);
+            border-color: #00E676;
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.1);
         }
 
     .plant-name {
-        font-weight: 600;
-        color: #374151;
+        font-weight: 700;
+        color: white;
+        font-size: 1.1rem;
     }
 
-    /* Badge de Propietario para Admin */
-    .owner-badge {
-        font-size: 0.75rem;
-        background-color: #e0e7ff;
-        color: #4338ca;
-        padding: 2px 8px;
-        border-radius: 10px;
-        display: inline-block;
-        margin-top: 4px;
-        font-weight: 600;
+    .plant-item.active .plant-name {
+        color: #00E676;
     }
 
-    /* Detalle de planta (Derecha) */
+    .plant-id {
+        font-size: 0.8rem;
+        color: #9ca3af;
+    }
+
+    /* --- BOTÓN AGREGAR (CAMBIADO) --- */
+    .btn-add-plant {
+        background: linear-gradient(90deg, #00E676 0%, #00C853 100%);
+        color: #003d1c;
+        border: none;
+        padding: 1rem;
+        width: 100%;
+        border-radius: 50px;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-top: 1.5rem;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+        .btn-add-plant:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 230, 118, 0.5);
+            filter: brightness(1.1);
+        }
+
+    /* --- DETALLE --- */
     .plant-detail-section {
-        background: white;
-        border-radius: 1.5rem;
+        background: #111827;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 24px;
         padding: 2.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
 
     .detail-header {
-        border-bottom: 2px solid #f3f4f6;
-        padding-bottom: 1rem;
-        margin-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
     }
 
     .detail-title {
-        font-size: 2rem;
-        font-weight: 800;
-        color: #10b981;
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: white;
+        margin-bottom: 0.5rem;
+    }
+
+    .detail-desc {
+        color: #9ca3af;
+        font-size: 1rem;
+        line-height: 1.5;
     }
 
     .info-grid {
@@ -134,128 +204,127 @@
     }
 
     .info-card {
-        background: #f9fafb;
-        padding: 1rem;
-        border-radius: 10px;
-        border: 1px solid #e5e7eb;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 1.5rem;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .info-label {
         font-size: 0.8rem;
-        color: #6b7280;
+        color: #9ca3af;
         font-weight: 700;
         text-transform: uppercase;
+        margin-bottom: 0.5rem;
     }
 
     .info-value {
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: #1f2937;
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: white;
     }
 
-    .loading-container {
+    .val-hum {
+        color: #2979FF;
+    }
+
+    .val-temp {
+        color: #FF9100;
+    }
+
+    .val-light {
+        color: #FFEA00;
+    }
+
+    .val-id {
+        color: #E0E0E0;
+    }
+
+    .loading-container, .empty-state {
         text-align: center;
         padding: 4rem;
-        color: #10b981;
+        color: #9ca3af;
     }
 
-    .empty-state {
-        text-align: center;
-        padding: 3rem;
-        color: #6b7280;
-    }
-
-    .btn-manage {
-        background: #3b82f6;
-        color: white;
-        border: none;
-        padding: 1rem;
-        width: 100%;
-        border-radius: 0.75rem;
-        font-weight: 600;
-        margin-top: 1rem;
-        cursor: pointer;
+    @@media (max-width: 900px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
 <div class="plantas-page">
+    <div class="glow-blob glow-1"></div>
+    <div class="glow-blob glow-2"></div>
+
     <button class="btn-back-menu" @onclick="VolverAlDashboard">
         <span>⬅️</span> Volver al Dashboard
     </button>
 
     @if (cargando)
     {
-        <div class="loading-container">
-            <h2>🔄 Cargando plantas...</h2>
-        </div>
+        <div class="loading-container"><h2>🔄 Cargando plantas...</h2></div>
     }
     else if (plantas != null && plantas.Any())
     {
         <div class="content-grid">
+            <!-- LISTA -->
             <div class="plant-list-section">
-                <h3 class="list-title">
+                <div class="list-title">
                     @(esAdministrador ? "🌍 Todas las Plantas" : "🌱 Mis Plantas")
-                    (@plantas.Count)
-                </h3>
+                    <span style="font-size: 0.8em; color: #00E676;">(@plantas.Count)</span>
+                </div>
 
-                <div style="overflow-y: auto; flex:1;">
+                <div style="overflow-y: auto; flex:1; padding-right: 5px;">
                     @foreach (var planta in plantas)
                     {
                         <div class="plant-item @(planta.IdPlanta == plantaActual.IdPlanta ? "active" : "")"
                              @onclick="() => SeleccionarPlanta(planta)">
-
                             <div class="plant-name">@planta.NombrePlanta</div>
-
-                            @if (esAdministrador)
+                            @if (!esAdministrador)
                             {
-                                <div class="owner-badge">👤 @planta.NombrePropietario</div>
-                            }
-                            else
-                            {
-                                <small style="color: #6b7280;">ID: @planta.IdPlanta</small>
+                                <div class="plant-id">ID: @planta.IdPlanta</div>
                             }
                         </div>
                     }
                 </div>
-                <button class="btn-manage" @onclick="IrAGestion">⚙️ Gestionar Plantas</button>
+
+                <!-- ✅ BOTÓN ACTUALIZADO -->
+                <button class="btn-add-plant" @onclick="IrAGestion">
+                    <span>➕</span> Agregar Nueva Planta
+                </button>
             </div>
 
+            <!-- DETALLES -->
             <div class="plant-detail-section">
                 <div class="detail-header">
                     <h1 class="detail-title">@plantaActual.NombrePlanta</h1>
-                    <p style="color: #6b7280;">@plantaActual.Descripcion</p>
-
-                    @if (esAdministrador)
-                    {
-                        <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #4338ca;">
-                            <strong>Propietario:</strong> @plantaActual.NombrePropietario (ID: @plantaActual.IdUsuario)
-                        </div>
-                    }
+                    <p class="detail-desc">@plantaActual.Descripcion</p>
                 </div>
 
                 <div class="info-grid">
                     <div class="info-card">
                         <div class="info-label">Humedad Óptima</div>
-                        <div class="info-value" style="color: #3b82f6;">@plantaActual.NivelOptimoHumedad %</div>
+                        <div class="info-value val-hum">@plantaActual.NivelOptimoHumedad %</div>
                     </div>
                     <div class="info-card">
                         <div class="info-label">Temperatura Óptima</div>
-                        <div class="info-value" style="color: #f97316;">@plantaActual.NivelOptimoTemperatura °C</div>
+                        <div class="info-value val-temp">@plantaActual.NivelOptimoTemperatura °C</div>
                     </div>
                     <div class="info-card">
                         <div class="info-label">Luz Necesaria</div>
-                        <div class="info-value" style="color: #eab308;">@plantaActual.NivelOptimoLuz</div>
+                        <div class="info-value val-light">@plantaActual.NivelOptimoLuz</div>
                     </div>
                     <div class="info-card">
                         <div class="info-label">ID Sistema</div>
-                        <div class="info-value">@plantaActual.IdPlanta</div>
+                        <div class="info-value val-id">#@plantaActual.IdPlanta</div>
                     </div>
                 </div>
 
                 @if (!string.IsNullOrEmpty(plantaActual.RutaImagen))
                 {
                     <div style="margin-top: 2rem; text-align: center;">
-                        <img src="@plantaActual.RutaImagen" style="max-width: 100%; border-radius: 15px; max-height: 300px;" />
+                        <img src="@plantaActual.RutaImagen" style="max-width: 100%; border-radius: 16px; max-height: 300px; border: 2px solid rgba(255,255,255,0.1);" />
                     </div>
                 }
             </div>
@@ -264,9 +333,11 @@
     else
     {
         <div class="empty-state">
-            <h1>🥀 No hay plantas registradas</h1>
-            <p>@(esAdministrador ? "No existen plantas en el sistema." : "No tienes plantas asignadas.")</p>
-            <button class="btn-manage" style="max-width: 200px;" @onclick="IrAGestion">Agregar Planta</button>
+            <h1 style="font-size: 3rem;">🥀</h1>
+            <h2>No hay plantas registradas</h2>
+            <button class="btn-add-plant" style="max-width: 300px; margin-top: 2rem;" @onclick="IrAGestion">
+                Agregar Primera Planta
+            </button>
         </div>
     }
 </div>
@@ -287,65 +358,27 @@
         cargando = true;
         try
         {
-            // 1. Obtener usuario actual
             var usuarioLogueado = await AuthService.GetUsuarioActualAsync();
-
             if (usuarioLogueado != null)
             {
                 esAdministrador = usuarioLogueado.Rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
-
                 if (esAdministrador)
                 {
-                    // === LÓGICA DE ADMINISTRADOR ===
-                    // A) Obtener TODAS las plantas (Endpoint: /api/plantas)
-                    // Nota: Asegúrate de que ApiService.ObtenerPlantasAsync() llame a /api/plantas
-                    var todasLasPlantas = await ApiService.ObtenerPlantasAsync();
-
-                    // B) Obtener TODOS los usuarios para cruzar nombres
-                    var todosLosUsuarios = await ApiService.ObtenerUsuariosAsync();
-
-                    if (todasLasPlantas != null && todasLasPlantas.Any())
-                    {
-                        plantas = todasLasPlantas;
-
-                        // C) Asignar nombre del propietario a cada planta
-                        foreach (var p in plantas)
-                        {
-                            var owner = todosLosUsuarios?.FirstOrDefault(u => u.IdUsuario == p.IdUsuario);
-                            p.NombrePropietario = owner != null ? owner.Nombre : "Desconocido";
-                        }
-                    }
+                    plantas = await ApiService.ObtenerPlantasAsync() ?? new List<PlantaModel>();
                 }
                 else
                 {
-                    // === LÓGICA DE USUARIO/CUIDADOR ===
-                    // Solo sus plantas
-                    var misPlantas = await ApiService.ObtenerPlantasPorUsuarioAsync(usuarioLogueado.IdUsuario);
-                    if (misPlantas != null) plantas = misPlantas;
+                    plantas = await ApiService.ObtenerPlantasPorUsuarioAsync(usuarioLogueado.IdUsuario) ?? new List<PlantaModel>();
                 }
 
-                // Seleccionar primera por defecto
-                if (plantas.Any())
-                {
-                    plantaActual = plantas.First();
-                }
+                if (plantas.Any()) plantaActual = plantas.First();
             }
         }
-        catch (Exception ex)
-        {
-            Logger.LogError($"Error cargando plantas: {ex.Message}");
-        }
-        finally
-        {
-            cargando = false;
-        }
+        catch (Exception ex) { Logger.LogError($"Error: {ex.Message}"); }
+        finally { cargando = false; }
     }
 
-    private void SeleccionarPlanta(PlantaModel planta)
-    {
-        plantaActual = planta;
-    }
-
+    private void SeleccionarPlanta(PlantaModel planta) => plantaActual = planta;
     private void VolverAlDashboard() => Navigation.NavigateTo("/dashboard");
     private void IrAGestion() => Navigation.NavigateTo("/gestion-plantas");
 }
