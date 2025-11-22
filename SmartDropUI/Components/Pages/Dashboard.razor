@@ -1,13 +1,9 @@
 ﻿@page "/dashboard"
 @using SmartDropUI.Services
 @using SmartDropUI.Models
-@using System.Timers
 @inject ArduinoService ArduinoService
-@inject RiegoService RiegoService
 @inject ClimaService ClimaService
 @inject NavigationManager Navigation
-@inject ApiService ApiService
-@inject ILogger<Dashboard> Logger
 @inject HistorialRiegoService HistorialService
 @rendermode InteractiveServer
 @implements IDisposable
@@ -15,432 +11,292 @@
 <PageTitle>Dashboard - SmartDrop</PageTitle>
 
 <style>
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    .dashboard-page {
-        min-height: 100vh;
-        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 50%, #cffafe 100%);
+    /* Dashboard mantiene el tema claro */
+    .layout {
         display: flex;
+        min-height: 100vh;
+        background: #F3F4F6;
+        color: #1F2937;
     }
 
-    /* Sidebar */
     .sidebar {
-        width: 250px;
-        background: white;
-        box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+        width: 260px;
+        background: #111827;
+        color: white;
         display: flex;
         flex-direction: column;
         position: fixed;
         height: 100vh;
-        left: 0;
-        top: 0;
         z-index: 100;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.1);
     }
 
-    .logo-section {
+    .sidebar-brand {
         padding: 1.5rem;
-        text-align: center;
-        border-bottom: 2px solid #f0f0f0;
-    }
-
-    .logo-icon {
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .logo-title {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #10b981;
-        margin: 0;
-    }
-
-    .logo-subtitle {
-        font-size: 0.75rem;
-        color: #6b7280;
-        margin: 0.25rem 0 0 0;
-    }
-
-    .menu-section {
-        flex: 1;
-        padding: 1rem 0;
-        overflow-y: auto;
-    }
-
-    .menu-title {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #9ca3af;
-        padding: 0.5rem 1.5rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .menu-item {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        padding: 0.875rem 1.5rem;
-        color: #4b5563;
+        gap: 10px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.05);
+    }
+
+    .brand-text {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 800;
+        font-size: 1.4rem;
+    }
+
+    .nav-menu {
+        flex: 1;
+        padding: 1.5rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .nav-item {
+        padding: 0.9rem 1rem;
+        border-radius: 10px;
+        color: #9CA3AF;
+        font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s;
-        font-weight: 500;
-        border-left: 3px solid transparent;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.2s;
+        text-decoration: none;
     }
 
-        .menu-item:hover {
-            background: #f0fdf4;
-            color: #10b981;
-            border-left-color: #10b981;
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
         }
 
-        .menu-item.active {
-            background: #d1fae5;
-            color: #10b981;
-            border-left-color: #10b981;
+        .nav-item.active {
+            background: linear-gradient(90deg, #00E676 0%, #2979FF 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
         }
 
-    .menu-icon {
-        font-size: 1.25rem;
-    }
-
-    .logout-section {
-        padding: 1rem;
-        border-top: 2px solid #f0f0f0;
+    .sidebar-footer {
+        padding: 1.5rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
     }
 
     .btn-logout {
+        background: rgba(239, 68, 68, 0.1);
+        color: #EF4444;
         width: 100%;
-        background: #ef4444;
-        color: white;
-        border: none;
-        padding: 0.875rem;
-        border-radius: 0.75rem;
-        font-weight: 600;
+        padding: 0.8rem;
+        border-radius: 10px;
+        border: 1px solid rgba(239, 68, 68, 0.2);
         cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        transition: all 0.3s;
+        font-weight: 700;
+        transition: 0.2s;
     }
 
         .btn-logout:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
+            background: #EF4444;
+            color: white;
         }
 
-    /* Main Content */
-    .main-content {
-        margin-left: 250px;
+    .content {
+        margin-left: 260px;
         flex: 1;
-        padding: 2rem;
+        padding: 2.5rem;
     }
 
-    .top-bar {
-        background: white;
-        border-radius: 1rem;
-        padding: 1.5rem 2rem;
+    .header {
         margin-bottom: 2rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         display: flex;
-        align-items: center;
         justify-content: space-between;
-    }
-
-    .top-bar-left {
-        display: flex;
         align-items: center;
-        gap: 1rem;
     }
 
-    .top-bar-icon {
-        font-size: 2rem;
-    }
-
-    .top-bar-title {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #10b981;
-        margin: 0;
-    }
-
-    .mode-badge {
-        background: #d1fae5;
-        color: #065f46;
-        padding: 0.5rem 1rem;
-        border-radius: 9999px;
-        font-weight: 600;
-        font-size: 0.875rem;
-    }
-
-    /* Cards Grid - 3 columnas */
-    .cards-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .info-card {
-        background: white;
-        border-radius: 1.5rem;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        text-align: center;
-        border-top: 4px solid #10b981;
-        transition: all 0.3s;
-    }
-
-        .info-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #111827;
+            margin: 0;
         }
 
-    .card-icon {
-        font-size: 3rem;
+    /* Tarjetas */
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 1px solid white;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+
+    .c-green::before {
+        background: #00E676;
+    }
+
+    .c-blue::before {
+        background: #2979FF;
+    }
+
+    .c-orange::before {
+        background: #FF9100;
+    }
+
+    .c-purple::before {
+        background: #651FFF;
+    }
+
+    .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
         margin-bottom: 1rem;
     }
 
+    .icon-box {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .bg-green {
+        background: #E8F5E9;
+        color: #00C853;
+    }
+
+    .bg-blue {
+        background: #E3F2FD;
+        color: #2962FF;
+    }
+
+    .bg-orange {
+        background: #FFF3E0;
+        color: #FF6D00;
+    }
+
+    .bg-purple {
+        background: #EDE7F6;
+        color: #6200EA;
+    }
+
     .card-title {
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: #10b981;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.75rem;
-    }
-
-    .card-label {
-        font-size: 0.75rem;
-        color: #6b7280;
-        font-style: italic;
-        margin-bottom: 0.5rem;
-    }
-
-    .card-value {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 0.75rem;
-    }
-
-    .temp-value {
-        color: #f97316;
-    }
-
-    .humidity-value {
-        color: #3b82f6;
-    }
-
-    .card-status-badge {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
+        font-size: 0.9rem;
+        color: #6B7280;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 
-    .badge-inactive {
-        background: #f3f4f6;
-        color: #6b7280;
+    .card-val {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #111827;
+        line-height: 1;
     }
 
-    .badge-active {
-        background: #d1fae5;
-        color: #065f46;
-    }
-
-    .badge-online {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
-    .badge-time {
-        background: #d1fae5;
-        color: #065f46;
+    .text-neutral {
+        color: #6B7280;
+        font-weight: 600;
         font-size: 0.85rem;
+        margin-top: 10px;
+        display: block;
     }
 
-    .badge-forecast {
-        background: #fef3c7;
-        color: #92400e;
-        font-size: 1rem;
-    }
-
-    @@media (max-width: 1024px) {
+    @@media (max-width: 768px) {
         .sidebar {
-            transform: translateX(-100%);
+            display: none;
         }
 
-        .main-content {
+        .content {
             margin-left: 0;
-        }
-
-        .cards-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-
-    @@media (max-width: 640px) {
-        .cards-grid {
-            grid-template-columns: 1fr;
         }
     }
 </style>
 
-<div class="dashboard-page">
-    <!-- Sidebar -->
+<div class="layout">
     <aside class="sidebar">
-        <div class="logo-section">
-            <div class="logo-icon">💧</div>
-            <h1 class="logo-title">SmartDrop</h1>
-            <p class="logo-subtitle">Sistema de Riego Inteligente</p>
+        <div class="sidebar-brand">
+            <svg width="32" height="32" viewBox="0 0 100 100" fill="none"><path d="M50 5C50 5 15 35 15 60C15 79.33 30.67 95 50 95C69.33 95 85 79.33 85 60C85 35 50 5 50 5Z" fill="#00E676" /></svg>
+            <span class="brand-text">SmartDrop</span>
         </div>
-
-        <nav class="menu-section">
-            <div class="menu-title">Principal</div>
-            <div class="menu-item active" @onclick='() => Navigation.NavigateTo("/dashboard")'>
-                <span class="menu-icon">🎛️</span>
-                Panel de Control
-            </div>
-
-            <div class="menu-title">Gestión</div>
-            <div class="menu-item" @onclick='() => Navigation.NavigateTo("/plantas")'>
-                <span class="menu-icon">🌱</span>
-                Plantas
-            </div>
-            <div class="menu-item" @onclick='() => Navigation.NavigateTo("/graficos")'>
-                <span class="menu-icon">📊</span>
-                Gráficos
-            </div>
-            <div class="menu-item" @onclick='() => Navigation.NavigateTo("/usuarios")'>
-                <span class="menu-icon">👥</span>
-                Usuarios
-            </div>
-
-            <div class="menu-title">Sistema</div>
-            <div class="menu-item" @onclick='() => Navigation.NavigateTo("/riego")'>
-                <span class="menu-icon">💧</span>
-                Riego
-            </div>
-            <div class="menu-item" @onclick='() => Navigation.NavigateTo("/historial-riego")'>
-                <span class="menu-icon">📋</span>
-                Historial Riego
-            </div>
+        <nav class="nav-menu">
+            <div class="nav-item active"><span>📊</span> Dashboard</div>
+            <div class="nav-item" @onclick='() => Navigation.NavigateTo("/plantas")'><span>🌿</span> Plantas</div>
+            <div class="nav-item" @onclick='() => Navigation.NavigateTo("/riego")'><span>🚰</span> Riego</div>
+            <div class="nav-item" @onclick='() => Navigation.NavigateTo("/graficos")'><span>📈</span> Estadísticas</div>
+            <div class="nav-item" @onclick='() => Navigation.NavigateTo("/historial-riego")'><span>📋</span> Historial</div>
         </nav>
-
-        <div class="logout-section">
-            <button class="btn-logout" @onclick='() => Navigation.NavigateTo("/login")'>
-                <span>🚪</span>
-                Cerrar Sesión
-            </button>
+        <div class="sidebar-footer">
+            <button class="btn-logout" @onclick='() => Navigation.NavigateTo("/login")'>Cerrar Sesión</button>
         </div>
     </aside>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="top-bar">
-            <div class="top-bar-left">
-                <span class="top-bar-icon">🎛️</span>
-                <h2 class="top-bar-title">PANEL DE CONTROL</h2>
+    <main class="content">
+        <div class="header">
+            <div>
+                <h1>Panel de Control</h1>
+                <p>Bienvenido de nuevo.</p>
             </div>
-            <div class="mode-badge">Sistema Activo</div>
         </div>
 
-        <div class="cards-grid">
-            <!-- Temperatura -->
-            <div class="info-card">
-                <div class="card-icon">🌡️</div>
-                <div class="card-title">TEMPERATURA</div>
-                <div class="card-label">Temperatura</div>
-                <div class="card-value temp-value">
-                    @temperaturaActual°C
+        <div class="grid">
+            <div class="card c-green">
+                <div class="card-top">
+                    <div><div class="card-title">Humedad Suelo</div><div class="card-val">@humedadSuelo%</div></div>
+                    <div class="icon-box bg-green">🌱</div>
                 </div>
+                <span class="text-neutral">@(humedadSuelo < 30 ? "⚠️ Requiere Riego" : "✅ Nivel Óptimo")</span>
             </div>
 
-            <!-- Humedad del Aire -->
-            <div class="info-card">
-                <div class="card-icon">💧</div>
-                <div class="card-title">HUMEDAD DEL AIRE</div>
-                <div class="card-label">Humedad</div>
-                <div class="card-value humidity-value">
-                    @humedadAire%
+            <div class="card c-orange">
+                <div class="card-top">
+                    <div><div class="card-title">Temperatura</div><div class="card-val">@temperaturaActual°C</div></div>
+                    <div class="icon-box bg-orange">🌡️</div>
                 </div>
+                <span class="text-neutral">Aire: @humedadAire%</span>
             </div>
 
-            <!-- Bomba de Agua -->
-            <div class="info-card">
-                <div class="card-icon">💧</div>
-                <div class="card-title">BOMBA DE AGUA</div>
-                <div class="card-label">Estado</div>
-                <div class="card-value" style="color: @(bombaActiva ? "#10b981" : "#6b7280"); font-size: 1.5rem;">
-                    @(bombaActiva ? "ACTIVA" : "INACTIVA")
+            <div class="card c-blue">
+                <div class="card-top">
+                    <div><div class="card-title">Bomba</div><div class="card-val" style="color:@(bombaActiva ? "#00C853" : "#1F2937")">@(bombaActiva ? "ON" : "OFF")</div></div>
+                    <div class="icon-box bg-blue">💧</div>
                 </div>
-                <div class="card-status-badge @(bombaActiva ? "badge-active" : "badge-inactive")">
-                    @(bombaActiva ? "● Activa" : "○ Inactiva")
-                </div>
+                <span class="text-neutral">@(bombaActiva ? "Riego en curso..." : "Modo Automático")</span>
             </div>
 
-            <!-- Último Riego -->
-            <div class="info-card">
-                <div class="card-icon">📅</div>
-                <div class="card-title">ÚLTIMO RIEGO</div>
-                <div class="card-label">Fecha</div>
-                <div class="card-status-badge badge-time">
-                    @(ultimoRiego.HasValue
-                                        ? ultimoRiego.Value.ToString("dd/MM/yyyy HH:mm")
-                                        : "Sin registros")
+            <div class="card c-purple">
+                <div class="card-top">
+                    <div><div class="card-title">Pronóstico</div><div class="card-val" style="font-size:1.6rem; text-transform:capitalize;">@pronostico</div></div>
+                    <div class="icon-box bg-purple">☁️</div>
                 </div>
-            </div>
-
-            <!-- Pronóstico -->
-            <div class="info-card">
-                <div class="card-icon">🌤️</div>
-                <div class="card-title">PRONÓSTICO</div>
-                <div class="card-label">Pronóstico</div>
-                <div class="card-status-badge badge-forecast">
-                    @pronostico
-                </div>
-            </div>
-
-            <!-- Viento -->
-            <div class="info-card">
-                <div class="card-icon">💨</div>
-                <div class="card-title">VIENTO</div>
-                <div class="card-label">Viento</div>
-                <div class="card-value" style="color: #6366f1;">
-                    @viento
-                </div>
-            </div>
-
-            <!-- Estado del Programa -->
-            <div class="info-card">
-                <div class="card-icon">💻</div>
-                <div class="card-title">ESTADO DEL PROGRAMA</div>
-                <div class="card-label">Estado</div>
-                <div class="card-value" style="color: #10b981; font-size: 1.5rem;">ONLINE</div>
-                <div class="card-status-badge badge-online">● Online</div>
-            </div>
-
-            <!-- Humedad del Suelo -->
-            <div class="info-card">
-                <div class="card-icon">🌱</div>
-                <div class="card-title">HUMEDAD DEL SUELO</div>
-                <div class="card-label">Humedad</div>
-                <div class="card-value" style="color: @ObtenerColorHumedad(humedadSuelo);">
-                    @humedadSuelo%
-                </div>
-                <div class="card-status-badge"
-                     style="background: @ObtenerColorHumedadFondo(humedadSuelo); color: @ObtenerColorHumedadTexto(humedadSuelo);">
-                    @ObtenerEstadoHumedad(humedadSuelo)
-                </div>
+                <span class="text-neutral">Viento: @viento</span>
             </div>
         </div>
     </main>
@@ -452,39 +308,17 @@
     private int humedadSuelo = 0;
     private bool bombaActiva = false;
     private DateTime? ultimoRiego = null;
-    private string pronostico = "Cargando...";
+    private string pronostico = "--";
     private string viento = "0 m/s";
     private System.Timers.Timer? actualizacionTimer;
 
     protected override async Task OnInitializedAsync()
     {
         ArduinoService.DatosRecibidos += OnDatosArduinoRecibidos;
-        await CargarUltimoRiegoAsync();
-        await ActualizarDatosClimaAsync();
-
-        // ✅ Timer cada 5 segundos
+        await ActualizarTodo();
         actualizacionTimer = new System.Timers.Timer(5000);
-        actualizacionTimer.Elapsed += async (sender, e) => await ActualizarDatosAsync();
-        actualizacionTimer.AutoReset = true;
+        actualizacionTimer.Elapsed += async (s, e) => await ActualizarTodo();
         actualizacionTimer.Start();
-
-        Console.WriteLine("✅ [DASHBOARD] Inicializado correctamente");
-    }
-
-    private async Task CargarUltimoRiegoAsync()
-    {
-        try
-        {
-            var ultimoRiegoModel = await HistorialService.ObtenerUltimoRiegoAsync();
-            if (ultimoRiegoModel != null)
-            {
-                ultimoRiego = ultimoRiegoModel.Fecha;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ [DASHBOARD] Error: {ex.Message}");
-        }
     }
 
     private void OnDatosArduinoRecibidos(DatosArduinoModel datos)
@@ -494,90 +328,32 @@
         InvokeAsync(StateHasChanged);
     }
 
-    private async Task ActualizarDatosAsync()
+    private async Task ActualizarTodo()
     {
         try
         {
-            Console.WriteLine("🔄 [DASHBOARD] Actualizando datos...");
-
             var estado = await ArduinoService.ObtenerEstadoAsync();
-
             if (estado != null)
             {
                 humedadSuelo = estado.Humedad;
                 bombaActiva = estado.BombaEncendida;
-
-                Console.WriteLine($"✅ [DASHBOARD] H:{humedadSuelo}% B:{bombaActiva}");
             }
-            else
+            var clima = await ClimaService.ObtenerClimaActualAsync();
+            if (clima != null)
             {
-                Console.WriteLine("⚠️ [DASHBOARD] Estado es null");
+                temperaturaActual = (float)clima.Temperatura;
+                humedadAire = clima.Humedad;
+                viento = $"{clima.VelocidadViento} m/s";
+                pronostico = clima.Descripcion;
             }
-
-            await CargarUltimoRiegoAsync();
-            await ActualizarDatosClimaAsync();
             await InvokeAsync(StateHasChanged);
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ [DASHBOARD] Error: {ex.Message}");
-        }
-    }
-    private async Task ActualizarDatosClimaAsync()
-    {
-        try
-        {
-            var datosClima = await ClimaService.ObtenerClimaActualAsync();
-
-            if (datosClima != null)
-            {
-                temperaturaActual = (float)datosClima.Temperatura;
-                humedadAire = datosClima.Humedad;
-                viento = $"{datosClima.VelocidadViento:F1} m/s";
-                pronostico = datosClima.Descripcion;
-
-                Console.WriteLine($"🌤️ [DASHBOARD] Clima: {temperaturaActual}°C, {humedadAire}%");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ [DASHBOARD] Error clima: {ex.Message}");
-            pronostico = "Error al cargar";
-        }
-    }
-
-    private string ObtenerColorHumedad(int h)
-    {
-        if (h < 30) return "#ef4444";
-        if (h < 60) return "#f97316";
-        return "#10b981";
-    }
-
-    private string ObtenerColorHumedadFondo(int h)
-    {
-        if (h < 30) return "#fee2e2";
-        if (h < 60) return "#ffedd5";
-        return "#d1fae5";
-    }
-
-    private string ObtenerColorHumedadTexto(int h)
-    {
-        if (h < 30) return "#991b1b";
-        if (h < 60) return "#9a3412";
-        return "#065f46";
-    }
-
-    private string ObtenerEstadoHumedad(int h)
-    {
-        if (h < 30) return "CRÍTICO";
-        if (h < 60) return "BAJO";
-        return "ÓPTIMO";
+        catch { }
     }
 
     public void Dispose()
     {
         ArduinoService.DatosRecibidos -= OnDatosArduinoRecibidos;
         actualizacionTimer?.Stop();
-        actualizacionTimer?.Dispose();
     }
 }

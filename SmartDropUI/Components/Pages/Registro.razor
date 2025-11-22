@@ -8,542 +8,163 @@
 
 <PageTitle>Registro - SmartDrop</PageTitle>
 
-
 <style>
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    }
-
-    .registro-page {
+    .registro-wrapper {
         min-height: 100vh;
-        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 50%, #cffafe 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 2rem;
+        background-color: #05070a;
         position: relative;
+        overflow: hidden;
+        padding: 2rem;
     }
 
-    .color-dots {
-        position: fixed;
-        right: 1.5rem;
-        top: 50%;
-        transform: translateY(-50%);
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        z-index: 100;
-    }
-
-    .color-dot {
-        width: 3rem;
-        height: 3rem;
+    .blob {
+        position: absolute;
         border-radius: 50%;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        cursor: pointer;
-        transition: transform 0.3s ease;
+        filter: blur(80px);
+        opacity: 0.5;
+        z-index: 0;
+        animation: moveColors 15s infinite alternate;
     }
 
-        .color-dot:hover {
-            transform: scale(1.1);
-        }
-
-    .dot-teal {
-        background: #14b8a6;
+    .blob-1 {
+        width: 500px;
+        height: 500px;
+        background: #00E676;
+        top: -150px;
+        left: -150px;
     }
 
-    .dot-green {
-        background: #10b981;
+    .blob-2 {
+        width: 600px;
+        height: 600px;
+        background: #2979FF;
+        bottom: -200px;
+        right: -200px;
     }
 
-    .dot-purple {
-        background: #a855f7;
-    }
-
-    .dot-orange {
-        background: #f97316;
-    }
-
-    .registro-card {
-        background: white;
-        border-radius: 2rem;
-        box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.2);
-        padding: 2.5rem;
-        width: 100%;
-        max-width: 600px;
+    .glass-card-reg {
         position: relative;
         z-index: 10;
+        background: rgba(20, 25, 40, 0.85);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        width: 100%;
+        max-width: 650px;
+        padding: 2.5rem;
+        border-radius: 30px;
     }
 
-    .registro-header {
+    .reg-header {
         text-align: center;
         margin-bottom: 2rem;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 1rem;
     }
 
-    .registro-title {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #1f2937;
-        margin-bottom: 0.5rem;
-        letter-spacing: 0.5px;
-    }
-
-    .registro-subtitle {
-        color: #6b7280;
-        font-size: 0.95rem;
-    }
-
-    .icon-row {
-        display: flex;
-        justify-content: center;
-        gap: 1.5rem;
-        margin: 1.5rem 0 2rem 0;
-        font-size: 2.5rem;
-    }
-
-    .registro-form {
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .form-label {
-        display: flex;
-        align-items: center;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-        color: #374151;
-        font-size: 0.9rem;
-    }
-
-    .label-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 2rem;
-        height: 2rem;
-        border-radius: 0.5rem;
-        margin-right: 0.5rem;
-        font-size: 1.1rem;
-    }
-
-    .icon-purple {
-        background-color: #f3e8ff;
-    }
-
-    .icon-blue {
-        background-color: #dbeafe;
-    }
-
-    .icon-green {
-        background-color: #d1fae5;
-    }
-
-    .icon-orange {
-        background-color: #ffedd5;
-    }
-
-    .icon-teal {
-        background-color: #ccfbf1;
-    }
-
-    .icon-yellow {
-        background-color: #fef3c7;
-    }
-
-    .form-input, .form-select {
-        width: 100%;
-        padding: 0.875rem 1rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 0.75rem;
-        font-size: 0.95rem;
-        transition: all 0.3s ease;
-        background: white;
-        color: #1f2937;
-    }
-
-        .form-input::placeholder {
-            color: #d1d5db;
-        }
-
-        .form-input:focus, .form-select:focus {
-            outline: none;
-            border-color: #10b981;
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-        }
-
-    .input-wrapper {
-        position: relative;
-    }
-
-    .password-toggle-btn {
-        position: absolute;
-        right: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 1.25rem;
-        padding: 0.25rem;
-        transition: transform 0.2s;
-    }
-
-        .password-toggle-btn:hover {
-            transform: translateY(-50%) scale(1.15);
-        }
-
-    .checkbox-group {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-    }
-
-        .checkbox-group input[type="checkbox"] {
-            width: 1.125rem;
-            height: 1.125rem;
-            cursor: pointer;
-        }
-
-        .checkbox-group label {
-            cursor: pointer;
-            font-weight: 500;
-            color: #4b5563;
-            font-size: 0.9rem;
-        }
-
-    .alert {
-        padding: 0.875rem;
-        border-radius: 0.75rem;
-        font-size: 0.9rem;
-        text-align: center;
-        margin-bottom: 1rem;
-        animation: slideIn 0.3s ease;
-    }
-
-    @@keyframes slideIn {
-        from
-
-    {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    }
-
-    .alert-error {
-        background-color: #fee2e2;
-        color: #991b1b;
-        border: 1px solid #fecaca;
-    }
-
-    .alert-success {
-        background-color: #d1fae5;
-        color: #065f46;
-        border: 1px solid #a7f3d0;
-    }
-
-    .button-row {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1.5rem;
-    }
-
-    .btn {
-        flex: 1;
-        padding: 1rem;
-        border: none;
-        border-radius: 0.75rem;
-        font-weight: 600;
-        font-size: 0.95rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-    }
-
-    .btn-create {
-        background: #374151;
+    .reg-title {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.8rem;
         color: white;
-        box-shadow: 0 4px 12px rgba(55, 65, 81, 0.3);
+        font-weight: 800;
     }
 
-        .btn-create:hover:not(:disabled) {
-            background: #1f2937;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(55, 65, 81, 0.4);
-        }
+    .reg-label {
+        color: #E2E8F0;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+        margin-left: 10px;
+        display: block;
+    }
 
-        .btn-create:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-    .btn-back {
-        background: #ef4444;
+    .form-control-rounded option {
+        background-color: #151B2B;
         color: white;
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-    }
-
-        .btn-back:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
-        }
-
-    .btn-icon {
-        font-size: 1.25rem;
-    }
-
-    .loading-spinner {
-        display: inline-block;
-        width: 1.25rem;
-        height: 1.25rem;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-
-    @@keyframes spin {
-        to
-
-    {
-        transform: rotate(360deg);
-    }
-
-    }
-
-    @@media (max-width: 768px) {
-        .color-dots
-
-    {
-        display: none;
-    }
-
-    .registro-card {
-        padding: 2rem 1.5rem;
-    }
-
-    .registro-title {
-        font-size: 1.5rem;
-    }
-
-    .button-row {
-        flex-direction: column;
-    }
-
     }
 </style>
 
-<div class="registro-page">
-    <div class="color-dots">
-        <div class="color-dot dot-teal"></div>
-        <div class="color-dot dot-green"></div>
-        <div class="color-dot dot-purple"></div>
-        <div class="color-dot dot-orange"></div>
-    </div>
+<div class="registro-wrapper">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
 
-    <div class="registro-card">
-        <div class="registro-header">
-            <h1 class="registro-title">REGISTRAR NUEVO USUARIO</h1>
-            <p class="registro-subtitle">Sistema de Riego Automático SmartDrop</p>
+    <div class="glass-card-reg">
+        <div class="reg-header">
+            <h2 class="reg-title">Únete a SmartDrop</h2>
+            <p style="color: #94A3B8;">Crea tu cuenta de monitoreo</p>
         </div>
 
-        <div class="icon-row">
-            <span>🌿</span>
-            <span>💧</span>
-            <span>🔧</span>
-            <span>⚙️</span>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div>
+                <div class="mb-4">
+                    <label class="reg-label">Identificación</label>
+                    <input type="number" class="form-control-rounded" @bind="usuario.Identificacion" placeholder="Ej: 1065.." style="padding-left: 1.5rem;" />
+                </div>
+                <div class="mb-4">
+                    <label class="reg-label">Nombre</label>
+                    <input type="text" class="form-control-rounded" @bind="usuario.NombreCompleto" placeholder="Tu nombre" style="padding-left: 1.5rem;" />
+                </div>
+                <div class="mb-4">
+                    <label class="reg-label">Correo</label>
+                    <input type="email" class="form-control-rounded" @bind="usuario.Correo" placeholder="mail@ejemplo.com" style="padding-left: 1.5rem;" />
+                </div>
+            </div>
+
+            <div>
+                <div class="mb-4">
+                    <label class="reg-label">Usuario</label>
+                    <input type="text" class="form-control-rounded" @bind="usuario.NombreUsuario" placeholder="Usuario único" style="padding-left: 1.5rem;" />
+                </div>
+                <div class="mb-4">
+                    <label class="reg-label">Rol</label>
+                    <select class="form-control-rounded" @bind="usuario.Rol" style="padding-left: 1.5rem; appearance:auto;">
+                        <option value="">Seleccionar...</option>
+                        <option value="Cuidador">Cuidador</option>
+                        <option value="Administrador">Administrador</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="reg-label">Contraseña</label>
+                    <input type="password" class="form-control-rounded" @bind="usuario.Contrasena" placeholder="******" style="padding-left: 1.5rem;" />
+                </div>
+            </div>
         </div>
 
-        <div class="registro-form">
-            <div class="form-group">
-                <label class="form-label">
-                    <span class="label-icon icon-purple">🆔</span>
-                    Identificación
-                </label>
-                <input type="number"
-                       @bind="usuario.Identificacion"
-                       placeholder="Ingrese su identificación"
-                       class="form-input" />
-            </div>
+        @if (!string.IsNullOrEmpty(mensajeError))
+        {
+            <div class="alert alert-danger mt-4">@mensajeError</div>
+        }
+        @if (!string.IsNullOrEmpty(mensajeExito))
+        {
+            <div class="alert alert-success mt-4">@mensajeExito</div>
+        }
 
-            <div class="form-group">
-                <label class="form-label">
-                    <span class="label-icon icon-blue">👤</span>
-                    Nombre Completo
-                </label>
-                <input type="text"
-                       @bind="usuario.NombreCompleto"
-                       placeholder="Ingrese su nombre completo"
-                       class="form-input" />
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">
-                    <span class="label-icon icon-green">📧</span>
-                    Correo Electrónico
-                </label>
-                <input type="email"
-                       @bind="usuario.Correo"
-                       placeholder="usuario@ejemplo.com"
-                       class="form-input" />
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">
-                    <span class="label-icon icon-orange">🖊️</span>
-                    Nombre de Usuario
-                </label>
-                <input type="text"
-                       @bind="usuario.NombreUsuario"
-                       placeholder="Ingrese nombre de usuario"
-                       class="form-input" />
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">
-                    <span class="label-icon icon-teal">👥</span>
-                    Rol del Usuario
-                </label>
-                <select @bind="usuario.Rol" class="form-select">
-                    <option value="">Seleccionar rol</option>
-                    <option value="Cuidador">Cuidador</option>
-                    <option value="Administrador">Administrador</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">
-                    <span class="label-icon icon-yellow">🔐</span>
-                    Contraseña
-                </label>
-                <div class="input-wrapper">
-                    <input type="@(mostrarPassword ? "text" : "password")"
-                           @bind="usuario.Contrasena"
-                           placeholder="Ingrese una contraseña segura"
-                           class="form-input" />
-                    <button type="button"
-                            class="password-toggle-btn"
-                            @onclick="() => mostrarPassword = !mostrarPassword">
-                        @(mostrarPassword ? "🙈" : "👁️")
-                    </button>
-                </div>
-            </div>
-
-            <div class="checkbox-group">
-                <input type="checkbox"
-                       id="mostrarCheckbox"
-                       @bind="mostrarPassword" />
-                <label for="mostrarCheckbox">Mostrar contraseña</label>
-            </div>
-
-            @if (!string.IsNullOrEmpty(mensajeExito))
-            {
-                <div class="alert alert-success">
-                    ✅ @mensajeExito
-                </div>
-            }
-
-            @if (!string.IsNullOrEmpty(mensajeError))
-            {
-                <div class="alert alert-error">
-                    ❌ @mensajeError
-                </div>
-            }
-
-            <div class="button-row">
-                <button class="btn btn-create" @onclick="HandleRegistro" disabled="@cargando">
-                    @if (cargando)
-                    {
-                        <span class="loading-spinner"></span>
-                        <span>Creando...</span>
-                    }
-                    else
-                    {
-                        <span class="btn-icon">➕</span>
-                        <span>CREAR USUARIO</span>
-                    }
-                </button>
-                <button class="btn btn-back" @onclick='() => Navigation.NavigateTo("/login")'>
-                    <span class="btn-icon">⬅️</span>
-                    ATRÁS
-                </button>
-            </div>
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button class="btn-outline" style="flex: 1;" @onclick='() => Navigation.NavigateTo("/login")'>Cancelar</button>
+            <button class="btn-neon" style="flex: 2;" @onclick="HandleRegistro" disabled="@cargando">
+                @(cargando ? "Guardando..." : "REGISTRARME")
+            </button>
         </div>
     </div>
 </div>
 
 @code {
     private Usuario usuario = new Usuario();
-    private bool mostrarPassword = false;
     private bool cargando = false;
     private string mensajeError = "";
     private string mensajeExito = "";
 
     private async Task HandleRegistro()
     {
-        mensajeError = string.Empty;
-        mensajeExito = string.Empty;
-
-        // Validaciones (mantener las mismas)
-        if (usuario.Identificacion <= 0)
-        {
-            mensajeError = "Ingrese una identificación válida";
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(usuario.NombreCompleto))
-        {
-            mensajeError = "Ingrese su nombre completo";
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(usuario.Correo) || !usuario.Correo.Contains("@"))
-        {
-            mensajeError = "Ingrese un correo válido";
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(usuario.NombreUsuario))
-        {
-            mensajeError = "Ingrese un nombre de usuario";
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(usuario.Rol))
-        {
-            mensajeError = "Seleccione un rol";
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(usuario.Contrasena) || usuario.Contrasena.Length < 6)
-        {
-            mensajeError = "La contraseña debe tener al menos 6 caracteres";
-            return;
-        }
+        mensajeError = "";
+        if (usuario.Identificacion <= 0 || string.IsNullOrWhiteSpace(usuario.NombreUsuario)) { mensajeError = "Faltan datos."; return; }
 
         cargando = true;
-
         try
         {
-            // ✅ Mapear los campos correctamente
             var usuarioRegistro = new Usuario
             {
                 IdUsuario = usuario.Identificacion,
@@ -553,35 +174,16 @@
                 Password = usuario.Contrasena,
                 Rol = usuario.Rol
             };
-
-            Logger.LogInformation($"📤 Registrando usuario: {usuarioRegistro.NombreUsuario}");
-
-            // ✅ Usar AuthService
             var (success, message) = await AuthService.RegistrarAsync(usuarioRegistro);
-
             if (success)
             {
-                mensajeExito = message;
-                Logger.LogInformation("✅ Usuario creado exitosamente");
-
-                usuario = new Usuario();
-                await Task.Delay(2000);
+                mensajeExito = "¡Cuenta creada!";
+                await Task.Delay(1500);
                 Navigation.NavigateTo("/login");
             }
-            else
-            {
-                mensajeError = message;
-                Logger.LogWarning($"❌ Error: {message}");
-            }
+            else { mensajeError = message; }
         }
-        catch (Exception ex)
-        {
-            mensajeError = $"Error inesperado: {ex.Message}";
-            Logger.LogError($"❌ Excepción: {ex.Message}");
-        }
-        finally
-        {
-            cargando = false;
-        }
+        catch (Exception ex) { mensajeError = ex.Message; }
+        finally { cargando = false; }
     }
 }
