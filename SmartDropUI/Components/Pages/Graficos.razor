@@ -9,138 +9,208 @@
 @rendermode InteractiveServer
 @implements IDisposable
 
-<PageTitle>Gráficos en Tiempo Real</PageTitle>
+<PageTitle>Gráficos en Tiempo Real - SmartDrop</PageTitle>
 
 <style>
-    .graficos-container {
+    /* --- TEMA OSCURO --- */
+    .graficos-page {
+        min-height: 100vh;
+        background-color: #05070a;
         padding: 2rem;
-        max-width: 1400px;
-        margin: 0 auto;
-        font-family: 'Segoe UI', sans-serif;
+        font-family: 'Outfit', sans-serif;
+        color: white;
+        position: relative;
+        overflow-x: hidden;
     }
 
-    .btn-back {
-        background: #10b981;
-        color: white;
-        border: none;
-        padding: 0.8rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 700;
+    /* Luces de fondo */
+    .glow-blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        opacity: 0.3;
+        z-index: 0;
+        animation: floatColor 10s infinite ease-in-out;
+    }
+
+    .glow-1 {
+        width: 500px;
+        height: 500px;
+        background: #00E676;
+        top: -150px;
+        left: -150px;
+    }
+
+    .glow-2 {
+        width: 600px;
+        height: 600px;
+        background: #2979FF;
+        bottom: -150px;
+        right: -150px;
+    }
+
+    /* Botón Volver */
+    .btn-back-menu {
+        background: rgba(255, 255, 255, 0.05);
+        color: #9ca3af;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
         cursor: pointer;
-        margin-bottom: 2rem;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        transition: 0.2s;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 10;
     }
 
-        .btn-back:hover {
-            background: #059669;
-            transform: translateY(-2px);
+        .btn-back-menu:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: white;
+            transform: translateX(-5px);
         }
 
+    .page-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 3rem;
+        background: linear-gradient(90deg, #00E676, #2979FF);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Grid de Gráficos */
     .charts-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 2rem;
         margin-bottom: 3rem;
+        position: relative;
+        z-index: 10;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
+    /* Tarjetas de Gráfico */
     .chart-card {
-        background: white;
-        border-radius: 20px;
+        background: #111827;
+        border-radius: 24px;
         padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
     }
 
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+    }
+
     .chart-title {
-        color: #10b981;
-        font-weight: 800;
+        color: white;
+        font-weight: 700;
         text-transform: uppercase;
-        margin-bottom: 0.5rem;
+        letter-spacing: 1px;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
     .chart-subtitle {
-        color: #6b7280;
-        font-size: 0.9rem;
-        margin-bottom: 1.5rem;
-        font-style: italic;
+        color: #9ca3af;
+        font-size: 0.8rem;
+        margin-top: 5px;
     }
 
+    /* Contenedor SVG */
     .chart-box {
-        background: #f8fafc;
-        border-radius: 15px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 16px;
         padding: 20px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid rgba(255, 255, 255, 0.05);
         position: relative;
         height: 250px;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Estilos SVG (Adaptados a Dark Mode) */
+    .grid-line {
+        stroke: rgba(255, 255, 255, 0.1);
+        stroke-dasharray: 4;
+    }
+
+    .axis-text {
+        font-size: 10px;
+        fill: #6B7280;
+        font-family: monospace;
     }
 
     .line-humedad {
         fill: none;
-        stroke: #10b981;
+        stroke: #00E676; /* Verde Neón */
         stroke-width: 3;
         stroke-linecap: round;
         stroke-linejoin: round;
-        filter: drop-shadow(0 4px 6px rgba(16, 185, 129, 0.2));
+        filter: drop-shadow(0 0 8px rgba(0, 230, 118, 0.4));
     }
 
     .line-temp {
         fill: none;
-        stroke: #ef4444;
+        stroke: #FF9100; /* Naranja Neón */
         stroke-width: 3;
         stroke-linecap: round;
         stroke-linejoin: round;
-        filter: drop-shadow(0 4px 6px rgba(239, 68, 68, 0.2));
+        filter: drop-shadow(0 0 8px rgba(255, 145, 0, 0.4));
     }
 
     .dot {
-        fill: white;
+        fill: #111827;
         stroke-width: 2;
         r: 4;
         transition: all 0.3s;
     }
 
     .dot-hum {
-        stroke: #10b981;
+        stroke: #00E676;
     }
 
     .dot-temp {
-        stroke: #ef4444;
+        stroke: #FF9100;
     }
 
-    .grid-line {
-        stroke: #e2e8f0;
-        stroke-dasharray: 4;
-    }
-
-    .axis-text {
-        font-size: 10px;
-        fill: #94a3b8;
-        font-family: monospace;
-    }
-
+    /* Valor Destacado */
     .value-display {
-        font-size: 1.8rem;
+        font-size: 2.5rem;
         font-weight: 900;
+        text-align: center;
         padding: 1rem;
-        border-radius: 15px;
-        background: #f0fdf4;
-        color: #10b981;
-        border: 1px solid #bbf7d0;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .value-temp {
-        background: #fef2f2;
-        color: #ef4444;
-        border-color: #fecaca;
+    .val-green {
+        color: #00E676;
     }
 
+    .val-orange {
+        color: #FF9100;
+    }
+
+    /* Detalles Clima */
     .weather-details {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -149,84 +219,120 @@
     }
 
     .weather-badge {
-        background: #f1f5f9;
-        padding: 0.5rem;
-        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 0.8rem;
+        border-radius: 12px;
         font-size: 0.9rem;
-        color: #475569;
+        color: #9ca3af;
         font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
+    /* --- TABLA DE HISTORIAL --- */
     .history-section {
-        background: white;
-        border-radius: 20px;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        background: #111827;
+        border-radius: 24px;
+        padding: 2.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        position: relative;
+        z-index: 10;
+        max-width: 1400px;
+        margin: 0 auto;
     }
 
-    /* Header con Botón */
     .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        color: white;
         font-size: 1.2rem;
-        font-weight: 800;
-        color: #334155;
-        margin-bottom: 1.5rem;
+        font-weight: 700;
+    }
+
+    /* Nuevo estilo para el título de la sección con icono */
+    .section-title-with-icon {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        gap: 12px;
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: white;
     }
 
     .btn-refresh-table {
-        background: #3b82f6;
-        color: white;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
+        background: rgba(41, 121, 255, 0.1);
+        color: #2979FF;
+        border: 1px solid rgba(41, 121, 255, 0.3);
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
         font-size: 0.9rem;
         cursor: pointer;
-        transition: 0.2s;
+        transition: 0.3s;
+        font-weight: 600;
         display: flex;
         align-items: center;
-        gap: 5px;
+        gap: 8px;
     }
 
         .btn-refresh-table:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
+            background: rgba(41, 121, 255, 0.2);
+            color: white;
         }
 
     .custom-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0 10px; /* Espacio entre filas */
     }
 
         .custom-table th {
             text-align: left;
             padding: 1rem;
-            background: #f8fafc;
-            color: #64748b;
+            color: #6B7280;
             font-weight: 700;
-            font-size: 0.85rem;
             text-transform: uppercase;
-            border-bottom: 2px solid #e2e8f0;
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .custom-table td {
-            padding: 1rem;
-            border-bottom: 1px solid #f1f5f9;
-            color: #334155;
+            padding: 1.2rem;
+            background: rgba(255, 255, 255, 0.02);
+            color: white;
             font-weight: 500;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-    .status-dot {
-        height: 10px;
-        width: 10px;
-        border-radius: 50%;
-        display: inline-block;
-        margin-right: 5px;
+            .custom-table td:first-child {
+                border-top-left-radius: 12px;
+                border-bottom-left-radius: 12px;
+                border-left: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+            .custom-table td:last-child {
+                border-top-right-radius: 12px;
+                border-bottom-right-radius: 12px;
+                border-right: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .status-ok {
+        background: rgba(0, 230, 118, 0.1);
+        color: #00E676;
+    }
+
+    .status-bad {
+        background: rgba(239, 68, 68, 0.1);
+        color: #EF4444;
     }
 
     @@media (max-width: 1000px) {
@@ -236,24 +342,47 @@
     }
 </style>
 
-<div class="graficos-container">
-    <button class="btn-back" @onclick='() => Navigation.NavigateTo("/dashboard")'><span>⬅</span> Volver</button>
+<div class="graficos-page">
+    <div class="glow-blob glow-1"></div>
+    <div class="glow-blob glow-2"></div>
 
-    <h1 style="text-align:center; color:#10b981; font-weight:900; margin-bottom:3rem;">ANÁLISIS EN TIEMPO REAL</h1>
+    <button class="btn-back-menu" @onclick='() => Navigation.NavigateTo("/dashboard")'>
+        <span>⬅️</span> Volver al Dashboard
+    </button>
+
+    <h1 class="page-title">ANÁLISIS EN TIEMPO REAL</h1>
 
     <div class="charts-grid">
+
+        <!-- GRÁFICO HUMEDAD -->
         <div class="chart-card">
             <div>
-                <div class="chart-title">Humedad del Suelo</div>
-                <div class="chart-subtitle">Sensor Arduino en Vivo</div>
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title" style="color: #00E676;">
+                            <!-- ✅ ICONO NUEVO: PLANTA/HOJA (Estilo Outline) -->
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22c4.97 0 9-4.03 9-9V7a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v6c0 4.97 4.03 9 9 9z"></path>
+                                <path d="M12 22V7"></path>
+                                <path d="M2 13h10"></path>
+                            </svg>
+                            Humedad del Suelo
+                        </div>
+                        <div class="chart-subtitle">Sensor Arduino en Vivo</div>
+                    </div>
+                </div>
+
                 <div class="chart-box">
                     <svg width="100%" height="100%" viewBox="0 0 500 250" preserveAspectRatio="none">
+                        <!-- Grid Lines -->
                         @for (int i = 0; i <= 5; i++)
                         {
                             <line x1="40" y1="@(i * 40 + 25)" x2="490" y2="@(i * 40 + 25)" class="grid-line" />
                             <g><text x="5" y="@(i * 40 + 30)" class="axis-text">@(100 - i * 20)%</text></g>
                         }
+                        <!-- Linea Datos -->
                         <path d="@pathHumedad" class="line-humedad" />
+                        <!-- Puntos -->
                         @foreach (var p in puntosHumedad)
                         {
                             <circle cx="@p.X" cy="@p.Y" class="dot dot-hum" />
@@ -261,13 +390,30 @@
                     </svg>
                 </div>
             </div>
-            <div class="value-display">@ultimaHumedad.ToString("0.0") %</div>
+            <div class="value-display val-green">@ultimaHumedad.ToString("0.0") %</div>
         </div>
 
+        <!-- GRÁFICO TEMPERATURA -->
         <div class="chart-card">
             <div>
-                <div class="chart-title" style="color:#ef4444;">Clima Ambiental</div>
-                <div class="chart-subtitle">Datos API OpenWeatherMap</div>
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title" style="color: #FF9100;">
+                            <!-- ✅ ICONO NUEVO: SOL Y NUBE (Clima) -->
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2v2"></path>
+                                <path d="m4.93 4.93 1.41 1.41"></path>
+                                <path d="M20 12h2"></path>
+                                <path d="m19.07 4.93-1.41 1.41"></path>
+                                <path d="M15.97 15.97A4 4 0 1 0 10.5 10.5"></path>
+                                <path d="M16 20a4 4 0 1 1 0-8"></path>
+                            </svg>
+                            Clima Ambiental
+                        </div>
+                        <div class="chart-subtitle">Datos API OpenWeatherMap</div>
+                    </div>
+                </div>
+
                 <div class="chart-box">
                     <svg width="100%" height="100%" viewBox="0 0 500 250" preserveAspectRatio="none">
                         @for (int i = 0; i <= 5; i++)
@@ -284,7 +430,7 @@
                 </div>
             </div>
             <div>
-                <div class="value-display value-temp">@ultimaTemperatura.ToString("0.0") °C</div>
+                <div class="value-display val-orange">@ultimaTemperatura.ToString("0.0") °C</div>
                 <div class="weather-details">
                     <div class="weather-badge">💧 Hum: @humedadAire%</div>
                     <div class="weather-badge">💨 Viento: @viento km/h</div>
@@ -293,13 +439,21 @@
         </div>
     </div>
 
+    <!-- TABLA HISTORIAL -->
     <div class="history-section">
         <div class="section-header">
-            <div>
-                <span>📋</span> Últimos 5 Riegos Registrados
+            <div class="section-title-with-icon">
+                <!-- ✅ ICONO NUEVO: HISTORIAL/RELOJ -->
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2979FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 3v5h5"></path>
+                    <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"></path>
+                    <path d="M12 7v5l4 2"></path>
+                </svg>
+                Últimos 5 Riegos Registrados
             </div>
             <button class="btn-refresh-table" @onclick="CargarHistorial">
-                <span>🔄</span> Actualizar Tabla
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" /></svg>
+                Actualizar
             </button>
         </div>
 
@@ -320,17 +474,16 @@
                         {
                             <tr>
                                 <td>@item.Fecha.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                                <td style="color:#10b981; font-weight:bold;">@item.Humedad %</td>
-                                <td style="color:#ef4444; font-weight:bold;">@item.Temperatura °C</td>
+                                <td style="color:#00E676; font-weight:bold;">@item.Humedad %</td>
+                                <td style="color:#FF9100; font-weight:bold;">@item.Temperatura °C</td>
                                 <td>
                                     @if (item.Humedad < 30)
                                     {
-                                        <span style="color:#ef4444;">Seco</span>
+                                        <span class="status-badge status-bad">Seco</span>
                                     }
                                     else
                                     {
-
-                                        <span style="color:#10b981;">Óptimo</span>
+                                        <span class="status-badge status-ok">Óptimo</span>
                                     }
                                 </td>
                             </tr>
@@ -371,7 +524,6 @@
         _timer.Start();
     }
 
-    // ✅ Método que llama el botón
     private async Task CargarHistorial()
     {
         try

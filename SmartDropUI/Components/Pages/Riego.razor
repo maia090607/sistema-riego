@@ -34,8 +34,22 @@
         z-index: 0;
         animation: floatColor 10s infinite ease-in-out;
     }
-    .glow-1 { width: 500px; height: 500px; background: #00E676; top: -150px; left: -150px; }
-    .glow-2 { width: 600px; height: 600px; background: #2979FF; bottom: -150px; right: -150px; }
+
+    .glow-1 {
+        width: 500px;
+        height: 500px;
+        background: #00E676;
+        top: -150px;
+        left: -150px;
+    }
+
+    .glow-2 {
+        width: 600px;
+        height: 600px;
+        background: #2979FF;
+        bottom: -150px;
+        right: -150px;
+    }
 
     /* Botón Volver */
     .btn-back-menu {
@@ -54,12 +68,13 @@
         position: relative;
         z-index: 10;
     }
-    .btn-back-menu:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
-        border-color: white;
-        transform: translateX(-5px);
-    }
+
+        .btn-back-menu:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: white;
+            transform: translateX(-5px);
+        }
 
     /* Encabezado */
     .header-container {
@@ -95,15 +110,17 @@
         gap: 8px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
-    .mode-auto { 
-        background: rgba(0, 230, 118, 0.1); 
-        color: #00E676; 
-        border: 1px solid rgba(0, 230, 118, 0.3); 
+
+    .mode-auto {
+        background: rgba(0, 230, 118, 0.1);
+        color: #00E676;
+        border: 1px solid rgba(0, 230, 118, 0.3);
     }
-    .mode-manual { 
-        background: rgba(255, 145, 0, 0.1); 
-        color: #FF9100; 
-        border: 1px solid rgba(255, 145, 0, 0.3); 
+
+    .mode-manual {
+        background: rgba(255, 145, 0, 0.1);
+        color: #FF9100;
+        border: 1px solid rgba(255, 145, 0, 0.3);
     }
 
     /* Grid de Tarjetas */
@@ -128,7 +145,10 @@
         position: relative;
         overflow: hidden;
     }
-    .status-card:hover { transform: translateY(-5px); }
+
+        .status-card:hover {
+            transform: translateY(-5px);
+        }
 
     /* Icono dentro de la tarjeta */
     .icon-wrapper {
@@ -141,33 +161,80 @@
         margin: 0 auto 1.5rem auto;
         background: rgba(255, 255, 255, 0.03);
     }
-    
-    .icon-wrapper svg {
-        width: 40px;
-        height: 40px;
-        stroke-width: 2;
-    }
+
+        .icon-wrapper svg {
+            width: 40px;
+            height: 40px;
+            stroke-width: 2;
+        }
 
     /* Bordes y colores dinámicos */
-    .card-on { border-color: #00E676; }
-    .card-on .icon-wrapper { background: rgba(0, 230, 118, 0.1); color: #00E676; }
-    
-    .card-off { border-color: #EF4444; }
-    .card-off .icon-wrapper { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
-    
-    .card-online { border-color: #2979FF; }
-    .card-online .icon-wrapper { background: rgba(41, 121, 255, 0.1); color: #2979FF; }
-    
-    .card-offline { border-color: #9CA3AF; }
-    .card-offline .icon-wrapper { background: rgba(156, 163, 175, 0.1); color: #9CA3AF; }
+    .card-on {
+        border-color: #00E676;
+    }
 
-    .status-label { color: #9ca3af; font-size: 0.9rem; text-transform: uppercase; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: 1px; }
-    .status-value { font-size: 2rem; font-weight: 900; margin: 0; }
+        .card-on .icon-wrapper {
+            background: rgba(0, 230, 118, 0.1);
+            color: #00E676;
+        }
 
-    .text-green { color: #00E676; }
-    .text-red { color: #EF4444; }
-    .text-blue { color: #2979FF; }
-    .text-gray { color: #9CA3AF; }
+    .card-off {
+        border-color: #EF4444;
+    }
+
+        .card-off .icon-wrapper {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+        }
+
+    .card-online {
+        border-color: #2979FF;
+    }
+
+        .card-online .icon-wrapper {
+            background: rgba(41, 121, 255, 0.1);
+            color: #2979FF;
+        }
+
+    .card-offline {
+        border-color: #9CA3AF;
+    }
+
+        .card-offline .icon-wrapper {
+            background: rgba(156, 163, 175, 0.1);
+            color: #9CA3AF;
+        }
+
+    .status-label {
+        color: #9ca3af;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        letter-spacing: 1px;
+    }
+
+    .status-value {
+        font-size: 2rem;
+        font-weight: 900;
+        margin: 0;
+    }
+
+    .text-green {
+        color: #00E676;
+    }
+
+    .text-red {
+        color: #EF4444;
+    }
+
+    .text-blue {
+        color: #2979FF;
+    }
+
+    .text-gray {
+        color: #9CA3AF;
+    }
 
     /* Sección Manual */
     .manual-section {
@@ -217,20 +284,22 @@
         color: #003d1c;
         box-shadow: 0 4px 20px rgba(0, 230, 118, 0.3);
     }
-    .btn-start:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 30px rgba(0, 230, 118, 0.5);
-    }
+
+        .btn-start:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 230, 118, 0.5);
+        }
 
     .btn-stop {
         background: linear-gradient(90deg, #EF4444 0%, #DC2626 100%);
         color: white;
         box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
     }
-    .btn-stop:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 30px rgba(239, 68, 68, 0.5);
-    }
+
+        .btn-stop:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(239, 68, 68, 0.5);
+        }
 
     .btn-action:disabled {
         opacity: 0.6;
@@ -262,9 +331,20 @@
     }
 
     @@media (max-width: 768px) {
-        .status-grid { grid-template-columns: 1fr; }
-        .header-container { flex-direction: column; align-items: flex-start; gap: 1rem; }
-        .mode-badge { width: 100%; justify-content: center; }
+        .status-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .header-container {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .mode-badge {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 
@@ -279,7 +359,7 @@
 
     <div class="header-container">
         <h1 class="page-title">Control de Riego</h1>
-        
+
         <!-- ETIQUETA DE ESTADO DEL SISTEMA -->
         <div class="mode-badge @(riegoManualActivo ? "mode-manual" : "mode-auto")">
             @if (riegoManualActivo)
@@ -297,7 +377,7 @@
 
     <!-- GRID DE ESTADO -->
     <div class="status-grid">
-        
+
         <!-- TARJETA BOMBA (ICONO GOTA) -->
         <div class="status-card @(bombaActiva ? "card-on" : "card-off")">
             <div class="icon-wrapper">
@@ -363,7 +443,7 @@
                     <span>INICIAR RIEGO AHORA</span>
                 }
             </button>
-            
+
             <div style="margin-top:1rem;">
                 <span class="info-alert">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
