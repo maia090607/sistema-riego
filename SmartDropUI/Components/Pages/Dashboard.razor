@@ -55,14 +55,13 @@
     }
 
     .nav-item {
-        padding: 0.9rem 1rem;
+        padding: 1rem 1.5rem;
         border-radius: 10px;
         color: #9CA3AF;
         font-weight: 600;
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 10px;
         transition: all 0.2s;
         text-decoration: none;
     }
@@ -183,8 +182,14 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
     }
+
+        /* Estilos para los SVGs dentro de las cajas */
+        .icon-box svg {
+            width: 28px;
+            height: 28px;
+            stroke-width: 2;
+        }
 
     .bg-green {
         background: #E8F5E9;
@@ -246,13 +251,16 @@
             <svg width="32" height="32" viewBox="0 0 100 100" fill="none"><path d="M50 5C50 5 15 35 15 60C15 79.33 30.67 95 50 95C69.33 95 85 79.33 85 60C85 35 50 5 50 5Z" fill="#00E676" /></svg>
             <span class="brand-text">SmartDrop</span>
         </div>
+
+        <!-- MENÚ LATERAL SIN ICONOS (SOLO TEXTO) -->
         <nav class="nav-menu">
-            <div class="nav-item active"><span>📊</span> Dashboard</div>
-            <div class="nav-item" @onclick='() => Navigation.NavigateTo("/plantas")'><span>🌿</span> Plantas</div>
-            <div class="nav-item" @onclick='() => Navigation.NavigateTo("/riego")'><span>🚰</span> Riego</div>
-            <div class="nav-item" @onclick='() => Navigation.NavigateTo("/graficos")'><span>📈</span> Estadísticas</div>
-            <div class="nav-item" @onclick='() => Navigation.NavigateTo("/historial-riego")'><span>📋</span> Historial</div>
+            <div class="nav-item active">Dashboard</div>
+            <div class="nav-item" @onclick='() => Navigation.NavigateTo("/plantas")'>Plantas</div>
+            <div class="nav-item" @onclick='() => Navigation.NavigateTo("/riego")'>Riego</div>
+            <div class="nav-item" @onclick='() => Navigation.NavigateTo("/graficos")'>Estadísticas</div>
+            <div class="nav-item" @onclick='() => Navigation.NavigateTo("/historial-riego")'>Historial</div>
         </nav>
+
         <div class="sidebar-footer">
             <button class="btn-logout" @onclick='() => Navigation.NavigateTo("/login")'>Cerrar Sesión</button>
         </div>
@@ -267,34 +275,57 @@
         </div>
 
         <div class="grid">
+
+            <!-- Tarjeta Humedad Suelo (Icono Hoja/Planta) -->
             <div class="card c-green">
                 <div class="card-top">
                     <div><div class="card-title">Humedad Suelo</div><div class="card-val">@humedadSuelo%</div></div>
-                    <div class="icon-box bg-green">🌱</div>
+                    <div class="icon-box bg-green">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22c4.97 0 9-4.03 9-9V7a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v6c0 4.97 4.03 9 9 9z"></path>
+                            <path d="M12 22V7"></path>
+                            <path d="M2 13h10"></path>
+                        </svg>
+                    </div>
                 </div>
                 <span class="text-neutral">@(humedadSuelo < 30 ? "⚠️ Requiere Riego" : "✅ Nivel Óptimo")</span>
             </div>
 
+            <!-- Tarjeta Temperatura (Icono Termómetro) -->
             <div class="card c-orange">
                 <div class="card-top">
                     <div><div class="card-title">Temperatura</div><div class="card-val">@temperaturaActual°C</div></div>
-                    <div class="icon-box bg-orange">🌡️</div>
+                    <div class="icon-box bg-orange">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>
+                        </svg>
+                    </div>
                 </div>
                 <span class="text-neutral">Aire: @humedadAire%</span>
             </div>
 
+            <!-- Tarjeta Bomba (Icono Gota de Agua) -->
             <div class="card c-blue">
                 <div class="card-top">
                     <div><div class="card-title">Bomba</div><div class="card-val" style="color:@(bombaActiva ? "#00C853" : "#1F2937")">@(bombaActiva ? "ON" : "OFF")</div></div>
-                    <div class="icon-box bg-blue">💧</div>
+                    <div class="icon-box bg-blue">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                        </svg>
+                    </div>
                 </div>
                 <span class="text-neutral">@(bombaActiva ? "Riego en curso..." : "Modo Automático")</span>
             </div>
 
+            <!-- Tarjeta Pronóstico (Icono Nube) -->
             <div class="card c-purple">
                 <div class="card-top">
                     <div><div class="card-title">Pronóstico</div><div class="card-val" style="font-size:1.6rem; text-transform:capitalize;">@pronostico</div></div>
-                    <div class="icon-box bg-purple">☁️</div>
+                    <div class="icon-box bg-purple">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                        </svg>
+                    </div>
                 </div>
                 <span class="text-neutral">Viento: @viento</span>
             </div>
