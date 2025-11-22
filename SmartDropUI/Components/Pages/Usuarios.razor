@@ -1,606 +1,509 @@
-﻿@page "/usuarios"
+﻿@page "/usuario"
 @using SmartDropUI.Services
 @using SmartDropUI.Models
-@inject RiegoService RiegoService
 @inject AuthService AuthService
+@inject ApiService ApiService
 @inject NavigationManager Navigation
 @inject ILogger<Usuarios> Logger
 @rendermode InteractiveServer
 
-<PageTitle>Gestión de Usuarios - SmartDrop</PageTitle>
+<PageTitle>Mi Perfil - SmartDrop</PageTitle>
 
+<!-- Estilos se mantienen iguales, solo lógica actualizada -->
 <style>
-    /* Estilos generales */
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: 'Segoe UI', Roboto, sans-serif;
-    }
-
-    .usuarios-page {
+    .profile-page {
         min-height: 100vh;
-        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 50%, #cffafe 100%);
+        background-color: #05070a;
         padding: 2rem;
+        font-family: 'Outfit', sans-serif;
+        color: white;
+        position: relative;
+        overflow-x: hidden;
     }
 
-    .usuarios-container {
-        max-width: 1600px;
-        margin: 0 auto;
+    .glow-blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        opacity: 0.3;
+        z-index: 0;
+        animation: floatColor 10s infinite ease-in-out;
+    }
+
+    .glow-1 {
+        width: 500px;
+        height: 500px;
+        background: #00E676;
+        top: -100px;
+        right: -100px;
+    }
+
+    .glow-2 {
+        width: 600px;
+        height: 600px;
+        background: #2979FF;
+        bottom: -100px;
+        left: -100px;
     }
 
     .btn-back-menu {
-        background: #10b981;
-        color: white;
-        border: none;
+        background: rgba(255, 255, 255, 0.05);
+        color: #9ca3af;
+        border: 1px solid rgba(255, 255, 255, 0.1);
         padding: 0.75rem 1.5rem;
-        border-radius: 0.75rem;
+        border-radius: 50px;
         font-weight: 600;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        margin-bottom: 2rem;
         transition: all 0.3s ease;
+        position: relative;
+        z-index: 10;
     }
 
         .btn-back-menu:hover {
-            background: #059669;
-            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: white;
+            transform: translateX(-5px);
         }
 
-    .page-header {
+    .profile-container {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 10;
+    }
+
+    .profile-card {
+        background: #111827;
+        border-radius: 24px;
+        padding: 2.5rem;
         text-align: center;
-        margin-bottom: 2.5rem;
-    }
-
-    .page-title {
-        font-size: 2.25rem;
-        font-weight: bold;
-        color: #10b981;
-        margin-bottom: 0.5rem;
-    }
-
-    .page-subtitle {
-        font-size: 1rem;
-        color: #6b7280;
-    }
-
-    /* Tabla */
-    .usuarios-table-section {
-        background: white;
-        border-radius: 1.5rem;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        margin-bottom: 2rem;
-    }
-
-    .table-header {
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
         align-items: center;
+    }
+
+    .avatar-wrapper {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        border: 4px solid #1f2937;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 0 25px rgba(0, 230, 118, 0.15);
+        position: relative;
+        background: #0f1219;
+    }
+
+    .avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .upload-btn-wrapper {
         margin-bottom: 1.5rem;
     }
 
-    .table-title {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #10b981;
-    }
-
-    .btn-refresh {
-        background: #3b82f6;
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.75rem;
-        font-weight: 600;
+    .btn-camera {
+        background: rgba(41, 121, 255, 0.15);
+        color: #2979FF;
+        border: 1px solid rgba(41, 121, 255, 0.3);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
         cursor: pointer;
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
+        gap: 6px;
+        transition: 0.3s;
     }
 
-        .btn-refresh:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-        }
-
-    .table-container {
-        overflow-x: auto;
-        border-radius: 0.75rem;
-        border: 1px solid #e5e7eb;
-    }
-
-    .usuarios-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-        .usuarios-table thead {
-            background: #10b981;
+        .btn-camera:hover {
+            background: rgba(41, 121, 255, 0.25);
             color: white;
         }
 
-        .usuarios-table th {
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.875rem;
-        }
-
-        .usuarios-table td {
-            padding: 1rem;
-            border-bottom: 1px solid #e5e7eb;
-            color: #374151;
-        }
-
-        .usuarios-table tbody tr:hover {
-            background: #f0fdf4;
-        }
-
-    /* Badges Roles */
-    .badge-rol {
-        display: inline-block;
-        padding: 0.375rem 0.875rem;
-        border-radius: 9999px;
-        font-weight: 600;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-    }
-
-    .rol-admin {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-    /* Azul */
-    .rol-cuidador {
-        background: #f3e8ff;
-        color: #6b21a8;
-    }
-    /* Morado */
-    .rol-otro {
-        background: #fef3c7;
-        color: #92400e;
-    }
-    /* Naranja */
-
-    /* Grid Layout */
-    .content-grid {
-        display: grid;
-        grid-template-columns: 300px 1fr 350px;
-        gap: 2rem;
-    }
-
-    /* Sidebar Perfil */
-    .profile-section {
-        background: white;
-        border-radius: 1.5rem;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        text-align: center;
-        height: fit-content;
-    }
-
-    .profile-avatar {
-        width: 140px;
-        height: 140px;
-        background: #10b981;
-        border-radius: 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        font-size: 4rem;
+    .user-name {
+        font-size: 1.5rem;
+        font-weight: 800;
         color: white;
-    }
-
-    .btn-upload-photo {
-        background: #3b82f6;
-        color: white;
-        border: none;
-        padding: 0.875rem 1.5rem;
-        border-radius: 0.75rem;
-        font-weight: 600;
-        cursor: pointer;
-        width: 100%;
-        margin-bottom: 1.5rem;
-    }
-
-    .profile-role-title {
-        font-size: 1.25rem;
-        font-weight: bold;
-        color: #10b981;
         margin-bottom: 0.5rem;
     }
 
-    .profile-role-subtitle {
-        font-size: 0.9rem;
-        color: #6b7280;
+    .user-role {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        display: inline-block;
+        margin-bottom: 1.5rem;
     }
 
-    /* Formulario Central */
-    .info-section {
-        background: white;
-        border-radius: 1.5rem;
+    .role-admin {
+        background: rgba(255, 145, 0, 0.1);
+        color: #FF9100;
+        border: 1px solid rgba(255, 145, 0, 0.3);
+    }
+
+    .role-user {
+        background: rgba(0, 230, 118, 0.1);
+        color: #00E676;
+        border: 1px solid rgba(0, 230, 118, 0.3);
+    }
+
+    .stats-row {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-val {
+        display: block;
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: white;
+    }
+
+    .stat-lbl {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    .edit-card {
+        background: #111827;
+        border-radius: 24px;
         padding: 2.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .card-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .section-title {
         font-size: 1.5rem;
-        font-weight: bold;
-        color: #10b981;
-        margin-bottom: 1.5rem;
-        text-align: center;
+        font-weight: 800;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
+
+    .btn-edit-toggle {
+        background: transparent;
+        color: #2979FF;
+        border: 1px solid #2979FF;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+        .btn-edit-toggle:hover {
+            background: rgba(41, 121, 255, 0.1);
+        }
 
     .form-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr 1fr;
         gap: 1.5rem;
-        margin-bottom: 2rem;
     }
 
     .form-group {
         display: flex;
         flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
     }
 
     .form-label {
+        font-size: 0.85rem;
+        color: #9ca3af;
         font-weight: 600;
-        color: #374151;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
+        margin-left: 5px;
     }
 
-    .form-input, .form-select {
-        width: 100%;
-        padding: 0.875rem 1rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 0.75rem;
+    .form-input {
+        background: #1f2937;
+        border: 1px solid #374151;
+        color: white;
+        padding: 12px 16px;
+        border-radius: 12px;
         font-size: 0.95rem;
-        transition: all 0.3s ease;
-        background: #f9fafb;
+        outline: none;
+        transition: 0.3s;
     }
 
-        .form-input:focus {
-            border-color: #10b981;
-            outline: none;
-            background: white;
+        .form-input:not(:disabled):focus {
+            border-color: #2979FF;
+            background: #111827;
+            box-shadow: 0 0 0 3px rgba(41, 121, 255, 0.1);
         }
 
-    /* Botones Acción */
-    .action-buttons {
+        .form-input:disabled {
+            background: transparent;
+            border-color: transparent;
+            padding-left: 0;
+            color: #e2e8f0;
+            font-weight: 600;
+            cursor: default;
+        }
+
+    .btn-row {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr 2fr;
         gap: 1rem;
         margin-top: 2rem;
     }
 
-    .btn-action {
-        padding: 1rem;
-        border: none;
-        border-radius: 0.75rem;
-        font-weight: 600;
-        font-size: 0.95rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        color: white;
-    }
-
-    .btn-edit {
-        background: #10b981;
-    }
-
-        .btn-edit:hover {
-            background: #059669;
-        }
-
     .btn-save {
-        background: #3b82f6;
+        background: linear-gradient(90deg, #2979FF 0%, #1565C0 100%);
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 50px;
+        font-weight: 800;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 4px 15px rgba(41, 121, 255, 0.3);
     }
 
         .btn-save:hover {
-            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(41, 121, 255, 0.5);
         }
 
-    .btn-close-session {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    .btn-cancel {
+        background: transparent;
+        border: 1px solid #EF4444;
+        color: #EF4444;
+        padding: 1rem;
+        border-radius: 50px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.3s;
     }
 
-        .btn-close-session:hover {
-            background: #b91c1c;
+        .btn-cancel:hover {
+            background: rgba(239, 68, 68, 0.1);
         }
 
-    .btn-delete {
-        background: #ef4444;
-    }
-
-        .btn-delete:hover {
-            background: #dc2626;
-        }
-
-    /* Lista Derecha */
-    .users-list-section {
-        background: white;
-        border-radius: 1.5rem;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-
-    .list-title {
-        font-size: 1.125rem;
-        font-weight: bold;
-        color: #10b981;
+    .alert {
+        padding: 1rem;
+        border-radius: 12px;
         margin-bottom: 1.5rem;
+        font-weight: 600;
         text-align: center;
     }
 
-    .user-item {
-        padding: 1rem;
-        border-bottom: 1px solid #e5e7eb;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        transition: 0.2s;
+    .alert-success {
+        background: rgba(0, 230, 118, 0.1);
+        color: #00E676;
+        border: 1px solid rgba(0, 230, 118, 0.2);
     }
 
-        .user-item:hover {
-            background: #f0fdf4;
+    .alert-error {
+        background: rgba(239, 68, 68, 0.1);
+        color: #EF4444;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    @@media (max-width: 900px) {
+        .profile-container {
+            grid-template-columns: 1fr;
         }
 
-        .user-item.active {
-            background: #d1fae5;
-            border-left: 4px solid #10b981;
-        }
-
-    .user-avatar-small {
-        width: 40px;
-        height: 40px;
-        background: #10b981;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-    }
-
-    .user-name {
-        font-weight: 600;
-        color: #1f2937;
-        font-size: 0.95rem;
-    }
-
-    .user-role {
-        font-size: 0.8rem;
-        color: #6b7280;
-    }
-
-    @@media (max-width: 1200px) {
-        .content-grid {
+        .form-grid {
             grid-template-columns: 1fr;
         }
     }
 </style>
 
-<div class="usuarios-page">
-    <div class="usuarios-container">
-        <button class="btn-back-menu" @onclick='() => Navigation.NavigateTo("/dashboard")'>
-            <span>⬅️</span> Volver al Dashboard
-        </button>
+<div class="profile-page">
+    <div class="glow-blob glow-1"></div>
+    <div class="glow-blob glow-2"></div>
 
-        <div class="page-header">
-            <h1 class="page-title">Panel de Gestión de Usuarios</h1>
-            <p class="page-subtitle">Administra y gestiona los usuarios del sistema SmartDrop</p>
+    <button class="btn-back-menu" @onclick='() => Navigation.NavigateTo("/dashboard")'>
+        <span>⬅️</span> Volver al Dashboard
+    </button>
+
+    @if (cargando)
+    {
+        <div style="text-align:center; padding: 4rem; color: #2979FF;">
+            <h2>🔄 Cargando perfil...</h2>
         </div>
-
-        <div class="usuarios-table-section">
-            <div class="table-header">
-                <h2 class="table-title">👥 Usuarios Registrados</h2>
-                <button class="btn-refresh" @onclick="CargarUsuarios">
-                    <span>🔄</span> Actualizar
-                </button>
-            </div>
-
-            @if (cargando)
-            {
-                <div style="text-align:center; padding: 2rem;">⏳ Cargando usuarios...</div>
-            }
-            else if (usuarios == null || !usuarios.Any())
-            {
-                <div style="text-align:center; padding: 2rem;">👤 No hay usuarios disponibles</div>
-            }
-            else
-            {
-                <div class="table-container">
-                    <table class="usuarios-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nombre</th>
-                                <th>Email</th>
-                                <th>Usuario</th>
-                                <th>Rol</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var usuario in usuarios)
-                            {
-                                <tr @onclick="() => SeleccionarUsuarioDeLista(usuario)" style="cursor: pointer;">
-                                    <td>@usuario.IdUsuario</td>
-                                    <td>@usuario.Nombre</td>
-                                    <td>@usuario.Email</td>
-                                    <td>@usuario.NombreUsuario</td>
-                                    <td>
-                                        <span class="badge-rol @ObtenerClaseRol(usuario.Rol)">
-                                            @usuario.Rol
-                                        </span>
-                                    </td>
-                                    <td>
-                                        @if (usuario.Accedio)
-                                        {
-                                            <span style="color: #10b981;">● Activo</span>
-                                        }
-                                        else
-                                        {
-                                            <span style="color: #6b7280;">○ Inactivo</span>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+    }
+    else if (usuario != null)
+    {
+        <div class="profile-container">
+            <div class="profile-card">
+                <div class="avatar-wrapper">
+                    <img src="@(string.IsNullOrEmpty(usuario.RutaImagen) ? "https://cdn-icons-png.flaticon.com/512/149/149071.png" : usuario.RutaImagen)"
+                         class="avatar-img" alt="Avatar" />
                 </div>
-            }
-        </div>
 
-        <div class="content-grid">
-            <div class="profile-section">
-                <div class="profile-avatar">👤</div>
-                <button class="btn-upload-photo"><span>📁</span> Subir Foto</button>
-                <h3 class="profile-role-title">@usuarioSeleccionado.Rol</h3>
-                <p class="profile-role-subtitle">Usuario del Sistema</p>
+                @if (isEditing)
+                {
+                    <div class="upload-btn-wrapper">
+                        <label class="btn-camera" for="fileInput">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                            Cambiar Foto
+                        </label>
+                        <InputFile OnChange="SubirImagen" id="fileInput" style="display:none;" accept="image/*" capture />
+                    </div>
+                }
+
+                <div class="user-name">@usuario.Nombre</div>
+                <div class="user-role @(usuario.Rol == "Administrador" ? "role-admin" : "role-user")">
+                    @usuario.Rol
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <span class="stat-val">@usuario.IdUsuario</span>
+                        <span class="stat-lbl">ID Usuario</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-val" style="color:#00E676;">Activo</span>
+                        <span class="stat-lbl">Estado</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="info-section">
-                <h2 class="section-title">Información del Usuario</h2>
+            <div class="edit-card">
+                <div class="card-header-row">
+                    <div class="section-title">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2979FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        Información Personal
+                    </div>
+
+                    @if (!isEditing)
+                    {
+                        <button class="btn-edit-toggle" @onclick="ActivarEdicion">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                            Editar Perfil
+                        </button>
+                    }
+                </div>
+
+                @if (!string.IsNullOrEmpty(mensaje))
+                {
+                    <div class="alert @tipoAlerta">@mensaje</div>
+                }
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label class="form-label">Identificación</label>
-                        <input type="text" class="form-input" @bind="usuarioSeleccionado.Identificacion" readonly="@(!modoEdicion)" />
+                        <label class="form-label">Nombre Completo</label>
+                        <input type="text" class="form-input" @bind="usuario.Nombre" disabled="@(!isEditing)" />
                     </div>
+
                     <div class="form-group">
                         <label class="form-label">Nombre de Usuario</label>
-                        <input type="text" class="form-input" @bind="usuarioSeleccionado.NombreUsuario" readonly="@(!modoEdicion)" />
+                        <input type="text" class="form-input" @bind="usuario.NombreUsuario" disabled="@(!isEditing)" />
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Nombre Completo</label>
-                        <input type="text" class="form-input" @bind="usuarioSeleccionado.NombreCompleto" readonly="@(!modoEdicion)" />
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-input" @bind="usuarioSeleccionado.Correo" readonly="@(!modoEdicion)" />
-                    </div>
+
                     <div class="form-group full-width">
-                        <label class="form-label">Rol del Usuario</label>
-                        <select class="form-select" @bind="usuarioSeleccionado.Rol" disabled="@(!modoEdicion || !esAdministrador)">
-                            <option value="Administrador">Administrador</option>
-                            <option value="Cuidador">Cuidador</option>
-                        </select>
+                        <label class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-input" @bind="usuario.Email" disabled="@(!isEditing)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Contraseña</label>
+                        <input type="@(isEditing ? "text" : "password")"
+                               class="form-input"
+                               @bind="usuario.Password"
+                               disabled="@(!isEditing)"
+                               placeholder="••••••••" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Rol (No editable)</label>
+                        <input type="text" class="form-input" value="@usuario.Rol" disabled />
                     </div>
                 </div>
 
-                <div class="action-buttons">
-                    <button class="btn-action btn-edit" @onclick="HabilitarEdicion"><span>✏️</span> Hacer Cambios</button>
-                    <button class="btn-action btn-save" @onclick="GuardarCambios"><span>💾</span> Guardar Cambios</button>
-                    <button class="btn-action btn-close-session" @onclick="CerrarSesion"><span>🚪</span> Cerrar Sesión</button>
-
-                    @if (esAdministrador)
-                    {
-                        <button class="btn-action btn-delete" @onclick="EliminarUsuario"><span>🗑️</span> Eliminar Usuario</button>
-                    }
-                </div>
-            </div>
-
-            <div class="users-list-section">
-                <h3 class="list-title">Lista de Usuarios</h3>
-                <div style="max-height: 600px; overflow-y: auto;">
-                    @if (usuarios != null)
-                    {
-                        @foreach (var usuario in usuarios)
-                        {
-                            <div class="user-item @(usuario.IdUsuario == usuarioSeleccionado.Id ? "active" : "")"
-                                 @onclick="() => SeleccionarUsuarioDeLista(usuario)">
-                                <div class="user-avatar-small">👤</div>
-                                <div>
-                                    <div class="user-name">@usuario.Nombre</div>
-                                    <div class="user-role">@usuario.Rol</div>
-                                </div>
-                            </div>
-                        }
-                    }
-                </div>
+                @if (isEditing)
+                {
+                    <div class="btn-row">
+                        <button class="btn-cancel" @onclick="CancelarEdicion">Cancelar</button>
+                        <button class="btn-save" @onclick="GuardarCambios" disabled="@guardando">
+                            @(guardando ? "Guardando..." : "💾 GUARDAR CAMBIOS")
+                        </button>
+                    </div>
+                }
             </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <div style="text-align:center; padding: 4rem; color: #EF4444;">
+            <h2>⚠️ No se encontró información del usuario.</h2>
+            <button class="btn-back-menu" style="margin-top:1rem;" @onclick='() => Navigation.NavigateTo("/login")'>Ir al Login</button>
+        </div>
+    }
 </div>
 
 @code {
-    private List<Usuario>? usuarios;
-    private bool cargando = false;
-    private bool modoEdicion = false;
-    private bool esAdministrador = false; // Para controlar permisos
-
-    private UsuarioGestionModel usuarioSeleccionado = new()
-    {
-        Id = 0,
-        Identificacion = "",
-        NombreUsuario = "Seleccione...",
-        NombreCompleto = "",
-        Correo = "",
-        Rol = ""
-    };
-
-    public class UsuarioGestionModel
-    {
-        public int Id { get; set; }
-        public string Identificacion { get; set; } = "";
-        public string NombreUsuario { get; set; } = "";
-        public string NombreCompleto { get; set; } = "";
-        public string Correo { get; set; } = "";
-        public string Rol { get; set; } = "";
-    }
+    private Usuario? usuario;
+    private Usuario? usuarioOriginal;
+    private bool cargando = true;
+    private bool isEditing = false;
+    private bool guardando = false;
+    private string mensaje = "";
+    private string tipoAlerta = "";
+    private const string MASK_PASSWORD = "********";
 
     protected override async Task OnInitializedAsync()
     {
-        await CargarUsuarios();
+        await CargarUsuario();
     }
 
-    private async Task CargarUsuarios()
+    private async Task CargarUsuario()
     {
         cargando = true;
         try
         {
-            // 1. Obtener quién está logueado
-            var usuarioLogueado = await AuthService.GetUsuarioActualAsync();
-
-            if (usuarioLogueado == null)
+            var usuarioSesion = await AuthService.GetUsuarioActualAsync();
+            if (usuarioSesion != null)
             {
-                Navigation.NavigateTo("/login");
-                return;
-            }
-
-            // Determinar si es admin para habilitar botones extra
-            esAdministrador = usuarioLogueado.Rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
-
-            // 2. Obtener TODOS los usuarios de la API
-            var todosLosUsuarios = await RiegoService.ObtenerUsuariosAsync();
-
-            // 3. FILTRAR SEGÚN EL ROL
-            if (esAdministrador)
-            {
-                // Si es Admin, ve a todos
-                usuarios = todosLosUsuarios;
-            }
-            else
-            {
-                // Si es Cuidador (u otro), solo se ve a sí mismo
-                usuarios = todosLosUsuarios.Where(u => u.IdUsuario == usuarioLogueado.IdUsuario).ToList();
-
-                // Autoseleccionar al usuario para que no salga vacío
-                if (usuarios.Any())
-                {
-                    SeleccionarUsuarioDeLista(usuarios.First());
-                }
+                usuario = usuarioSesion;
+                if (!isEditing) usuario.Password = MASK_PASSWORD;
             }
         }
         catch (Exception ex)
@@ -613,49 +516,131 @@
         }
     }
 
-    private void SeleccionarUsuarioDeLista(Usuario usuario)
+    private void ActivarEdicion()
     {
-        usuarioSeleccionado = new UsuarioGestionModel
+        if (usuario != null)
         {
-            Id = usuario.IdUsuario,
-            Identificacion = usuario.IdUsuario.ToString(),
-            NombreUsuario = usuario.NombreUsuario,
-            NombreCompleto = usuario.Nombre,
-            Correo = usuario.Email,
-            Rol = usuario.Rol
-        };
-        modoEdicion = false;
-    }
-
-    private string ObtenerClaseRol(string rol)
-    {
-        return rol.ToLower() switch
-        {
-            "administrador" => "rol-admin",
-            "cuidador" => "rol-cuidador",
-            _ => "rol-otro"
-        };
-    }
-
-    private void HabilitarEdicion() => modoEdicion = true;
-
-    private void GuardarCambios()
-    {
-        if (modoEdicion)
-        {
-            // Aquí agregarías la lógica para llamar a la API de actualización
-            modoEdicion = false;
+            usuarioOriginal = new Usuario
+            {
+                IdUsuario = usuario.IdUsuario,
+                Nombre = usuario.Nombre,
+                NombreUsuario = usuario.NombreUsuario,
+                Email = usuario.Email,
+                Password = usuario.Password,
+                Rol = usuario.Rol,
+                RutaImagen = usuario.RutaImagen
+            };
+            if (usuario.Password == MASK_PASSWORD) usuario.Password = "";
+            isEditing = true;
+            mensaje = "";
         }
     }
 
-    private async Task CerrarSesion()
+    private void CancelarEdicion()
     {
-        await AuthService.LogoutAsync();
-        Navigation.NavigateTo("/login", forceLoad: true);
+        if (usuario != null && usuarioOriginal != null)
+        {
+            usuario.Nombre = usuarioOriginal.Nombre;
+            usuario.NombreUsuario = usuarioOriginal.NombreUsuario;
+            usuario.Email = usuarioOriginal.Email;
+            usuario.Password = MASK_PASSWORD;
+            usuario.RutaImagen = usuarioOriginal.RutaImagen;
+        }
+        isEditing = false;
+        mensaje = "";
     }
 
-    private void EliminarUsuario()
+    private async Task SubirImagen(InputFileChangeEventArgs e)
     {
-        // Lógica de eliminación (solo visible para admin)
+        var file = e.File;
+        if (file != null)
+        {
+            try
+            {
+                long maxFileSize = 1024 * 1024 * 5;
+                var resizedImage = await file.RequestImageFileAsync("image/jpeg", 300, 300);
+                var buffer = new byte[resizedImage.Size];
+                await resizedImage.OpenReadStream(maxFileSize).ReadAsync(buffer);
+                var base64 = Convert.ToBase64String(buffer);
+                // ✅ IMPORTANTE: Prefijo necesario para que la API lo detecte
+                usuario.RutaImagen = $"data:image/jpeg;base64,{base64}";
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                MostrarMensaje($"Error al procesar imagen: {ex.Message}", "alert-error");
+            }
+        }
+    }
+
+    private async Task GuardarCambios()
+    {
+        if (usuario == null) return;
+        if (string.IsNullOrWhiteSpace(usuario.Nombre) || string.IsNullOrWhiteSpace(usuario.NombreUsuario))
+        {
+            MostrarMensaje("⚠️ Nombre y Usuario son obligatorios.", "alert-error");
+            return;
+        }
+
+        // Preparar password
+        string passwordToSend = usuario.Password;
+
+        // ✅ CORRECCIÓN: Si es la máscara o vacía, mandamos NULL para que la API sepa que no cambió
+        if (string.IsNullOrEmpty(passwordToSend) || passwordToSend == MASK_PASSWORD)
+        {
+            passwordToSend = null;
+        }
+        else if (passwordToSend.Length < 6)
+        {
+            MostrarMensaje("⚠️ La contraseña debe tener al menos 6 caracteres.", "alert-error");
+            return;
+        }
+
+        var usuarioUpdate = new Usuario
+        {
+            IdUsuario = usuario.IdUsuario,
+            Nombre = usuario.Nombre,
+            NombreUsuario = usuario.NombreUsuario,
+            Email = usuario.Email,
+            Password = passwordToSend, // Enviamos null o la nueva clave
+            Rol = usuario.Rol,
+            RutaImagen = usuario.RutaImagen,
+            Accedio = usuario.Accedio
+        };
+
+        guardando = true;
+        mensaje = "";
+
+        try
+        {
+            var (success, msg) = await ApiService.ActualizarUsuarioAsync(usuarioUpdate);
+            if (success)
+            {
+                MostrarMensaje("✅ Perfil actualizado correctamente.", "alert-success");
+                usuario.Password = MASK_PASSWORD;
+                isEditing = false;
+            }
+            else
+            {
+                MostrarMensaje($"❌ Error: {msg}", "alert-error");
+            }
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error crítico: {ex.Message}", "alert-error");
+        }
+        finally
+        {
+            guardando = false;
+        }
+    }
+
+    private void MostrarMensaje(string msg, string tipo)
+    {
+        mensaje = msg;
+        tipoAlerta = tipo;
+        var timer = new System.Timers.Timer(5000);
+        timer.Elapsed += (s, e) => { mensaje = ""; InvokeAsync(StateHasChanged); timer.Dispose(); };
+        timer.Start();
     }
 }

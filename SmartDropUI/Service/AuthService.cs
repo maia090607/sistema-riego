@@ -57,7 +57,6 @@ namespace SmartDropUI.Services
             {
                 _logger.LogInformation($"📝 Registrando usuario: {usuario.NombreUsuario}");
 
-                // ✅ Crear objeto con los campos exactos que espera la API
                 var usuarioAPI = new
                 {
                     idUsuario = usuario.IdUsuario,
@@ -73,24 +72,28 @@ namespace SmartDropUI.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    _logger.LogInformation($"✅ Usuario registrado: {usuario.NombreUsuario}");
                     return (true, "Usuario registrado exitosamente");
                 }
 
+                // Leemos el error que nos manda la API (Backend)
                 var errorContent = await response.Content.ReadAsStringAsync();
                 _logger.LogWarning($"❌ Error al registrar: {errorContent}");
 
-                if (errorContent.Contains("ya existe") || errorContent.Contains("Conflict"))
+                // --- CORRECCIÓN AQUÍ ---
+                // En lugar de devolver solo mensajes específicos, devolvemos lo que diga el servidor
+                // si no cae en los casos conocidos.
+                if (errorContent.Contains("ya existe") || errorContent.Contains("Conflict") || errorContent.Contains("en uso"))
                 {
-                    return (false, "El usuario o identificación ya existe");
+                    return (false, "El usuario o identificación ya está registrado.");
                 }
 
-                return (false, "Error al registrar usuario");
+                // Devuelve el error real para que sepas qué corregir (ej: error de Oracle)
+                return (false, $"Error del sistema: {errorContent}");
             }
             catch (Exception ex)
             {
                 _logger.LogError($"❌ Error en registro: {ex.Message}");
-                return (false, "Error al conectar con el servidor");
+                return (false, $"Error de conexión: {ex.Message}");
             }
         }
         public async Task<Usuario?> GetUsuarioActualAsync()

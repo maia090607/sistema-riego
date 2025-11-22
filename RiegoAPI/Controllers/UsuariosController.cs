@@ -69,51 +69,39 @@ namespace API.Controllers
             }
         }
 
-        // POST: api/usuarios
+        /// POST: api/usuarios
         [HttpPost]
         public ActionResult<UsuarioResponseDTO> Insertar([FromBody] UsuarioRequestDTO usuarioDTO)
         {
             try
             {
-                if (usuarioDTO == null)
-                    return BadRequest("El usuario no puede ser nulo");
+                if (usuarioDTO == null) return BadRequest("El usuario no puede ser nulo");
+
+                // ✅ VALIDACIÓN MANUAL: Para usuarios NUEVOS, la contraseña ES obligatoria.
+                if (string.IsNullOrWhiteSpace(usuarioDTO.Password))
+                {
+                    return BadRequest("La contraseña es obligatoria para nuevos usuarios.");
+                }
 
                 _logger.LogInformation($"📝 Creando usuario: {usuarioDTO.NombreUsuario}");
 
-                // ✅ Validar que el nombre de usuario no exista
+                // Validaciones existentes...
                 var existente = _serviciosUsuario.ValidarNombreUsuario(usuarioDTO.NombreUsuario);
-                if (existente.Estado && existente.Entidad != null)
-                {
-                    _logger.LogWarning($"⚠️ Usuario {usuarioDTO.NombreUsuario} ya existe");
-                    return Conflict("El nombre de usuario ya está en uso");
-                }
+                if (existente.Estado && existente.Entidad != null) return Conflict("El nombre de usuario ya está en uso");
 
-                // ✅ Validar que el ID (cédula) no exista
                 var existenteId = _serviciosUsuario.BuscarPorId(usuarioDTO.IdUsuario);
-                if (existenteId.Estado && existenteId.Entidad != null)
-                {
-                    _logger.LogWarning($"⚠️ ID {usuarioDTO.IdUsuario} ya existe");
-                    return Conflict("El ID de usuario ya está en uso");
-                }
+                if (existenteId.Estado && existenteId.Entidad != null) return Conflict("El ID de usuario ya está en uso");
 
                 var entidad = UsuarioMapper.ToEntity(usuarioDTO);
                 var resultado = _serviciosUsuario.Insertar(entidad);
 
-                if (!resultado.Estado)
-                {
-                    _logger.LogError($"❌ Error al insertar: {resultado.Mensaje}");
-                    return BadRequest(resultado.Mensaje);
-                }
+                if (!resultado.Estado) return BadRequest(resultado.Mensaje);
 
                 var responseDTO = UsuarioMapper.ToResponseDTO(entidad);
-
-                _logger.LogInformation($"✅ Usuario {usuarioDTO.NombreUsuario} creado con ID {entidad.IdUsuario}");
-
                 return CreatedAtAction(nameof(ObtenerPorId), new { id = entidad.IdUsuario }, responseDTO);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"❌ Excepción: {ex.Message}");
                 return StatusCode(500, $"Error: {ex.Message}");
             }
         }
@@ -124,14 +112,17 @@ namespace API.Controllers
         {
             try
             {
-                if (id != usuarioDTO.IdUsuario)
-                    return BadRequest("El ID no coincide");
+                if (id != usuarioDTO.IdUsuario) return BadRequest("El ID no coincide");
+
+                // ✅ NOTA: Aquí NO validamos password. Si viene null, el repositorio (DAL)
+                // se encargará de mantener la contraseña vieja gracias al cambio que hicimos en Oracle.
 
                 var entidad = UsuarioMapper.ToEntity(usuarioDTO);
+
+                // Aseguramos pasar el password (sea null o texto) al servicio
                 var resultado = _serviciosUsuario.Actualizar(entidad);
 
-                if (!resultado.Estado)
-                    return NotFound(resultado.Mensaje);
+                if (!resultado.Estado) return NotFound(resultado.Mensaje);
 
                 return Ok(UsuarioMapper.ToResponseDTO(entidad));
             }

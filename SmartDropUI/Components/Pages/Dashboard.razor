@@ -5,6 +5,7 @@
 @inject ClimaService ClimaService
 @inject NavigationManager Navigation
 @inject HistorialRiegoService HistorialService
+@inject AuthService AuthService
 @rendermode InteractiveServer
 @implements IDisposable
 
@@ -81,6 +82,14 @@
     .sidebar-footer {
         padding: 1.5rem;
         border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .user-info {
+        text-align: center;
+        margin-bottom: 1rem;
+        color: #00E676;
+        font-weight: 700;
+        font-size: 0.9rem;
     }
 
     .btn-logout {
@@ -252,16 +261,23 @@
             <span class="brand-text">SmartDrop</span>
         </div>
 
-        <!-- MENÚ LATERAL SIN ICONOS (SOLO TEXTO) -->
+        <!-- MENÚ LATERAL CON ETIQUETA DE USUARIO -->
         <nav class="nav-menu">
             <div class="nav-item active">Dashboard</div>
             <div class="nav-item" @onclick='() => Navigation.NavigateTo("/plantas")'>Plantas</div>
             <div class="nav-item" @onclick='() => Navigation.NavigateTo("/riego")'>Riego</div>
             <div class="nav-item" @onclick='() => Navigation.NavigateTo("/graficos")'>Estadísticas</div>
             <div class="nav-item" @onclick='() => Navigation.NavigateTo("/historial-riego")'>Historial</div>
+
+            <!-- Nueva Etiqueta de Usuario -->
+            <div class="nav-item" @onclick='() => Navigation.NavigateTo("/usuario")'>Usuario</div>
         </nav>
 
         <div class="sidebar-footer">
+            @if (usuarioActual != null)
+            {
+                <div class="user-info">👋 @usuarioActual.NombreUsuario</div>
+            }
             <button class="btn-logout" @onclick='() => Navigation.NavigateTo("/login")'>Cerrar Sesión</button>
         </div>
     </aside>
@@ -341,11 +357,15 @@
     private DateTime? ultimoRiego = null;
     private string pronostico = "--";
     private string viento = "0 m/s";
+    private Usuario? usuarioActual;
     private System.Timers.Timer? actualizacionTimer;
 
     protected override async Task OnInitializedAsync()
     {
         ArduinoService.DatosRecibidos += OnDatosArduinoRecibidos;
+        // Cargamos el usuario
+        usuarioActual = await AuthService.GetUsuarioActualAsync();
+
         await ActualizarTodo();
         actualizacionTimer = new System.Timers.Timer(5000);
         actualizacionTimer.Elapsed += async (s, e) => await ActualizarTodo();

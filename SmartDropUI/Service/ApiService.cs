@@ -15,6 +15,7 @@ namespace SmartDropUI.Services
             _logger = logger;
         }
 
+        // ... [Otros métodos sin cambios] ...
         // ✅ Obtener Usuarios
         public async Task<List<Usuario>?> ObtenerUsuariosAsync()
         {
@@ -84,7 +85,7 @@ namespace SmartDropUI.Services
             }
         }
 
-        // ✅ Guardar Temperatura (SOLO UNA DEFINICIÓN)
+        // ✅ Guardar Temperatura
         public async Task<bool> GuardarTemperaturaAsync(float tempAmbiente, float tempSuelo, string observacion, int idPlanta)
         {
             try
@@ -106,7 +107,7 @@ namespace SmartDropUI.Services
             }
         }
 
-        // ✅ Guardar Registro Climático (SOLO UNA DEFINICIÓN)
+        // ✅ Guardar Registro Climático
         public async Task<bool> GuardarRegistroClimaticoAsync(float humSuelo, float humAmbiente, float tempAmbiente, float viento, int idPlanta)
         {
             try
@@ -129,17 +130,37 @@ namespace SmartDropUI.Services
             }
         }
 
-        // ✅ Guardar Humedad
-        public async Task<bool> GuardarHumedadPorcentajeAsync(float valorHumedad)
+        // ✅ ACTUALIZAR CON MENSAJE DE ERROR
+        public async Task<(bool Success, string Message)> ActualizarUsuarioAsync(Usuario usuario)
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("/api/humedad", valorHumedad);
-                return response.IsSuccessStatusCode;
+                var usuarioDto = new
+                {
+                    IdUsuario = usuario.IdUsuario,
+                    Nombre = usuario.Nombre,
+                    Email = usuario.Email,
+                    NombreUsuario = usuario.NombreUsuario,
+                    Password = usuario.Password,
+                    Rol = usuario.Rol,
+                    RutaImagen = usuario.RutaImagen,
+                    Accedio = usuario.Accedio
+                };
+
+                var response = await _httpClient.PutAsJsonAsync($"/api/usuarios/{usuario.IdUsuario}", usuarioDto);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, "Actualizado correctamente");
+                }
+
+                // Leer el error que manda el servidor
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return (false, errorContent);
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                return (false, $"Error de conexión: {ex.Message}");
             }
         }
     }
