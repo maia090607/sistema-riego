@@ -10,7 +10,7 @@
 <PageTitle>Gestión de Plantas - SmartDrop</PageTitle>
 
 <style>
-    /* --- TEMA OSCURO --- */
+    /* --- TEMA OSCURO GENERAL --- */
     .gestion-page {
         min-height: 100vh;
         background-color: #05070a;
@@ -22,263 +22,119 @@
     }
 
     /* Luces de fondo */
-    .glow-blob {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(90px);
-        opacity: 0.3;
-        z-index: 0;
-        animation: floatColor 10s infinite ease-in-out;
-    }
-
-    .glow-1 {
-        width: 500px;
-        height: 500px;
-        background: #00E676;
-        top: -100px;
-        left: -100px;
-    }
-
-    .glow-2 {
-        width: 600px;
-        height: 600px;
-        background: #2979FF;
-        bottom: -100px;
-        right: -100px;
-    }
+    .glow-blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.3; z-index: 0; animation: floatColor 10s infinite ease-in-out; }
+    .glow-1 { width: 500px; height: 500px; background: #00E676; top: -100px; left: -100px; }
+    .glow-2 { width: 600px; height: 600px; background: #2979FF; bottom: -100px; right: -100px; }
 
     /* Encabezado */
     .header-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        position: relative;
-        z-index: 10;
+        display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; position: relative; z-index: 10;
     }
-
-    .header-title {
-        font-size: 2rem;
-        font-weight: 900;
-        color: white;
-    }
-
+    .header-title { font-size: 2rem; font-weight: 900; color: white; }
+    .btn-header-group { display: flex; gap: 10px; }
     .btn-back {
-        background: rgba(255, 255, 255, 0.05);
-        color: #9ca3af;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 0.6rem 1.2rem;
-        border-radius: 50px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: 0.3s;
+        background: rgba(255, 255, 255, 0.05); color: #9ca3af; border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.6rem 1.2rem; border-radius: 50px; font-weight: 600; cursor: pointer; transition: 0.3s;
     }
+    .btn-back:hover { background: rgba(255, 255, 255, 0.1); color: white; border-color: white; }
 
-        .btn-back:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-color: white;
-        }
+    /* Botón Catálogo */
+    .btn-catalog {
+        background: rgba(0, 230, 118, 0.1); color: #00E676; border: 1px solid rgba(0, 230, 118, 0.3);
+        padding: 1rem; border-radius: 16px; font-weight: 800; cursor: pointer; transition: 0.3s;
+        display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+        text-transform: uppercase; margin-top: 1rem;
+    }
+    .btn-catalog:hover { background: rgba(0, 230, 118, 0.2); box-shadow: 0 0 20px rgba(0, 230, 118, 0.2); transform: translateY(-2px); }
 
     /* Layout Grid */
     .content-container {
-        display: grid;
-        grid-template-columns: 1fr 350px;
-        gap: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
-        position: relative;
-        z-index: 10;
+        display: grid; grid-template-columns: 1fr 350px; gap: 2rem; max-width: 1200px; margin: 0 auto; position: relative; z-index: 10;
     }
 
-    /* Tarjeta Formulario */
+    /* Formulario */
     .form-section {
-        background: #111827; /* Dark Gray */
-        border-radius: 24px;
-        padding: 2.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: #111827; border-radius: 24px; padding: 2.5rem; border: 1px solid rgba(255, 255, 255, 0.05);
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
     }
-
     .section-title {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: white;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        padding-bottom: 1rem;
+        font-size: 1.2rem; font-weight: 700; color: white; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;
+        border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;
     }
 
-    /* Inputs Modernos (Dark) */
-    .form-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .full-width {
-        grid-column: 1 / -1;
-    }
-
-    .form-label {
-        font-size: 0.85rem;
-        color: #9ca3af;
-        font-weight: 600;
-        margin-left: 10px;
-    }
-
+    /* Inputs */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .full-width { grid-column: 1 / -1; }
+    .form-label { font-size: 0.85rem; color: #9ca3af; font-weight: 600; margin-left: 10px; }
     .form-input, .form-select, .form-textarea {
-        background: #1f2937; /* Input bg oscuro */
-        border: 1px solid #374151;
-        color: white;
-        padding: 12px 16px;
-        border-radius: 12px;
-        font-size: 0.95rem;
-        outline: none;
-        transition: 0.3s;
+        background: #1f2937; border: 1px solid #374151; color: white; padding: 12px 16px; border-radius: 12px; font-size: 0.95rem; outline: none; transition: 0.3s;
     }
-
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            border-color: #00E676;
-            background: #111827;
-            box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.1);
-        }
-
-    .form-textarea {
-        min-height: 100px;
-        resize: vertical;
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        border-color: #00E676; background: #111827; box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.1);
     }
+    .form-textarea { min-height: 100px; resize: vertical; }
 
-    /* Botones de Acción */
-    .action-buttons {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin-top: 2rem;
-    }
-
-    .btn {
-        padding: 1rem;
-        border: none;
-        border-radius: 50px;
-        font-weight: 800;
-        cursor: pointer;
-        transition: 0.3s;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
-        text-transform: uppercase;
-        font-size: 0.9rem;
-    }
-
+    /* Botones Acción */
+    .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }
+    .btn { padding: 1rem; border: none; border-radius: 50px; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 0.9rem; }
     .btn-register {
-        background: linear-gradient(90deg, #00E676 0%, #00C853 100%);
-        color: #003d1c;
-        grid-column: 1 / -1;
+        background: linear-gradient(90deg, #00E676 0%, #00C853 100%); color: #003d1c; grid-column: 1 / -1;
         box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
     }
-
-        .btn-register:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 230, 118, 0.5);
-            filter: brightness(1.1);
-        }
-
-    .btn-clear {
-        background: transparent;
-        border: 1px solid #4b5563;
-        color: #9ca3af;
-    }
-
-        .btn-clear:hover {
-            border-color: white;
-            color: white;
-            background: rgba(255,255,255,0.05);
-        }
-
-    .btn-dashboard {
-        background: rgba(41, 121, 255, 0.1);
-        color: #2979FF;
-        border: 1px solid rgba(41, 121, 255, 0.3);
-    }
-
-        .btn-dashboard:hover {
-            background: rgba(41, 121, 255, 0.2);
-            color: white;
-        }
+    .btn-register:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 230, 118, 0.5); }
+    .btn-clear { background: transparent; border: 1px solid #4b5563; color: #9ca3af; }
+    .btn-clear:hover { border-color: white; color: white; background: rgba(255,255,255,0.05); }
+    .btn-dashboard { background: rgba(41, 121, 255, 0.1); color: #2979FF; border: 1px solid rgba(41, 121, 255, 0.3); }
+    .btn-dashboard:hover { background: rgba(41, 121, 255, 0.2); color: white; }
 
     /* Sidebar Derecha */
-    .sidebar-section {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
+    .sidebar-section { display: flex; flex-direction: column; gap: 2rem; }
+    .info-card { background: #111827; border-radius: 24px; padding: 2rem; text-align: center; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+    .upload-box { border: 2px dashed #374151; background: #1f2937; border-radius: 16px; padding: 2rem; color: #9ca3af; cursor: pointer; transition: 0.3s; }
+    .upload-box:hover { border-color: #00E676; color: white; background: rgba(0, 230, 118, 0.05); }
+
+    /* --- MODAL CATALOGO --- */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
+        display: flex; justify-content: center; align-items: center; z-index: 1000;
+        animation: fadeIn 0.3s ease;
     }
-
-    .info-card {
-        background: #111827;
-        border-radius: 24px;
-        padding: 2rem;
-        text-align: center;
-        border: 1px solid rgba(255,255,255,0.05);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    .modal-content {
+        background: #111827; border: 1px solid #374151; border-radius: 24px;
+        padding: 2rem; width: 90%; max-width: 1000px; max-height: 85vh;
+        overflow-y: auto; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     }
-
-    .upload-box {
-        border: 2px dashed #374151;
-        background: #1f2937;
-        border-radius: 16px;
-        padding: 2rem;
-        color: #9ca3af;
-        cursor: pointer;
-        transition: 0.3s;
+    .catalog-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;
     }
-
-        .upload-box:hover {
-            border-color: #00E676;
-            color: white;
-            background: rgba(0, 230, 118, 0.05);
-        }
-
-    /* Alertas */
-    .alert {
-        padding: 1rem;
-        border-radius: 12px;
-        margin-bottom: 1.5rem;
-        font-weight: 600;
-        text-align: center;
+    .catalog-card {
+        background: #1f2937; border: 1px solid rgba(255,255,255,0.05); border-radius: 16px;
+        padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s ease;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
-
-    .alert-error {
-        background: rgba(239, 68, 68, 0.1);
-        color: #fca5a5;
-        border: 1px solid rgba(239, 68, 68, 0.3);
+    .catalog-card:hover {
+        border-color: #00E676; transform: translateY(-5px); background: rgba(0, 230, 118, 0.05);
+        box-shadow: 0 5px 15px rgba(0, 230, 118, 0.1);
     }
-
-    .alert-success {
-        background: rgba(16, 185, 129, 0.1);
-        color: #6ee7b7;
-        border: 1px solid rgba(16, 185, 129, 0.3);
+    .cat-icon-wrapper {
+        width: 70px; height: 70px; border-radius: 50%; background: rgba(255,255,255,0.05);
+        display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;
+        color: #00E676; transition: 0.3s;
     }
+    .catalog-card:hover .cat-icon-wrapper { background: rgba(0, 230, 118, 0.2); transform: scale(1.1); }
+    .cat-icon-wrapper svg { width: 40px; height: 40px; stroke-width: 1.5; }
+    
+    .cat-name { font-weight: 800; color: white; font-size: 1rem; margin-bottom: 5px; }
+    .cat-desc { font-size: 0.75rem; color: #9ca3af; margin-bottom: 10px; line-height: 1.3; }
+    .cat-stats { display: flex; gap: 8px; font-size: 0.7rem; font-weight: 700; }
+    .tag-hum { color: #2979FF; } .tag-temp { color: #FF9100; }
+    .close-modal { position: absolute; top: 20px; right: 20px; background: none; border: none; color: #9ca3af; font-size: 1.5rem; cursor: pointer; }
+    .close-modal:hover { color: white; }
 
-    @@media (max-width: 768px) {
-        .content-container {
-            grid-template-columns: 1fr;
-        }
-
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
-    }
+    @@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @@media (max-width: 768px) { .content-container { grid-template-columns: 1fr; } }
 </style>
 
 <div class="gestion-page">
@@ -287,7 +143,9 @@
 
     <div class="header-bar">
         <div class="header-title">Agregar Nueva Planta</div>
-        <button class="btn-back" @onclick="IrAPlantas">Volver a la lista</button>
+        <div class="btn-header-group">
+            <button class="btn-back" @onclick="IrAPlantas">Volver a la lista</button>
+        </div>
     </div>
 
     <div class="content-container">
@@ -339,51 +197,75 @@
 
             <div class="action-buttons">
                 <button class="btn btn-register" @onclick="RegistrarPlanta" disabled="@cargando">
-                    @if (cargando)
-                    {
-                        <span>⏳ Guardando...</span>
-                    }
-                    else
-                    {
-                        <span>💾 GUARDAR PLANTA</span>
-                    }
+                    @(cargando ? "⏳ Guardando..." : "💾 GUARDAR PLANTA")
                 </button>
-
-                <button class="btn btn-clear" @onclick="LimpiarFormulario">
-                    <span>🔄</span> Limpiar
-                </button>
-
-                <button class="btn btn-dashboard" @onclick="IrAlDashboard">
-                    <span>🎛️</span> Dashboard
-                </button>
+                <button class="btn btn-clear" @onclick="LimpiarFormulario">🔄 Limpiar</button>
+                <button class="btn btn-dashboard" @onclick="IrAlDashboard">🎛️ Dashboard</button>
             </div>
         </div>
 
-        <!-- SIDEBAR DERECHA (IMAGEN Y CONSEJOS) -->
+        <!-- SIDEBAR DERECHA -->
         <div class="sidebar-section">
+            
+            <!-- Tarjeta de Imagen -->
             <div class="info-card">
                 <h3 style="color:white; margin-bottom:1rem;">Imagen de Referencia</h3>
-                <div class="upload-box">
+                <div class="upload-box" @onclick="AbrirCatalogo">
                     <span style="font-size:2rem;">📷</span>
                     <p style="font-size:0.9rem; margin-top:0.5rem;">Pegar URL abajo</p>
                 </div>
                 <input type="text" class="form-input" style="margin-top:1rem;" placeholder="https://..." @bind="planta.RutaImagen" />
-
                 @if (!string.IsNullOrEmpty(planta.RutaImagen))
                 {
                     <img src="@planta.RutaImagen" style="width:100%; height:150px; object-fit:cover; border-radius:10px; margin-top:1rem; border: 2px solid rgba(255,255,255,0.1);" />
                 }
             </div>
 
+            <!-- Tarjeta de Consejo -->
             <div class="info-card">
                 <span style="font-size:2.5rem; display:block; margin-bottom:10px;">💡</span>
                 <h3 style="font-size:1.1rem; font-weight:700; color:white;">Consejo SmartDrop</h3>
                 <p style="color:#9ca3af; font-size:0.9rem; margin-top:0.5rem;">
-                    Configura correctamente los niveles óptimos para que el sistema cuide tus plantas automáticamente.
+                    Usa el catálogo para llenar rápidamente los datos óptimos de las plantas más comunes.
                 </p>
             </div>
+
+            <!-- BOTÓN CATÁLOGO -->
+            <button class="btn-catalog" @onclick="AbrirCatalogo">
+                <span>📖</span> Abrir Catálogo
+            </button>
+
         </div>
     </div>
+
+    <!-- MODAL DE CATÁLOGO -->
+    @if (mostrarCatalogo)
+    {
+        <div class="modal-overlay" @onclick="CerrarCatalogo">
+            <div class="modal-content" @onclick:stopPropagation>
+                <button class="close-modal" @onclick="CerrarCatalogo">×</button>
+                <h2 style="text-align:center; color:white; margin-bottom:0.5rem;">🌱 Catálogo de Plantas</h2>
+                <p style="text-align:center; color:#9ca3af;">Selecciona una planta para autocompletar el formulario</p>
+
+                <div class="catalog-grid">
+                    @foreach (var item in catalogoPlantas)
+                    {
+                        <div class="catalog-card" @onclick="() => SeleccionarDelCatalogo(item)">
+                            <div class="cat-icon-wrapper" style="color:@ObtenerColorIcono(item.Tipo)">
+                                @GetIconoSVG(item.Tipo)
+                            </div>
+                            <div class="cat-name">@item.Nombre</div>
+                            <div class="cat-desc">@item.Descripcion</div>
+                            <div class="cat-stats">
+                                <span class="tag-hum">💧 @item.Humedad%</span>
+                                <span class="tag-temp">🌡️ @item.Temperatura°C</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
@@ -391,6 +273,132 @@
     private bool cargando = false;
     private string mensajeAlerta = "";
     private string tipoAlertaClass = "";
+    private bool mostrarCatalogo = false;
+
+    public class PlantaCatalogo
+    {
+        public string Nombre { get; set; } = "";
+        public string Descripcion { get; set; } = "";
+        public float Humedad { get; set; }
+        public float Temperatura { get; set; }
+        public float Luz { get; set; }
+        public string Tipo { get; set; } = "Hoja"; 
+    }
+
+    // --- LISTA DE PLANTAS PREDEFINIDAS ---
+    private List<PlantaCatalogo> catalogoPlantas = new()
+    {
+        new PlantaCatalogo { Nombre = "Aloe Vera", Descripcion = "Suculenta medicinal, requiere poca agua.", Humedad = 40, Temperatura = 25, Luz = 1000, Tipo = "Suculenta" },
+        new PlantaCatalogo { Nombre = "Tomate", Descripcion = "Planta de fruto, necesita riego constante.", Humedad = 70, Temperatura = 22, Luz = 1000, Tipo = "Fruto" },
+        new PlantaCatalogo { Nombre = "Helecho", Descripcion = "Planta de sombra, ama la humedad alta.", Humedad = 80, Temperatura = 20, Luz = 200, Tipo = "Hoja" },
+        new PlantaCatalogo { Nombre = "Cactus", Descripcion = "Resistente a sequía, mucha luz.", Humedad = 20, Temperatura = 30, Luz = 1000, Tipo = "Suculenta" },
+        new PlantaCatalogo { Nombre = "Orquídea", Descripcion = "Flor delicada, luz indirecta.", Humedad = 55, Temperatura = 24, Luz = 500, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Albahaca", Descripcion = "Hierba aromática, sol y agua moderada.", Humedad = 60, Temperatura = 23, Luz = 1000, Tipo = "Hierba" },
+        new PlantaCatalogo { Nombre = "Rosa", Descripcion = "Arbusto floral, requiere cuidado medio.", Humedad = 60, Temperatura = 20, Luz = 1000, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Menta", Descripcion = "Crecimiento rápido, suelo húmedo.", Humedad = 75, Temperatura = 18, Luz = 500, Tipo = "Hierba" },
+        new PlantaCatalogo { Nombre = "Lavanda", Descripcion = "Aromática, prefiere mucho sol.", Humedad = 40, Temperatura = 22, Luz = 1000, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Ficus", Descripcion = "Árbol de interior, luz indirecta.", Humedad = 50, Temperatura = 20, Luz = 500, Tipo = "Arbol" },
+        new PlantaCatalogo { Nombre = "Poto", Descripcion = "Trepador, resistente, luz media.", Humedad = 50, Temperatura = 22, Luz = 500, Tipo = "Hoja" },
+        new PlantaCatalogo { Nombre = "Sansevieria", Descripcion = "Lengua de suegra, muy resistente.", Humedad = 30, Temperatura = 25, Luz = 500, Tipo = "Suculenta" },
+        new PlantaCatalogo { Nombre = "Bambú", Descripcion = "Crece en agua o tierra, luz difusa.", Humedad = 80, Temperatura = 20, Luz = 500, Tipo = "Hoja" },
+        new PlantaCatalogo { Nombre = "Girasol", Descripcion = "Necesita sol directo todo el día.", Humedad = 60, Temperatura = 25, Luz = 1000, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Romero", Descripcion = "Arbusto leñoso, poca agua.", Humedad = 40, Temperatura = 20, Luz = 1000, Tipo = "Hierba" },
+        new PlantaCatalogo { Nombre = "Suculenta", Descripcion = "Hojas carnosas, riego escaso.", Humedad = 30, Temperatura = 22, Luz = 1000, Tipo = "Suculenta" },
+        new PlantaCatalogo { Nombre = "Begonia", Descripcion = "Flores coloridas, sombra parcial.", Humedad = 70, Temperatura = 18, Luz = 200, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Geranio", Descripcion = "Flor exterior, resistente.", Humedad = 50, Temperatura = 20, Luz = 1000, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Cinta", Descripcion = "Malamadre, purifica el aire.", Humedad = 60, Temperatura = 20, Luz = 500, Tipo = "Hoja" },
+        new PlantaCatalogo { Nombre = "Lirio de Paz", Descripcion = "Flores blancas, luz baja.", Humedad = 70, Temperatura = 22, Luz = 200, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Anturio", Descripcion = "Flor roja brillante, humedad alta.", Humedad = 80, Temperatura = 25, Luz = 500, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Palmera Areca", Descripcion = "Tropical, interior luminoso.", Humedad = 60, Temperatura = 24, Luz = 500, Tipo = "Arbol" },
+        new PlantaCatalogo { Nombre = "Jade", Descripcion = "Árbol del dinero, suculenta.", Humedad = 40, Temperatura = 22, Luz = 1000, Tipo = "Suculenta" },
+        new PlantaCatalogo { Nombre = "Monstera", Descripcion = "Costilla de Adán, hojas grandes.", Humedad = 70, Temperatura = 25, Luz = 500, Tipo = "Hoja" },
+        new PlantaCatalogo { Nombre = "Calatea", Descripcion = "Hojas decorativas, humedad alta.", Humedad = 80, Temperatura = 22, Luz = 200, Tipo = "Hoja" },
+        new PlantaCatalogo { Nombre = "Violeta Africana", Descripcion = "Pequeña, flores constantes.", Humedad = 50, Temperatura = 20, Luz = 500, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Hiedra", Descripcion = "Trepador rápido, sombra.", Humedad = 60, Temperatura = 18, Luz = 200, Tipo = "Hoja" },
+        new PlantaCatalogo { Nombre = "Pepinillo", Descripcion = "Riego frecuente, sol pleno.", Humedad = 80, Temperatura = 25, Luz = 1000, Tipo = "Fruto" },
+        new PlantaCatalogo { Nombre = "Pimiento", Descripcion = "Necesita calor y sol.", Humedad = 60, Temperatura = 26, Luz = 1000, Tipo = "Fruto" },
+        new PlantaCatalogo { Nombre = "Fresa", Descripcion = "Fruta pequeña, suelo drenado.", Humedad = 70, Temperatura = 20, Luz = 1000, Tipo = "Fruto" },
+        new PlantaCatalogo { Nombre = "Perejil", Descripcion = "Hierba culinaria, semisombra.", Humedad = 70, Temperatura = 18, Luz = 500, Tipo = "Hierba" },
+        new PlantaCatalogo { Nombre = "Cilantro", Descripcion = "Anual, clima fresco.", Humedad = 60, Temperatura = 18, Luz = 500, Tipo = "Hierba" },
+        new PlantaCatalogo { Nombre = "Tomillo", Descripcion = "Aromática resistente, sol.", Humedad = 30, Temperatura = 22, Luz = 1000, Tipo = "Hierba" },
+        new PlantaCatalogo { Nombre = "Orégano", Descripcion = "Cobertura suelo, sol.", Humedad = 40, Temperatura = 20, Luz = 1000, Tipo = "Hierba" },
+        new PlantaCatalogo { Nombre = "Crisantemo", Descripcion = "Flor otoño, luz intensa.", Humedad = 60, Temperatura = 18, Luz = 1000, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Petunia", Descripcion = "Colgante, mucho sol.", Humedad = 50, Temperatura = 22, Luz = 1000, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Tulipán", Descripcion = "Bulbosa, primavera.", Humedad = 60, Temperatura = 15, Luz = 1000, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Narciso", Descripcion = "Flor amarilla, resistente.", Humedad = 50, Temperatura = 15, Luz = 1000, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Jacinto", Descripcion = "Aromático, bulbo.", Humedad = 60, Temperatura = 18, Luz = 500, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Azalea", Descripcion = "Arbusto, suelo ácido.", Humedad = 70, Temperatura = 18, Luz = 200, Tipo = "Arbol" },
+        new PlantaCatalogo { Nombre = "Camelia", Descripcion = "Invierno, sombra parcial.", Humedad = 70, Temperatura = 15, Luz = 200, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Hortensia", Descripcion = "Cambia color según pH.", Humedad = 80, Temperatura = 20, Luz = 200, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Buganvilla", Descripcion = "Trepador colorida, sol.", Humedad = 40, Temperatura = 25, Luz = 1000, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Jazmín", Descripcion = "Aromático nocturno.", Humedad = 60, Temperatura = 22, Luz = 1000, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Hibisco", Descripcion = "Tropical, flor grande.", Humedad = 70, Temperatura = 25, Luz = 1000, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Gardenia", Descripcion = "Fragante, delicada.", Humedad = 80, Temperatura = 22, Luz = 500, Tipo = "Flor" },
+        new PlantaCatalogo { Nombre = "Esparraguera", Descripcion = "Follaje fino, colgante.", Humedad = 60, Temperatura = 20, Luz = 500, Tipo = "Hoja" },
+        new PlantaCatalogo { Nombre = "Tradescantia", Descripcion = "Amor de hombre, púrpura.", Humedad = 60, Temperatura = 20, Luz = 500, Tipo = "Hoja" },
+        new PlantaCatalogo { Nombre = "Pilea", Descripcion = "Planta del dinero china.", Humedad = 60, Temperatura = 20, Luz = 500, Tipo = "Hoja" },
+        new PlantaCatalogo { Nombre = "Drácena", Descripcion = "Tronco leñoso, interior.", Humedad = 50, Temperatura = 22, Luz = 500, Tipo = "Arbol" },
+        new PlantaCatalogo { Nombre = "Yuca", Descripcion = "Muy resistente, sol.", Humedad = 30, Temperatura = 25, Luz = 1000, Tipo = "Arbol" },
+        new PlantaCatalogo { Nombre = "Zamioculca", Descripcion = "ZZ plant, poca luz.", Humedad = 40, Temperatura = 22, Luz = 200, Tipo = "Suculenta" }
+    };
+
+    // --- RENDERIZADO DE ICONOS SVG MEJORADOS ---
+    private RenderFragment GetIconoSVG(string tipo) => builder =>
+    {
+        string path = "";
+        switch (tipo)
+        {
+            case "Suculenta": // Cactus moderno
+                path = "<path d='M6 13V8a6 6 0 0 1 12 0v3' /><path d='M6 13a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4' /><path d='M10 8V5a2 2 0 0 1 4 0v3' /><path d='M18 13h2a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2' /><path d='M6 13H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h2' />";
+                break;
+            case "Flor": // Flor detallada
+                path = "<path d='M12 22c0-4-1.6-7-3-9' /><path d='M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m0 0v3m0-3h3m-3 0H9m3 12a9 9 0 1 1 0-18 9 9 0 0 1 0 18z' />";
+                break;
+            case "Hoja": // Hoja Monstera estilizada
+                path = "<path d='M2 22s5-3 5-10S2 2 2 2s5 3 10 3 10 5 10 5-3 5-10 5-10 7-10 7' /><path d='M12 22v-9' /><path d='M15 13a3 3 0 1 0 0-6' /><path d='M9 13a3 3 0 1 1 0-6' />";
+                break;
+            case "Arbol": // Árbol frondoso
+                path = "<path d='M12 22v-9' /><path d='M12 13c-4 0-7-3-7-7s3-7 7-7 7 3 7 7-3 7-7 7z' /><path d='M8 13l-2 2' /><path d='M16 13l2 2' />";
+                break;
+            case "Fruto": // Manzana/Fruto
+                path = "<path d='M12 20a8 8 0 0 0 8-8c0-4.4-3.6-8-8-8-4.4 0-8 3.6-8 8a8 8 0 0 0 8 8z' /><path d='M12 4c0-2 1-3 2-3' /><path d='M14 4c1.5 1 1.5 3 0 4' />";
+                break;
+            case "Hierba": // Sprout detallado
+                path = "<path d='M12 22v-9' /><path d='M12 13a5 5 0 0 0-5-5c0-3 3-5 5-5' /><path d='M12 13a5 5 0 0 1 5-5c0-3-3-5-5-5' />";
+                break;
+            default: 
+                path = "<path d='M12 22c4.97 0 9-4.03 9-9V7a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v6c0 4.97 4.03 9 9 9z' />";
+                break;
+        }
+        builder.AddMarkupContent(0, $"<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'>{path}</svg>");
+    };
+
+    private string ObtenerColorIcono(string tipo)
+    {
+        return tipo switch
+        {
+            "Suculenta" => "#00E676", // Verde
+            "Flor" => "#E040FB", // Rosa/Morado
+            "Fruto" => "#FF5252", // Rojo
+            "Arbol" => "#FF9100", // Naranja
+            "Hierba" => "#69F0AE", // Verde Claro
+            _ => "#2979FF" // Azul por defecto
+        };
+    }
+
+    private void AbrirCatalogo() => mostrarCatalogo = true;
+    private void CerrarCatalogo() => mostrarCatalogo = false;
+
+    private void SeleccionarDelCatalogo(PlantaCatalogo item)
+    {
+        planta.NombrePlanta = item.Nombre;
+        planta.Descripcion = item.Descripcion;
+        planta.NivelOptimoHumedad = item.Humedad;
+        planta.NivelOptimoTemperatura = item.Temperatura;
+        planta.NivelOptimoLuz = item.Luz;
+        mostrarCatalogo = false;
+        MostrarMensaje($"✅ Datos de {item.Nombre} cargados.", "success");
+    }
 
     private void IrAPlantas() => Navigation.NavigateTo("/plantas");
     private void IrAlDashboard() => Navigation.NavigateTo("/dashboard");
@@ -405,8 +413,7 @@
     {
         if (planta.IdPlanta <= 0) { MostrarMensaje("El ID debe ser mayor a 0.", "error"); return; }
         if (string.IsNullOrWhiteSpace(planta.NombrePlanta)) { MostrarMensaje("El nombre es obligatorio.", "error"); return; }
-        if (planta.NivelOptimoHumedad < 0 || planta.NivelOptimoHumedad > 100) { MostrarMensaje("Humedad inválida.", "error"); return; }
-
+        
         cargando = true;
         mensajeAlerta = "";
 
