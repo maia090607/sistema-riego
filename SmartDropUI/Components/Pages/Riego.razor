@@ -7,107 +7,389 @@
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
-@inject ClimaService _climaService  // ✅ CAMBIO DE NOMBRE: _climaService
+@inject ClimaService _climaService
 @rendermode InteractiveServer
 @implements IDisposable
 
 <PageTitle>Control de Riego - SmartDrop</PageTitle>
 
-<div class="container p-4" style="max-width: 1000px;">
-    <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded shadow-sm">
-        <div class="d-flex align-items-center gap-3">
-            <h2 class="fw-bold text-success m-0">🌊 CONTROL DE RIEGO</h2>
-            <span class="badge @(riegoManualActivo ? "bg-warning text-dark" : "bg-success") rounded-pill px-3">
-                @(riegoManualActivo ? "MODO MANUAL" : "MODO AUTOMÁTICO")
-            </span>
-        </div>
-        <button class="btn btn-outline-secondary btn-sm" @onclick='() => Navigation.NavigateTo("/dashboard")'>
-            ⬅ Volver
-        </button>
-    </div>
+<style>
+    /* --- TEMA OSCURO GENERAL --- */
+    .riego-page {
+        min-height: 100vh;
+        background-color: #05070a;
+        padding: 2rem;
+        font-family: 'Outfit', sans-serif;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
 
-    <div class="row g-4 mb-4">
-        <div class="col-md-6">
-            <div class="card h-100 shadow-sm border-0 text-center p-3"
-                 style="border-top: 5px solid @(bombaActiva ? "#198754" : "#dc3545") !important;">
-                <div class="display-4 mb-2">@(bombaActiva ? "💧" : "🛑")</div>
-                <h5 class="text-muted">ESTADO BOMBA</h5>
-                <h2 class="fw-bold @(bombaActiva ? "text-success" : "text-danger")">
-                    @(bombaActiva ? "ENCENDIDA" : "APAGADA")
-                </h2>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card h-100 shadow-sm border-0 text-center p-3"
-                 style="border-top: 5px solid #0dcaf0 !important;">
-                <div class="display-4 mb-2">📡</div>
-                <h5 class="text-muted">CONEXIÓN</h5>
-                <h2 class="fw-bold text-info">
-                    @(ArduinoService.EstaConectado ? "ONLINE" : "OFFLINE")
-                </h2>
-            </div>
-        </div>
-    </div>
+    /* Luces de fondo */
+    .glow-blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        opacity: 0.3;
+        z-index: 0;
+        animation: floatColor 10s infinite ease-in-out;
+    }
+    .glow-1 { width: 500px; height: 500px; background: #00E676; top: -150px; left: -150px; }
+    .glow-2 { width: 600px; height: 600px; background: #2979FF; bottom: -150px; right: -150px; }
 
-    <div class="card shadow border-0 rounded-4">
-        <div class="card-body p-5 text-center">
-            <h4 class="fw-bold text-secondary mb-4">🛠️ Operación Manual</h4>
+    /* Botón Volver */
+    .btn-back-menu {
+        background: rgba(255, 255, 255, 0.05);
+        color: #9ca3af;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 10;
+    }
+    .btn-back-menu:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-color: white;
+        transform: translateX(-5px);
+    }
 
-            @if (!riegoManualActivo)
+    /* Encabezado */
+    .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3rem;
+        position: relative;
+        z-index: 10;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(90deg, #00E676, #2979FF);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+    }
+
+    /* Etiqueta de Modo */
+    .mode-badge {
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .mode-auto { 
+        background: rgba(0, 230, 118, 0.1); 
+        color: #00E676; 
+        border: 1px solid rgba(0, 230, 118, 0.3); 
+    }
+    .mode-manual { 
+        background: rgba(255, 145, 0, 0.1); 
+        color: #FF9100; 
+        border: 1px solid rgba(255, 145, 0, 0.3); 
+    }
+
+    /* Grid de Tarjetas */
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        position: relative;
+        z-index: 10;
+        margin-bottom: 3rem;
+    }
+
+    /* Tarjetas de Estado */
+    .status-card {
+        background: #111827;
+        border-radius: 24px;
+        padding: 2rem;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        transition: transform 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .status-card:hover { transform: translateY(-5px); }
+
+    /* Icono dentro de la tarjeta */
+    .icon-wrapper {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem auto;
+        background: rgba(255, 255, 255, 0.03);
+    }
+    
+    .icon-wrapper svg {
+        width: 40px;
+        height: 40px;
+        stroke-width: 2;
+    }
+
+    /* Bordes y colores dinámicos */
+    .card-on { border-color: #00E676; }
+    .card-on .icon-wrapper { background: rgba(0, 230, 118, 0.1); color: #00E676; }
+    
+    .card-off { border-color: #EF4444; }
+    .card-off .icon-wrapper { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
+    
+    .card-online { border-color: #2979FF; }
+    .card-online .icon-wrapper { background: rgba(41, 121, 255, 0.1); color: #2979FF; }
+    
+    .card-offline { border-color: #9CA3AF; }
+    .card-offline .icon-wrapper { background: rgba(156, 163, 175, 0.1); color: #9CA3AF; }
+
+    .status-label { color: #9ca3af; font-size: 0.9rem; text-transform: uppercase; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: 1px; }
+    .status-value { font-size: 2rem; font-weight: 900; margin: 0; }
+
+    .text-green { color: #00E676; }
+    .text-red { color: #EF4444; }
+    .text-blue { color: #2979FF; }
+    .text-gray { color: #9CA3AF; }
+
+    /* Sección Manual */
+    .manual-section {
+        background: #111827;
+        border-radius: 24px;
+        padding: 3rem;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        position: relative;
+        z-index: 10;
+        max-width: 800px;
+        margin: 0 auto;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    .manual-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    /* Botones de Acción */
+    .btn-action {
+        padding: 1.2rem 2rem;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        border: none;
+        cursor: pointer;
+        transition: 0.3s;
+        width: 100%;
+        max-width: 400px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .btn-start {
+        background: linear-gradient(90deg, #00E676 0%, #00C853 100%);
+        color: #003d1c;
+        box-shadow: 0 4px 20px rgba(0, 230, 118, 0.3);
+    }
+    .btn-start:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 230, 118, 0.5);
+    }
+
+    .btn-stop {
+        background: linear-gradient(90deg, #EF4444 0%, #DC2626 100%);
+        color: white;
+        box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+    }
+    .btn-stop:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(239, 68, 68, 0.5);
+    }
+
+    .btn-action:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        filter: grayscale(1);
+    }
+
+    /* Timer Display */
+    .timer-display {
+        font-size: 3.5rem;
+        font-weight: 900;
+        color: #FF9100;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 30px rgba(255, 145, 0, 0.2);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .info-alert {
+        margin-top: 2.5rem;
+        padding: 1rem 1.5rem;
+        background: rgba(41, 121, 255, 0.1);
+        border: 1px solid rgba(41, 121, 255, 0.2);
+        border-radius: 12px;
+        color: #93C5FD;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    @@media (max-width: 768px) {
+        .status-grid { grid-template-columns: 1fr; }
+        .header-container { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        .mode-badge { width: 100%; justify-content: center; }
+    }
+</style>
+
+<div class="riego-page">
+    <!-- Luces ambientales -->
+    <div class="glow-blob glow-1"></div>
+    <div class="glow-blob glow-2"></div>
+
+    <button class="btn-back-menu" @onclick='() => Navigation.NavigateTo("/dashboard")'>
+        <span>⬅️</span> Volver al Dashboard
+    </button>
+
+    <div class="header-container">
+        <h1 class="page-title">Control de Riego</h1>
+        
+        <!-- ETIQUETA DE ESTADO DEL SISTEMA -->
+        <div class="mode-badge @(riegoManualActivo ? "mode-manual" : "mode-auto")">
+            @if (riegoManualActivo)
             {
-                <button class="btn btn-success w-100 py-3 fw-bold fs-4 shadow transition-btn"
-                        @onclick="IniciarRiegoManual"
-                        disabled="@esperandoRespuesta">
-                    @if (esperandoRespuesta)
-                    {
-                        <span>⏳ Procesando...</span>
-                    }
-                    else
-                    {
-                        <span>▶ INICIAR RIEGO MANUAL</span>
-                    }
-                </button>
-                <div class="alert alert-info mt-4 mb-0">
-                    <small>ℹ️ Al activar el modo manual, el sistema automático se pausará temporalmente.</small>
-                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                <span>MODO MANUAL ACTIVO</span>
             }
             else
             {
-                <div class="p-3 mb-4 bg-light rounded border border-warning">
-                    <h5 class="text-muted mb-1">Tiempo de riego activo</h5>
-                    <h1 class="fw-bold text-warning display-5">@tiempoRiego s</h1>
-                </div>
-
-                <button class="btn btn-danger w-100 py-3 fw-bold fs-4 shadow transition-btn"
-                        @onclick="DetenerRiegoManual"
-                        disabled="@esperandoRespuesta">
-                    @if (esperandoRespuesta)
-                    {
-                        <span>⏳ Deteniendo...</span>
-                    }
-                    else
-                    {
-                        <span>⏹ DETENER RIEGO MANUAL</span>
-                    }
-                </button>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"></path><path d="M12 6v6l4 2"></path></svg>
+                <span>MODO AUTOMÁTICO</span>
             }
         </div>
     </div>
+
+    <!-- GRID DE ESTADO -->
+    <div class="status-grid">
+        
+        <!-- TARJETA BOMBA (ICONO GOTA) -->
+        <div class="status-card @(bombaActiva ? "card-on" : "card-off")">
+            <div class="icon-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                </svg>
+            </div>
+            <div class="status-label">Estado Bomba</div>
+            <div class="status-value @(bombaActiva ? "text-green" : "text-red")">
+                @(bombaActiva ? "ENCENDIDA" : "APAGADA")
+            </div>
+        </div>
+
+        <!-- TARJETA CONEXIÓN (ICONO WIFI) -->
+        <div class="status-card @(ArduinoService.EstaConectado ? "card-online" : "card-offline")">
+            <div class="icon-wrapper">
+                @if (ArduinoService.EstaConectado)
+                {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                        <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                    </svg>
+                }
+                else
+                {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+                        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+                        <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+                        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+                        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                    </svg>
+                }
+            </div>
+            <div class="status-label">Conexión Sistema</div>
+            <div class="status-value @(ArduinoService.EstaConectado ? "text-blue" : "text-gray")">
+                @(ArduinoService.EstaConectado ? "ONLINE" : "OFFLINE")
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL MANUAL -->
+    <div class="manual-section">
+        <h3 class="manual-title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#FF9100"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+            Operación Manual
+        </h3>
+
+        @if (!riegoManualActivo)
+        {
+            <button class="btn-action btn-start" @onclick="IniciarRiegoManual" disabled="@esperandoRespuesta">
+                @if (esperandoRespuesta)
+                {
+                    <span>⏳ Conectando...</span>
+                }
+                else
+                {
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <span>INICIAR RIEGO AHORA</span>
+                }
+            </button>
+            
+            <div style="margin-top:1rem;">
+                <span class="info-alert">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    Al activar el modo manual, la programación automática se pausará temporalmente.
+                </span>
+            </div>
+        }
+        else
+        {
+            <div class="timer-display">@TimeSpan.FromSeconds(tiempoRiego).ToString(@"mm\:ss")</div>
+            <p style="color:#9ca3af; margin-bottom:2rem; font-weight:600;">TIEMPO TRANSCURRIDO</p>
+
+            <button class="btn-action btn-stop" @onclick="DetenerRiegoManual" disabled="@esperandoRespuesta">
+                @if (esperandoRespuesta)
+                {
+                    <span>⏳ Deteniendo...</span>
+                }
+                else
+                {
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                    <span>DETENER BOMBA</span>
+                }
+            </button>
+        }
+    </div>
 </div>
-
-<style>
-    .transition-btn {
-        transition: all 0.3s ease;
-    }
-
-        .transition-btn:hover {
-            transform: translateY(-3px);
-        }
-
-        .transition-btn:active {
-            transform: scale(0.98);
-        }
-</style>
 
 @code {
     private bool riegoManualActivo = false;
@@ -187,13 +469,11 @@
         bombaActiva = true;
         IniciarTimerVisual();
 
-        // Obtener datos clima
         float temp = 25.0f;
         float humAire = 50.0f;
         float viento = 0.0f;
         try
         {
-            // ✅ AQUÍ USAMOS _climaService (la variable, no la clase)
             var clima = await _climaService.ObtenerClimaActualAsync();
             if (clima != null)
             {
@@ -206,7 +486,6 @@
 
         try
         {
-            // 1. Historial
             var nuevoRiego = new HistorialRiegoModel
             {
                 Fecha = DateTime.Now,
@@ -215,20 +494,12 @@
                 IdPlanta = _idPlantaValido
             };
             bool guardado = await HistorialService.GuardarRiegoAsync(nuevoRiego);
-
-            // 2. Temperatura
             await ApiService.GuardarTemperaturaAsync(temp, temp, "Riego Manual", _idPlantaValido);
-
-            // 3. Clima
             await ApiService.GuardarRegistroClimaticoAsync(0, humAire, temp, viento, _idPlantaValido);
 
             if (guardado)
             {
                 if (!exitoArduino) await JS.InvokeVoidAsync("alert", "✅ Registrado, pero Arduino tardó en confirmar.");
-            }
-            else
-            {
-                await JS.InvokeVoidAsync("alert", "❌ Error al guardar en BD.");
             }
         }
         catch (Exception ex)

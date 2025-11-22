@@ -30,8 +30,22 @@
         z-index: 0;
         animation: floatColor 10s infinite ease-in-out;
     }
-    .glow-1 { width: 500px; height: 500px; background: #00E676; top: -100px; left: -100px; }
-    .glow-2 { width: 600px; height: 600px; background: #2979FF; bottom: -100px; right: -100px; }
+
+    .glow-1 {
+        width: 500px;
+        height: 500px;
+        background: #00E676;
+        top: -100px;
+        left: -100px;
+    }
+
+    .glow-2 {
+        width: 600px;
+        height: 600px;
+        background: #2979FF;
+        bottom: -100px;
+        right: -100px;
+    }
 
     /* Encabezado */
     .header-bar {
@@ -59,11 +73,12 @@
         cursor: pointer;
         transition: 0.3s;
     }
-    .btn-back:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
-        border-color: white;
-    }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: white;
+        }
 
     /* Layout Grid */
     .content-container {
@@ -110,7 +125,9 @@
         gap: 0.5rem;
     }
 
-    .full-width { grid-column: 1 / -1; }
+    .full-width {
+        grid-column: 1 / -1;
+    }
 
     .form-label {
         font-size: 0.85rem;
@@ -130,13 +147,16 @@
         transition: 0.3s;
     }
 
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-        border-color: #00E676;
-        background: #111827;
-        box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.1);
-    }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: #00E676;
+            background: #111827;
+            box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.1);
+        }
 
-    .form-textarea { min-height: 100px; resize: vertical; }
+    .form-textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
 
     /* Botones de Acción */
     .action-buttons {
@@ -167,32 +187,35 @@
         grid-column: 1 / -1;
         box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
     }
-    .btn-register:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 230, 118, 0.5);
-        filter: brightness(1.1);
-    }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 230, 118, 0.5);
+            filter: brightness(1.1);
+        }
 
     .btn-clear {
         background: transparent;
         border: 1px solid #4b5563;
         color: #9ca3af;
     }
-    .btn-clear:hover {
-        border-color: white;
-        color: white;
-        background: rgba(255,255,255,0.05);
-    }
+
+        .btn-clear:hover {
+            border-color: white;
+            color: white;
+            background: rgba(255,255,255,0.05);
+        }
 
     .btn-dashboard {
         background: rgba(41, 121, 255, 0.1);
         color: #2979FF;
         border: 1px solid rgba(41, 121, 255, 0.3);
     }
-    .btn-dashboard:hover {
-        background: rgba(41, 121, 255, 0.2);
-        color: white;
-    }
+
+        .btn-dashboard:hover {
+            background: rgba(41, 121, 255, 0.2);
+            color: white;
+        }
 
     /* Sidebar Derecha */
     .sidebar-section {
@@ -219,20 +242,42 @@
         cursor: pointer;
         transition: 0.3s;
     }
-    .upload-box:hover {
-        border-color: #00E676;
-        color: white;
-        background: rgba(0, 230, 118, 0.05);
-    }
+
+        .upload-box:hover {
+            border-color: #00E676;
+            color: white;
+            background: rgba(0, 230, 118, 0.05);
+        }
 
     /* Alertas */
-    .alert { padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; font-weight: 600; text-align: center; }
-    .alert-error { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
-    .alert-success { background: rgba(16, 185, 129, 0.1); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .alert {
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .alert-error {
+        background: rgba(239, 68, 68, 0.1);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.1);
+        color: #6ee7b7;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
 
     @@media (max-width: 768px) {
-        .content-container { grid-template-columns: 1fr; }
-        .form-grid { grid-template-columns: 1fr; }
+        .content-container {
+            grid-template-columns: 1fr;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
