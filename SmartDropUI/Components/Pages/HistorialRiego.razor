@@ -8,125 +8,252 @@
 <PageTitle>Historial - SmartDrop</PageTitle>
 
 <style>
-    .historial-container {
+    /* --- TEMA OSCURO --- */
+    .historial-page {
+        min-height: 100vh;
+        background-color: #05070a;
         padding: 2rem;
-        max-width: 1200px;
+        font-family: 'Outfit', sans-serif;
+        color: white;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* Luces de fondo */
+    .glow-blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        opacity: 0.3;
+        z-index: 0;
+        animation: floatColor 10s infinite ease-in-out;
+    }
+
+    .glow-1 {
+        width: 500px;
+        height: 500px;
+        background: #00E676;
+        top: -150px;
+        left: -150px;
+    }
+
+    .glow-2 {
+        width: 600px;
+        height: 600px;
+        background: #2979FF;
+        bottom: -150px;
+        right: -150px;
+    }
+
+    /* Botón Volver */
+    .btn-back-menu {
+        background: rgba(255, 255, 255, 0.05);
+        color: #9ca3af;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 10;
+    }
+
+        .btn-back-menu:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: white;
+            transform: translateX(-5px);
+        }
+
+    .page-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 3rem;
+        background: linear-gradient(90deg, #00E676, #2979FF);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* --- TARJETA CONTENEDORA --- */
+    .table-card {
+        background: #111827;
+        border-radius: 24px;
+        padding: 2.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 10;
+        max-width: 1400px;
         margin: 0 auto;
     }
 
-    .header-bar {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 1rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        margin-bottom: 2rem;
+    .card-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
 
-    .title {
-        color: #10b981;
+    .card-title {
+        font-size: 1.3rem;
         font-weight: 800;
-        font-size: 1.5rem;
+        color: white;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
     }
 
+    /* Botón Actualizar */
     .btn-refresh {
-        background: #3b82f6;
-        color: white;
-        border: none;
+        background: rgba(41, 121, 255, 0.1);
+        color: #2979FF;
+        border: 1px solid rgba(41, 121, 255, 0.3);
         padding: 0.7rem 1.5rem;
-        border-radius: 0.75rem;
-        font-weight: 600;
+        border-radius: 50px;
+        font-size: 0.9rem;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: 0.3s;
+        font-weight: 700;
         display: flex;
         align-items: center;
         gap: 8px;
+        text-transform: uppercase;
     }
 
         .btn-refresh:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
+            background: rgba(41, 121, 255, 0.2);
+            color: white;
+            box-shadow: 0 0 15px rgba(41, 121, 255, 0.2);
         }
 
-    .table-card {
-        background: white;
-        border-radius: 1.5rem;
-        padding: 1rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        overflow: hidden;
-    }
-
+    /* --- TABLA MODERNA --- */
     .custom-table {
         width: 100%;
-        border-collapse: collapse;
-        font-family: 'Segoe UI', sans-serif;
+        border-collapse: separate;
+        border-spacing: 0 8px;
     }
 
         .custom-table th {
-            background: #f9fafb;
-            color: #6b7280;
+            text-align: left;
+            padding: 1rem 1.5rem;
+            color: #6B7280;
             font-weight: 700;
             text-transform: uppercase;
             font-size: 0.85rem;
-            padding: 1.2rem;
-            text-align: left;
-            border-bottom: 2px solid #e5e7eb;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .custom-table td {
-            padding: 1.2rem;
-            border-bottom: 1px solid #f3f4f6;
-            color: #374151;
+            padding: 1.2rem 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            color: white;
             font-weight: 500;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: 0.2s;
         }
 
-        .custom-table tr:hover {
-            background: #f0fdf4;
+        .custom-table tr:hover td {
+            background: rgba(255, 255, 255, 0.05);
         }
 
-    .badge-pill {
-        padding: 0.4rem 1rem;
-        border-radius: 50px;
-        font-size: 0.85rem;
+        .custom-table td:first-child {
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            color: #9ca3af;
+        }
+
+        .custom-table td:last-child {
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+    /* Valores destacados */
+    .val-hum {
+        color: #2979FF;
         font-weight: 700;
     }
 
-    .badge-success {
-        background: #d1fae5;
-        color: #065f46;
+    .val-temp {
+        color: #FF9100;
+        font-weight: 700;
     }
 
-    .text-temp {
-        color: #f97316;
-        font-weight: bold;
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: inline-block;
     }
 
-    .text-hum {
-        color: #3b82f6;
-        font-weight: bold;
+    .status-ok {
+        background: rgba(0, 230, 118, 0.1);
+        color: #00E676;
+        border: 1px solid rgba(0, 230, 118, 0.2);
     }
 
-    .loading-state, .empty-state {
+    .state-text {
         text-align: center;
         padding: 3rem;
-        color: #9ca3af;
+        color: #6B7280;
+        font-size: 1.1rem;
+    }
+
+    @@media (max-width: 768px) {
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .btn-refresh {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 
-<div class="historial-container">
-    <div class="header-bar">
-        <h1 class="title">📋 HISTORIAL DE RIEGO</h1>
-        <button class="btn-refresh" @onclick="CargarDatos">
-            <span>🔄</span> Actualizar
-        </button>
-    </div>
+<div class="historial-page">
+    <div class="glow-blob glow-1"></div>
+    <div class="glow-blob glow-2"></div>
+
+    <button class="btn-back-menu" @onclick='() => Navigation.NavigateTo("/dashboard")'>
+        <span>⬅️</span> Volver al Dashboard
+    </button>
+
+    <h1 class="page-title">HISTORIAL DE RIEGO</h1>
 
     <div class="table-card">
+        <div class="card-header">
+            <div class="card-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Registros de Actividad
+            </div>
+            <button class="btn-refresh" @onclick="CargarDatos">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" /></svg>
+                Actualizar Lista
+            </button>
+        </div>
+
         <div style="overflow-x:auto;">
             <table class="custom-table">
                 <thead>
@@ -140,11 +267,11 @@
                 <tbody>
                     @if (cargando)
                     {
-                        <tr><td colspan="4" class="loading-state">⏳ Cargando datos...</td></tr>
+                        <tr><td colspan="4" class="state-text">🔄 Cargando datos del historial...</td></tr>
                     }
                     else if (historial == null || !historial.Any())
                     {
-                        <tr><td colspan="4" class="empty-state">📂 No hay registros de riego disponibles.</td></tr>
+                        <tr><td colspan="4" class="state-text">📂 No se encontraron registros de riego.</td></tr>
                     }
                     else
                     {
@@ -152,10 +279,10 @@
                         {
                             <tr>
                                 <td>@item.Fecha.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                                <td class="text-hum">@item.Humedad %</td>
-                                <td class="text-temp">@item.Temperatura °C</td>
+                                <td class="val-hum">@item.Humedad %</td>
+                                <td class="val-temp">@item.Temperatura °C</td>
                                 <td>
-                                    <span class="badge-pill badge-success">Completado</span>
+                                    <span class="status-badge status-ok">✅ Completado</span>
                                 </td>
                             </tr>
                         }
