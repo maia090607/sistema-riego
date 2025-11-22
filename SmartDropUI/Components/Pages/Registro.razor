@@ -9,27 +9,30 @@
 <PageTitle>Registro - SmartDrop</PageTitle>
 
 <style>
-    .registro-wrapper {
+    /* --- FONDO Y AMBIENTE --- */
+    .register-screen {
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: #05070a;
+        background-color: #05070a; /* Fondo muy oscuro */
         position: relative;
         overflow: hidden;
         padding: 2rem;
+        font-family: 'Segoe UI', sans-serif;
     }
 
-    .blob {
+    /* Efectos de luz de fondo */
+    .glow-blob {
         position: absolute;
         border-radius: 50%;
-        filter: blur(80px);
-        opacity: 0.5;
+        filter: blur(90px);
+        opacity: 0.3;
         z-index: 0;
-        animation: moveColors 15s infinite alternate;
+        animation: floatColor 10s infinite ease-in-out;
     }
 
-    .blob-1 {
+    .glow-1 {
         width: 500px;
         height: 500px;
         background: #00E676;
@@ -37,122 +40,319 @@
         left: -150px;
     }
 
-    .blob-2 {
+    .glow-2 {
         width: 600px;
         height: 600px;
         background: #2979FF;
-        bottom: -200px;
-        right: -200px;
+        bottom: -150px;
+        right: -150px;
+        animation-delay: 2s;
     }
 
-    .glass-card-reg {
+    /* --- TARJETA PRINCIPAL --- */
+    .register-box {
         position: relative;
         z-index: 10;
-        background: rgba(20, 25, 40, 0.85);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        background: #0f1219; /* Color oscuro sólido/mate similar a la imagen */
+        border: 1px solid #1f2937;
+        border-radius: 24px;
+        padding: 3rem 2.5rem;
         width: 100%;
-        max-width: 650px;
-        padding: 2.5rem;
-        border-radius: 30px;
-    }
-
-    .reg-header {
+        max-width: 800px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         text-align: center;
-        margin-bottom: 2rem;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        padding-bottom: 1rem;
     }
 
-    .reg-title {
-        font-family: 'Montserrat', sans-serif;
-        font-size: 1.8rem;
-        color: white;
+    .logo-header {
+        margin-bottom: 2.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .title-text {
+        font-size: 2rem;
         font-weight: 800;
-    }
-
-    .reg-label {
-        color: #E2E8F0;
-        font-size: 0.9rem;
-        font-weight: 600;
-        margin-bottom: 5px;
-        margin-left: 10px;
-        display: block;
-    }
-
-    .form-control-rounded option {
-        background-color: #151B2B;
         color: white;
+        margin: 0.5rem 0 0.2rem 0;
+        letter-spacing: -0.5px;
+    }
+
+    .subtitle-text {
+        color: #9ca3af;
+        font-size: 0.95rem;
+    }
+
+    /* --- GRID DEL FORMULARIO --- */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem; /* Espacio entre columnas/filas */
+        margin-bottom: 2.5rem;
+        text-align: left;
+    }
+
+    /* --- INPUTS PERSONALIZADOS --- */
+    .input-group {
+        position: relative;
+        width: 100%;
+    }
+
+    /* Estilo base del input */
+    .modern-input, .modern-select {
+        width: 100%;
+        background-color: #1a1d26; /* Fondo gris oscuro azulado */
+        border: 1px solid #2d3748;
+        color: #e2e8f0;
+        padding: 14px 16px 14px 45px; /* 45px a la izquierda para el icono */
+        border-radius: 12px;
+        font-size: 0.95rem;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+
+    /* --- OCULTAR SPINNERS (FLECHAS) EN INPUT NUMBER --- */
+    /* Chrome, Safari, Edge, Opera */
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+
+    .modern-select {
+        appearance: none;
+        cursor: pointer;
+        color: #e2e8f0;
+    }
+
+    .modern-input::placeholder {
+        color: #64748b; /* Color gris sutil */
+        opacity: 1; /* Firefox baja la opacidad por defecto */
+    }
+
+    .modern-input:focus, .modern-select:focus {
+        border-color: #00E676;
+        background-color: #1f2430;
+        box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.1);
+    }
+
+    /* Posicionamiento del icono */
+    .input-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    /* Icono de flecha para select */
+    .select-arrow {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748b;
+        pointer-events: none;
+        font-size: 0.8rem;
+    }
+
+    /* --- BOTONES --- */
+    .btn-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin-top: 1rem;
+    }
+
+    .btn-modern {
+        padding: 14px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Botón Cancelar */
+    .btn-cancel {
+        background-color: transparent;
+        border: 1px solid #2d3748;
+        color: #9ca3af;
+    }
+
+        .btn-cancel:hover {
+            border-color: #4b5563;
+            color: white;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+    /* Botón Registrarme */
+    .btn-register {
+        background: linear-gradient(90deg, #00E676 0%, #00C853 100%);
+        color: #003d1c;
+        box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+    }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 230, 118, 0.4);
+            filter: brightness(1.1);
+        }
+
+    /* --- ALERTAS --- */
+    .alert-box {
+        padding: 12px;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .alert-error {
+        background: rgba(239, 68, 68, 0.15);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.15);
+        color: #6ee7b7;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    @@media (max-width: 768px) {
+        .form-grid, .btn-row {
+            grid-template-columns: 1fr; /* Apilar en móvil */
+        }
     }
 </style>
 
-<div class="registro-wrapper">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
+<div class="register-screen">
+    <div class="glow-blob glow-1"></div>
+    <div class="glow-blob glow-2"></div>
 
-    <div class="glass-card-reg">
-        <div class="reg-header">
-            <h2 class="reg-title">Únete a SmartDrop</h2>
-            <p style="color: #94A3B8;">Crea tu cuenta de monitoreo</p>
+    <div class="register-box">
+
+        <div class="logo-header">
+            <svg width="60" height="60" viewBox="0 0 100 100" fill="none">
+                <path d="M50 5C50 5 15 35 15 60C15 79.33 30.67 95 50 95C69.33 95 85 79.33 85 60C85 35 50 5 50 5Z" fill="#00E676" />
+            </svg>
+            <h1 class="title-text">Crear Cuenta</h1>
+            <p class="subtitle-text">Únete a la comunidad SmartDrop</p>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-            <div>
-                <div class="mb-4">
-                    <label class="reg-label">Identificación</label>
-                    <input type="number" class="form-control-rounded" @bind="usuario.Identificacion" placeholder="Ej: 1065.." style="padding-left: 1.5rem;" />
-                </div>
-                <div class="mb-4">
-                    <label class="reg-label">Nombre</label>
-                    <input type="text" class="form-control-rounded" @bind="usuario.NombreCompleto" placeholder="Tu nombre" style="padding-left: 1.5rem;" />
-                </div>
-                <div class="mb-4">
-                    <label class="reg-label">Correo</label>
-                    <input type="email" class="form-control-rounded" @bind="usuario.Correo" placeholder="mail@ejemplo.com" style="padding-left: 1.5rem;" />
-                </div>
+        <div class="form-grid">
+
+            <!-- 1. ID -->
+            <div class="input-group">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="16" rx="2" />
+                    <circle cx="9" cy="10" r="2" />
+                    <path d="M15 8h2" />
+                    <path d="M15 12h2" />
+                    <path d="M7 16h10" />
+                </svg>
+
+                <!-- ✅ Usamos el atributo placeholder estándar, se comporta igual que los demás -->
+                <input type="number"
+                       class="modern-input"
+                       placeholder="ID"
+                       @bind="identificacionInput" />
             </div>
 
-            <div>
-                <div class="mb-4">
-                    <label class="reg-label">Usuario</label>
-                    <input type="text" class="form-control-rounded" @bind="usuario.NombreUsuario" placeholder="Usuario único" style="padding-left: 1.5rem;" />
-                </div>
-                <div class="mb-4">
-                    <label class="reg-label">Rol</label>
-                    <select class="form-control-rounded" @bind="usuario.Rol" style="padding-left: 1.5rem; appearance:auto;">
-                        <option value="">Seleccionar...</option>
-                        <option value="Cuidador">Cuidador</option>
-                        <option value="Administrador">Administrador</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label class="reg-label">Contraseña</label>
-                    <input type="password" class="form-control-rounded" @bind="usuario.Contrasena" placeholder="******" style="padding-left: 1.5rem;" />
-                </div>
+            <!-- 2. Nombre Completo -->
+            <div class="input-group">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+                <input type="text" class="modern-input" placeholder="Nombre Completo" @bind="usuario.NombreCompleto" />
             </div>
+
+            <!-- 3. Correo -->
+            <div class="input-group">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="#E5E7EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                </svg>
+                <input type="email" class="modern-input" placeholder="Correo Electrónico" @bind="usuario.Correo" />
+            </div>
+
+            <!-- 4. Usuario -->
+            <div class="input-group">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                    <line x1="7" y1="7" x2="7.01" y2="7" />
+                </svg>
+                <input type="text" class="modern-input" placeholder="Nombre de Usuario" @bind="usuario.NombreUsuario" />
+            </div>
+
+            <!-- 5. Rol -->
+            <div class="input-group">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                </svg>
+                <select class="modern-select" @bind="usuario.Rol">
+                    <option value="" disabled selected>Seleccionar Rol...</option>
+                    <option value="Cuidador">Cuidador</option>
+                    <option value="Administrador">Administrador</option>
+                </select>
+                <span class="select-arrow">▼</span>
+            </div>
+
+            <!-- 6. Contraseña -->
+            <div class="input-group">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="#FCD34D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <input type="password" class="modern-input" placeholder="Contraseña" @bind="usuario.Contrasena" />
+            </div>
+
         </div>
 
+        <!-- MENSAJES -->
         @if (!string.IsNullOrEmpty(mensajeError))
         {
-            <div class="alert alert-danger mt-4">@mensajeError</div>
+            <div class="alert-box alert-error">@mensajeError</div>
         }
         @if (!string.IsNullOrEmpty(mensajeExito))
         {
-            <div class="alert alert-success mt-4">@mensajeExito</div>
+            <div class="alert-box alert-success">@mensajeExito</div>
         }
 
-        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-            <button class="btn-outline" style="flex: 1;" @onclick='() => Navigation.NavigateTo("/login")'>Cancelar</button>
-            <button class="btn-neon" style="flex: 2;" @onclick="HandleRegistro" disabled="@cargando">
-                @(cargando ? "Guardando..." : "REGISTRARME")
+        <!-- BOTONES -->
+        <div class="btn-row">
+            <button class="btn-modern btn-cancel" @onclick='() => Navigation.NavigateTo("/login")'>
+                CANCELAR
+            </button>
+            <button class="btn-modern btn-register" @onclick="HandleRegistro" disabled="@cargando">
+                @(cargando ? "PROCESANDO..." : "REGISTRARME")
             </button>
         </div>
+
     </div>
 </div>
 
 @code {
     private Usuario usuario = new Usuario();
+    // Variable nullable para que el input empiece vacío
+    private int? identificacionInput;
+
     private bool cargando = false;
     private string mensajeError = "";
     private string mensajeExito = "";
@@ -160,7 +360,19 @@
     private async Task HandleRegistro()
     {
         mensajeError = "";
-        if (usuario.Identificacion <= 0 || string.IsNullOrWhiteSpace(usuario.NombreUsuario)) { mensajeError = "Faltan datos."; return; }
+
+        // Validación actualizada
+        if (identificacionInput == null || identificacionInput <= 0 ||
+            string.IsNullOrWhiteSpace(usuario.NombreUsuario) ||
+            string.IsNullOrWhiteSpace(usuario.Contrasena) ||
+            string.IsNullOrWhiteSpace(usuario.Rol))
+        {
+            mensajeError = "⚠️ Por favor completa los campos requeridos.";
+            return;
+        }
+
+        // Asignamos el valor del input temporal al modelo real
+        usuario.Identificacion = identificacionInput.Value;
 
         cargando = true;
         try
@@ -174,16 +386,27 @@
                 Password = usuario.Contrasena,
                 Rol = usuario.Rol
             };
+
             var (success, message) = await AuthService.RegistrarAsync(usuarioRegistro);
+
             if (success)
             {
-                mensajeExito = "¡Cuenta creada!";
-                await Task.Delay(1500);
+                mensajeExito = "¡Cuenta creada exitosamente!";
+                await Task.Delay(2000);
                 Navigation.NavigateTo("/login");
             }
-            else { mensajeError = message; }
+            else
+            {
+                mensajeError = message;
+            }
         }
-        catch (Exception ex) { mensajeError = ex.Message; }
-        finally { cargando = false; }
+        catch (Exception ex)
+        {
+            mensajeError = "Error de conexión: " + ex.Message;
+        }
+        finally
+        {
+            cargando = false;
+        }
     }
 }
