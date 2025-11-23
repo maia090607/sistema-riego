@@ -262,9 +262,14 @@
                     <tr>
                         <th>Fecha y Hora</th>
 
-                        @if (esAdministrador)
+                        @if (esAdministrador || esCuidador)
                         {
                             <th>ID Planta</th>
+                            <th>Nombre Planta</th>
+                        }
+
+                        @if (esAdministrador)
+                        {
                             <th>Propietario</th>
                         }
 
@@ -277,13 +282,17 @@
                     @if (cargando)
                     {
                         <tr>
-                            <td colspan="@(esAdministrador ? 6 : 4)" class="state-text">🔄 Cargando datos del historial...</td>
+                            <td colspan="@(4 + (esAdministrador || esCuidador ? 2 : 0) + (esAdministrador ? 1 : 0))" class="state-text">
+                                🔄 Cargando datos del historial...
+                            </td>
                         </tr>
                     }
                     else if (historial == null || !historial.Any())
                     {
                         <tr>
-                            <td colspan="@(esAdministrador ? 6 : 4)" class="state-text">📂 No se encontraron registros de riego.</td>
+                            <td colspan="@(4 + (esAdministrador || esCuidador ? 2 : 0) + (esAdministrador ? 1 : 0))" class="state-text">
+                                📂 No se encontraron registros de riego.
+                            </td>
                         </tr>
                     }
                     else
@@ -293,13 +302,14 @@
                             <tr>
                                 <td>@item.Fecha.ToString("dd/MM/yyyy HH:mm:ss")</td>
 
+                                @if (esAdministrador || esCuidador)
+                                {
+                                    <td style="color:#9ca3af; font-weight:600;">#@item.IdPlanta</td>
+                                    <td style="font-weight:600; color:white;">@item.NombrePlanta</td>
+                                }
+
                                 @if (esAdministrador)
                                 {
-                                    <td style="color:#9ca3af; font-size:0.9em;">
-                                        #@item.IdPlanta
-                                        <br />
-                                        <span style="font-size:0.8em; color:white;">(@item.NombrePlanta)</span>
-                                    </td>
                                     <td style="color:#FFD700; font-weight:bold;">
                                         @(string.IsNullOrEmpty(item.NombrePropietario) ? "Sin Asignar" : item.NombrePropietario)
                                     </td>
@@ -322,15 +332,19 @@
 @code {
     private List<HistorialRiegoModel> historial;
     private bool cargando = true;
-    private bool esAdministrador = false; // ✅ VARIABLE DE CONTROL
+
+    // ✅ VARIABLES DE CONTROL DE ROL
+    private bool esAdministrador = false;
+    private bool esCuidador = false;
 
     protected override async Task OnInitializedAsync()
     {
-        // ✅ DETECTAR SI ES ADMINISTRADOR
+        // ✅ DETECTAR ROL EXACTO
         var usuario = await AuthService.GetUsuarioActualAsync();
         if (usuario != null)
         {
             esAdministrador = usuario.Rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+            esCuidador = usuario.Rol.Equals("Cuidador", StringComparison.OrdinalIgnoreCase);
         }
 
         await CargarDatos();

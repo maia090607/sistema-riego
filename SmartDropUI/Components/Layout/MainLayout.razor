@@ -16,38 +16,21 @@
 
 @code {
     private Timer? _timerGlobal;
-    private bool bombaFueEncendida = false;
-    private List<PlantaModel> misPlantas = new();
+    private bool _bombaAnteriormenteEncendida = false;
 
-    // ✅ VARIABLES ANTI-DUPLICADOS
-    private DateTime _ultimoGuardado = DateTime.MinValue;
-    private bool _estaGuardando = false; // Semáforo para evitar colisiones
+    // Variables locales para control rápido
+    private DateTime _ultimoGuardadoLocal = DateTime.MinValue;
+    private bool _guardando = false;
 
     protected override async Task OnInitializedAsync()
     {
         _timerGlobal = new Timer(2000);
-        _timerGlobal.Elapsed += async (s, e) => await MonitorearRiego();
-        _timerGlobal.AutoReset = true;
+        _timerGlobal.AutoReset = false; // Pausa el timer mientras trabaja para evitar solapamientos
+        _timerGlobal.Elapsed += async (s, e) => await MonitorearRiegoAutomatico();
         _timerGlobal.Start();
-
-        await CargarPlantasCache();
     }
 
-    private async Task CargarPlantasCache()
-    {
-        try
-        {
-            var usuario = await AuthService.GetUsuarioActualAsync();
-            if (usuario != null)
-            {
-                var resultado = await ApiService.ObtenerPlantasPorUsuarioAsync(usuario.IdUsuario);
-                if (resultado != null) misPlantas = resultado;
-            }
-        }
-        catch { }
-    }
-
-    private async Task MonitorearRiego()
+    private async Task MonitorearRiegoAutomatico()
     {
         try
         {
@@ -55,54 +38,92 @@
 
             if (estado != null)
             {
-                // DETECCIÓN: Si la bomba se enciende (OFF -> ON)
-                if (!bombaFueEncendida && estado.BombaEncendida)
+                // Detectar si la bomba está encendida en modo automático
+                if (estado.BombaEncendida && !estado.ModoManual)
                 {
-                    // ✅ LÓGICA ROBUSTA ANTI-DUPLICADOS
-                    // 1. Verificamos si ya estamos guardando algo (_estaGuardando)
-                    // 2. Verificamos si pasaron al menos 60 segundos desde el último guardado
-                    double segundosDesdeUltimo = (DateTime.Now - _ultimoGuardado).TotalSeconds;
+                    // Condición 1: Flanco de subida (Estaba apagada -> Ahora encendida)
+                    // Condición 2: O si ya estaba encendida, asegurarnos por tiempo (Safety check)
+                    bool flancoSubida = !_bombaAnteriormenteEncendida;
+                    bool tiempoSuficienteLocal = (DateTime.Now - _ultimoGuardadoLocal).TotalSeconds > 120;
 
-                    if (!_estaGuardando && segundosDesdeUltimo > 60)
+                    if ((flancoSubida || tiempoSuficienteLocal) && !_guardando)
                     {
-                        _estaGuardando = true; // 🔒 BLOQUEAMOS INMEDIATAMENTE
-
-                        Console.WriteLine("🌍 [GLOBAL] Riego Detectado. Iniciando proceso de guardado único...");
-
-                        // Ejecutamos el guardado
-                        await RegistrarRiegoGlobal(estado.Humedad);
-
-                        _ultimoGuardado = DateTime.Now; // Actualizamos la hora
-                        _estaGuardando = false; // 🔓 DESBLOQUEAMOS
-                    }
-                    else
-                    {
-                        // Console.WriteLine("⏳ Riego ignorado (Ya se está guardando o fue muy reciente).");
+                        _guardando = true;
+                        await RegistrarRiegoBaseDatos(estado.Humedad);
+                        _guardando = false;
                     }
                 }
 
-                // Actualizar estado anterior
-                bombaFueEncendida = estado.BombaEncendida;
+                _bombaAnteriormenteEncendida = estado.BombaEncendida;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            _estaGuardando = false; // Liberar en caso de error
+            Console.WriteLine($"⚠️ Error monitor: {ex.Message}");
+            _guardando = false;
+        }
+        finally
+        {
+            _timerGlobal?.Start(); // Reiniciar timer
         }
     }
 
-    // En SmartDropUI/Components/Layout/MainLayout.razor
-
-    private async Task RegistrarRiegoGlobal(int humedadSuelo)
+    private async Task RegistrarRiegoBaseDatos(float humedadSuelo)
     {
         try
         {
-            // 1. Obtener ID de planta (lógica existente...)
-            if (misPlantas == null || !misPlantas.Any()) await CargarPlantasCache();
-            int idPlanta = (misPlantas != null && misPlantas.Any()) ? misPlantas.First().IdPlanta : 0;
-            if (idPlanta == 0) return;
+            // 🛑 VALIDACIÓN CRÍTICA DE BASE DE DATOS (SOLUCIÓN AL PROBLEMA)
+            // Antes de guardar, verificamos qué hay en la base de datos.
+            // Esto sincroniza todas las pestañas abiertas: si una ya guardó, las otras se detienen.
+            var ultimoEnBd = await HistorialService.ObtenerUltimoRiegoAsync();
 
-            // 2. Obtener datos del clima actual
+            if (ultimoEnBd != null)
+            {
+                // Si el último registro en BD es de hace menos de 2 minutos (120 seg), ABORTAMOS.
+                double segundosDesdeUltimo = (DateTime.Now - ultimoEnBd.Fecha).TotalSeconds;
+                if (segundosDesdeUltimo < 120)
+                {
+                    Console.WriteLine($"🛡️ [AUTO] Registro bloqueado. Ya existe uno reciente ({segundosDesdeUltimo:F0}s atrás).");
+                    _ultimoGuardadoLocal = DateTime.Now; // Sincronizamos localmente
+                    return;
+                }
+            }
+
+            Console.WriteLine("💧 [AUTO] Guardando nuevo registro de riego...");
+
+            // --- 1. OBTENER PLANTA (FALLBACK ROBUSTO) ---
+            int idPlantaDestino = 0;
+            string nombrePlanta = "Automático";
+
+            try
+            {
+                var usuario = await AuthService.GetUsuarioActualAsync();
+                if (usuario != null)
+                {
+                    var misPlantas = await ApiService.ObtenerPlantasPorUsuarioAsync(usuario.IdUsuario);
+                    if (misPlantas != null && misPlantas.Any())
+                    {
+                        idPlantaDestino = misPlantas.First().IdPlanta;
+                        nombrePlanta = misPlantas.First().NombrePlanta;
+                    }
+                }
+            }
+            catch { }
+
+            // Si no hay usuario o planta, buscar la primera del sistema (Respaldo)
+            if (idPlantaDestino == 0)
+            {
+                var todas = await ApiService.ObtenerPlantasAsync();
+                if (todas != null && todas.Any())
+                {
+                    idPlantaDestino = todas.First().IdPlanta;
+                    nombrePlanta = todas.First().NombrePlanta;
+                }
+            }
+
+            if (idPlantaDestino == 0) return; // No se puede guardar sin ID
+
+            // --- 2. OBTENER CLIMA ---
             float temp = 25.0f;
             float humAire = 50.0f;
             float viento = 0.0f;
@@ -118,30 +139,32 @@
             }
             catch { }
 
-            // 3. Guardar en HISTORIAL_RIEGO (Ya lo haces)
+            // --- 3. GUARDAR ---
             var historial = new HistorialRiegoModel
             {
                 Fecha = DateTime.Now,
                 Humedad = humedadSuelo,
                 Temperatura = temp,
-                IdPlanta = idPlanta
+                IdPlanta = idPlantaDestino,
+                NombrePlanta = nombrePlanta
             };
-            await HistorialService.GuardarRiegoAsync(historial);
 
-            // 4. ✅ NUEVO: Guardar en TEMPERATURA
-            await ApiService.GuardarTemperaturaAsync(temp, temp, "Registro automático al regar", idPlanta);
+            bool exito = await HistorialService.GuardarRiegoAsync(historial);
 
-            // 5. ✅ NUEVO: Guardar en REGISTRO_CLIMATICO
-            await ApiService.GuardarRegistroClimaticoAsync(humedadSuelo, humAire, temp, viento, idPlanta);
+            if (exito)
+            {
+                _ultimoGuardadoLocal = DateTime.Now; // Actualizar contador local
 
-            Console.WriteLine("✅ [GLOBAL] Riego y datos ambientales registrados correctamente.");
+                await ApiService.GuardarTemperaturaAsync(temp, temp, "Riego Automático", idPlantaDestino);
+                await ApiService.GuardarRegistroClimaticoAsync(humedadSuelo, humAire, temp, viento, idPlantaDestino);
+                Console.WriteLine($"✅ [AUTO] Guardado exitoso.");
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ [GLOBAL] Error al registrar datos completos: {ex.Message}");
+            Console.WriteLine($"❌ [AUTO] Error al guardar: {ex.Message}");
         }
     }
-    
 
     public void Dispose()
     {
