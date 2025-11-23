@@ -123,24 +123,28 @@
         border: 1px solid rgba(255, 145, 0, 0.3);
     }
 
-    /* --- SELECCIÓN DE PLANTA (DISEÑO GLASSMORPHISM MEJORADO) --- */
+    /* --- SELECCIÓN DE PLANTA (DISEÑO MEJORADO) --- */
     .admin-selector-container {
-        background: rgba(17, 24, 39, 0.75); /* Fondo oscuro más sólido */
-        backdrop-filter: blur(12px); /* Desenfoque tipo cristal */
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(41, 121, 255, 0.3); /* Borde sutil azul */
-        border-left: 5px solid #2979FF; /* Acento lateral fuerte */
-
+        background: rgba(17, 24, 39, 0.7); /* Fondo oscuro semitransparente */
+        backdrop-filter: blur(10px); /* Efecto cristal */
+        border: 1px solid rgba(41, 121, 255, 0.2);
+        border-left: 4px solid #2979FF; /* Línea de acento azul */
         border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 2.5rem;
+        padding: 1.2rem 1.5rem;
+        margin-bottom: 2rem;
         position: relative;
         z-index: 10;
         display: flex;
         align-items: center;
         gap: 1.5rem;
-        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5); /* Sombra elegante */
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         flex-wrap: wrap;
+    }
+
+    /* Estilo específico para Cuidador (Verde en vez de Azul) */
+    .cuidador-style {
+        border-color: rgba(0, 230, 118, 0.2);
+        border-left-color: #00E676;
     }
 
     .admin-label {
@@ -151,49 +155,56 @@
         text-transform: uppercase;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
         white-space: nowrap;
     }
 
-    /* SELECT PERSONALIZADO */
+    .cuidador-label {
+        color: #00E676; /* Verde para cuidador */
+    }
+
     .modern-select {
         flex: 1;
         min-width: 280px;
-        background-color: rgba(0, 0, 0, 0.4);
+        background-color: rgba(255, 255, 255, 0.05);
         color: #e2e8f0;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        padding: 14px 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 12px 16px;
         border-radius: 8px;
         font-family: 'Outfit', sans-serif;
-        font-size: 1rem;
-        font-weight: 500;
+        font-size: 0.95rem;
         cursor: pointer;
         transition: all 0.3s ease;
-        /* Flecha personalizada SVG */
         appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232979FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        /* Flecha personalizada */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 1rem center;
         background-size: 1.2em;
     }
 
         .modern-select:hover {
-            background-color: rgba(255, 255, 255, 0.08);
-            border-color: rgba(41, 121, 255, 0.5);
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
         .modern-select:focus {
             outline: none;
             border-color: #2979FF;
-            box-shadow: 0 0 0 4px rgba(41, 121, 255, 0.15);
             background-color: #0f172a;
+            box-shadow: 0 0 0 3px rgba(41, 121, 255, 0.2);
         }
 
-        .modern-select option {
-            background-color: #111827;
-            color: white;
-            padding: 12px;
-        }
+    .cuidador-focus:focus {
+        border-color: #00E676;
+        box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.2);
+    }
+
+    .modern-select option {
+        background-color: #111827;
+        color: white;
+        padding: 10px;
+    }
 
     /* Grid de Tarjetas */
     .status-grid {
@@ -450,25 +461,58 @@
         </div>
     </div>
 
-    @if (esAdministrador)
+    @if (plantasDisponibles != null && plantasDisponibles.Any())
     {
-        <div class="admin-selector-container">
-            <div class="admin-label">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                </svg>
-                Panel Admin
+        <div class="admin-selector-container @(!esAdministrador ? "cuidador-style" : "")">
+            <div class="admin-label @(!esAdministrador ? "cuidador-label" : "")">
+                @if (esAdministrador)
+                {
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    <span>Panel Admin:</span>
+                }
+                else
+                {
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22c4.97 0 9-4.03 9-9V7a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v6c0 4.97 4.03 9 9 9z"></path>
+                        <path d="M12 22V7"></path>
+                        <path d="M2 13h10"></path>
+                    </svg>
+                    <span>Mis Plantas:</span>
+                }
             </div>
 
-            <select class="modern-select" @onchange="CambiarPlantaSeleccionada">
-                <option value="0" disabled selected>👇 Seleccione Planta a Regar...</option>
-                @foreach (var p in todasLasPlantas)
+            <select class="modern-select @(!esAdministrador ? "cuidador-focus" : "")" @onchange="CambiarPlantaSeleccionada">
+                @if (_idPlantaValido == 0)
                 {
-                    <option value="@p.IdPlanta">
-                        🆔 @p.IdPlanta  — 🌿 @p.NombrePlanta  (@(string.IsNullOrEmpty(p.NombrePropietario) ? "Sin Dueño" : p.NombrePropietario))
+                    <option value="0" disabled selected>👇 Seleccione Planta a Regar...</option>
+                }
+
+                @foreach (var p in plantasDisponibles)
+                {
+                    <option value="@p.IdPlanta" selected="@(p.IdPlanta == _idPlantaValido)">
+                        @if (esAdministrador)
+                        {
+                            @:🆔 @p.IdPlanta  — 🌿 @p.NombrePlanta  (@(string.IsNullOrEmpty(p.NombrePropietario) ? "Sin Dueño" : p.NombrePropietario))
+                        }
+                        else
+                        {
+                            @:🌿 @p.NombrePlanta  (ID: @p.IdPlanta)
+                        }
                     </option>
                 }
             </select>
+        </div>
+    }
+    else
+    {
+        <div class="admin-selector-container" style="border-color: #EF4444; border-left-color: #EF4444;">
+            <div class="admin-label" style="color: #EF4444;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                Aviso:
+            </div>
+            <span style="color: #e2e8f0;">No tienes plantas registradas para controlar.</span>
         </div>
     }
 
@@ -577,9 +621,9 @@
     private float humedad_real = 0;
     private DateTime _horaUltimoComando = DateTime.MinValue;
 
-    // ✅ VARIABLES ADMIN
+    // ✅ VARIABLES DE DATOS
     private bool esAdministrador = false;
-    private List<PlantaModel> todasLasPlantas = new();
+    private List<PlantaModel> plantasDisponibles = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -597,27 +641,32 @@
             var usuario = await AuthService.GetUsuarioActualAsync();
             if (usuario != null)
             {
+                // 1. Detectar rol
                 esAdministrador = usuario.Rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
 
+                // 2. Cargar plantas según el rol
                 if (esAdministrador)
                 {
                     var lista = await ApiService.ObtenerPlantasAsync();
-                    todasLasPlantas = lista ?? new List<PlantaModel>();
-                    if (todasLasPlantas.Any()) _idPlantaValido = todasLasPlantas.First().IdPlanta;
+                    plantasDisponibles = lista ?? new List<PlantaModel>();
                 }
                 else
                 {
                     var lista = await ApiService.ObtenerPlantasPorUsuarioAsync(usuario.IdUsuario);
-                    if (lista != null && lista.Any())
-                    {
-                        _idPlantaValido = lista.First().IdPlanta;
-                    }
+                    plantasDisponibles = lista ?? new List<PlantaModel>();
+                }
+
+                // 3. Seleccionar la primera planta por defecto si hay disponibles
+                if (plantasDisponibles.Any())
+                {
+                    _idPlantaValido = plantasDisponibles.First().IdPlanta;
                 }
             }
         }
         catch { }
     }
 
+    // ✅ MÉTODO PARA CAMBIAR LA PLANTA DESDE EL SELECT
     private void CambiarPlantaSeleccionada(ChangeEventArgs e)
     {
         if (int.TryParse(e.Value?.ToString(), out int nuevoId))
@@ -703,7 +752,7 @@
                 Fecha = DateTime.Now,
                 Humedad = humedad_real,
                 Temperatura = temp,
-                IdPlanta = _idPlantaValido
+                IdPlanta = _idPlantaValido // ✅ SE USA EL ID SELECCIONADO EN EL DROPDOWN
             };
 
             bool guardado = await HistorialService.GuardarRiegoAsync(nuevoRiego);
