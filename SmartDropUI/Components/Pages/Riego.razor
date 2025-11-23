@@ -349,7 +349,6 @@
 </style>
 
 <div class="riego-page">
-    <!-- Luces ambientales -->
     <div class="glow-blob glow-1"></div>
     <div class="glow-blob glow-2"></div>
 
@@ -360,7 +359,6 @@
     <div class="header-container">
         <h1 class="page-title">Control de Riego</h1>
 
-        <!-- ETIQUETA DE ESTADO DEL SISTEMA -->
         <div class="mode-badge @(riegoManualActivo ? "mode-manual" : "mode-auto")">
             @if (riegoManualActivo)
             {
@@ -375,10 +373,8 @@
         </div>
     </div>
 
-    <!-- GRID DE ESTADO -->
     <div class="status-grid">
 
-        <!-- TARJETA BOMBA (ICONO GOTA) -->
         <div class="status-card @(bombaActiva ? "card-on" : "card-off")">
             <div class="icon-wrapper">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -391,7 +387,6 @@
             </div>
         </div>
 
-        <!-- TARJETA CONEXIÓN (ICONO WIFI) -->
         <div class="status-card @(ArduinoService.EstaConectado ? "card-online" : "card-offline")">
             <div class="icon-wrapper">
                 @if (ArduinoService.EstaConectado)
@@ -423,7 +418,6 @@
         </div>
     </div>
 
-    <!-- PANEL MANUAL -->
     <div class="manual-section">
         <h3 class="manual-title">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#FF9100"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
@@ -480,7 +474,8 @@
     private System.Timers.Timer? pollingTimer;
     private int _idPlantaValido = 0;
 
-    // ✅ CAMBIO 1: Variable para bloquear la consulta automática temporalmente
+    // VARIABLES CORREGIDAS PARA SINCRONIZACIÓN DE DATOS
+    private float humedad_real = 0;
     private DateTime _horaUltimoComando = DateTime.MinValue;
 
     protected override async Task OnInitializedAsync()
@@ -490,7 +485,6 @@
         pollingTimer.Elapsed += async (s, e) => await ConsultarEstadoServidor();
         pollingTimer.AutoReset = true;
         pollingTimer.Start();
-        // Eliminamos la llamada inicial para evitar parpadeos al cargar
     }
 
     private async Task CargarIdPlantaValido()
@@ -512,8 +506,7 @@
 
     private async Task ConsultarEstadoServidor()
     {
-        // ✅ CAMBIO 2: Si enviamos un comando hace menos de 4 segundos, NO consultamos nada.
-        // Esto evita que la App lea un estado "viejo" del Arduino y apague el botón.
+        // Evitar leer estado viejo justo después de enviar comando (Bloqueo 4s)
         if ((DateTime.Now - _horaUltimoComando).TotalSeconds < 4) return;
 
         try
@@ -524,6 +517,10 @@
                 await InvokeAsync(() =>
                 {
                     bombaActiva = datos.BombaEncendida;
+                    // ✅ Solo actualizamos si viene un valor válido para no sobreescribir con 0 por error
+                    if (datos.Humedad > 0)
+                        humedad_real = datos.Humedad;
+
                     if (datos.ModoManual && !riegoManualActivo)
                     {
                         riegoManualActivo = true;
@@ -549,21 +546,29 @@
             return;
         }
 
-        // ✅ CAMBIO 3: Bloqueamos el polling y forzamos la UI visualmente INMEDIATAMENTE
+        // 1. BLOQUEO DE POLLING Y UI INMEDIATA
         _horaUltimoComando = DateTime.Now;
-
         esperandoRespuesta = true;
-
-        // Actualización visual inmediata (Optimistic UI)
         riegoManualActivo = true;
         bombaActiva = true;
         IniciarTimerVisual();
-        StateHasChanged(); // Forzamos repintado para que aparezca el botón de detener
+        StateHasChanged();
 
-        // Enviamos la orden al Arduino
+        // 2. ✅ FIX CRÍTICO: FORZAR LECTURA DEL SENSOR ANTES DE GUARDAR
+        try
+        {
+            var datosSensor = await ArduinoService.ObtenerEstadoAsync();
+            if (datosSensor != null && datosSensor.Humedad > 0)
+            {
+                humedad_real = datosSensor.Humedad;
+            }
+        }
+        catch { /* Si falla, usamos el último valor conocido */ }
+
+        // 3. ENVIAR COMANDO AL ARDUINO
         bool exitoArduino = await ArduinoService.IniciarRiegoManualAsync();
 
-        // --- Lógica de Base de Datos (se mantiene igual) ---
+        // 4. OBTENER DATOS CLIMA Y GUARDAR EN BD
         float temp = 25.0f;
         float humAire = 50.0f;
         float viento = 0.0f;
@@ -581,20 +586,22 @@
 
         try
         {
+            // ✅ Usamos humedad_real que acabamos de refrescar
             var nuevoRiego = new HistorialRiegoModel
             {
                 Fecha = DateTime.Now,
-                Humedad = 50, // Valor referencia
+                Humedad = humedad_real,
                 Temperatura = temp,
                 IdPlanta = _idPlantaValido
             };
+
             bool guardado = await HistorialService.GuardarRiegoAsync(nuevoRiego);
             await ApiService.GuardarTemperaturaAsync(temp, temp, "Riego Manual", _idPlantaValido);
-            await ApiService.GuardarRegistroClimaticoAsync(0, humAire, temp, viento, _idPlantaValido);
+            await ApiService.GuardarRegistroClimaticoAsync(humedad_real, humAire, temp, viento, _idPlantaValido);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error guardando historial: {ex.Message}");
+            Console.WriteLine($"Error guardando: {ex.Message}");
         }
 
         esperandoRespuesta = false;
@@ -602,9 +609,7 @@
 
     private async Task DetenerRiegoManual()
     {
-        // ✅ CAMBIO 4: Bloqueamos polling también al detener
-        _horaUltimoComando = DateTime.Now;
-
+        _horaUltimoComando = DateTime.Now; // Bloqueo de consulta
         esperandoRespuesta = true;
 
         // Actualización visual inmediata
