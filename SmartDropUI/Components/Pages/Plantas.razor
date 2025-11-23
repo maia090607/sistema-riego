@@ -268,7 +268,6 @@
     else if (plantas != null && plantas.Any())
     {
         <div class="content-grid">
-            <!-- LISTA -->
             <div class="plant-list-section">
                 <div class="list-title">
                     @(esAdministrador ? "🌍 Todas las Plantas" : "🌱 Mis Plantas")
@@ -280,8 +279,17 @@
                     {
                         <div class="plant-item @(planta.IdPlanta == plantaActual.IdPlanta ? "active" : "")"
                              @onclick="() => SeleccionarPlanta(planta)">
+
                             <div class="plant-name">@planta.NombrePlanta</div>
-                            @if (!esAdministrador)
+
+                            @if (esAdministrador)
+                            {
+                                <div style="font-size: 0.8rem; color: #FF9100; margin-top: 2px;">
+                                    👤 @planta.NombrePropietario
+                                </div>
+                                <div class="plant-id" style="font-size: 0.7rem; opacity: 0.7;">ID: @planta.IdPlanta</div>
+                            }
+                            else
                             {
                                 <div class="plant-id">ID: @planta.IdPlanta</div>
                             }
@@ -289,13 +297,11 @@
                     }
                 </div>
 
-                <!-- ✅ BOTÓN ACTUALIZADO -->
                 <button class="btn-add-plant" @onclick="IrAGestion">
                     <span>➕</span> Agregar Nueva Planta
                 </button>
             </div>
 
-            <!-- DETALLES -->
             <div class="plant-detail-section">
                 <div class="detail-header">
                     <h1 class="detail-title">@plantaActual.NombrePlanta</h1>
@@ -362,12 +368,15 @@
             if (usuarioLogueado != null)
             {
                 esAdministrador = usuarioLogueado.Rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+
                 if (esAdministrador)
                 {
+                    // El admin obtiene TODAS las plantas (y ahora incluirá el propietario)
                     plantas = await ApiService.ObtenerPlantasAsync() ?? new List<PlantaModel>();
                 }
                 else
                 {
+                    // El usuario normal solo ve las suyas
                     plantas = await ApiService.ObtenerPlantasPorUsuarioAsync(usuarioLogueado.IdUsuario) ?? new List<PlantaModel>();
                 }
 

@@ -10,7 +10,9 @@
         public float NivelOptimoTemperatura { get; set; }
         public float NivelOptimoLuz { get; set; }
 
-        public int IdUsuario { get; set; } 
-        public string NombrePropietario { get; set; } = ""; 
+        public int IdUsuario { get; set; }
+
+        // ✅ PROPIEDAD AGREGADA
+        public string NombrePropietario { get; set; } = "";
     }
 }

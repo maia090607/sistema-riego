@@ -1,16 +1,13 @@
 ﻿using ENTITY;
 using RiegoAPI.DTO.Request;
-using RiegoAPI.DTOs.Request;
 using RiegoAPI.DTOs.Response;
 using System.Collections.Generic;
 using System.Linq;
-
 
 namespace RiegoAPI.DTO.Mappers
 {
     public class PlantaMapper
     {
-        /// Convierte de PlantaRequestDTO a Cultivo (Entity)
         public static Cultivo ToEntity(PlantaRequestDTO dto)
         {
             if (dto == null) return null;
@@ -23,11 +20,10 @@ namespace RiegoAPI.DTO.Mappers
                 nivel_optimo_humedad = dto.NivelOptimoHumedad,
                 nivel_optimo_temperatura = dto.NivelOptimoTemperatura,
                 nivel_optimo_luz = dto.NivelOptimoLuz,
-                IdUsuario = dto.IdUsuario // ✅ IMPORTANTE: Asignar el usuario
+                IdUsuario = dto.IdUsuario
             };
         }
 
-        /// Convierte de Cultivo (Entity) a PlantaResponseDTO
         public static PlantaResponseDTO ToResponseDTO(Cultivo entity)
         {
             if (entity == null) return null;
@@ -40,22 +36,22 @@ namespace RiegoAPI.DTO.Mappers
                 NivelOptimoHumedad = entity.nivel_optimo_humedad,
                 NivelOptimoTemperatura = entity.nivel_optimo_temperatura,
                 NivelOptimoLuz = entity.nivel_optimo_luz,
-                IdUsuario = entity.IdUsuario 
+                IdUsuario = entity.IdUsuario,
+
+                // ✅ MAPEO DEL NOMBRE DEL PROPIETARIO
+                NombrePropietario = entity.NombrePropietario
             };
         }
 
-        /// Convierte lista de Cultivos a lista de DTOs
         public static List<PlantaResponseDTO> ToResponseDTOList(IList<Cultivo> entities)
         {
             if (entities == null) return new List<PlantaResponseDTO>();
             return entities.Select(p => ToResponseDTO(p)).ToList();
         }
 
-        /// Actualiza un Cultivo existente con datos del DTO
         public static void UpdateEntity(Cultivo entity, PlantaRequestDTO dto)
         {
             if (entity == null || dto == null) return;
-
             entity.NombrePlanta = dto.NombrePlanta;
             entity.Descripcion = dto.Descripcion;
             entity.RutaImagen = dto.RutaImagen;
@@ -63,6 +59,5 @@ namespace RiegoAPI.DTO.Mappers
             entity.nivel_optimo_temperatura = dto.NivelOptimoTemperatura;
             entity.nivel_optimo_luz = dto.NivelOptimoLuz;
         }
-
     }
 }

@@ -3,12 +3,15 @@
     public class PlantaResponseDTO
     {
         public int IdPlanta { get; set; }
-        public string NombrePlanta { get; set; }
-        public string Descripcion { get; set; }
-        public string RutaImagen { get; set; }
+        public string NombrePlanta { get; set; } = string.Empty;
+        public string Descripcion { get; set; } = string.Empty;
+        public string RutaImagen { get; set; } = string.Empty;
         public float NivelOptimoHumedad { get; set; }
         public float NivelOptimoTemperatura { get; set; }
         public float NivelOptimoLuz { get; set; }
-        public int IdUsuario { get; set; } 
+        public int IdUsuario { get; set; }
+
+        // ✅ PROPIEDAD AGREGADA
+        public string NombrePropietario { get; set; } = "";
     }
 }
