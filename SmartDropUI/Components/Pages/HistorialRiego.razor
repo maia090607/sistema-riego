@@ -2,6 +2,7 @@
 @using SmartDropUI.Services
 @using SmartDropUI.Models
 @inject HistorialRiegoService HistorialService
+@inject AuthService AuthService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
@@ -239,7 +240,8 @@
     <div class="table-card">
         <div class="card-header">
             <div class="card-title">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                     stroke="#00E676" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="14 2 14 8 20 8"></polyline>
                     <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -259,6 +261,13 @@
                 <thead>
                     <tr>
                         <th>Fecha y Hora</th>
+
+                        @if (esAdministrador)
+                        {
+                            <th>ID Planta</th>
+                            <th>Propietario</th>
+                        }
+
                         <th>Humedad Suelo</th>
                         <th>Temperatura</th>
                         <th>Estado</th>
@@ -267,11 +276,15 @@
                 <tbody>
                     @if (cargando)
                     {
-                        <tr><td colspan="4" class="state-text">🔄 Cargando datos del historial...</td></tr>
+                        <tr>
+                            <td colspan="@(esAdministrador ? 6 : 4)" class="state-text">🔄 Cargando datos del historial...</td>
+                        </tr>
                     }
                     else if (historial == null || !historial.Any())
                     {
-                        <tr><td colspan="4" class="state-text">📂 No se encontraron registros de riego.</td></tr>
+                        <tr>
+                            <td colspan="@(esAdministrador ? 6 : 4)" class="state-text">📂 No se encontraron registros de riego.</td>
+                        </tr>
                     }
                     else
                     {
@@ -279,6 +292,19 @@
                         {
                             <tr>
                                 <td>@item.Fecha.ToString("dd/MM/yyyy HH:mm:ss")</td>
+
+                                @if (esAdministrador)
+                                {
+                                    <td style="color:#9ca3af; font-size:0.9em;">
+                                        #@item.IdPlanta
+                                        <br />
+                                        <span style="font-size:0.8em; color:white;">(@item.NombrePlanta)</span>
+                                    </td>
+                                    <td style="color:#FFD700; font-weight:bold;">
+                                        @(string.IsNullOrEmpty(item.NombrePropietario) ? "Sin Asignar" : item.NombrePropietario)
+                                    </td>
+                                }
+
                                 <td class="val-hum">@item.Humedad %</td>
                                 <td class="val-temp">@item.Temperatura °C</td>
                                 <td>
@@ -296,9 +322,17 @@
 @code {
     private List<HistorialRiegoModel> historial;
     private bool cargando = true;
+    private bool esAdministrador = false; // ✅ VARIABLE DE CONTROL
 
     protected override async Task OnInitializedAsync()
     {
+        // ✅ DETECTAR SI ES ADMINISTRADOR
+        var usuario = await AuthService.GetUsuarioActualAsync();
+        if (usuario != null)
+        {
+            esAdministrador = usuario.Rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+        }
+
         await CargarDatos();
     }
 

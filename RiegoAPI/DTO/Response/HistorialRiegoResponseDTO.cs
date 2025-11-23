@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace RiegoAPI.DTOs.Response
 {
@@ -9,5 +8,10 @@ namespace RiegoAPI.DTOs.Response
         public DateTime Fecha { get; set; }
         public float Humedad { get; set; }
         public float Temperatura { get; set; }
+
+        // ✅ NUEVOS CAMPOS
+        public int IdPlanta { get; set; }
+        public string NombrePlanta { get; set; } = "";
+        public string NombrePropietario { get; set; } = "";
     }
 }

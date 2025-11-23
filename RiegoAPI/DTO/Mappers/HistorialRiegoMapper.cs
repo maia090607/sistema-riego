@@ -22,20 +22,22 @@ namespace RiegoAPI.DTO.Mappers
                 IdPlanta = dto.IdPlanta // ✅ Mapeamos el ID
             };
         }
-        /// Convierte de Historial_Riego (Entity) a HistorialRiegoResponseDTO
         public static HistorialRiegoResponseDTO ToResponseDTO(Historial_Riego entity)
         {
             if (entity == null) return null;
-
             return new HistorialRiegoResponseDTO
             {
                 Id = entity.Id,
                 Fecha = entity.Fecha,
                 Humedad = entity.Humedad,
-                Temperatura = entity.Temperatura
+                Temperatura = entity.Temperatura,
+
+                // ✅ MAPEO DE NUEVOS CAMPOS
+                IdPlanta = entity.IdPlanta,
+                NombrePlanta = entity.NombrePlanta,
+                NombrePropietario = entity.NombrePropietario
             };
         }
-
         /// Convierte lista de Historiales a lista de DTOs
         public static List<HistorialRiegoResponseDTO> ToResponseDTOList(IList<Historial_Riego> entities)
         {

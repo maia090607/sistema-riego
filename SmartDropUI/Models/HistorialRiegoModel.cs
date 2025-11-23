@@ -1,4 +1,6 @@
-﻿namespace SmartDropUI.Models
+﻿using System;
+
+namespace SmartDropUI.Models
 {
     public class HistorialRiegoModel
     {
@@ -6,6 +8,10 @@
         public DateTime Fecha { get; set; }
         public float Humedad { get; set; }
         public float Temperatura { get; set; }
-        public int IdPlanta { get; set; } // ✅ Nuevo
+        public int IdPlanta { get; set; }
+
+        // ✅ NUEVOS CAMPOS
+        public string NombrePlanta { get; set; } = "";
+        public string NombrePropietario { get; set; } = "";
     }
 }

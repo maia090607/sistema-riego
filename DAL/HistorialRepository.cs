@@ -143,7 +143,21 @@ namespace DAL
 
         public Response<List<Historial_Riego>> MostrarTodos()
         {
-            string query = "SELECT ID_HISTORIAL_RIEGO, FECHA_HORA, HUMEDAD, TEMPERATURA FROM HISTORIAL_RIEGO";
+            // ✅ QUERY ACTUALIZADA CON JOINS A CULTIVO Y USUARIO
+            string query = @"
+                SELECT 
+                    h.ID_HISTORIAL_RIEGO, 
+                    h.FECHA_HORA, 
+                    h.HUMEDAD, 
+                    h.TEMPERATURA,
+                    h.ID_PLANTA,
+                    c.NOMBRE_PLANTA,
+                    u.NOMBRE_USUARIO as PROPIETARIO
+                FROM HISTORIAL_RIEGO h
+                LEFT JOIN CULTIVO c ON h.ID_PLANTA = c.ID_PLANTA
+                LEFT JOIN USUARIO u ON c.ID_USUARIO = u.CEDULA
+                ORDER BY h.FECHA_HORA DESC";
+
             var lista = new List<Historial_Riego>();
 
             try
@@ -161,21 +175,21 @@ namespace DAL
                                 Id = Convert.ToInt32(reader["ID_HISTORIAL_RIEGO"]),
                                 Fecha = Convert.ToDateTime(reader["FECHA_HORA"]),
                                 Humedad = Convert.ToSingle(reader["HUMEDAD"]),
-                                Temperatura = Convert.ToSingle(reader["TEMPERATURA"])
+                                Temperatura = Convert.ToSingle(reader["TEMPERATURA"]),
+
+                                // ✅ LECTURA DE NUEVOS DATOS
+                                IdPlanta = reader["ID_PLANTA"] != DBNull.Value ? Convert.ToInt32(reader["ID_PLANTA"]) : 0,
+                                NombrePlanta = reader["NOMBRE_PLANTA"] != DBNull.Value ? reader["NOMBRE_PLANTA"].ToString() : "Desconocida",
+                                NombrePropietario = reader["PROPIETARIO"] != DBNull.Value ? reader["PROPIETARIO"].ToString() : "Sin Asignar"
                             });
                         }
                     }
                 }
-
                 return new Response<List<Historial_Riego>>(true, "Lista obtenida correctamente", lista, null);
-            }
-            catch (OracleException ex)
-            {
-                return new Response<List<Historial_Riego>>(false, $"Error Oracle: {ex.Message}", null, null);
             }
             catch (Exception ex)
             {
-                return new Response<List<Historial_Riego>>(false, $"Error general: {ex.Message}", null, null);
+                return new Response<List<Historial_Riego>>(false, $"Error: {ex.Message}", null, null);
             }
         }
     }
