@@ -9,8 +9,8 @@
 
 <PageTitle>Mi Perfil - SmartDrop</PageTitle>
 
-<!-- Estilos se mantienen iguales, solo lógica actualizada -->
 <style>
+    /* --- ESTILOS GENERALES --- */
     .profile-page {
         min-height: 100vh;
         background-color: #05070a;
@@ -70,12 +70,13 @@
             transform: translateX(-5px);
         }
 
+    /* --- SECCIÓN PERFIL --- */
     .profile-container {
         display: grid;
         grid-template-columns: 350px 1fr;
         gap: 2rem;
         max-width: 1200px;
-        margin: 0 auto;
+        margin: 0 auto 3rem auto;
         position: relative;
         z-index: 10;
     }
@@ -110,30 +111,6 @@
         object-fit: cover;
     }
 
-    .upload-btn-wrapper {
-        margin-bottom: 1.5rem;
-    }
-
-    .btn-camera {
-        background: rgba(41, 121, 255, 0.15);
-        color: #2979FF;
-        border: 1px solid rgba(41, 121, 255, 0.3);
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: 0.3s;
-    }
-
-        .btn-camera:hover {
-            background: rgba(41, 121, 255, 0.25);
-            color: white;
-        }
-
     .user-name {
         font-size: 1.5rem;
         font-weight: 800;
@@ -164,32 +141,6 @@
         border: 1px solid rgba(0, 230, 118, 0.3);
     }
 
-    .stats-row {
-        display: flex;
-        justify-content: space-around;
-        width: 100%;
-        padding-top: 1.5rem;
-        border-top: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .stat-item {
-        text-align: center;
-    }
-
-    .stat-val {
-        display: block;
-        font-size: 1.2rem;
-        font-weight: 800;
-        color: white;
-    }
-
-    .stat-lbl {
-        font-size: 0.75rem;
-        color: #9ca3af;
-        text-transform: uppercase;
-        font-weight: 600;
-    }
-
     .edit-card {
         background: #111827;
         border-radius: 24px;
@@ -215,25 +166,6 @@
         align-items: center;
         gap: 12px;
     }
-
-    .btn-edit-toggle {
-        background: transparent;
-        color: #2979FF;
-        border: 1px solid #2979FF;
-        padding: 0.5rem 1rem;
-        border-radius: 50px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: 0.3s;
-        font-size: 0.9rem;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-        .btn-edit-toggle:hover {
-            background: rgba(41, 121, 255, 0.1);
-        }
 
     .form-grid {
         display: grid;
@@ -269,12 +201,6 @@
         transition: 0.3s;
     }
 
-        .form-input:not(:disabled):focus {
-            border-color: #2979FF;
-            background: #111827;
-            box-shadow: 0 0 0 3px rgba(41, 121, 255, 0.1);
-        }
-
         .form-input:disabled {
             background: transparent;
             border-color: transparent;
@@ -284,64 +210,76 @@
             cursor: default;
         }
 
-    .btn-row {
-        display: grid;
-        grid-template-columns: 1fr 2fr;
-        gap: 1rem;
-        margin-top: 2rem;
+    /* --- SECCIÓN LISTA DE USUARIOS (SOLO ADMIN) --- */
+    .admin-users-section {
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 10;
     }
 
-    .btn-save {
-        background: linear-gradient(90deg, #2979FF 0%, #1565C0 100%);
-        color: white;
-        border: none;
-        padding: 1rem;
-        border-radius: 50px;
-        font-weight: 800;
-        text-transform: uppercase;
-        cursor: pointer;
-        transition: 0.3s;
-        box-shadow: 0 4px 15px rgba(41, 121, 255, 0.3);
+    .users-card {
+        background: #111827;
+        border-radius: 24px;
+        padding: 2rem;
+        border: 1px solid rgba(41, 121, 255, 0.2);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        border-top: 4px solid #2979FF;
     }
 
-        .btn-save:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(41, 121, 255, 0.5);
+    .users-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+        margin-top: 1rem;
+    }
+
+        .users-table th {
+            text-align: left;
+            padding: 1rem;
+            color: #6B7280;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-    .btn-cancel {
-        background: transparent;
-        border: 1px solid #EF4444;
-        color: #EF4444;
-        padding: 1rem;
-        border-radius: 50px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-
-        .btn-cancel:hover {
-            background: rgba(239, 68, 68, 0.1);
+        .users-table td {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            color: white;
+            font-weight: 500;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            vertical-align: middle;
         }
 
-    .alert {
-        padding: 1rem;
-        border-radius: 12px;
-        margin-bottom: 1.5rem;
-        font-weight: 600;
-        text-align: center;
+            .users-table td:first-child {
+                border-top-left-radius: 12px;
+                border-bottom-left-radius: 12px;
+                border-left: 1px solid rgba(255, 255, 255, 0.05);
+                color: #2979FF;
+                font-weight: 700;
+            }
+
+            .users-table td:last-child {
+                border-top-right-radius: 12px;
+                border-bottom-right-radius: 12px;
+                border-right: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+    .mini-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #374151;
     }
 
-    .alert-success {
-        background: rgba(0, 230, 118, 0.1);
-        color: #00E676;
-        border: 1px solid rgba(0, 230, 118, 0.2);
-    }
-
-    .alert-error {
-        background: rgba(239, 68, 68, 0.1);
-        color: #EF4444;
-        border: 1px solid rgba(239, 68, 68, 0.2);
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
     @@media (max-width: 900px) {
@@ -351,6 +289,11 @@
 
         .form-grid {
             grid-template-columns: 1fr;
+        }
+
+        .users-table {
+            display: block;
+            overflow-x: auto;
         }
     }
 </style>
@@ -378,30 +321,19 @@
                          class="avatar-img" alt="Avatar" />
                 </div>
 
-                @if (isEditing)
-                {
-                    <div class="upload-btn-wrapper">
-                        <label class="btn-camera" for="fileInput">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                            Cambiar Foto
-                        </label>
-                        <InputFile OnChange="SubirImagen" id="fileInput" style="display:none;" accept="image/*" capture />
-                    </div>
-                }
-
                 <div class="user-name">@usuario.Nombre</div>
                 <div class="user-role @(usuario.Rol == "Administrador" ? "role-admin" : "role-user")">
                     @usuario.Rol
                 </div>
 
-                <div class="stats-row">
-                    <div class="stat-item">
-                        <span class="stat-val">@usuario.IdUsuario</span>
-                        <span class="stat-lbl">ID Usuario</span>
+                <div style="display:flex; justify-content:space-around; width:100%; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.1);">
+                    <div style="text-align:center;">
+                        <span style="display:block; font-size:1.2rem; font-weight:800; color:white;">@usuario.IdUsuario</span>
+                        <span style="font-size:0.75rem; color:#9ca3af; text-transform:uppercase; font-weight:600;">ID Usuario</span>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-val" style="color:#00E676;">Activo</span>
-                        <span class="stat-lbl">Estado</span>
+                    <div style="text-align:center;">
+                        <span style="display:block; font-size:1.2rem; font-weight:800; color:#00E676;">Activo</span>
+                        <span style="font-size:0.75rem; color:#9ca3af; text-transform:uppercase; font-weight:600;">Estado</span>
                     </div>
                 </div>
             </div>
@@ -412,63 +344,107 @@
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2979FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         Información Personal
                     </div>
-
-                    @if (!isEditing)
-                    {
-                        <button class="btn-edit-toggle" @onclick="ActivarEdicion">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                            Editar Perfil
-                        </button>
-                    }
                 </div>
-
-                @if (!string.IsNullOrEmpty(mensaje))
-                {
-                    <div class="alert @tipoAlerta">@mensaje</div>
-                }
 
                 <div class="form-grid">
                     <div class="form-group">
                         <label class="form-label">Nombre Completo</label>
-                        <input type="text" class="form-input" @bind="usuario.Nombre" disabled="@(!isEditing)" />
+                        <input type="text" class="form-input" value="@usuario.Nombre" disabled />
                     </div>
-
                     <div class="form-group">
                         <label class="form-label">Nombre de Usuario</label>
-                        <input type="text" class="form-input" @bind="usuario.NombreUsuario" disabled="@(!isEditing)" />
+                        <input type="text" class="form-input" value="@usuario.NombreUsuario" disabled />
                     </div>
-
                     <div class="form-group full-width">
                         <label class="form-label">Correo Electrónico</label>
-                        <input type="email" class="form-input" @bind="usuario.Email" disabled="@(!isEditing)" />
+                        <input type="email" class="form-input" value="@usuario.Email" disabled />
                     </div>
-
                     <div class="form-group">
                         <label class="form-label">Contraseña</label>
-                        <input type="@(isEditing ? "text" : "password")"
-                               class="form-input"
-                               @bind="usuario.Password"
-                               disabled="@(!isEditing)"
-                               placeholder="••••••••" />
+                        <input type="password" class="form-input" value="********" disabled />
                     </div>
-
                     <div class="form-group">
                         <label class="form-label">Rol (No editable)</label>
                         <input type="text" class="form-input" value="@usuario.Rol" disabled />
                     </div>
                 </div>
-
-                @if (isEditing)
-                {
-                    <div class="btn-row">
-                        <button class="btn-cancel" @onclick="CancelarEdicion">Cancelar</button>
-                        <button class="btn-save" @onclick="GuardarCambios" disabled="@guardando">
-                            @(guardando ? "Guardando..." : "💾 GUARDAR CAMBIOS")
-                        </button>
-                    </div>
-                }
             </div>
         </div>
+
+        @if (esAdministrador)
+        {
+            <div class="admin-users-section">
+                <div class="users-card">
+                    <div class="card-header-row">
+                        <div class="section-title" style="color: #2979FF;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            Gestión de Usuarios Registrados
+                        </div>
+                        <span class="status-badge" style="background:rgba(41,121,255,0.1); color:#2979FF; padding:5px 12px; border-radius:20px; font-weight:700;">Total: @(listaUsuarios?.Count ?? 0)</span>
+                    </div>
+
+                    <div style="overflow-x:auto;">
+                        <table class="users-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Usuario</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Correo</th>
+                                    <th>Rol</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (listaUsuarios != null && listaUsuarios.Any())
+                                {
+                                    @foreach (var u in listaUsuarios)
+                                    {
+                                        <tr>
+                                            <td>#@u.IdUsuario</td>
+                                            <td>
+                                                <div class="user-cell">
+                                                    <img src="@(string.IsNullOrEmpty(u.RutaImagen) ? "https://cdn-icons-png.flaticon.com/512/149/149071.png" : u.RutaImagen)" class="mini-avatar" />
+                                                    <span style="font-weight:700;">@u.NombreUsuario</span>
+                                                </div>
+                                            </td>
+                                            <td>@u.Nombre</td>
+                                            <td style="color:#9ca3af;">@u.Email</td>
+                                            <td>
+                                                @if (u.Rol == "Administrador")
+                                                {
+                                                    <span style="color:#FF9100; font-weight:700;">Admin</span>
+                                                }
+                                                else
+                                                {
+                                                    <span style="color:#00E676;">Cuidador</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (u.Accedio)
+                                                {
+                                                    <span style="color:#00E676; font-size:0.8rem;">● Online</span>
+                                                }
+                                                else
+                                                {
+                                                    <span style="color:#6B7280; font-size:0.8rem;">○ Offline</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" style="text-align:center; padding:2rem; color:#6B7280;">No se encontraron otros usuarios.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
     }
     else
     {
@@ -481,166 +457,42 @@
 
 @code {
     private Usuario? usuario;
-    private Usuario? usuarioOriginal;
+    private List<Usuario>? listaUsuarios;
     private bool cargando = true;
-    private bool isEditing = false;
-    private bool guardando = false;
-    private string mensaje = "";
-    private string tipoAlerta = "";
-    private const string MASK_PASSWORD = "********";
+    private bool esAdministrador = false;
 
     protected override async Task OnInitializedAsync()
     {
-        await CargarUsuario();
+        await CargarDatos();
     }
 
-    private async Task CargarUsuario()
+    private async Task CargarDatos()
     {
         cargando = true;
         try
         {
-            var usuarioSesion = await AuthService.GetUsuarioActualAsync();
-            if (usuarioSesion != null)
+            // 1. Cargar mi perfil
+            usuario = await AuthService.GetUsuarioActualAsync();
+
+            if (usuario != null)
             {
-                usuario = usuarioSesion;
-                if (!isEditing) usuario.Password = MASK_PASSWORD;
+                // 2. Verificar si soy Admin
+                esAdministrador = usuario.Rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+
+                // 3. Si soy Admin, cargar la lista completa de usuarios
+                if (esAdministrador)
+                {
+                    listaUsuarios = await ApiService.ObtenerUsuariosAsync();
+                }
             }
         }
         catch (Exception ex)
         {
-            Logger.LogError($"Error: {ex.Message}");
+            Logger.LogError($"Error cargando datos: {ex.Message}");
         }
         finally
         {
             cargando = false;
         }
-    }
-
-    private void ActivarEdicion()
-    {
-        if (usuario != null)
-        {
-            usuarioOriginal = new Usuario
-            {
-                IdUsuario = usuario.IdUsuario,
-                Nombre = usuario.Nombre,
-                NombreUsuario = usuario.NombreUsuario,
-                Email = usuario.Email,
-                Password = usuario.Password,
-                Rol = usuario.Rol,
-                RutaImagen = usuario.RutaImagen
-            };
-            if (usuario.Password == MASK_PASSWORD) usuario.Password = "";
-            isEditing = true;
-            mensaje = "";
-        }
-    }
-
-    private void CancelarEdicion()
-    {
-        if (usuario != null && usuarioOriginal != null)
-        {
-            usuario.Nombre = usuarioOriginal.Nombre;
-            usuario.NombreUsuario = usuarioOriginal.NombreUsuario;
-            usuario.Email = usuarioOriginal.Email;
-            usuario.Password = MASK_PASSWORD;
-            usuario.RutaImagen = usuarioOriginal.RutaImagen;
-        }
-        isEditing = false;
-        mensaje = "";
-    }
-
-    private async Task SubirImagen(InputFileChangeEventArgs e)
-    {
-        var file = e.File;
-        if (file != null)
-        {
-            try
-            {
-                long maxFileSize = 1024 * 1024 * 5;
-                var resizedImage = await file.RequestImageFileAsync("image/jpeg", 300, 300);
-                var buffer = new byte[resizedImage.Size];
-                await resizedImage.OpenReadStream(maxFileSize).ReadAsync(buffer);
-                var base64 = Convert.ToBase64String(buffer);
-                // ✅ IMPORTANTE: Prefijo necesario para que la API lo detecte
-                usuario.RutaImagen = $"data:image/jpeg;base64,{base64}";
-                StateHasChanged();
-            }
-            catch (Exception ex)
-            {
-                MostrarMensaje($"Error al procesar imagen: {ex.Message}", "alert-error");
-            }
-        }
-    }
-
-    private async Task GuardarCambios()
-    {
-        if (usuario == null) return;
-        if (string.IsNullOrWhiteSpace(usuario.Nombre) || string.IsNullOrWhiteSpace(usuario.NombreUsuario))
-        {
-            MostrarMensaje("⚠️ Nombre y Usuario son obligatorios.", "alert-error");
-            return;
-        }
-
-        // Preparar password
-        string passwordToSend = usuario.Password;
-
-        // ✅ CORRECCIÓN: Si es la máscara o vacía, mandamos NULL para que la API sepa que no cambió
-        if (string.IsNullOrEmpty(passwordToSend) || passwordToSend == MASK_PASSWORD)
-        {
-            passwordToSend = null;
-        }
-        else if (passwordToSend.Length < 6)
-        {
-            MostrarMensaje("⚠️ La contraseña debe tener al menos 6 caracteres.", "alert-error");
-            return;
-        }
-
-        var usuarioUpdate = new Usuario
-        {
-            IdUsuario = usuario.IdUsuario,
-            Nombre = usuario.Nombre,
-            NombreUsuario = usuario.NombreUsuario,
-            Email = usuario.Email,
-            Password = passwordToSend, // Enviamos null o la nueva clave
-            Rol = usuario.Rol,
-            RutaImagen = usuario.RutaImagen,
-            Accedio = usuario.Accedio
-        };
-
-        guardando = true;
-        mensaje = "";
-
-        try
-        {
-            var (success, msg) = await ApiService.ActualizarUsuarioAsync(usuarioUpdate);
-            if (success)
-            {
-                MostrarMensaje("✅ Perfil actualizado correctamente.", "alert-success");
-                usuario.Password = MASK_PASSWORD;
-                isEditing = false;
-            }
-            else
-            {
-                MostrarMensaje($"❌ Error: {msg}", "alert-error");
-            }
-        }
-        catch (Exception ex)
-        {
-            MostrarMensaje($"Error crítico: {ex.Message}", "alert-error");
-        }
-        finally
-        {
-            guardando = false;
-        }
-    }
-
-    private void MostrarMensaje(string msg, string tipo)
-    {
-        mensaje = msg;
-        tipoAlerta = tipo;
-        var timer = new System.Timers.Timer(5000);
-        timer.Elapsed += (s, e) => { mensaje = ""; InvokeAsync(StateHasChanged); timer.Dispose(); };
-        timer.Start();
     }
 }
