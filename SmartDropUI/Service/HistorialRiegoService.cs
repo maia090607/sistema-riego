@@ -1,5 +1,6 @@
 ﻿using SmartDropUI.Models;
 using System.Net.Http.Json;
+using Microsoft.JSInterop; // Necesario para logs en consola
 
 namespace SmartDropUI.Services
 {
@@ -7,11 +8,13 @@ namespace SmartDropUI.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<HistorialRiegoService> _logger;
+        private readonly IJSRuntime _js; // Para logs en el navegador
 
-        public HistorialRiegoService(HttpClient httpClient, ILogger<HistorialRiegoService> logger)
+        public HistorialRiegoService(HttpClient httpClient, ILogger<HistorialRiegoService> logger, IJSRuntime js)
         {
             _httpClient = httpClient;
             _logger = logger;
+            _js = js;
         }
 
         public async Task<List<HistorialRiegoModel>> ObtenerHistorialAsync()
@@ -19,6 +22,7 @@ namespace SmartDropUI.Services
             try
             {
                 var response = await _httpClient.GetAsync("/api/historial");
+
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<HistorialRiegoModel>>>();
@@ -27,10 +31,18 @@ namespace SmartDropUI.Services
                         return result.data;
                     }
                 }
+                else
+                {
+                    // Si falla, mostramos el error en la consola del navegador
+                    string errorMsg = await response.Content.ReadAsStringAsync();
+                    await _js.InvokeVoidAsync("console.error", $"❌ Error obteniendo historial: {response.StatusCode} - {errorMsg}");
+                }
+
                 return new List<HistorialRiegoModel>();
             }
-            catch
+            catch (Exception ex)
             {
+                await _js.InvokeVoidAsync("console.error", $"❌ Excepción historial: {ex.Message}");
                 return new List<HistorialRiegoModel>();
             }
         }
@@ -39,14 +51,13 @@ namespace SmartDropUI.Services
         {
             try
             {
-                // ✅ CORRECCIÓN: Ahora enviamos todos los datos, incluido TipoRiego
                 var requestData = new
                 {
                     fecha = historial.Fecha,
                     humedad = historial.Humedad,
                     temperatura = historial.Temperatura,
                     idPlanta = historial.IdPlanta,
-                    tipoRiego = historial.TipoRiego // <--- ESTO FALTABA
+                    tipoRiego = historial.TipoRiego // ✅ Campo crítico
                 };
 
                 var response = await _httpClient.PostAsJsonAsync("/api/historial", requestData);
@@ -54,14 +65,14 @@ namespace SmartDropUI.Services
                 if (!response.IsSuccessStatusCode)
                 {
                     var error = await response.Content.ReadAsStringAsync();
-                    _logger.LogError($"❌ Error API: {error}");
+                    await _js.InvokeVoidAsync("console.error", $"❌ Error guardando: {error}");
                 }
 
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"❌ Excepción enviando historial: {ex.Message}");
+                await _js.InvokeVoidAsync("console.error", $"❌ Excepción guardando: {ex.Message}");
                 return false;
             }
         }
