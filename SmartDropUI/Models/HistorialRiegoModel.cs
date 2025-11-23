@@ -10,8 +10,11 @@ namespace SmartDropUI.Models
         public float Temperatura { get; set; }
         public int IdPlanta { get; set; }
 
-        // ✅ NUEVOS CAMPOS
+        // Datos informativos (para mostrar en tabla)
         public string NombrePlanta { get; set; } = "";
         public string NombrePropietario { get; set; } = "";
+
+        // ✅ ESTA ES LA PROPIEDAD QUE FALTABA
+        public string TipoRiego { get; set; } = "Manual";
     }
 }

@@ -1,8 +1,5 @@
-﻿using SmartDropUI.Components.Pages;
-using SmartDropUI.Models;
-using System;
+﻿using SmartDropUI.Models;
 using System.Net.Http.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SmartDropUI.Services
 {
@@ -17,32 +14,23 @@ namespace SmartDropUI.Services
             _logger = logger;
         }
 
-        // ✅ Obtener todo el historial
         public async Task<List<HistorialRiegoModel>> ObtenerHistorialAsync()
         {
             try
             {
-                _logger.LogInformation("📋 Obteniendo historial de riego...");
-
                 var response = await _httpClient.GetAsync("/api/historial");
-
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<HistorialRiegoModel>>>();
-
                     if (result?.success == true && result.data != null)
                     {
-                        _logger.LogInformation($"✅ {result.data.Count} registros obtenidos");
                         return result.data;
                     }
                 }
-
-                _logger.LogWarning("⚠️ No se pudo obtener el historial");
                 return new List<HistorialRiegoModel>();
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError($"❌ Error al obtener historial: {ex.Message}");
                 return new List<HistorialRiegoModel>();
             }
         }
@@ -51,64 +39,47 @@ namespace SmartDropUI.Services
         {
             try
             {
+                // ✅ CORRECCIÓN: Ahora enviamos todos los datos, incluido TipoRiego
                 var requestData = new
                 {
                     fecha = historial.Fecha,
                     humedad = historial.Humedad,
                     temperatura = historial.Temperatura,
-                    idPlanta = historial.IdPlanta // ✅ Enviamos el ID a la API
+                    idPlanta = historial.IdPlanta,
+                    tipoRiego = historial.TipoRiego // <--- ESTO FALTABA
                 };
 
                 var response = await _httpClient.PostAsJsonAsync("/api/historial", requestData);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    _logger.LogError($"❌ Error API: {error}");
+                }
+
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error guardando historial: {ex.Message}");
+                _logger.LogError($"❌ Excepción enviando historial: {ex.Message}");
                 return false;
             }
         }
-        // ✅ Obtener historial por fecha
-        public async Task<List<HistorialRiegoModel>> ObtenerPorFechaAsync(DateTime fecha)
-        {
-            try
-            {
-                var fechaStr = fecha.ToString("yyyy-MM-dd");
-                var response = await _httpClient.GetAsync($"/api/historial/por-fecha?fecha={fechaStr}");
 
-                if (response.IsSuccessStatusCode)
-                {
-                    var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<HistorialRiegoModel>>>();
-                    return result?.data ?? new List<HistorialRiegoModel>();
-                }
-
-                return new List<HistorialRiegoModel>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"❌ Error: {ex.Message}");
-                return new List<HistorialRiegoModel>();
-            }
-        }
-
-        // ✅ Obtener último riego
         public async Task<HistorialRiegoModel?> ObtenerUltimoRiegoAsync()
         {
             try
             {
                 var response = await _httpClient.GetAsync("/api/historial/ultimo");
-
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadFromJsonAsync<ApiResponse<HistorialRiegoModel>>();
                     return result?.data;
                 }
-
                 return null;
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError($"❌ Error al obtener último riego: {ex.Message}");
                 return null;
             }
         }

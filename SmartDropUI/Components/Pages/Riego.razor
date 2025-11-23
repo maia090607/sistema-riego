@@ -14,7 +14,7 @@
 <PageTitle>Control de Riego - SmartDrop</PageTitle>
 
 <style>
-    /* --- TEMA OSCURO GENERAL --- */
+    /* ESTILOS GENERALES */
     .riego-page {
         min-height: 100vh;
         background-color: #05070a;
@@ -25,7 +25,6 @@
         overflow: hidden;
     }
 
-    /* Luces de fondo */
     .glow-blob {
         position: absolute;
         border-radius: 50%;
@@ -51,7 +50,7 @@
         right: -150px;
     }
 
-    /* Botón Volver */
+    /* BOTONES Y PANELES */
     .btn-back-menu {
         background: rgba(255, 255, 255, 0.05);
         color: #9ca3af;
@@ -76,7 +75,6 @@
             transform: translateX(-5px);
         }
 
-    /* Encabezado */
     .header-container {
         display: flex;
         justify-content: space-between;
@@ -97,7 +95,6 @@
         margin: 0;
     }
 
-    /* Etiqueta de Modo */
     .mode-badge {
         padding: 0.6rem 1.2rem;
         border-radius: 50px;
@@ -123,12 +120,12 @@
         border: 1px solid rgba(255, 145, 0, 0.3);
     }
 
-    /* --- SELECCIÓN DE PLANTA (DISEÑO MEJORADO) --- */
+    /* SELECTOR DE PLANTA */
     .admin-selector-container {
-        background: rgba(17, 24, 39, 0.7); /* Fondo oscuro semitransparente */
-        backdrop-filter: blur(10px); /* Efecto cristal */
+        background: rgba(17, 24, 39, 0.7);
+        backdrop-filter: blur(10px);
         border: 1px solid rgba(41, 121, 255, 0.2);
-        border-left: 4px solid #2979FF; /* Línea de acento azul */
+        border-left: 4px solid #2979FF;
         border-radius: 12px;
         padding: 1.2rem 1.5rem;
         margin-bottom: 2rem;
@@ -141,7 +138,6 @@
         flex-wrap: wrap;
     }
 
-    /* Estilo específico para Cuidador (Verde en vez de Azul) */
     .cuidador-style {
         border-color: rgba(0, 230, 118, 0.2);
         border-left-color: #00E676;
@@ -160,7 +156,7 @@
     }
 
     .cuidador-label {
-        color: #00E676; /* Verde para cuidador */
+        color: #00E676;
     }
 
     .modern-select {
@@ -176,17 +172,11 @@
         cursor: pointer;
         transition: all 0.3s ease;
         appearance: none;
-        /* Flecha personalizada */
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 1rem center;
         background-size: 1.2em;
     }
-
-        .modern-select:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
 
         .modern-select:focus {
             outline: none;
@@ -195,18 +185,13 @@
             box-shadow: 0 0 0 3px rgba(41, 121, 255, 0.2);
         }
 
-    .cuidador-focus:focus {
-        border-color: #00E676;
-        box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.2);
-    }
+        .modern-select option {
+            background-color: #111827;
+            color: white;
+            padding: 10px;
+        }
 
-    .modern-select option {
-        background-color: #111827;
-        color: white;
-        padding: 10px;
-    }
-
-    /* Grid de Tarjetas */
+    /* ESTADO Y MANUAL */
     .status-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -216,7 +201,6 @@
         margin-bottom: 3rem;
     }
 
-    /* Tarjetas de Estado */
     .status-card {
         background: #111827;
         border-radius: 24px;
@@ -233,7 +217,6 @@
             transform: translateY(-5px);
         }
 
-    /* Icono dentro de la tarjeta */
     .icon-wrapper {
         width: 80px;
         height: 80px;
@@ -251,7 +234,6 @@
             stroke-width: 2;
         }
 
-    /* Bordes y colores dinámicos */
     .card-on {
         border-color: #00E676;
     }
@@ -319,7 +301,6 @@
         color: #9CA3AF;
     }
 
-    /* Sección Manual */
     .manual-section {
         background: #111827;
         border-radius: 24px;
@@ -344,7 +325,6 @@
         gap: 10px;
     }
 
-    /* Botones de Acción */
     .btn-action {
         padding: 1.2rem 2rem;
         border-radius: 50px;
@@ -390,7 +370,6 @@
         filter: grayscale(1);
     }
 
-    /* Timer Display */
     .timer-display {
         font-size: 3.5rem;
         font-weight: 900;
@@ -446,7 +425,6 @@
 
     <div class="header-container">
         <h1 class="page-title">Control de Riego</h1>
-
         <div class="mode-badge @(riegoManualActivo ? "mode-manual" : "mode-auto")">
             @if (riegoManualActivo)
             {
@@ -467,23 +445,17 @@
             <div class="admin-label @(!esAdministrador ? "cuidador-label" : "")">
                 @if (esAdministrador)
                 {
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    </svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                     <span>Panel Admin:</span>
                 }
                 else
                 {
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22c4.97 0 9-4.03 9-9V7a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v6c0 4.97 4.03 9 9 9z"></path>
-                        <path d="M12 22V7"></path>
-                        <path d="M2 13h10"></path>
-                    </svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4.97 0 9-4.03 9-9V7a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v6c0 4.97 4.03 9 9 9z"></path><path d="M12 22V7"></path><path d="M2 13h10"></path></svg>
                     <span>Mis Plantas:</span>
                 }
             </div>
 
-            <select class="modern-select @(!esAdministrador ? "cuidador-focus" : "")" @onchange="CambiarPlantaSeleccionada">
+            <select class="modern-select" @onchange="CambiarPlantaSeleccionada">
                 @if (_idPlantaValido == 0)
                 {
                     <option value="0" disabled selected>👇 Seleccione Planta a Regar...</option>
@@ -517,12 +489,9 @@
     }
 
     <div class="status-grid">
-
         <div class="status-card @(bombaActiva ? "card-on" : "card-off")">
             <div class="icon-wrapper">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
             </div>
             <div class="status-label">Estado Bomba</div>
             <div class="status-value @(bombaActiva ? "text-green" : "text-red")">
@@ -534,24 +503,11 @@
             <div class="icon-wrapper">
                 @if (ArduinoService.EstaConectado)
                 {
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
-                        <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
-                        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
-                        <line x1="12" y1="20" x2="12.01" y2="20"></line>
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
                 }
                 else
                 {
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="1" y1="1" x2="23" y2="23"></line>
-                        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
-                        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
-                        <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
-                        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
-                        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
-                        <line x1="12" y1="20" x2="12.01" y2="20"></line>
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path><path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
                 }
             </div>
             <div class="status-label">Conexión Sistema</div>
@@ -616,13 +572,12 @@
     private System.Timers.Timer? timer;
     private System.Timers.Timer? pollingTimer;
 
-    // VARIABLES CONTROL
     private int _idPlantaValido = 0;
     private float humedad_real = 0;
     private DateTime _horaUltimoComando = DateTime.MinValue;
 
-    // ✅ VARIABLES DE DATOS
     private bool esAdministrador = false;
+    private bool esCuidador = false;
     private List<PlantaModel> plantasDisponibles = new();
 
     protected override async Task OnInitializedAsync()
@@ -641,10 +596,9 @@
             var usuario = await AuthService.GetUsuarioActualAsync();
             if (usuario != null)
             {
-                // 1. Detectar rol
                 esAdministrador = usuario.Rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+                esCuidador = usuario.Rol.Equals("Cuidador", StringComparison.OrdinalIgnoreCase);
 
-                // 2. Cargar plantas según el rol
                 if (esAdministrador)
                 {
                     var lista = await ApiService.ObtenerPlantasAsync();
@@ -656,7 +610,7 @@
                     plantasDisponibles = lista ?? new List<PlantaModel>();
                 }
 
-                // 3. Seleccionar la primera planta por defecto si hay disponibles
+                // ✅ CORRECCIÓN: Seleccionar la primera planta automáticamente si existe
                 if (plantasDisponibles.Any())
                 {
                     _idPlantaValido = plantasDisponibles.First().IdPlanta;
@@ -666,7 +620,6 @@
         catch { }
     }
 
-    // ✅ MÉTODO PARA CAMBIAR LA PLANTA DESDE EL SELECT
     private void CambiarPlantaSeleccionada(ChangeEventArgs e)
     {
         if (int.TryParse(e.Value?.ToString(), out int nuevoId))
@@ -692,11 +645,13 @@
                     if (datos.ModoManual && !riegoManualActivo)
                     {
                         riegoManualActivo = true;
+                        EstadoGlobal.UsuarioEstaRegando = true;
                         IniciarTimerVisual();
                     }
                     else if (!datos.ModoManual && riegoManualActivo)
                     {
                         riegoManualActivo = false;
+                        EstadoGlobal.UsuarioEstaRegando = false;
                         DetenerTimerVisual();
                     }
                     StateHasChanged();
@@ -714,7 +669,9 @@
             return;
         }
 
+        EstadoGlobal.UsuarioEstaRegando = true;
         _horaUltimoComando = DateTime.Now;
+
         esperandoRespuesta = true;
         riegoManualActivo = true;
         bombaActiva = true;
@@ -747,15 +704,19 @@
 
         try
         {
+            // ✅ ENVÍO EXPLÍCITO DEL TIPO "Manual"
             var nuevoRiego = new HistorialRiegoModel
             {
                 Fecha = DateTime.Now,
                 Humedad = humedad_real,
                 Temperatura = temp,
-                IdPlanta = _idPlantaValido // ✅ SE USA EL ID SELECCIONADO EN EL DROPDOWN
+                IdPlanta = _idPlantaValido,
+                TipoRiego = "Manual"
             };
 
-            bool guardado = await HistorialService.GuardarRiegoAsync(nuevoRiego);
+            // El servicio ahora sí enviará este dato porque actualizamos el HistorialRiegoService.cs
+            await HistorialService.GuardarRiegoAsync(nuevoRiego);
+
             await ApiService.GuardarTemperaturaAsync(temp, temp, "Riego Manual", _idPlantaValido);
             await ApiService.GuardarRegistroClimaticoAsync(humedad_real, humAire, temp, viento, _idPlantaValido);
         }
@@ -783,6 +744,8 @@
         {
             await ArduinoService.ActivarModoAutomaticoAsync();
         }
+
+        EstadoGlobal.UsuarioEstaRegando = false;
         esperandoRespuesta = false;
     }
 

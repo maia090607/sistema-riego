@@ -7,6 +7,7 @@
 @inject ApiService ApiService
 @inject AuthService AuthService
 @inject ClimaService ClimaService
+@inject IJSRuntime JS
 
 <div class="page">
     <main style="width: 100%; height: 100vh; overflow-y: auto;">
@@ -16,16 +17,18 @@
 
 @code {
     private Timer? _timerGlobal;
-    private bool _bombaAnteriormenteEncendida = false;
 
-    // Variables locales para control rápido
-    private DateTime _ultimoGuardadoLocal = DateTime.MinValue;
+    // ✅ LÓGICA DE CICLO:
+    // true = Ya guardé este riego, no guardar más hasta que se apague.
+    // false = Estoy listo para guardar el próximo riego.
+    private bool _yaRegistreEsteCiclo = false;
     private bool _guardando = false;
 
     protected override async Task OnInitializedAsync()
     {
-        _timerGlobal = new Timer(2000);
-        _timerGlobal.AutoReset = false; // Pausa el timer mientras trabaja para evitar solapamientos
+        // Timer rápido (1 segundo)
+        _timerGlobal = new Timer(1000);
+        _timerGlobal.AutoReset = false;
         _timerGlobal.Elapsed += async (s, e) => await MonitorearRiegoAutomatico();
         _timerGlobal.Start();
     }
@@ -38,92 +41,77 @@
 
             if (estado != null)
             {
-                // Detectar si la bomba está encendida en modo automático
-                if (estado.BombaEncendida && !estado.ModoManual)
+                // --- CASO 1: LA BOMBA ESTÁ APAGADA ---
+                if (!estado.BombaEncendida)
                 {
-                    // Condición 1: Flanco de subida (Estaba apagada -> Ahora encendida)
-                    // Condición 2: O si ya estaba encendida, asegurarnos por tiempo (Safety check)
-                    bool flancoSubida = !_bombaAnteriormenteEncendida;
-                    bool tiempoSuficienteLocal = (DateTime.Now - _ultimoGuardadoLocal).TotalSeconds > 120;
-
-                    if ((flancoSubida || tiempoSuficienteLocal) && !_guardando)
+                    // Reiniciamos la bandera para estar listos para el próximo riego
+                    if (_yaRegistreEsteCiclo)
+                    {
+                        _yaRegistreEsteCiclo = false;
+                        Console.WriteLine("🔄 [SISTEMA] Bomba apagada. Sistema listo para próximo registro.");
+                    }
+                }
+                // --- CASO 2: LA BOMBA ESTÁ ENCENDIDA ---
+                else
+                {
+                    // Verificamos que sea Automático (Usuario no está presionando botón)
+                    // Y que NO hayamos registrado este ciclo todavía
+                    if (!EstadoGlobal.UsuarioEstaRegando && !_yaRegistreEsteCiclo && !_guardando)
                     {
                         _guardando = true;
-                        await RegistrarRiegoBaseDatos(estado.Humedad);
+
+                        await JS.InvokeVoidAsync("console.log", $"⚡ [AUTO] ¡Riego detectado! Guardando en Historial...");
+
+                        // Guardamos
+                        bool exito = await RegistrarRiegoBaseDatos(estado.Humedad);
+
+                        if (exito)
+                        {
+                            // ✅ MARCAMOS QUE YA SE REGISTRÓ ESTE CICLO
+                            _yaRegistreEsteCiclo = true;
+                        }
+
                         _guardando = false;
                     }
                 }
-
-                _bombaAnteriormenteEncendida = estado.BombaEncendida;
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"⚠️ Error monitor: {ex.Message}");
+            Console.WriteLine($"Error monitor: {ex.Message}");
             _guardando = false;
         }
         finally
         {
-            _timerGlobal?.Start(); // Reiniciar timer
+            _timerGlobal?.Start();
         }
     }
 
-    private async Task RegistrarRiegoBaseDatos(float humedadSuelo)
+    private async Task<bool> RegistrarRiegoBaseDatos(float humedadSuelo)
     {
         try
         {
-            // 🛑 VALIDACIÓN CRÍTICA DE BASE DE DATOS (SOLUCIÓN AL PROBLEMA)
-            // Antes de guardar, verificamos qué hay en la base de datos.
-            // Esto sincroniza todas las pestañas abiertas: si una ya guardó, las otras se detienen.
-            var ultimoEnBd = await HistorialService.ObtenerUltimoRiegoAsync();
-
-            if (ultimoEnBd != null)
-            {
-                // Si el último registro en BD es de hace menos de 2 minutos (120 seg), ABORTAMOS.
-                double segundosDesdeUltimo = (DateTime.Now - ultimoEnBd.Fecha).TotalSeconds;
-                if (segundosDesdeUltimo < 120)
-                {
-                    Console.WriteLine($"🛡️ [AUTO] Registro bloqueado. Ya existe uno reciente ({segundosDesdeUltimo:F0}s atrás).");
-                    _ultimoGuardadoLocal = DateTime.Now; // Sincronizamos localmente
-                    return;
-                }
-            }
-
-            Console.WriteLine("💧 [AUTO] Guardando nuevo registro de riego...");
-
-            // --- 1. OBTENER PLANTA (FALLBACK ROBUSTO) ---
+            // 1. BUSCAR PLANTA (Cualquiera disponible como respaldo)
             int idPlantaDestino = 0;
-            string nombrePlanta = "Automático";
+            string nombrePlanta = "Riego Automático";
 
-            try
+            // Intentar obtener todas las plantas
+            var todasLasPlantas = await ApiService.ObtenerPlantasAsync();
+
+            if (todasLasPlantas != null && todasLasPlantas.Any())
             {
-                var usuario = await AuthService.GetUsuarioActualAsync();
-                if (usuario != null)
-                {
-                    var misPlantas = await ApiService.ObtenerPlantasPorUsuarioAsync(usuario.IdUsuario);
-                    if (misPlantas != null && misPlantas.Any())
-                    {
-                        idPlantaDestino = misPlantas.First().IdPlanta;
-                        nombrePlanta = misPlantas.First().NombrePlanta;
-                    }
-                }
+                // Usamos la primera planta encontrada
+                var p = todasLasPlantas.First();
+                idPlantaDestino = p.IdPlanta;
+                nombrePlanta = p.NombrePlanta;
             }
-            catch { }
-
-            // Si no hay usuario o planta, buscar la primera del sistema (Respaldo)
-            if (idPlantaDestino == 0)
+            else
             {
-                var todas = await ApiService.ObtenerPlantasAsync();
-                if (todas != null && todas.Any())
-                {
-                    idPlantaDestino = todas.First().IdPlanta;
-                    nombrePlanta = todas.First().NombrePlanta;
-                }
+                await JS.InvokeVoidAsync("console.warn", "❌ [AUTO] Error: No hay plantas en la BD.");
+                return false;
             }
 
-            if (idPlantaDestino == 0) return; // No se puede guardar sin ID
-
-            // --- 2. OBTENER CLIMA ---
+            // 2. CLIMA
             float temp = 25.0f;
             float humAire = 50.0f;
             float viento = 0.0f;
@@ -139,30 +127,36 @@
             }
             catch { }
 
-            // --- 3. GUARDAR ---
+            // 3. GUARDAR EN BD
             var historial = new HistorialRiegoModel
             {
                 Fecha = DateTime.Now,
                 Humedad = humedadSuelo,
                 Temperatura = temp,
                 IdPlanta = idPlantaDestino,
-                NombrePlanta = nombrePlanta
+                NombrePlanta = nombrePlanta,
+                TipoRiego = "Automatico" // Sin tilde
             };
 
             bool exito = await HistorialService.GuardarRiegoAsync(historial);
 
             if (exito)
             {
-                _ultimoGuardadoLocal = DateTime.Now; // Actualizar contador local
-
-                await ApiService.GuardarTemperaturaAsync(temp, temp, "Riego Automático", idPlantaDestino);
+                await ApiService.GuardarTemperaturaAsync(temp, temp, "Riego Auto", idPlantaDestino);
                 await ApiService.GuardarRegistroClimaticoAsync(humedadSuelo, humAire, temp, viento, idPlantaDestino);
-                Console.WriteLine($"✅ [AUTO] Guardado exitoso.");
+                await JS.InvokeVoidAsync("console.log", "✅ [AUTO] Registro guardado exitosamente.");
+                return true;
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("console.error", "❌ [AUTO] La API rechazó el guardado.");
+                return false;
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ [AUTO] Error al guardar: {ex.Message}");
+            await JS.InvokeVoidAsync("console.error", $"❌ [AUTO] Excepción: {ex.Message}");
+            return false;
         }
     }
 

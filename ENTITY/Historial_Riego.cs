@@ -10,7 +10,10 @@ namespace ENTITY
         public float Temperatura { get; set; }
         public int IdPlanta { get; set; }
 
-        // ✅ NUEVAS PROPIEDADES (No se guardan en la tabla, vienen del JOIN)
+        // ✅ ESTA PROPIEDAD FALTABA:
+        public string TipoRiego { get; set; } = "Manual";
+
+        // Propiedades extendidas (para los JOINs)
         public string NombrePlanta { get; set; } = "";
         public string NombrePropietario { get; set; } = "";
     }
