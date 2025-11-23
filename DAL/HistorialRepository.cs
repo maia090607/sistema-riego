@@ -16,7 +16,7 @@ namespace DAL
                 try
                 {
                     connection.Open();
-                    // ✅ Asegúrate que el SQL tenga :p_tipo_riego
+                    // ✅ El SQL debe coincidir EXACTAMENTE con el package body
                     string query = @"
                         BEGIN 
                             PKG_HISTORIAL_RIEGO.SP_INSERTAR_HISTORIAL(
@@ -24,7 +24,7 @@ namespace DAL
                                 :p_humedad,
                                 :p_temperatura,
                                 :p_id_planta,
-                                :p_tipo_riego,  -- <--- ESTO ES VITAL
+                                :p_tipo_riego, -- ✅ Nuevo parámetro vital
                                 :p_id_generado,
                                 :p_estado,
                                 :p_mensaje
@@ -39,14 +39,17 @@ namespace DAL
                         cmd.Parameters.Add(":p_humedad", OracleDbType.Single).Value = historial.Humedad;
                         cmd.Parameters.Add(":p_temperatura", OracleDbType.Single).Value = historial.Temperatura;
 
+                        // Manejo de nulos para ID Planta
                         if (historial.IdPlanta > 0)
                             cmd.Parameters.Add(":p_id_planta", OracleDbType.Int32).Value = historial.IdPlanta;
                         else
                             cmd.Parameters.Add(":p_id_planta", OracleDbType.Int32).Value = DBNull.Value;
 
-                        // ✅ ENVIAR EL DATO A ORACLE
-                        cmd.Parameters.Add(":p_tipo_riego", OracleDbType.Varchar2).Value = historial.TipoRiego ?? "Manual";
+                        // ✅ Enviar Tipo Riego (Por defecto Manual si viene vacío)
+                        string tipo = string.IsNullOrEmpty(historial.TipoRiego) ? "Manual" : historial.TipoRiego;
+                        cmd.Parameters.Add(":p_tipo_riego", OracleDbType.Varchar2).Value = tipo;
 
+                        // Parámetros de salida
                         var paramId = cmd.Parameters.Add(":p_id_generado", OracleDbType.Int32); paramId.Direction = ParameterDirection.Output;
                         var paramEstado = cmd.Parameters.Add(":p_estado", OracleDbType.Int32); paramEstado.Direction = ParameterDirection.Output;
                         var paramMensaje = cmd.Parameters.Add(":p_mensaje", OracleDbType.Varchar2, 200); paramMensaje.Direction = ParameterDirection.Output;

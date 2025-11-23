@@ -663,21 +663,23 @@
 
     private async Task IniciarRiegoManual()
     {
+        // 1. Validar Planta
         if (_idPlantaValido == 0)
         {
             await JS.InvokeVoidAsync("alert", "⚠️ Error: Selecciona una planta válida para regar.");
             return;
         }
 
+        // 2. Activar Semáforo y UI
         EstadoGlobal.UsuarioEstaRegando = true;
         _horaUltimoComando = DateTime.Now;
-
         esperandoRespuesta = true;
         riegoManualActivo = true;
         bombaActiva = true;
         IniciarTimerVisual();
         StateHasChanged();
 
+        // 3. Obtener Humedad y Clima
         try
         {
             var datosSensor = await ArduinoService.ObtenerEstadoAsync();
@@ -685,44 +687,49 @@
         }
         catch { }
 
-        bool exitoArduino = await ArduinoService.IniciarRiegoManualAsync();
-
         float temp = 25.0f;
         float humAire = 50.0f;
         float viento = 0.0f;
         try
         {
             var clima = await _climaService.ObtenerClimaActualAsync();
-            if (clima != null)
-            {
-                temp = (float)clima.Temperatura;
-                humAire = (float)clima.Humedad;
-                viento = (float)clima.VelocidadViento;
-            }
+            if (clima != null) { temp = (float)clima.Temperatura; humAire = (float)clima.Humedad; viento = (float)clima.VelocidadViento; }
         }
         catch { }
 
+        // 4. Enviar orden al Arduino
+        bool exitoArduino = await ArduinoService.IniciarRiegoManualAsync();
+
+        // 5. GUARDAR EN BASE DE DATOS
         try
         {
-            // ✅ ENVÍO EXPLÍCITO DEL TIPO "Manual"
             var nuevoRiego = new HistorialRiegoModel
             {
                 Fecha = DateTime.Now,
                 Humedad = humedad_real,
                 Temperatura = temp,
                 IdPlanta = _idPlantaValido,
+
+                // ✅ ESTA ES LA CLAVE: Enviamos "Manual" explícitamente
                 TipoRiego = "Manual"
             };
 
-            // El servicio ahora sí enviará este dato porque actualizamos el HistorialRiegoService.cs
-            await HistorialService.GuardarRiegoAsync(nuevoRiego);
+            bool guardado = await HistorialService.GuardarRiegoAsync(nuevoRiego);
 
-            await ApiService.GuardarTemperaturaAsync(temp, temp, "Riego Manual", _idPlantaValido);
-            await ApiService.GuardarRegistroClimaticoAsync(humedad_real, humAire, temp, viento, _idPlantaValido);
+            if (guardado)
+            {
+                await ApiService.GuardarTemperaturaAsync(temp, temp, "Riego Manual", _idPlantaValido);
+                await ApiService.GuardarRegistroClimaticoAsync(humedad_real, humAire, temp, viento, _idPlantaValido);
+                Console.WriteLine("✅ Riego Manual Guardado");
+            }
+            else
+            {
+                Console.WriteLine("❌ Error al guardar riego manual en BD");
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error guardando: {ex.Message}");
+            Console.WriteLine($"Error crítico guardando: {ex.Message}");
         }
 
         esperandoRespuesta = false;
