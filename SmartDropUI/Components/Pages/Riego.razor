@@ -81,7 +81,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 3rem;
+        margin-bottom: 2rem;
         position: relative;
         z-index: 10;
         flex-wrap: wrap;
@@ -122,6 +122,78 @@
         color: #FF9100;
         border: 1px solid rgba(255, 145, 0, 0.3);
     }
+
+    /* --- SELECCIÓN DE PLANTA (DISEÑO GLASSMORPHISM MEJORADO) --- */
+    .admin-selector-container {
+        background: rgba(17, 24, 39, 0.75); /* Fondo oscuro más sólido */
+        backdrop-filter: blur(12px); /* Desenfoque tipo cristal */
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(41, 121, 255, 0.3); /* Borde sutil azul */
+        border-left: 5px solid #2979FF; /* Acento lateral fuerte */
+
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2.5rem;
+        position: relative;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5); /* Sombra elegante */
+        flex-wrap: wrap;
+    }
+
+    .admin-label {
+        color: #2979FF;
+        font-weight: 800;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        white-space: nowrap;
+    }
+
+    /* SELECT PERSONALIZADO */
+    .modern-select {
+        flex: 1;
+        min-width: 280px;
+        background-color: rgba(0, 0, 0, 0.4);
+        color: #e2e8f0;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 14px 20px;
+        border-radius: 8px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        /* Flecha personalizada SVG */
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232979FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.2em;
+    }
+
+        .modern-select:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: rgba(41, 121, 255, 0.5);
+        }
+
+        .modern-select:focus {
+            outline: none;
+            border-color: #2979FF;
+            box-shadow: 0 0 0 4px rgba(41, 121, 255, 0.15);
+            background-color: #0f172a;
+        }
+
+        .modern-select option {
+            background-color: #111827;
+            color: white;
+            padding: 12px;
+        }
 
     /* Grid de Tarjetas */
     .status-grid {
@@ -345,6 +417,11 @@
             width: 100%;
             justify-content: center;
         }
+
+        .admin-selector-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
     }
 </style>
 
@@ -372,6 +449,28 @@
             }
         </div>
     </div>
+
+    @if (esAdministrador)
+    {
+        <div class="admin-selector-container">
+            <div class="admin-label">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                Panel Admin
+            </div>
+
+            <select class="modern-select" @onchange="CambiarPlantaSeleccionada">
+                <option value="0" disabled selected>👇 Seleccione Planta a Regar...</option>
+                @foreach (var p in todasLasPlantas)
+                {
+                    <option value="@p.IdPlanta">
+                        🆔 @p.IdPlanta  — 🌿 @p.NombrePlanta  (@(string.IsNullOrEmpty(p.NombrePropietario) ? "Sin Dueño" : p.NombrePropietario))
+                    </option>
+                }
+            </select>
+        </div>
+    }
 
     <div class="status-grid">
 
@@ -472,41 +571,63 @@
     private int tiempoRiego = 0;
     private System.Timers.Timer? timer;
     private System.Timers.Timer? pollingTimer;
-    private int _idPlantaValido = 0;
 
-    // VARIABLES CORREGIDAS PARA SINCRONIZACIÓN DE DATOS
+    // VARIABLES CONTROL
+    private int _idPlantaValido = 0;
     private float humedad_real = 0;
     private DateTime _horaUltimoComando = DateTime.MinValue;
 
+    // ✅ VARIABLES ADMIN
+    private bool esAdministrador = false;
+    private List<PlantaModel> todasLasPlantas = new();
+
     protected override async Task OnInitializedAsync()
     {
-        await CargarIdPlantaValido();
+        await CargarDatosIniciales();
         pollingTimer = new System.Timers.Timer(2000);
         pollingTimer.Elapsed += async (s, e) => await ConsultarEstadoServidor();
         pollingTimer.AutoReset = true;
         pollingTimer.Start();
     }
 
-    private async Task CargarIdPlantaValido()
+    private async Task CargarDatosIniciales()
     {
         try
         {
             var usuario = await AuthService.GetUsuarioActualAsync();
             if (usuario != null)
             {
-                var plantas = await ApiService.ObtenerPlantasPorUsuarioAsync(usuario.IdUsuario);
-                if (plantas != null && plantas.Any())
+                esAdministrador = usuario.Rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+
+                if (esAdministrador)
                 {
-                    _idPlantaValido = plantas.First().IdPlanta;
+                    var lista = await ApiService.ObtenerPlantasAsync();
+                    todasLasPlantas = lista ?? new List<PlantaModel>();
+                    if (todasLasPlantas.Any()) _idPlantaValido = todasLasPlantas.First().IdPlanta;
+                }
+                else
+                {
+                    var lista = await ApiService.ObtenerPlantasPorUsuarioAsync(usuario.IdUsuario);
+                    if (lista != null && lista.Any())
+                    {
+                        _idPlantaValido = lista.First().IdPlanta;
+                    }
                 }
             }
         }
         catch { }
     }
 
+    private void CambiarPlantaSeleccionada(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int nuevoId))
+        {
+            _idPlantaValido = nuevoId;
+        }
+    }
+
     private async Task ConsultarEstadoServidor()
     {
-        // Evitar leer estado viejo justo después de enviar comando (Bloqueo 4s)
         if ((DateTime.Now - _horaUltimoComando).TotalSeconds < 4) return;
 
         try
@@ -517,9 +638,7 @@
                 await InvokeAsync(() =>
                 {
                     bombaActiva = datos.BombaEncendida;
-                    // ✅ Solo actualizamos si viene un valor válido para no sobreescribir con 0 por error
-                    if (datos.Humedad > 0)
-                        humedad_real = datos.Humedad;
+                    if (datos.Humedad > 0) humedad_real = datos.Humedad;
 
                     if (datos.ModoManual && !riegoManualActivo)
                     {
@@ -542,11 +661,10 @@
     {
         if (_idPlantaValido == 0)
         {
-            await JS.InvokeVoidAsync("alert", "⚠️ Error: No tienes plantas registradas. Crea una planta primero.");
+            await JS.InvokeVoidAsync("alert", "⚠️ Error: Selecciona una planta válida para regar.");
             return;
         }
 
-        // 1. BLOQUEO DE POLLING Y UI INMEDIATA
         _horaUltimoComando = DateTime.Now;
         esperandoRespuesta = true;
         riegoManualActivo = true;
@@ -554,21 +672,15 @@
         IniciarTimerVisual();
         StateHasChanged();
 
-        // 2. ✅ FIX CRÍTICO: FORZAR LECTURA DEL SENSOR ANTES DE GUARDAR
         try
         {
             var datosSensor = await ArduinoService.ObtenerEstadoAsync();
-            if (datosSensor != null && datosSensor.Humedad > 0)
-            {
-                humedad_real = datosSensor.Humedad;
-            }
+            if (datosSensor != null && datosSensor.Humedad > 0) humedad_real = datosSensor.Humedad;
         }
-        catch { /* Si falla, usamos el último valor conocido */ }
+        catch { }
 
-        // 3. ENVIAR COMANDO AL ARDUINO
         bool exitoArduino = await ArduinoService.IniciarRiegoManualAsync();
 
-        // 4. OBTENER DATOS CLIMA Y GUARDAR EN BD
         float temp = 25.0f;
         float humAire = 50.0f;
         float viento = 0.0f;
@@ -586,7 +698,6 @@
 
         try
         {
-            // ✅ Usamos humedad_real que acabamos de refrescar
             var nuevoRiego = new HistorialRiegoModel
             {
                 Fecha = DateTime.Now,
@@ -609,10 +720,9 @@
 
     private async Task DetenerRiegoManual()
     {
-        _horaUltimoComando = DateTime.Now; // Bloqueo de consulta
+        _horaUltimoComando = DateTime.Now;
         esperandoRespuesta = true;
 
-        // Actualización visual inmediata
         riegoManualActivo = false;
         bombaActiva = false;
         DetenerTimerVisual();

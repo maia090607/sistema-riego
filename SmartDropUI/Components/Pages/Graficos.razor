@@ -5,6 +5,7 @@
 @inject ArduinoService ArduinoService
 @inject ClimaService ClimaService
 @inject HistorialRiegoService HistorialService
+@inject AuthService AuthService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 @implements IDisposable
@@ -251,7 +252,6 @@
         font-weight: 700;
     }
 
-    /* Nuevo estilo para el título de la sección con icono */
     .section-title-with-icon {
         display: flex;
         align-items: center;
@@ -354,13 +354,11 @@
 
     <div class="charts-grid">
 
-        <!-- GRÁFICO HUMEDAD -->
         <div class="chart-card">
             <div>
                 <div class="chart-header">
                     <div>
                         <div class="chart-title" style="color: #00E676;">
-                            <!-- ✅ ICONO NUEVO: PLANTA/HOJA (Estilo Outline) -->
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 22c4.97 0 9-4.03 9-9V7a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v6c0 4.97 4.03 9 9 9z"></path>
                                 <path d="M12 22V7"></path>
@@ -374,15 +372,12 @@
 
                 <div class="chart-box">
                     <svg width="100%" height="100%" viewBox="0 0 500 250" preserveAspectRatio="none">
-                        <!-- Grid Lines -->
                         @for (int i = 0; i <= 5; i++)
                         {
                             <line x1="40" y1="@(i * 40 + 25)" x2="490" y2="@(i * 40 + 25)" class="grid-line" />
                             <g><text x="5" y="@(i * 40 + 30)" class="axis-text">@(100 - i * 20)%</text></g>
                         }
-                        <!-- Linea Datos -->
                         <path d="@pathHumedad" class="line-humedad" />
-                        <!-- Puntos -->
                         @foreach (var p in puntosHumedad)
                         {
                             <circle cx="@p.X" cy="@p.Y" class="dot dot-hum" />
@@ -393,13 +388,11 @@
             <div class="value-display val-green">@ultimaHumedad.ToString("0.0") %</div>
         </div>
 
-        <!-- GRÁFICO TEMPERATURA -->
         <div class="chart-card">
             <div>
                 <div class="chart-header">
                     <div>
                         <div class="chart-title" style="color: #FF9100;">
-                            <!-- ✅ ICONO NUEVO: SOL Y NUBE (Clima) -->
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 2v2"></path>
                                 <path d="m4.93 4.93 1.41 1.41"></path>
@@ -439,11 +432,9 @@
         </div>
     </div>
 
-    <!-- TABLA HISTORIAL -->
     <div class="history-section">
         <div class="section-header">
             <div class="section-title-with-icon">
-                <!-- ✅ ICONO NUEVO: HISTORIAL/RELOJ -->
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2979FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 3v5h5"></path>
                     <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"></path>
@@ -462,6 +453,13 @@
                 <thead>
                     <tr>
                         <th>Fecha y Hora</th>
+
+                        @if (esAdministrador)
+                        {
+                            <th>ID Planta</th>
+                            <th>Propietario</th>
+                        }
+
                         <th>Humedad Suelo</th>
                         <th>Temperatura</th>
                         <th>Estado</th>
@@ -474,6 +472,13 @@
                         {
                             <tr>
                                 <td>@item.Fecha.ToString("dd/MM/yyyy HH:mm:ss")</td>
+
+                                @if (esAdministrador)
+                                {
+                                    <td style="color:#9ca3af; font-size:0.9em;">#@item.IdPlanta <br /><span style="font-size:0.8em;">(@item.NombrePlanta)</span></td>
+                                    <td style="color:#FFD700; font-weight:bold;">@item.NombrePropietario</td>
+                                }
+
                                 <td style="color:#00E676; font-weight:bold;">@item.Humedad %</td>
                                 <td style="color:#FF9100; font-weight:bold;">@item.Temperatura °C</td>
                                 <td>
@@ -491,7 +496,9 @@
                     }
                     else
                     {
-                        <tr><td colspan="4" style="text-align:center; color:#94a3b8;">No hay datos recientes...</td></tr>
+                        <tr>
+                            <td colspan="@(esAdministrador ? 6 : 4)" style="text-align:center; color:#94a3b8;">No hay datos recientes...</td>
+                        </tr>
                     }
                 </tbody>
             </table>
@@ -512,10 +519,19 @@
     private double ultimaTemperatura = 0;
     private double humedadAire = 0;
     private double viento = 0;
+
     private List<HistorialRiegoModel> historialReciente = new();
+    private bool esAdministrador = false; // ✅ Variable de control
 
     protected override async Task OnInitializedAsync()
     {
+        // ✅ Detectar Rol
+        var usuario = await AuthService.GetUsuarioActualAsync();
+        if (usuario != null)
+        {
+            esAdministrador = usuario.Rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+        }
+
         for (int i = 0; i < MAX_PUNTOS; i++) { colaHumedad.Enqueue(0); colaTemp.Enqueue(0); }
         await CargarHistorial();
         _timer = new Timer(2000);
