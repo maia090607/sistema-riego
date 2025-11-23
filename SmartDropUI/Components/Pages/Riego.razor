@@ -480,6 +480,9 @@
     private System.Timers.Timer? pollingTimer;
     private int _idPlantaValido = 0;
 
+    // ✅ CAMBIO 1: Variable para bloquear la consulta automática temporalmente
+    private DateTime _horaUltimoComando = DateTime.MinValue;
+
     protected override async Task OnInitializedAsync()
     {
         await CargarIdPlantaValido();
@@ -487,7 +490,7 @@
         pollingTimer.Elapsed += async (s, e) => await ConsultarEstadoServidor();
         pollingTimer.AutoReset = true;
         pollingTimer.Start();
-        await ConsultarEstadoServidor();
+        // Eliminamos la llamada inicial para evitar parpadeos al cargar
     }
 
     private async Task CargarIdPlantaValido()
@@ -509,6 +512,10 @@
 
     private async Task ConsultarEstadoServidor()
     {
+        // ✅ CAMBIO 2: Si enviamos un comando hace menos de 4 segundos, NO consultamos nada.
+        // Esto evita que la App lea un estado "viejo" del Arduino y apague el botón.
+        if ((DateTime.Now - _horaUltimoComando).TotalSeconds < 4) return;
+
         try
         {
             var datos = await ArduinoService.ObtenerEstadoAsync();
@@ -542,13 +549,21 @@
             return;
         }
 
-        esperandoRespuesta = true;
-        bool exitoArduino = await ArduinoService.IniciarRiegoManualAsync();
+        // ✅ CAMBIO 3: Bloqueamos el polling y forzamos la UI visualmente INMEDIATAMENTE
+        _horaUltimoComando = DateTime.Now;
 
+        esperandoRespuesta = true;
+
+        // Actualización visual inmediata (Optimistic UI)
         riegoManualActivo = true;
         bombaActiva = true;
         IniciarTimerVisual();
+        StateHasChanged(); // Forzamos repintado para que aparezca el botón de detener
 
+        // Enviamos la orden al Arduino
+        bool exitoArduino = await ArduinoService.IniciarRiegoManualAsync();
+
+        // --- Lógica de Base de Datos (se mantiene igual) ---
         float temp = 25.0f;
         float humAire = 50.0f;
         float viento = 0.0f;
@@ -569,22 +584,17 @@
             var nuevoRiego = new HistorialRiegoModel
             {
                 Fecha = DateTime.Now,
-                Humedad = 50,
+                Humedad = 50, // Valor referencia
                 Temperatura = temp,
                 IdPlanta = _idPlantaValido
             };
             bool guardado = await HistorialService.GuardarRiegoAsync(nuevoRiego);
             await ApiService.GuardarTemperaturaAsync(temp, temp, "Riego Manual", _idPlantaValido);
             await ApiService.GuardarRegistroClimaticoAsync(0, humAire, temp, viento, _idPlantaValido);
-
-            if (guardado)
-            {
-                if (!exitoArduino) await JS.InvokeVoidAsync("alert", "✅ Registrado, pero Arduino tardó en confirmar.");
-            }
         }
         catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("alert", $"❌ Error crítico: {ex.Message}");
+            Console.WriteLine($"Error guardando historial: {ex.Message}");
         }
 
         esperandoRespuesta = false;
@@ -592,15 +602,22 @@
 
     private async Task DetenerRiegoManual()
     {
+        // ✅ CAMBIO 4: Bloqueamos polling también al detener
+        _horaUltimoComando = DateTime.Now;
+
         esperandoRespuesta = true;
+
+        // Actualización visual inmediata
+        riegoManualActivo = false;
+        bombaActiva = false;
+        DetenerTimerVisual();
+        StateHasChanged();
+
         bool exito = await ArduinoService.DetenerRiegoManualAsync();
 
         if (exito)
         {
             await ArduinoService.ActivarModoAutomaticoAsync();
-            riegoManualActivo = false;
-            bombaActiva = false;
-            DetenerTimerVisual();
         }
         esperandoRespuesta = false;
     }

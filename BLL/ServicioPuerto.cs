@@ -92,17 +92,17 @@ namespace BLL
             }
         }
 
-        // ✅ MÉTODO RECUPERADO: Envío simple (sin esperar confirmación)
-        // Esto soluciona el error en RiegoController
         public void EnviarComando(string comando)
         {
             try
             {
                 if (PuertoAbierto)
                 {
-                    _serialPort.DiscardInBuffer();
+                    // No limpiamos el Buffer de ENTRADA (DiscardInBuffer) aquí
+                    // para no borrar datos que el hilo de lectura esté a punto de procesar.
+
                     _serialPort.WriteLine(comando);
-                    Console.WriteLine($"📤 Comando enviado: {comando}");
+                    Console.WriteLine($"📤 Comando enviado (Fire&Forget): {comando}");
                 }
             }
             catch (Exception ex)

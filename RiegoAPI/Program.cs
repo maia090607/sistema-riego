@@ -1,47 +1,24 @@
 ﻿using BLL;
 using RiegoAPI.Controllers;
-using RiegoAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ===========================
-// SERVICIOS BÁSICOS
-// ===========================
-
-builder.Services.AddSingleton<IArduinoService, ArduinoService>();
-builder.Services.AddControllers();
-
-// TEMPERATURA
-builder.Services.AddScoped<ServicioTemperatura>();
-
-// ✅ Swagger básico
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// CORS
+// --- 1. CORS (Permitir conexión desde la UI) ---
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
     });
 });
 
-// HttpClient
+// --- 2. Servicios Básicos ---
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 
-builder.Services.AddHttpClient("OpenWeather", client =>
-{
-    client.BaseAddress = new Uri("https://api.openweathermap.org/data/2.5/");
-    client.Timeout = TimeSpan.FromSeconds(10);
-});
-
-// ===================================
-// SERVICIOS DE LA CAPA BLL
-// ===================================
-
+// --- 3. Servicios de Negocio (BLL) ---
 builder.Services.AddScoped<ServiciosPlanta>();
 builder.Services.AddScoped<ServicioHistorial>();
 builder.Services.AddScoped<ServiciosUsuario>();
@@ -49,21 +26,21 @@ builder.Services.AddScoped<ServiciosAlertas>();
 builder.Services.AddScoped<ServicioClima>();
 builder.Services.AddScoped<ServiciosHumedad>();
 builder.Services.AddScoped<ServicioGraficas>();
+builder.Services.AddScoped<ServicioTemperatura>();
 
-// Puerto Serial
+// --- 4. SERVICIO SINGLETON DEL PUERTO SERIAL (CRÍTICO) ---
+// Este servicio mantendrá la conexión viva con el Arduino
 builder.Services.AddSingleton<ServicioPuerto>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
-    string puerto = config.GetValue<string>("SerialPort:Puerto") ?? "COM3";
+    // Asegúrate que el COM coincida con tu administrador de dispositivos
+    string puerto = config.GetValue<string>("SerialPort:Puerto") ?? "COM11";
     int baudRate = config.GetValue<int>("SerialPort:BaudRate", 9600);
     return new ServicioPuerto(puerto, baudRate);
 });
 
 var app = builder.Build();
 
-// ===================================
-// PIPELINE HTTP
-// ===================================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -71,29 +48,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-//app.UseStaticFiles();
 app.UseCors("AllowAll");
 app.UseAuthorization();
 app.MapControllers();
 
-// Redirigir raíz a Swagger
-app.MapGet("/", () => Results.Redirect("/swagger"));
-
-// Obtener las URLs dinámicamente
-var urls = app.Configuration.GetValue<string>("ASPNETCORE_URLS") ??
-           builder.Configuration.GetSection("applicationUrl").Value ??
-           "https://localhost:5001;http://localhost:5000";
-
-var httpsUrl = urls.Split(';').FirstOrDefault(u => u.StartsWith("https")) ?? "https://localhost:5001";
-var puerto = app.Configuration.GetValue<string>("SerialPort:Puerto") ?? "COM3";
-
-Console.WriteLine("════════════════════════════════════════════════════");
-Console.WriteLine("  🌱 API SMARTDROP - Sistema de Riego Automático");
-Console.WriteLine("════════════════════════════════════════════════════");
-Console.WriteLine($"🌐 API: {httpsUrl}");
-Console.WriteLine($"📚 Swagger: {httpsUrl}/swagger");
-Console.WriteLine($"🔌 Puerto Serial: {puerto}");
-Console.WriteLine("════════════════════════════════════════════════════");
-Console.WriteLine();
+// Mensaje de inicio en consola
+var puertoConfig = app.Configuration.GetValue<string>("SerialPort:Puerto") ?? "COM11";
+Console.WriteLine($"✅ API Iniciada. Conectando a Arduino en {puertoConfig}...");
 
 app.Run();

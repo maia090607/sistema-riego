@@ -1,164 +1,62 @@
-﻿using Microsoft.Extensions.Logging;
-using RiegoAPI.DTO.Response;
-using RiegoAPI.DTO.Response.SmartDropUI.DTO.Response;
-using RiegoAPI.DTOs.Response;
-using RiegoAPI.Models;
-using System.Net.Http.Json;
+﻿using System;
+using System.IO.Ports;
 
-namespace SmartDropUI.Services
+namespace BLL
 {
-    public class BombaService
+    // Clase dedicada a hablar con el Arduino
+    public class BombaService : IDisposable
     {
-        private readonly HttpClient _httpClient;
-        private readonly ILogger<BombaService>? _logger;
+        private SerialPort _serialPort;
+        private bool _isConnected = false;
 
-        public BombaService(HttpClient httpClient, ILogger<BombaService>? logger = null)
-        {
-            _httpClient = httpClient;
-            _logger = logger;
-        }
-
-        public async Task<ResultadoOperacion> EncenderBombaAsync()
+        // Configura aquí tu puerto si no quieres leerlo de config, o pásalo al constructor
+        // NOTA: Asegúrate que coincida con lo que dice tu Arduino IDE (ej. COM3, COM11)
+        public BombaService(string nombrePuerto = "COM11", int baudios = 9600)
         {
             try
             {
-                _logger?.LogInformation("Intentando encender bomba...");
-
-                var response = await _httpClient.PostAsync("api/bomba/encender", null);
-
-                if (response.IsSuccessStatusCode)
+                _serialPort = new SerialPort(nombrePuerto, baudios);
+                if (!_serialPort.IsOpen)
                 {
-                    var resultado = await response.Content.ReadFromJsonAsync<ApiResponseDTO>();
-
-                    return new ResultadoOperacion
-                    {
-                        Exitoso = true,
-                        Mensaje = resultado?.message ?? "Bomba encendida",
-                        FechaHora = resultado?.timestamp ?? DateTime.Now
-                    };
+                    _serialPort.Open();
+                    _isConnected = true;
+                    Console.WriteLine($"[HARDWARE] ✅ Conectado al Arduino en {nombrePuerto}");
                 }
-
-                return new ResultadoOperacion
-                {
-                    Exitoso = false,
-                    Mensaje = "No se pudo encender la bomba"
-                };
             }
             catch (Exception ex)
             {
-                return new ResultadoOperacion
-                {
-                    Exitoso = false,
-                    Mensaje = $"Error: {ex.Message}"
-                };
+                Console.WriteLine($"[HARDWARE] ❌ Error conectando al puerto {nombrePuerto}: {ex.Message}");
+                // No lanzamos excepción para no tumbar la API, pero la bomba no funcionará
             }
         }
 
-        public async Task<ResultadoOperacion> ApagarBombaAsync()
+        public void Encender()
         {
-            try
+            if (_isConnected && _serialPort.IsOpen)
             {
-                _logger?.LogInformation("Intentando apagar bomba...");
-
-                var response = await _httpClient.PostAsync("api/bomba/apagar", null);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var resultado = await response.Content.ReadFromJsonAsync<ApiResponseDTO>();
-
-                    return new ResultadoOperacion
-                    {
-                        Exitoso = true,
-                        Mensaje = resultado?.message ?? "Bomba apagada",
-                        FechaHora = resultado?.timestamp ?? DateTime.Now
-                    };
-                }
-
-                return new ResultadoOperacion
-                {
-                    Exitoso = false,
-                    Mensaje = "No se pudo apagar la bomba"
-                };
+                // Enviamos '1' porque es lo común. Si tu Arduino usa 'E', cambia el "1" por "E".
+                _serialPort.Write("1");
+                Console.WriteLine("[HARDWARE] 💧 Enviado orden: ENCENDER (1)");
             }
-            catch (Exception ex)
+            else
             {
-                return new ResultadoOperacion
-                {
-                    Exitoso = false,
-                    Mensaje = $"Error: {ex.Message}"
-                };
+                Console.WriteLine("[HARDWARE] ⚠️ No se pudo encender. Puerto cerrado.");
             }
         }
 
-        public async Task<EstadoBomba> ObtenerEstadoAsync()
+        public void Apagar()
         {
-            try
+            if (_isConnected && _serialPort.IsOpen)
             {
-                var response = await _httpClient.GetFromJsonAsync<EstadoBombaResponse>("api/bomba/estado");
-
-                return new EstadoBomba
-                {
-                    Encendida = response?.encendida ?? false,
-                    FechaActualizacion = response?.timestamp ?? DateTime.Now
-                };
-            }
-            catch
-            {
-                return new EstadoBomba
-                {
-                    Encendida = false,
-                    FechaActualizacion = DateTime.Now
-                };
+                _serialPort.Write("0");
+                Console.WriteLine("[HARDWARE] 🛑 Enviado orden: APAGAR (0)");
             }
         }
 
-        public async Task<DatosSensoresModel?> ObtenerDatosSensoresAsync()
+        public void Dispose()
         {
-            try
-            {
-                var response = await _httpClient.GetFromJsonAsync<SensoresResponse>("api/bomba/sensores");
-
-                if (response?.success == true && response.datos != null)
-                {
-                    return new DatosSensoresModel
-                    {
-                        Temperatura = response.datos.Temperatura,
-                        Humedad = response.datos.Humedad,
-                        HumedadSuelo = response.datos.HumedadSuelo,
-                        FechaLectura = response.datos.FechaLectura
-                    };
-                }
-
-                return null;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        public async Task<ConexionArduino> VerificarConexionAsync()
-        {
-            try
-            {
-                var response = await _httpClient.GetFromJsonAsync<ConexionResponseDTO>("api/bomba/conexion");
-
-                return new ConexionArduino
-                {
-                    Conectado = response?.conectado ?? false,
-                    Puerto = response?.puerto ?? "Desconocido",
-                    FechaVerificacion = response?.timestamp ?? DateTime.Now
-                };
-            }
-            catch
-            {
-                return new ConexionArduino
-                {
-                    Conectado = false,
-                    Puerto = "Error",
-                    FechaVerificacion = DateTime.Now
-                };
-            }
+            if (_serialPort != null && _serialPort.IsOpen)
+                _serialPort.Close();
         }
     }
 }

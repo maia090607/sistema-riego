@@ -34,25 +34,31 @@ namespace RiegoAPI.Controllers
             });
         }
 
+        // RiegoAPI/Controllers/ArduinoController.cs
+
         [HttpPost("manual-on")]
         public IActionResult IniciarManual()
         {
-            bool ok = _servicioPuerto.EnviarComandoConConfirmacion("MANUAL_ON");
-            return Ok(new { success = ok, message = ok ? "OK:MANUAL_ON" : "Error al enviar" });
+            // Usamos EnviarComando (sin confirmación) para evitar el choque de hilos
+            _servicioPuerto.EnviarComando("MANUAL_ON");
+
+            // Retornamos éxito inmediato. El estado real se actualizará en el Dashboard 
+            // cuando el hilo de lectura reciba el dato del Arduino.
+            return Ok(new { success = true, message = "OK:MANUAL_ON" });
         }
 
         [HttpPost("manual-off")]
         public IActionResult DetenerManual()
         {
-            bool ok = _servicioPuerto.EnviarComandoConConfirmacion("MANUAL_OFF");
-            return Ok(new { success = ok, message = ok ? "OK:MANUAL_OFF" : "Error al enviar" });
+            _servicioPuerto.EnviarComando("MANUAL_OFF");
+            return Ok(new { success = true, message = "OK:MANUAL_OFF" });
         }
 
         [HttpPost("auto")]
         public IActionResult ActivarAuto()
         {
-            bool ok = _servicioPuerto.EnviarComandoConConfirmacion("AUTO");
-            return Ok(new { success = ok, message = ok ? "OK:AUTO" : "Error al enviar" });
+            _servicioPuerto.EnviarComando("AUTO");
+            return Ok(new { success = true, message = "OK:AUTO" });
         }
     }
 }
