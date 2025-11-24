@@ -168,5 +168,31 @@ namespace RiegoAPI.Controllers
             ));
         }
 
+        // GET: api/plantas/usuario/mapear-telefono?telefono={numero_telefono}
+        [HttpGet("usuario/mapear-telefono")]
+        public IActionResult MapearTelefonoAId([FromQuery] string telefono)
+        {
+            if (string.IsNullOrEmpty(telefono))
+            {
+                return BadRequest(ApiResponseDTO<object>.Error("El número de teléfono es requerido."));
+            }
+
+            // NOTA: Esta línea asume que tienes un método en tus servicios (BLL)
+            // que puede encontrar el ID de usuario (int) basado en el número de teléfono (string).
+            var resultadoMapeo = _serviciosPlanta.MapearTelefonoAId(telefono);
+
+            if (resultadoMapeo.Estado && resultadoMapeo.IdUsuario > 0)
+            {
+                // Si el mapeo fue exitoso, devolvemos el ID en formato JSON
+                return Ok(ApiResponseDTO<object>.Success(
+                    new { idUsuario = resultadoMapeo.IdUsuario },
+                    "Mapeo de ID exitoso"
+                ));
+            }
+
+            // Si no se encuentra el usuario
+            return NotFound(ApiResponseDTO<object>.Error($"No se encontró usuario con el teléfono {telefono}"));
+        }
+
     }
 }

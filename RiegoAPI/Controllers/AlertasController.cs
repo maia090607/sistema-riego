@@ -242,6 +242,65 @@ namespace RiegoAPI.Controllers
             return Ok(ApiResponseDTO<object>.Success(resumen, "Resumen de alertas"));
         }
 
+        ///TE VOY A AGREGAR AQUI UN  ENDPOINT DE EJEMPLO, PORQUE EL QUE TIENES ALLA NO FUNCIONA
+        [HttpGet("ejm-riegos")]
+        public IActionResult ObtenerDemoRiego()
+        {
+            var alarmas = new List<object>
+{
+    new {
+        IdAlarma = 1,
+        Tipo = "Humedad Baja",
+        Cultivo = "Naranja",
+        Nivel = "Alto",
+        Estado = "Activa",
+        Descripcion = "El nivel de humedad en el sector norte cayó por debajo del 25%",
+        HumedadActual = 22.5,
+        Umbral = 25.0,
+        Sector = "Norte",
+        Fecha = DateTime.Now.AddMinutes(-20).ToString("yyyy-MM-dd HH:mm:ss")
+    },
+    new {
+        IdAlarma = 2,
+        Tipo = "Caudal Excesivo",
+        Nivel = "Medio",
+        Estado = "Activa",
+        Descripcion = "El caudal del sistema supera el límite recomendado",
+        CaudalActual = 180,
+        Umbral = 150,
+        Sector = "Centro",
+        Fecha = DateTime.Now.AddMinutes(-10).ToString("yyyy-MM-dd HH:mm:ss")
+    },
+    new {
+        IdAlarma = 3,
+        Tipo = "Sensor Desconectado",
+        Cultivo = "Mango",
+        Nivel = "Crítico",
+        Estado = "Activa",
+        Descripcion = "El sensor de humedad en el sector sur no está transmitiendo datos",
+        SensorId = "HM-SUR-04",
+        Sector = "Sur",
+        Fecha = DateTime.Now.AddMinutes(-3).ToString("yyyy-MM-dd HH:mm:ss")
+    },
+    new {
+        IdAlarma = 4,
+        Tipo = "Humedad Óptima",
+        Cultivo = "Sabila",
+        Nivel = "Bajo",
+        Estado = "Resuelta",
+        Descripcion = "Humedad estabilizada dentro del rango ideal (30% - 45%)",
+        HumedadActual = 37.2,
+        Sector = "Oeste",
+        Fecha = DateTime.Now.AddHours(-3).ToString("yyyy-MM-dd HH:mm:ss")
+    }
+};
+
+            return Ok(ApiResponseDTO<object>.Success(
+                alarmas,
+                "Alarmas activas registradas el día de hoy"
+            ));
+        }
+
 
     }
 }
