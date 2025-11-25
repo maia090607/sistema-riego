@@ -11,8 +11,6 @@ namespace BLL
 
         public Response<Usuario> ObtenerTodos() => usuarioDAL.ObtenerTodos();
 
-        // 🔴 ANTES (Error): public Response<Usuario> BuscarPorId(int id) => usuarioDAL.ObtenerPorId(id);
-        // 🟢 AHORA (Corregido): Llamamos a BuscarPorId que es como se llama en el repositorio
         public Response<Usuario> BuscarPorId(int id) => usuarioDAL.BuscarPorId(id);
 
         public Response<Usuario> Actualizar(Usuario u) => usuarioDAL.Actualizar(u);
@@ -22,5 +20,8 @@ namespace BLL
         public Response<Usuario> ValidarNombreUsuario(string nombreUsuario) => usuarioDAL.BuscarPorUsuario(nombreUsuario);
 
         public Response<Usuario> ValidarCredenciales(string nombreUsuario, string password) => usuarioDAL.BuscarPorCredenciales(nombreUsuario, password);
+
+        // 🟢 MÉTODO NUEVO: Resuelve el error CS1061 en el controlador, exponiendo la búsqueda por teléfono.
+        public Response<Usuario> MapearTelefonoAId(string telefono) => usuarioDAL.BuscarPorTelefono(telefono);
     }
 }

@@ -1,9 +1,7 @@
-﻿
-namespace ENTITY
+﻿namespace ENTITY
 {
     public class Usuario
     {
-
         public int IdUsuario { get; set; }
         public string Nombre { get; set; }
         public string Email { get; set; }
@@ -13,9 +11,12 @@ namespace ENTITY
         public string RutaImagen { get; set; }
         public bool Accedio { get; set; }
 
+        // 🟢 NUEVA PROPIEDAD AGREGADA
+        public string Telefono { get; set; }
+
         public override string ToString()
         {
-            return $"{IdUsuario};{Nombre};{Email};{NombreUsuario};{Password};{Rol};{RutaImagen};{Accedio}";
+            return $"{IdUsuario};{Nombre};{Email};{NombreUsuario};{Password};{Rol};{RutaImagen};{Accedio};{Telefono}";
         }
     }
 }

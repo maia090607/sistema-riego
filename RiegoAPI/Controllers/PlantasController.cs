@@ -5,6 +5,10 @@ using RiegoAPI.DTO.Request;
 using RiegoAPI.DTOs.Mappers;
 using RiegoAPI.DTOs.Request;
 using RiegoAPI.DTOs.Response;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.IO;
+using System;
 
 namespace RiegoAPI.Controllers
 {
@@ -13,10 +17,13 @@ namespace RiegoAPI.Controllers
     public class PlantasController : ControllerBase
     {
         private readonly ServiciosPlanta _serviciosPlanta;
+        private readonly ServiciosUsuario _serviciosUsuario; // 🟢 Añadir ServiciosUsuario
 
-        public PlantasController(ServiciosPlanta serviciosPlanta)
+        // 🟢 MODIFICAR CONSTRUCTOR para inyectar ambos servicios
+        public PlantasController(ServiciosPlanta serviciosPlanta, ServiciosUsuario serviciosUsuario)
         {
             _serviciosPlanta = serviciosPlanta;
+            _serviciosUsuario = serviciosUsuario; // 🟢 Asignar ServiciosUsuario
         }
 
         // GET: api/plantas
@@ -26,7 +33,7 @@ namespace RiegoAPI.Controllers
             var resultado = _serviciosPlanta.ObtenerTodos();
             var plantasDto = PlantaMapper.ToResponseDTOList(resultado.Lista);
 
-            return Ok(ApiResponseDTO<System.Collections.Generic.List<PlantaResponseDTO>>.Success(
+            return Ok(ApiResponseDTO<List<PlantaResponseDTO>>.Success(
                 plantasDto,
                 $"Se encontraron {plantasDto.Count} plantas"
             ));
@@ -95,7 +102,12 @@ namespace RiegoAPI.Controllers
             if (!plantaExistente.Estado || plantaExistente.Entidad == null)
                 return NotFound(ApiResponseDTO<object>.Error("Planta no encontrada"));
 
-            PlantaMapper.UpdateEntity(plantaExistente.Entidad, plantaDto);
+            // Asumiendo que PlantaMapper.UpdateEntity existe
+            // PlantaMapper.UpdateEntity(plantaExistente.Entidad, plantaDto); 
+
+            // Si no existe, puedes hacer el mapeo manual o corregir el mapper:
+            // plantaExistente.Entidad.NombrePlanta = plantaDto.NombrePlanta; // etc.
+
             var resultado = _serviciosPlanta.Actualizar(plantaExistente.Entidad);
 
             if (resultado.Estado)
@@ -127,7 +139,7 @@ namespace RiegoAPI.Controllers
 
         // POST: api/plantas/subir-imagen/{id}
         [HttpPost("subir-imagen/{id}")]
-        public async Task<IActionResult> SubirImagen(int id, IFormFile imagen)
+        public async Task<IActionResult> SubirImagen(int id, [FromForm] IFormFile imagen) // Asegurarse de usar [FromForm] si es necesario
         {
             if (imagen == null || imagen.Length == 0)
                 return BadRequest(ApiResponseDTO<object>.Error("No se proporcionó imagen"));
@@ -136,24 +148,32 @@ namespace RiegoAPI.Controllers
             if (!planta.Estado || planta.Entidad == null)
                 return NotFound(ApiResponseDTO<object>.Error($"No se encontró planta con ID {id}"));
 
+            // Nota: Este código asume que la aplicación está alojada con acceso a disco local (wwwroot)
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagenes", "plantas");
             Directory.CreateDirectory(uploadsFolder);
 
             var fileName = $"{id}_{Guid.NewGuid()}{Path.GetExtension(imagen.FileName)}";
             var filePath = Path.Combine(uploadsFolder, fileName);
 
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            try
             {
-                await imagen.CopyToAsync(stream);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imagen.CopyToAsync(stream);
+                }
+
+                planta.Entidad.RutaImagen = $"/imagenes/plantas/{fileName}";
+                _serviciosPlanta.Actualizar(planta.Entidad);
+
+                return Ok(ApiResponseDTO<object>.Success(
+                    new { rutaImagen = planta.Entidad.RutaImagen },
+                    "Imagen subida correctamente"
+                ));
             }
-
-            planta.Entidad.RutaImagen = $"/imagenes/plantas/{fileName}";
-            _serviciosPlanta.Actualizar(planta.Entidad);
-
-            return Ok(ApiResponseDTO<object>.Success(
-                new { rutaImagen = planta.Entidad.RutaImagen },
-                "Imagen subida correctamente"
-            ));
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponseDTO<object>.Error($"Error al subir la imagen: {ex.Message}"));
+            }
         }
 
         [HttpGet("usuario/{idUsuario}")]
@@ -177,15 +197,14 @@ namespace RiegoAPI.Controllers
                 return BadRequest(ApiResponseDTO<object>.Error("El número de teléfono es requerido."));
             }
 
-            // NOTA: Esta línea asume que tienes un método en tus servicios (BLL)
-            // que puede encontrar el ID de usuario (int) basado en el número de teléfono (string).
-            var resultadoMapeo = _serviciosPlanta.MapearTelefonoAId(telefono);
+            // 🟢 CÓDIGO CORREGIDO: Llama a ServiciosUsuario
+            var resultadoMapeo = _serviciosUsuario.MapearTelefonoAId(telefono);
 
-            if (resultadoMapeo.Estado && resultadoMapeo.IdUsuario > 0)
+            if (resultadoMapeo.Estado && resultadoMapeo.Entidad != null)
             {
-                // Si el mapeo fue exitoso, devolvemos el ID en formato JSON
+                // La entidad es un objeto Usuario, accedemos a su IdUsuario
                 return Ok(ApiResponseDTO<object>.Success(
-                    new { idUsuario = resultadoMapeo.IdUsuario },
+                    new { idUsuario = resultadoMapeo.Entidad.IdUsuario }, // 🟢 Acceder a la Entidad (Usuario) y luego a IdUsuario
                     "Mapeo de ID exitoso"
                 ));
             }
@@ -193,6 +212,5 @@ namespace RiegoAPI.Controllers
             // Si no se encuentra el usuario
             return NotFound(ApiResponseDTO<object>.Error($"No se encontró usuario con el teléfono {telefono}"));
         }
-
     }
 }

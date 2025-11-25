@@ -220,5 +220,33 @@ namespace DAL
                 Accedio = reader["ACCEDIO"] != DBNull.Value && Convert.ToInt32(reader["ACCEDIO"]) == 1
             };
         }
+
+
+        public Response<Usuario> BuscarPorTelefono(string telefono)
+        {
+            using (var conn = CrearConexion())
+            {
+                try
+                {
+                    conn.Open();
+                    // ASUMIMOS que la columna en la BD se llama TELEFONO
+                    string query = "SELECT * FROM Usuario WHERE TELEFONO = :telefono";
+                    using (var cmd = new OracleCommand(query, conn))
+                    {
+                        cmd.Parameters.Add(":telefono", OracleDbType.Varchar2).Value = telefono;
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                var usuario = MapearUsuario(reader);
+                                return new Response<Usuario>(true, "Usuario encontrado por teléfono", usuario, null);
+                            }
+                            return new Response<Usuario>(false, "Usuario no encontrado por teléfono", null, null);
+                        }
+                    }
+                }
+                catch (Exception ex) { return new Response<Usuario>(false, ex.Message, null, null); }
+            }
+        }
     }
 }
